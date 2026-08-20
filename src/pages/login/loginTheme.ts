@@ -1,0 +1,17 @@
+export const loginTheme = {
+  primary: '#1b4332',
+  primaryHover: '#2d6a4f',
+  accent: '#e1c550',
+  text: '#ffffff',
+  textMuted: 'rgba(255, 255, 255, 0.78)',
+  glassBg: 'rgba(12, 12, 12, 0.72)',
+  glassBorder: 'rgba(255, 255, 255, 0.14)',
+  brandTagline: '#b7e4c7',
+  masteryGreen: '#49c991',
+  background: '#1a1208',
+  inputBg: 'rgba(255, 255, 255, 0.08)',
+  inputBorder: 'rgba(255, 255, 255, 0.16)',
+  error: '#fecaca',
+  overlayStart: 'rgba(0, 0, 0, 0.45)',
+  overlayEnd: 'rgba(0, 0, 0, 0.55)',
+} as const;

@@ -1,0 +1,324 @@
+import type { ReactNode } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import type { MasteryLevel } from '@/api/generated/models/MasteryLevel';
+import type { RecurringTaskProgress } from '@/api/generated/models/RecurringTaskProgress';
+import { getMasteryAvatarSource } from '@/assets/masteryAvatars';
+import { useLanguage } from '@/i18n/LanguageProvider';
+import {
+  CrownIcon,
+  FireIcon,
+  IconBadge,
+  StarIcon,
+  TrophyIcon,
+} from '@/pages/recurring-tasks/premium/PremiumIcons';
+import PremiumSurface from '@/pages/recurring-tasks/premium/PremiumSurface';
+import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import { computeLevelProgress } from '@/utils/masteryProgress';
+import { getMasteryLevelName } from '@/utils/masteryLevelName';
+
+type StatTone = 'red' | 'green' | 'gold';
+
+function StatCard({
+  label,
+  value,
+  tone,
+  icon,
+}: {
+  label: string;
+  value: string;
+  tone: StatTone;
+  icon: ReactNode;
+}) {
+  const accent = tone === 'red' ? 'red' : tone === 'gold' ? 'gold' : 'green';
+
+  return (
+    <PremiumSurface
+      accent={accent}
+      compact
+      padding={7}
+      radius={12}
+      style={styles.statShell}
+      contentStyle={styles.statContent}
+    >
+      <IconBadge tone={tone} size={24}>
+        {icon}
+      </IconBadge>
+      <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+        {value}
+      </Text>
+      <Text style={styles.statLabel} numberOfLines={2}>
+        {label}
+      </Text>
+    </PremiumSurface>
+  );
+}
+
+export function MasteryStatsGrid({
+  progress,
+}: {
+  progress: RecurringTaskProgress;
+}) {
+  const { t } = useLanguage();
+
+  return (
+    <View style={styles.statsGrid}>
+      <StatCard
+        tone="red"
+        icon={<FireIcon size={11} />}
+        label={t('recurring.stats.currentStreak')}
+        value={t('recurring.stats.daysValue', {
+          days: String(progress.currentStreak),
+        })}
+      />
+      <StatCard
+        tone="gold"
+        icon={<TrophyIcon size={13} />}
+        label={t('recurring.stats.highestStreak')}
+        value={t('recurring.stats.daysValue', {
+          days: String(progress.highestStreakReached),
+        })}
+      />
+      <StatCard
+        tone="green"
+        icon={<StarIcon size={13} />}
+        label={t('recurring.stats.currentLevel')}
+        value={t('recurring.stats.levelValue', {
+          level: String(progress.currentLevel),
+        })}
+      />
+      <StatCard
+        tone="gold"
+        icon={<CrownIcon size={13} />}
+        label={t('recurring.stats.highestLevel')}
+        value={t('recurring.stats.levelValue', {
+          level: String(progress.highestLevelReached),
+        })}
+      />
+    </View>
+  );
+}
+
+export default function MasteryProfileHero({
+  progress,
+  levels,
+}: {
+  progress: RecurringTaskProgress;
+  levels: MasteryLevel[];
+}) {
+  const { t, language } = useLanguage();
+  const levelProgress = computeLevelProgress(
+    levels,
+    progress.currentStreak,
+    progress.currentLevel,
+  );
+  const currentLevel = levelProgress.currentLevel;
+  const nextLevel = levelProgress.nextLevel;
+  const avatarSource = getMasteryAvatarSource(currentLevel?.avatarKey);
+  const avatarSize = 68;
+
+  return (
+    <View style={styles.profileRow}>
+      <View style={[styles.avatarWrap, { width: avatarSize }]}>
+        <View
+          style={[
+            styles.avatarGlow,
+            {
+              width: avatarSize + 8,
+              height: avatarSize + 8,
+              borderRadius: (avatarSize + 8) / 2,
+            },
+          ]}
+        />
+        <View
+          style={[
+            styles.avatarRingOuter,
+            {
+              width: avatarSize,
+              height: avatarSize,
+              borderRadius: avatarSize / 2,
+            },
+          ]}
+        >
+          <View style={styles.avatarRingMid}>
+            <View style={styles.avatarRingInner}>
+              {avatarSource ? (
+                <Image source={avatarSource} style={styles.avatar} />
+              ) : (
+                <View style={[styles.avatar, styles.avatarFallback]} />
+              )}
+            </View>
+          </View>
+        </View>
+        <View style={styles.levelBadge}>
+          <Text style={styles.levelBadgeText}>{progress.currentLevel}</Text>
+        </View>
+      </View>
+
+      <View style={styles.levelInfo}>
+        <Text style={styles.levelLabel}>
+          {t('recurring.profile.levelLabel', {
+            level: String(progress.currentLevel),
+          })}
+        </Text>
+        <Text style={styles.levelName} numberOfLines={1}>
+          {currentLevel
+            ? getMasteryLevelName(currentLevel, language)
+            : t('recurring.profile.unknownLevel')}
+        </Text>
+
+        {nextLevel ? (
+          <>
+            <Text style={styles.progressText} numberOfLines={1}>
+              {t('recurring.profile.daysToNext', {
+                current: String(levelProgress.daysInCurrentLevel),
+                total: String(levelProgress.daysNeededForNextLevel),
+                next: String(nextLevel.number),
+              })}
+            </Text>
+            <View style={styles.progressBarTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${levelProgress.progressPercent}%` },
+                ]}
+              />
+            </View>
+          </>
+        ) : (
+          <Text style={styles.maxLevel}>{t('recurring.profile.maxLevel')}</Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  statShell: {
+    flex: 1,
+    minWidth: 0,
+  },
+  statContent: {
+    gap: 2,
+  },
+  statValue: {
+    ...premiumType.statValue,
+    color: recurringTheme.textPrimary,
+    fontSize: 12,
+  },
+  statLabel: {
+    color: recurringTheme.textMuted,
+    fontSize: 7,
+    fontWeight: '600',
+    lineHeight: 10,
+  },
+  profileRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+  },
+  avatarWrap: {
+    alignItems: 'center',
+  },
+  avatarGlow: {
+    position: 'absolute',
+    top: -4,
+    backgroundColor: recurringTheme.accentGlow,
+    opacity: 0.65,
+  },
+  avatarRingOuter: {
+    padding: 2,
+    backgroundColor: recurringTheme.accentBright,
+    shadowColor: recurringTheme.accentBright,
+    shadowOpacity: 0.55,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 8,
+  },
+  avatarRingMid: {
+    flex: 1,
+    borderRadius: 999,
+    padding: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+  },
+  avatarRingInner: {
+    flex: 1,
+    borderRadius: 999,
+    overflow: 'hidden',
+    backgroundColor: recurringTheme.surfaceElevated,
+    borderWidth: 2,
+    borderColor: 'rgba(6, 9, 8, 0.85)',
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  avatarFallback: {
+    backgroundColor: '#40916c',
+  },
+  levelBadge: {
+    position: 'absolute',
+    bottom: -3,
+    minWidth: 22,
+    height: 22,
+    paddingHorizontal: 5,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: recurringTheme.accentDark,
+    borderWidth: 2,
+    borderColor: recurringTheme.accentBright,
+  },
+  levelBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  levelInfo: {
+    flex: 1,
+    minWidth: 0,
+    gap: 3,
+  },
+  levelLabel: {
+    ...premiumType.overline,
+    color: recurringTheme.accentBright,
+    fontSize: 9,
+  },
+  levelName: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+    textShadowColor: 'rgba(0, 0, 0, 0.55)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+  },
+  progressText: {
+    color: 'rgba(255, 255, 255, 0.78)',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  progressBarTrack: {
+    height: 5,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: recurringTheme.accentBright,
+    minWidth: 3,
+  },
+  maxLevel: {
+    color: 'rgba(255, 255, 255, 0.72)',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+});

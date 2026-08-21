@@ -4,7 +4,11 @@ import { APP_LANGUAGES, useLanguage } from '@/i18n/LanguageProvider';
 import type { AppLanguage } from '@/i18n/types';
 import { loginTheme } from '@/pages/login/loginTheme';
 
-export default function LanguagePicker() {
+type LanguagePickerProps = {
+  variant?: 'solid' | 'ghost';
+};
+
+export default function LanguagePicker({ variant = 'solid' }: LanguagePickerProps) {
   const { language, setLanguage, t } = useLanguage();
   const [open, setOpen] = useState(false);
 
@@ -13,11 +17,16 @@ export default function LanguagePicker() {
   return (
     <>
       <Pressable
-        style={styles.trigger}
+        style={[styles.trigger, variant === 'ghost' && styles.triggerGhost]}
         accessibilityLabel={t('language.switch')}
         onPress={() => setOpen(true)}
       >
-        <Text style={styles.triggerText}>
+        <Text
+          style={[
+            styles.triggerText,
+            variant === 'ghost' && styles.triggerTextGhost,
+          ]}
+        >
           {current?.flag} {language.toUpperCase()} ▾
         </Text>
       </Pressable>
@@ -63,10 +72,23 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.16)',
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
   },
+  triggerGhost: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
   triggerText: {
     color: loginTheme.text,
     fontSize: 13,
     fontWeight: '700',
+  },
+  triggerTextGhost: {
+    fontSize: 12,
+    fontWeight: '800',
+    textShadowColor: 'rgba(0, 0, 0, 0.65)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   backdrop: {
     flex: 1,

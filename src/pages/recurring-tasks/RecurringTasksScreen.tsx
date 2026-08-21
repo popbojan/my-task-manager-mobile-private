@@ -44,8 +44,6 @@ import {
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 const logoSource = require('@/assets/images/logo.png');
 
-const MAX_TASKS_WITHOUT_SCROLL = 5;
-
 function sortTasksForList(tasks: RecurringTask[]): RecurringTask[] {
   return sortTasksStable(tasks);
 }
@@ -67,6 +65,8 @@ export default function RecurringTasksScreen() {
     visible: boolean;
     task: RecurringTask | null;
   }>({ visible: false, task: null });
+  const [listViewportHeight, setListViewportHeight] = useState(0);
+  const [listContentHeight, setListContentHeight] = useState(0);
   const statusTargetsRef = useRef(new Map<string, RecurringTaskStatus>());
   const statusSyncRunningRef = useRef(new Set<string>());
 
@@ -164,6 +164,8 @@ export default function RecurringTasksScreen() {
   const progressIsLoading =
     progressQuery.isLoading && !progressQuery.data && !progressPremiumLocked;
   const canRenderBoard = tasksQuery.isSuccess || tasksPremiumLocked;
+  const listScrollEnabled =
+    listViewportHeight === 0 || listContentHeight > listViewportHeight + 1;
 
   const deleteErrorMessage = useMemo(() => {
     if (!deleteTaskMutation.isError) {
@@ -341,8 +343,15 @@ export default function RecurringTasksScreen() {
           style={styles.taskList}
           contentContainerStyle={styles.taskListContent}
           showsVerticalScrollIndicator={false}
-          scrollEnabled={sortedTasks.length > MAX_TASKS_WITHOUT_SCROLL}
-          bounces={sortedTasks.length > MAX_TASKS_WITHOUT_SCROLL}
+          scrollEnabled={listScrollEnabled}
+          bounces={listScrollEnabled}
+          nestedScrollEnabled
+          onLayout={event => {
+            setListViewportHeight(event.nativeEvent.layout.height);
+          }}
+          onContentSizeChange={(_, height) => {
+            setListContentHeight(height);
+          }}
           ListEmptyComponent={
             tasksAreLoading || !canRenderBoard
               ? undefined

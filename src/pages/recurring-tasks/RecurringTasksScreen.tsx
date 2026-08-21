@@ -28,7 +28,6 @@ import MasteryProfileHero, {
 } from '@/pages/recurring-tasks/MasteryProfileHero';
 import { PlusIcon } from '@/pages/recurring-tasks/premium/TabIcons';
 import RecurringTaskCard from '@/pages/recurring-tasks/RecurringTaskCard';
-import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormModal';
 import { sortTasksStable } from '@/pages/recurring-tasks/recurringBoardConfig';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import TodaySummaryCard from '@/pages/recurring-tasks/TodaySummaryCard';
@@ -49,7 +48,15 @@ function sortTasksForList(tasks: RecurringTask[]): RecurringTask[] {
   return sortTasksStable(tasks);
 }
 
-export default function RecurringTasksScreen() {
+type RecurringTasksScreenProps = {
+  onOpenCreateTask: () => void;
+  onOpenEditTask: (taskId: string) => void;
+};
+
+export default function RecurringTasksScreen({
+  onOpenCreateTask,
+  onOpenEditTask,
+}: RecurringTasksScreenProps) {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const heroHeight = Math.min(
     Math.max(Math.round(windowHeight * 0.21), 175),
@@ -58,10 +65,6 @@ export default function RecurringTasksScreen() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
 
-  const [formModal, setFormModal] = useState<{
-    visible: boolean;
-    taskId: string | null;
-  }>({ visible: false, taskId: null });
   const [deleteModal, setDeleteModal] = useState<{
     visible: boolean;
     task: RecurringTask | null;
@@ -204,7 +207,7 @@ export default function RecurringTasksScreen() {
       return;
     }
 
-    setFormModal({ visible: true, taskId: null });
+    onOpenCreateTask();
   }
 
   function openEditModal(taskId: string) {
@@ -212,11 +215,7 @@ export default function RecurringTasksScreen() {
       return;
     }
 
-    setFormModal({ visible: true, taskId });
-  }
-
-  function closeFormModal() {
-    setFormModal({ visible: false, taskId: null });
+    onOpenEditTask(taskId);
   }
 
   function openDeleteModal(task: RecurringTask) {
@@ -395,16 +394,6 @@ export default function RecurringTasksScreen() {
           />
         ) : null}
       </View>
-
-      <RecurringTaskFormModal
-        visible={formModal.visible}
-        taskId={formModal.taskId}
-        onClose={closeFormModal}
-        onSaved={() => {
-          queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
-          queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
-        }}
-      />
 
       <DeleteRecurringTaskModal
         visible={deleteModal.visible}

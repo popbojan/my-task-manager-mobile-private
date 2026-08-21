@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/authClient';
 import QueryProvider from '@/api/QueryProvider';
 import { AuthProvider, useAuth } from '@/auth/AuthContext';
@@ -8,16 +9,40 @@ import { LanguageProvider } from '@/i18n/LanguageProvider';
 import MainTabBar, { type MainTab } from '@/navigation/MainTabBar';
 import TabPlaceholderScreen from '@/pages/home/TabPlaceholderScreen';
 import LoginScreen from '@/pages/login/LoginScreen';
+import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormModal';
 import RecurringTasksScreen from '@/pages/recurring-tasks/RecurringTasksScreen';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 function MainAppShell() {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<MainTab>('today');
+  const [taskForm, setTaskForm] = useState<{
+    visible: boolean;
+    taskId: string | null;
+    session: number;
+  }>({ visible: false, taskId: null, session: 0 });
+
+  function openTaskForm(taskId: string | null) {
+    setTaskForm(prev => ({
+      visible: true,
+      taskId,
+      session: prev.session + 1,
+    }));
+  }
+
+  function closeTaskForm() {
+    setTaskForm(prev => ({ ...prev, visible: false, taskId: null }));
+  }
 
   return (
     <View style={shellStyles.root}>
       <View style={shellStyles.content}>
-        {activeTab === 'today' ? <RecurringTasksScreen /> : null}
+        {activeTab === 'today' ? (
+          <RecurringTasksScreen
+            onOpenCreateTask={() => openTaskForm(null)}
+            onOpenEditTask={openTaskForm}
+          />
+        ) : null}
         {activeTab === 'tasks' ? (
           <TabPlaceholderScreen tab="tasks" onGoToday={() => setActiveTab('today')} />
         ) : null}
@@ -35,6 +60,17 @@ function MainAppShell() {
         ) : null}
       </View>
       <MainTabBar activeTab={activeTab} onTabChange={setActiveTab} />
+      {taskForm.visible ? (
+        <RecurringTaskFormModal
+          key={`task-form-${taskForm.session}`}
+          taskId={taskForm.taskId}
+          onClose={closeTaskForm}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
+            queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
+          }}
+        />
+      ) : null}
     </View>
   );
 }

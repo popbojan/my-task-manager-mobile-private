@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  BackHandler,
+  Keyboard,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   RecurringTaskStatus,
@@ -26,7 +26,6 @@ import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { shouldRetryApiQuery } from '@/utils/apiError';
 
 type RecurringTaskFormModalProps = {
-  visible: boolean;
   taskId: string | null;
   onClose: () => void;
   onSaved: () => void;
@@ -45,40 +44,64 @@ const INITIAL_FORM: FormState = {
 };
 
 export default function RecurringTaskFormModal({
-  visible,
   taskId,
   onClose,
   onSaved,
 }: RecurringTaskFormModalProps) {
   const { t } = useLanguage();
   const { height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const isEdit = taskId !== null;
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [error, setError] = useState<string | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const taskQuery = useQuery({
     queryKey: ['recurring-task', taskId],
     queryFn: () => authApi.getRecurringTask({ recurringTaskId: taskId! }),
-    enabled: visible && isEdit,
+    enabled: isEdit,
     retry: shouldRetryApiQuery,
   });
 
   useEffect(() => {
-    if (!visible) {
-      setForm(INITIAL_FORM);
-      setError(null);
-      return;
-    }
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
+    const showSub = Keyboard.addListener(showEvent, event => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      onClose();
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, [onClose]);
+
+  useEffect(() => {
     if (!isEdit) {
       setForm(INITIAL_FORM);
+      setError(null);
       return;
     }
 
     if (taskQuery.data) {
       setForm(recurringTaskToFormState(taskQuery.data));
     }
-  }, [visible, isEdit, taskQuery.data]);
+  }, [isEdit, taskQuery.data]);
+
+  const isLoadingTask = isEdit && taskQuery.isLoading;
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -139,50 +162,54 @@ export default function RecurringTaskFormModal({
     saveMutation.mutate();
   }
 
-  const isLoadingTask = isEdit && taskQuery.isLoading;
-  const panelMaxHeight = Math.round(windowHeight * 0.52);
+  const availableHeight = windowHeight - keyboardHeight - insets.top - 12;
+  const panelHeight = Math.min(
+    Math.round(windowHeight * 0.52),
+    420,
+    Math.max(300, availableHeight),
+  );
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.root}>
-        <Pressable style={styles.backdropTap} accessibilityLabel={t('common.close')} onPress={onClose} />
+    <View style={styles.overlay} accessibilityViewIsModal>
+      <Pressable style={styles.backdropTap} accessibilityLabel={t('common.close')} onPress={onClose} />
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.keyboardWrap}
-        >
-          <SafeAreaView edges={['top']} style={styles.safeTop}>
-            <View style={[styles.panel, { maxHeight: panelMaxHeight }]}>
-              <View style={styles.panelHeader}>
-                <View style={styles.panelHeaderCopy}>
-                  <Text style={styles.eyebrow}>{t('recurring.stats.dailyHint')}</Text>
-                  <Text style={styles.title}>
-                    {isEdit ? t('recurring.form.editTitle') : t('recurring.form.createTitle')}
-                  </Text>
-                </View>
-                <Pressable
-                  style={styles.closeButton}
-                  accessibilityLabel={t('common.close')}
-                  onPress={onClose}
-                >
-                  <Text style={styles.closeText}>×</Text>
-                </Pressable>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardWrap}
+        keyboardVerticalOffset={insets.top}
+      >
+        <SafeAreaView edges={['top']} style={styles.safeTop}>
+          <View style={[styles.panel, { height: panelHeight }]}>
+            <View style={styles.panelHeader}>
+              <View style={styles.panelHeaderCopy}>
+                <Text style={styles.eyebrow}>{t('recurring.stats.dailyHint')}</Text>
+                <Text style={styles.title}>
+                  {isEdit ? t('recurring.form.editTitle') : t('recurring.form.createTitle')}
+                </Text>
               </View>
+              <Pressable
+                style={styles.closeButton}
+                accessibilityLabel={t('common.close')}
+                onPress={onClose}
+              >
+                <Text style={styles.closeText}>×</Text>
+              </Pressable>
+            </View>
 
-              {isLoadingTask ? (
-                <View style={styles.loadingBlock}>
-                  <ActivityIndicator color={recurringTheme.accentBright} />
-                  <Text style={styles.loadingText}>{t('recurring.loadingTask')}</Text>
-                </View>
-              ) : (
-                <ScrollView
-                  style={styles.formScroll}
-                  contentContainerStyle={styles.formContent}
-                  keyboardShouldPersistTaps="handled"
-                  showsVerticalScrollIndicator={false}
-                >
-                  <Text style={styles.label}>{t('recurring.form.titleLabel')} *</Text>
-                  <Text style={styles.fieldHint}>{t('recurring.form.titleRequiredHint')}</Text>
+            {isLoadingTask ? (
+              <View style={styles.loadingBlock}>
+                <ActivityIndicator color={recurringTheme.accentBright} />
+                <Text style={styles.loadingText}>{t('recurring.loadingTask')}</Text>
+              </View>
+            ) : (
+              <View style={styles.formBody}>
+                <View style={styles.fieldBlock}>
+                  <Text style={styles.label}>
+                    {t('recurring.form.titleLabel')} *{' '}
+                    <Text style={styles.fieldHintInline}>
+                      ({t('recurring.form.titleRequiredHint')})
+                    </Text>
+                  </Text>
                   <TextInput
                     style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
                     value={form.title}
@@ -195,8 +222,12 @@ export default function RecurringTaskFormModal({
                     placeholder={t('recurring.form.titlePlaceholder')}
                     placeholderTextColor={recurringTheme.textMuted}
                     autoFocus
+                    showSoftInputOnFocus
+                    returnKeyType="next"
                   />
+                </View>
 
+                <View style={styles.fieldBlock}>
                   <Text style={styles.label}>{t('recurring.form.descriptionLabel')}</Text>
                   <TextInput
                     style={[styles.input, styles.textArea]}
@@ -207,9 +238,12 @@ export default function RecurringTaskFormModal({
                     placeholder={t('recurring.form.descriptionPlaceholder')}
                     placeholderTextColor={recurringTheme.textMuted}
                     multiline
+                    numberOfLines={4}
                     textAlignVertical="top"
                   />
+                </View>
 
+                <View style={styles.fieldBlock}>
                   <Text style={styles.label}>{t('recurring.form.statusLabel')}</Text>
                   <View style={styles.statusRow}>
                     {DAILY_STATUS_COLUMNS.map(({ status, labelKey }) => {
@@ -227,6 +261,8 @@ export default function RecurringTaskFormModal({
                               active && styles.statusChipTextActive,
                             ]}
                             numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.8}
                           >
                             {t(labelKey)}
                           </Text>
@@ -234,12 +270,18 @@ export default function RecurringTaskFormModal({
                       );
                     })}
                   </View>
+                </View>
 
-                  {error ? (
-                    <View style={styles.errorBox}>
-                      <Text style={styles.error}>{error}</Text>
-                    </View>
-                  ) : null}
+                <View style={styles.footer}>
+                  <View style={styles.errorSlot}>
+                    {error ? (
+                      <View style={styles.errorBox}>
+                        <Text style={styles.error} numberOfLines={2}>
+                          {error}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
 
                   <View style={styles.actions}>
                     <Pressable style={styles.cancelButton} onPress={onClose}>
@@ -257,21 +299,21 @@ export default function RecurringTaskFormModal({
                       )}
                     </Pressable>
                   </View>
-                </ScrollView>
-              )}
-            </View>
-          </SafeAreaView>
-        </KeyboardAvoidingView>
-
-        <View style={styles.keyboardSpacer} pointerEvents="none" />
-      </View>
-    </Modal>
+                </View>
+              </View>
+            )}
+          </View>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 1000,
+    elevation: 1000,
     backgroundColor: 'rgba(0, 0, 0, 0.65)',
   },
   backdropTap: {
@@ -303,8 +345,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 10,
+    paddingTop: 12,
+    paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: recurringTheme.cardBorder,
   },
@@ -322,7 +364,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: recurringTheme.textPrimary,
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
   },
   closeButton: {
@@ -343,64 +385,66 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   loadingBlock: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
-    paddingVertical: 28,
   },
   loadingText: {
     color: recurringTheme.textSecondary,
     fontSize: 13,
   },
-  formScroll: {
-    flexGrow: 0,
+  formBody: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 12,
+    justifyContent: 'space-between',
   },
-  formContent: {
-    padding: 16,
-    gap: 8,
-    paddingBottom: 20,
+  fieldBlock: {
+    gap: 4,
   },
   label: {
     color: recurringTheme.textSecondary,
     fontSize: 12,
     fontWeight: '700',
-    marginTop: 4,
   },
-  fieldHint: {
+  fieldHintInline: {
     color: recurringTheme.textMuted,
-    fontSize: 11,
-    lineHeight: 15,
-    marginBottom: 2,
+    fontSize: 10,
+    fontWeight: '500',
   },
   input: {
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
     borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     color: recurringTheme.textPrimary,
-    fontSize: 16,
+    fontSize: 15,
     backgroundColor: recurringTheme.surfaceInset,
   },
   inputError: {
     borderColor: 'rgba(239, 68, 68, 0.45)',
   },
   textArea: {
-    minHeight: 88,
-    paddingTop: 12,
+    height: 96,
+    paddingTop: 10,
+    lineHeight: 20,
   },
   statusRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 6,
-    marginTop: 2,
   },
   statusChip: {
-    paddingHorizontal: 10,
+    flex: 1,
+    paddingHorizontal: 6,
     paddingVertical: 8,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
     backgroundColor: recurringTheme.surfaceInset,
+    alignItems: 'center',
   },
   statusChipActive: {
     borderColor: recurringTheme.cardBorderAccent,
@@ -408,34 +452,40 @@ const styles = StyleSheet.create({
   },
   statusChipText: {
     color: recurringTheme.textMuted,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
+    textAlign: 'center',
   },
   statusChipTextActive: {
     color: recurringTheme.accentBright,
   },
+  footer: {
+    gap: 6,
+  },
+  errorSlot: {
+    minHeight: 0,
+  },
   errorBox: {
     borderRadius: 10,
-    padding: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     backgroundColor: recurringTheme.fireRedSoft,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.35)',
-    marginTop: 4,
   },
   error: {
     color: recurringTheme.fireRedBright,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 16,
     fontWeight: '600',
   },
   actions: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 10,
   },
   cancelButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 11,
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
@@ -447,7 +497,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 11,
     borderRadius: 12,
     alignItems: 'center',
     backgroundColor: recurringTheme.accentDark,
@@ -457,8 +507,5 @@ const styles = StyleSheet.create({
   saveText: {
     color: '#fff',
     fontWeight: '800',
-  },
-  keyboardSpacer: {
-    flex: 1,
   },
 });

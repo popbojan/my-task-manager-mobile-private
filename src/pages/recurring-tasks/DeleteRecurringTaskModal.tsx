@@ -6,12 +6,14 @@ import {
   Text,
   View,
 } from 'react-native';
+import { RecurringTaskStatus } from '@/api/generated';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 type DeleteRecurringTaskModalProps = {
   visible: boolean;
   taskTitle: string | null;
+  taskStatus: RecurringTaskStatus | null;
   isPending: boolean;
   errorMessage: string | null;
   onClose: () => void;
@@ -21,12 +23,20 @@ type DeleteRecurringTaskModalProps = {
 export default function DeleteRecurringTaskModal({
   visible,
   taskTitle,
+  taskStatus,
   isPending,
   errorMessage,
   onClose,
   onConfirm,
 }: DeleteRecurringTaskModalProps) {
   const { t } = useLanguage();
+  const isDone = taskStatus === RecurringTaskStatus.Done;
+  const blockedMessage = isDone
+    ? t('recurring.deleteBlockedDone', {
+        column: t('recurring.status.done'),
+      })
+    : null;
+  const canDelete = !isDone && !isPending;
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
@@ -36,15 +46,27 @@ export default function DeleteRecurringTaskModal({
           <Text style={styles.body}>
             {t('recurring.deleteConfirm', { title: taskTitle ?? '' })}
           </Text>
-          {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+
+          {blockedMessage ? (
+            <View style={styles.infoBox}>
+              <Text style={styles.infoText}>{blockedMessage}</Text>
+            </View>
+          ) : null}
+
+          {errorMessage ? (
+            <View style={[styles.infoBox, styles.errorBox]}>
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            </View>
+          ) : null}
+
           <View style={styles.actions}>
             <Pressable style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelText}>{t('common.close')}</Text>
+              <Text style={styles.cancelText}>{t('common.cancel')}</Text>
             </Pressable>
             <Pressable
-              style={styles.deleteButton}
+              style={[styles.deleteButton, !canDelete && styles.deleteButtonDisabled]}
               onPress={onConfirm}
-              disabled={isPending}
+              disabled={!canDelete}
             >
               {isPending ? (
                 <ActivityIndicator color="#fff" />
@@ -87,9 +109,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  error: {
+  infoBox: {
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: recurringTheme.goldSoft,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 168, 67, 0.35)',
+  },
+  errorBox: {
+    backgroundColor: recurringTheme.fireRedSoft,
+    borderColor: 'rgba(239, 68, 68, 0.35)',
+  },
+  infoText: {
+    color: recurringTheme.goldBright,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+  },
+  errorText: {
     color: recurringTheme.fireRedBright,
     fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
   },
   actions: {
     flexDirection: 'row',
@@ -116,6 +157,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#7f1d1d',
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.35)',
+  },
+  deleteButtonDisabled: {
+    opacity: 0.45,
   },
   deleteText: {
     color: '#fff',

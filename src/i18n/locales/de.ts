@@ -61,12 +61,17 @@ export const de = {
   'recurring.noTasks': 'Noch keine täglichen Aufgaben.',
   'recurring.addTaskDaily': 'Neue tägliche Aufgabe',
   'recurring.status.toggle': 'Status ändern',
+  'recurring.status.toggleHint': 'Tippe auf den Namen oder die Checkbox, um den Status zu wechseln',
   'recurring.edit': 'Bearbeiten',
   'recurring.delete': 'Löschen',
   'recurring.deleteTitle': 'Aufgabe löschen',
-  'recurring.deleteConfirm': '„{{title}}“ wirklich löschen?',
+  'recurring.deleteConfirm':
+    'Möchtest du die Aufgabe „{{title}}“ wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
+  'recurring.deleteBlockedDone':
+    'Erledigte Aufgaben (Status „{{column}}“) können nicht gelöscht werden. Setze die Aufgabe zuerst auf „Offen“ oder „In Bearbeitung“.',
   'recurring.deleteError': 'Aufgabe konnte nicht gelöscht werden.',
-  'recurring.deleteErrorDoneColumn': 'Erledigte Aufgaben in „{{column}}“ können nicht gelöscht werden.',
+  'recurring.deleteErrorDoneColumn':
+    'Erledigte Aufgaben (Status „{{column}}“) können nicht gelöscht werden. Setze die Aufgabe zuerst auf „Offen“ oder „In Bearbeitung“.',
   'recurring.streak.count': 'Streak {{count}}',
   'recurring.status.todo': 'Offen',
   'recurring.status.inProgress': 'In Bearbeitung',
@@ -102,7 +107,9 @@ export const de = {
   'recurring.form.descriptionLabel': 'Beschreibung',
   'recurring.form.descriptionPlaceholder': 'Optionale Details…',
   'recurring.form.statusLabel': 'Status',
-  'recurring.form.titleRequired': 'Bitte gib einen Titel ein.',
+  'recurring.form.titleRequiredHint':
+    'Ohne Titel kann die Aufgabe nicht gespeichert werden.',
+  'recurring.form.titleRequired': 'Bitte gib einen Titel ein — ohne Namen kann die Aufgabe nicht gespeichert werden.',
   'recurring.form.save': 'Speichern',
   'recurring.form.error': 'Speichern fehlgeschlagen.',
 } as const;

@@ -129,6 +129,16 @@ export default function RecurringTaskFormModal({
     },
   });
 
+  function handleSavePress() {
+    if (!form.title.trim()) {
+      setError(t('recurring.form.titleRequired'));
+      return;
+    }
+
+    setError(null);
+    saveMutation.mutate();
+  }
+
   const isLoadingTask = isEdit && taskQuery.isLoading;
   const panelMaxHeight = Math.round(windowHeight * 0.52);
 
@@ -172,10 +182,16 @@ export default function RecurringTaskFormModal({
                   showsVerticalScrollIndicator={false}
                 >
                   <Text style={styles.label}>{t('recurring.form.titleLabel')} *</Text>
+                  <Text style={styles.fieldHint}>{t('recurring.form.titleRequiredHint')}</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
                     value={form.title}
-                    onChangeText={title => setForm(current => ({ ...current, title }))}
+                    onChangeText={title => {
+                      setForm(current => ({ ...current, title }));
+                      if (error && title.trim()) {
+                        setError(null);
+                      }
+                    }}
                     placeholder={t('recurring.form.titlePlaceholder')}
                     placeholderTextColor={recurringTheme.textMuted}
                     autoFocus
@@ -219,7 +235,11 @@ export default function RecurringTaskFormModal({
                     })}
                   </View>
 
-                  {error ? <Text style={styles.error}>{error}</Text> : null}
+                  {error ? (
+                    <View style={styles.errorBox}>
+                      <Text style={styles.error}>{error}</Text>
+                    </View>
+                  ) : null}
 
                   <View style={styles.actions}>
                     <Pressable style={styles.cancelButton} onPress={onClose}>
@@ -227,8 +247,8 @@ export default function RecurringTaskFormModal({
                     </Pressable>
                     <Pressable
                       style={styles.saveButton}
-                      onPress={() => saveMutation.mutate()}
-                      disabled={saveMutation.isPending || !form.title.trim()}
+                      onPress={handleSavePress}
+                      disabled={saveMutation.isPending}
                     >
                       {saveMutation.isPending ? (
                         <ActivityIndicator color="#fff" />
@@ -345,6 +365,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 4,
   },
+  fieldHint: {
+    color: recurringTheme.textMuted,
+    fontSize: 11,
+    lineHeight: 15,
+    marginBottom: 2,
+  },
   input: {
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
@@ -354,6 +380,9 @@ const styles = StyleSheet.create({
     color: recurringTheme.textPrimary,
     fontSize: 16,
     backgroundColor: recurringTheme.surfaceInset,
+  },
+  inputError: {
+    borderColor: 'rgba(239, 68, 68, 0.45)',
   },
   textArea: {
     minHeight: 88,
@@ -385,10 +414,19 @@ const styles = StyleSheet.create({
   statusChipTextActive: {
     color: recurringTheme.accentBright,
   },
+  errorBox: {
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: recurringTheme.fireRedSoft,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.35)',
+    marginTop: 4,
+  },
   error: {
     color: recurringTheme.fireRedBright,
     fontSize: 13,
-    marginTop: 4,
+    lineHeight: 18,
+    fontWeight: '600',
   },
   actions: {
     flexDirection: 'row',

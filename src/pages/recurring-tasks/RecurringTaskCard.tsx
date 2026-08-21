@@ -16,6 +16,34 @@ type RecurringTaskCardProps = {
   isUpdating?: boolean;
 };
 
+function TaskCheckboxVisual({
+  isDone,
+  isInProgress,
+}: {
+  isDone: boolean;
+  isInProgress: boolean;
+}) {
+  return (
+    <View
+      style={[
+        styles.checkboxOuter,
+        isInProgress && styles.checkboxOuterProgress,
+        isDone && styles.checkboxOuterDone,
+      ]}
+    >
+      <View
+        style={[
+          styles.checkbox,
+          isInProgress && styles.checkboxProgress,
+          isDone && styles.checkboxDone,
+        ]}
+      >
+        {isDone ? <Text style={styles.checkmark}>✓</Text> : null}
+      </View>
+    </View>
+  );
+}
+
 export default function RecurringTaskCard({
   task,
   onEdit,
@@ -53,44 +81,30 @@ export default function RecurringTaskCard({
     >
       <View style={styles.row}>
         <Pressable
-          style={styles.checkboxHitArea}
+          style={styles.mainTapArea}
+          accessibilityRole="button"
           accessibilityLabel={t('recurring.status.toggle')}
+          accessibilityHint={t('recurring.status.toggleHint')}
           onPress={handleToggleStatus}
           disabled={isUpdating}
         >
-          <View
-            style={[
-              styles.checkboxOuter,
-              isInProgress && styles.checkboxOuterProgress,
-              isDone && styles.checkboxOuterDone,
-            ]}
-          >
-            <View
-              style={[
-                styles.checkbox,
-                isInProgress && styles.checkboxProgress,
-                isDone && styles.checkboxDone,
-              ]}
+          <TaskCheckboxVisual isDone={isDone} isInProgress={isInProgress} />
+
+          <View style={styles.content}>
+            <Text
+              style={[styles.title, isDone && styles.titleDone]}
+              numberOfLines={1}
             >
-              {isDone ? <Text style={styles.checkmark}>✓</Text> : null}
+              {task.title}
+            </Text>
+            <View style={styles.streakPill}>
+              <FireIcon size={10} />
+              <Text style={styles.streakText}>
+                {t('recurring.streak.count', { count: String(task.streakCount) })}
+              </Text>
             </View>
           </View>
         </Pressable>
-
-        <View style={styles.content}>
-          <Text
-            style={[styles.title, isDone && styles.titleDone]}
-            numberOfLines={1}
-          >
-            {task.title}
-          </Text>
-          <View style={styles.streakPill}>
-            <FireIcon size={10} />
-            <Text style={styles.streakText}>
-              {t('recurring.streak.count', { count: String(task.streakCount) })}
-            </Text>
-          </View>
-        </View>
 
         <View style={styles.actions}>
           <Pressable
@@ -124,8 +138,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  checkboxHitArea: {
-    padding: 2,
+  mainTapArea: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 2,
+    paddingRight: 4,
   },
   checkboxOuter: {
     width: 28,

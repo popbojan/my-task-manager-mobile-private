@@ -63,12 +63,17 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.noTasks': 'Još nema dnevnih zadataka.',
   'recurring.addTaskDaily': 'Novi dnevni zadatak',
   'recurring.status.toggle': 'Promeni status',
+  'recurring.status.toggleHint': 'Dodirni naziv ili polje da promeniš status',
   'recurring.edit': 'Izmeni',
   'recurring.delete': 'Obriši',
   'recurring.deleteTitle': 'Obriši zadatak',
-  'recurring.deleteConfirm': 'Obrisati „{{title}}“?',
+  'recurring.deleteConfirm':
+    'Da li stvarno želiš da obrišeš zadatak „{{title}}“? Ova radnja se ne može poništiti.',
+  'recurring.deleteBlockedDone':
+    'Završeni zadaci (status „{{column}}“) se ne mogu obrisati. Prvo postavi zadatak na Otvoreno ili U toku.',
   'recurring.deleteError': 'Zadatak nije obrisan.',
-  'recurring.deleteErrorDoneColumn': 'Završeni zadaci u „{{column}}“ se ne mogu obrisati.',
+  'recurring.deleteErrorDoneColumn':
+    'Završeni zadaci (status „{{column}}“) se ne mogu obrisati. Prvo postavi zadatak na Otvoreno ili U toku.',
   'recurring.streak.count': 'Niz {{count}}',
   'recurring.status.todo': 'Otvoreno',
   'recurring.status.inProgress': 'U toku',
@@ -104,7 +109,10 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.form.descriptionLabel': 'Opis',
   'recurring.form.descriptionPlaceholder': 'Opcioni detalji…',
   'recurring.form.statusLabel': 'Status',
-  'recurring.form.titleRequired': 'Unesi naslov.',
+  'recurring.form.titleRequiredHint':
+    'Bez naslova zadatak ne može biti sačuvan.',
+  'recurring.form.titleRequired':
+    'Unesi naslov — zadatak bez imena ne može biti sačuvan.',
   'recurring.form.save': 'Sačuvaj',
   'recurring.form.error': 'Čuvanje nije uspelo.',
 };

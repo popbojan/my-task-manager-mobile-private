@@ -62,12 +62,17 @@ export const en: Record<TranslationKey, string> = {
   'recurring.noTasks': 'No daily tasks yet.',
   'recurring.addTaskDaily': 'New daily task',
   'recurring.status.toggle': 'Change status',
+  'recurring.status.toggleHint': 'Tap the name or checkbox to change status',
   'recurring.edit': 'Edit',
   'recurring.delete': 'Delete',
   'recurring.deleteTitle': 'Delete task',
-  'recurring.deleteConfirm': 'Delete “{{title}}”?',
+  'recurring.deleteConfirm':
+    'Delete “{{title}}”? This action cannot be undone.',
+  'recurring.deleteBlockedDone':
+    'Completed tasks (status “{{column}}”) cannot be deleted. Set the task to Open or In progress first.',
   'recurring.deleteError': 'Could not delete task.',
-  'recurring.deleteErrorDoneColumn': 'Completed tasks in “{{column}}” cannot be deleted.',
+  'recurring.deleteErrorDoneColumn':
+    'Completed tasks (status “{{column}}”) cannot be deleted. Set the task to Open or In progress first.',
   'recurring.streak.count': 'Streak {{count}}',
   'recurring.status.todo': 'Open',
   'recurring.status.inProgress': 'In progress',
@@ -103,7 +108,9 @@ export const en: Record<TranslationKey, string> = {
   'recurring.form.descriptionLabel': 'Description',
   'recurring.form.descriptionPlaceholder': 'Optional details…',
   'recurring.form.statusLabel': 'Status',
-  'recurring.form.titleRequired': 'Please enter a title.',
+  'recurring.form.titleRequiredHint': 'A task cannot be saved without a title.',
+  'recurring.form.titleRequired':
+    'Please enter a title — a task without a name cannot be saved.',
   'recurring.form.save': 'Save',
   'recurring.form.error': 'Could not save.',
 };

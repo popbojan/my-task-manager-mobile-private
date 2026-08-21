@@ -380,6 +380,7 @@ export default function RecurringTasksScreen() {
       <DeleteRecurringTaskModal
         visible={deleteModal.visible}
         taskTitle={deleteModal.task?.title ?? null}
+        taskStatus={deleteModal.task?.status ?? null}
         isPending={deleteTaskMutation.isPending}
         errorMessage={deleteErrorMessage}
         onClose={closeDeleteModal}

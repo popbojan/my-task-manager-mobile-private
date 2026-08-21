@@ -12,6 +12,7 @@ import LoginScreen from '@/pages/login/LoginScreen';
 import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormModal';
 import RecurringTasksScreen from '@/pages/recurring-tasks/RecurringTasksScreen';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import CurrentUserBootstrap from '@/user/CurrentUserBootstrap';
 
 function MainAppShell() {
   const queryClient = useQueryClient();
@@ -108,7 +109,14 @@ function AppContent() {
     );
   }
 
-  return accessToken ? <MainAppShell /> : <LoginScreen />;
+  return accessToken ? (
+    <>
+      <CurrentUserBootstrap />
+      <MainAppShell />
+    </>
+  ) : (
+    <LoginScreen />
+  );
 }
 
 export default function App() {

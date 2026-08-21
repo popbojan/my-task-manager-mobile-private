@@ -3,7 +3,7 @@ import type { RecurringTask } from '@/api/generated/models/RecurringTask';
 import { RecurringTaskStatus } from '@/api/generated';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
-import { EditIcon, MoreIcon } from '@/pages/recurring-tasks/premium/TabIcons';
+import { EditIcon, TrashIcon } from '@/pages/recurring-tasks/premium/TabIcons';
 import PremiumSurface from '@/pages/recurring-tasks/premium/PremiumSurface';
 import { getNextStatus } from '@/pages/recurring-tasks/recurringBoardConfig';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
@@ -132,7 +132,7 @@ export default function RecurringTaskCard({
             accessibilityLabel={t('recurring.delete')}
             onPress={() => onDelete(task)}
           >
-            <MoreIcon size={14} />
+            <TrashIcon size={14} />
           </Pressable>
         </View>
       </View>

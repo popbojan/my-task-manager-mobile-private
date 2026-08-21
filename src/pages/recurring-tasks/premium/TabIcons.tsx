@@ -139,6 +139,68 @@ export function EditIcon({ size = 14, color = recurringTheme.textMuted }: TabIco
   );
 }
 
+export function TrashIcon({
+  size = 14,
+  color = recurringTheme.fireRedBright,
+}: TabIconProps) {
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center' }}>
+      <View
+        style={{
+          width: size * 0.72,
+          height: 1.5,
+          backgroundColor: color,
+          borderRadius: 1,
+        }}
+      />
+      <View
+        style={{
+          width: size * 0.22,
+          height: size * 0.18,
+          borderTopLeftRadius: 1,
+          borderTopRightRadius: 1,
+          borderWidth: 1.5,
+          borderColor: color,
+          borderBottomWidth: 0,
+          marginTop: 1,
+        }}
+      />
+      <View
+        style={{
+          width: size * 0.58,
+          height: size * 0.62,
+          borderWidth: 1.5,
+          borderColor: color,
+          borderTopWidth: 0,
+          borderBottomLeftRadius: 2,
+          borderBottomRightRadius: 2,
+          marginTop: -0.5,
+        }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: size * 0.2,
+          width: 1.5,
+          height: size * 0.28,
+          backgroundColor: color,
+          left: size * 0.36,
+        }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: size * 0.2,
+          width: 1.5,
+          height: size * 0.28,
+          backgroundColor: color,
+          right: size * 0.36,
+        }}
+      />
+    </View>
+  );
+}
+
 export function MoreIcon({ size = 14, color = recurringTheme.textMuted }: TabIconProps) {
   return (
     <View style={{ width: size, height: size, justifyContent: 'center', gap: 3 }}>

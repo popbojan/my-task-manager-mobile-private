@@ -101,6 +101,10 @@ export const en: Record<TranslationKey, string> = {
   'recurring.banner.successLine': 'Great! Your streak stays intact until reset.',
   'recurring.banner.warningLine':
     'Complete all tasks before the daily reset to keep your streak & level.',
+  'recurring.celebration.title': 'Knockout! All done!',
+  'recurring.celebration.subtitle':
+    'Come back tomorrow, complete your tasks, and push your streak to new heights.',
+  'recurring.celebration.dismiss': 'Tap to close',
   'recurring.form.createTitle': 'New task',
   'recurring.form.editTitle': 'Edit task',
   'recurring.form.titleLabel': 'Title',

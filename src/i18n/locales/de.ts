@@ -99,7 +99,11 @@ export const de = {
   'recurring.focus.title': 'Behalte deinen Fokus.',
   'recurring.banner.successLine': 'Stark! Deine Kette bleibt intakt bis zum Reset.',
   'recurring.banner.warningLine':
-    'Erledige alle Aufgaben vor dem Tages-Reset, um deine Kette & dein Level zu halten.',
+    'Erledige alle Aufgaben vor Mitternacht, um deine Streak zu behalten.',
+  'recurring.celebration.title': 'Knockout! Alles erledigt!',
+  'recurring.celebration.subtitle':
+    'Komm morgen zurück, erledige deine Aufgaben und steigere deine Kettenzahl.',
+  'recurring.celebration.dismiss': 'Tippen zum Schließen',
   'recurring.form.createTitle': 'Neue Aufgabe',
   'recurring.form.editTitle': 'Aufgabe bearbeiten',
   'recurring.form.titleLabel': 'Titel',

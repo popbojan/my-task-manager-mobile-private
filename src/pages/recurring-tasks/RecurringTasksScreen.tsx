@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -20,6 +20,7 @@ import { authApi } from '@/api/authClient';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import LanguagePicker from '@/pages/login/LanguagePicker';
 import { loginTheme } from '@/pages/login/loginTheme';
+import AllTasksCompleteCelebration from '@/pages/recurring-tasks/AllTasksCompleteCelebration';
 import DeleteRecurringTaskModal from '@/pages/recurring-tasks/DeleteRecurringTaskModal';
 import FocusReminderCard from '@/pages/recurring-tasks/FocusReminderCard';
 import MasteryProfileHero, {
@@ -67,8 +68,11 @@ export default function RecurringTasksScreen() {
   }>({ visible: false, task: null });
   const [listViewportHeight, setListViewportHeight] = useState(0);
   const [listContentHeight, setListContentHeight] = useState(0);
+  const [celebrationVisible, setCelebrationVisible] = useState(false);
   const statusTargetsRef = useRef(new Map<string, RecurringTaskStatus>());
   const statusSyncRunningRef = useRef(new Set<string>());
+  const wasAllCompleteRef = useRef(false);
+  const isInitialCompleteCheckRef = useRef(true);
 
   const tasksQuery = useQuery({
     queryKey: ['recurring-tasks'],
@@ -166,6 +170,20 @@ export default function RecurringTasksScreen() {
   const canRenderBoard = tasksQuery.isSuccess || tasksPremiumLocked;
   const listScrollEnabled =
     listViewportHeight === 0 || listContentHeight > listViewportHeight + 1;
+
+  useEffect(() => {
+    if (isInitialCompleteCheckRef.current) {
+      isInitialCompleteCheckRef.current = false;
+      wasAllCompleteRef.current = allDailyTasksComplete;
+      return;
+    }
+
+    if (allDailyTasksComplete && dailyTaskCount > 0 && !wasAllCompleteRef.current) {
+      setCelebrationVisible(true);
+    }
+
+    wasAllCompleteRef.current = allDailyTasksComplete;
+  }, [allDailyTasksComplete, dailyTaskCount]);
 
   const deleteErrorMessage = useMemo(() => {
     if (!deleteTaskMutation.isError) {
@@ -396,6 +414,11 @@ export default function RecurringTasksScreen() {
         errorMessage={deleteErrorMessage}
         onClose={closeDeleteModal}
         onConfirm={confirmDeleteTask}
+      />
+
+      <AllTasksCompleteCelebration
+        visible={celebrationVisible}
+        onDismiss={() => setCelebrationVisible(false)}
       />
     </View>
   );

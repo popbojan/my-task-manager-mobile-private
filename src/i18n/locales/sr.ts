@@ -102,6 +102,10 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.banner.successLine': 'Odlično! Niz ostaje netaknut do reseta.',
   'recurring.banner.warningLine':
     'Završi sve zadatke pre dnevnog reseta da zadržiš niz i nivo.',
+  'recurring.celebration.title': 'Nokaut! Sve završeno!',
+  'recurring.celebration.subtitle':
+    'Vrati se sutra, završi zadatke i podigni svoj niz na viši nivo.',
+  'recurring.celebration.dismiss': 'Dodirni da zatvoriš',
   'recurring.form.createTitle': 'Novi zadatak',
   'recurring.form.editTitle': 'Izmeni zadatak',
   'recurring.form.titleLabel': 'Naslov',

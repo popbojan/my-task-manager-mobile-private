@@ -1,7 +1,7 @@
 import type { RecurringTaskProgress } from '@/api/generated/models/RecurringTaskProgress';
 
 export const DEFAULT_RECURRING_PROGRESS: RecurringTaskProgress = {
-  id: 'default',
+  id: 'local-default',
   currentStreak: 0,
   highestStreakReached: 0,
   currentLevel: 1,
@@ -17,5 +17,12 @@ export function normalizeRecurringProgress(
     return DEFAULT_RECURRING_PROGRESS;
   }
 
-  return progress;
+  return {
+    ...DEFAULT_RECURRING_PROGRESS,
+    ...progress,
+    currentStreak: progress.currentStreak ?? 0,
+    highestStreakReached: progress.highestStreakReached ?? 0,
+    currentLevel: Math.max(1, progress.currentLevel ?? 1),
+    highestLevelReached: Math.max(1, progress.highestLevelReached ?? 1),
+  };
 }

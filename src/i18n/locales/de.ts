@@ -53,6 +53,13 @@ export const de = {
   'nav.progress': 'Fortschritt',
   'nav.profile': 'Profil',
   'nav.backToToday': 'Zurück zu Heute',
+  'dev.api.title': 'Backend (Dev)',
+  'dev.api.hintLocal':
+    'Lokal — gleiche Daten wie Web auf localhost:5173 (Test-Accounts mit Premium).',
+  'dev.api.hintProduction':
+    'Production — live Railway-Daten (Prod-Accounts).',
+  'dev.api.switchToProduction': 'Zu Production wechseln',
+  'dev.api.switchToLocal': 'Zu Lokal wechseln',
   'recurring.loading': 'Lade Aufgaben…',
   'recurring.error': 'Aufgaben konnten nicht geladen werden.',
   'recurring.progressError': 'Fortschritt konnte nicht geladen werden.',

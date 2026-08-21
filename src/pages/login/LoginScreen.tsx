@@ -14,6 +14,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -25,6 +26,7 @@ import LanguagePicker from '@/pages/login/LanguagePicker';
 import LoginHelpModal from '@/pages/login/LoginHelpModal';
 import MasteryLevelStrip from '@/pages/login/MasteryLevelStrip';
 import { loginTheme } from '@/pages/login/loginTheme';
+import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 import type { MasteryLevel } from '@/api/generated/models/MasteryLevel';
 
 const logoSource = require('@/assets/images/logo.png');
@@ -38,6 +40,7 @@ export default function LoginScreen() {
   const { setAccessToken } = useAuth();
   const { t } = useLanguage();
   const apiLanguage = useApiLanguage();
+  const queryClient = useQueryClient();
 
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -114,6 +117,7 @@ export default function LoginScreen() {
       });
 
       if (data.accessToken) {
+        clearRecurringSessionQueries(queryClient);
         setAccessToken(data.accessToken);
       }
     } catch {
@@ -121,7 +125,7 @@ export default function LoginScreen() {
     } finally {
       setIsLoggingIn(false);
     }
-  }, [apiLanguage, email, isLoggingIn, otp, setAccessToken, t]);
+  }, [apiLanguage, email, isLoggingIn, otp, queryClient, setAccessToken, t]);
 
   const canSendOtp = !!email.trim() && !isSendingOtp;
   const canLogin = !!email.trim() && !!otp.trim() && !isLoggingIn;

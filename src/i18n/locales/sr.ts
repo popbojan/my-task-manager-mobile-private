@@ -55,6 +55,13 @@ export const sr: Record<TranslationKey, string> = {
   'nav.progress': 'Napredak',
   'nav.profile': 'Profil',
   'nav.backToToday': 'Nazad na Danas',
+  'dev.api.title': 'Backend (Dev)',
+  'dev.api.hintLocal':
+    'Lokalno — isti podaci kao web na localhost:5173 (test nalozi sa premiumom).',
+  'dev.api.hintProduction':
+    'Production — live Railway podaci (prod nalozi).',
+  'dev.api.switchToProduction': 'Prebaci na production',
+  'dev.api.switchToLocal': 'Prebaci na lokalno',
   'recurring.loading': 'Učitavanje zadataka…',
   'recurring.error': 'Zadaci nisu učitani.',
   'recurring.progressError': 'Napredak nije učitan.',

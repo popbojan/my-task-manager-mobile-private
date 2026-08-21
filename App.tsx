@@ -13,6 +13,8 @@ import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormMod
 import RecurringTasksScreen from '@/pages/recurring-tasks/RecurringTasksScreen';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import CurrentUserBootstrap from '@/user/CurrentUserBootstrap';
+import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
+import { ApiEnvironmentProvider } from '@/config/ApiEnvironmentProvider';
 
 function MainAppShell() {
   const queryClient = useQueryClient();
@@ -78,6 +80,7 @@ function MainAppShell() {
 
 function AppContent() {
   const { accessToken, setAccessToken, isAuthReady, setIsAuthReady } = useAuth();
+  const queryClient = useQueryClient();
   const hasInitializedRef = useRef(false);
 
   useEffect(() => {
@@ -90,8 +93,10 @@ function AppContent() {
     async function refreshSession() {
       try {
         const data = await authApi.refreshAccessToken();
+        clearRecurringSessionQueries(queryClient);
         setAccessToken(data.accessToken);
       } catch {
+        clearRecurringSessionQueries(queryClient);
         setAccessToken(null);
       } finally {
         setIsAuthReady(true);
@@ -99,7 +104,7 @@ function AppContent() {
     }
 
     refreshSession();
-  }, [setAccessToken, setIsAuthReady]);
+  }, [queryClient, setAccessToken, setIsAuthReady]);
 
   if (!isAuthReady) {
     return (
@@ -122,13 +127,15 @@ function AppContent() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <LanguageProvider>
-          <QueryProvider>
-            <AppContent />
-          </QueryProvider>
-        </LanguageProvider>
-      </AuthProvider>
+      <ApiEnvironmentProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <QueryProvider>
+              <AppContent />
+            </QueryProvider>
+          </LanguageProvider>
+        </AuthProvider>
+      </ApiEnvironmentProvider>
     </SafeAreaProvider>
   );
 }

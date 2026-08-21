@@ -17,6 +17,7 @@ import {
   type RecurringTask,
 } from '@/api/generated';
 import { authApi } from '@/api/authClient';
+import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import LanguagePicker from '@/pages/login/LanguagePicker';
 import { loginTheme } from '@/pages/login/loginTheme';
@@ -40,6 +41,10 @@ import {
   DEFAULT_RECURRING_PROGRESS,
   normalizeRecurringProgress,
 } from '@/utils/recurringProgress';
+import {
+  recurringTaskProgressQueryKey,
+  recurringTasksQueryKey,
+} from '@/recurring/recurringQueryKeys';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 const logoSource = require('@/assets/images/logo.png');
@@ -63,6 +68,7 @@ export default function RecurringTasksScreen({
     198,
   );
   const { t } = useLanguage();
+  const { accessToken } = useAuth();
   const queryClient = useQueryClient();
 
   const [deleteModal, setDeleteModal] = useState<{
@@ -78,14 +84,16 @@ export default function RecurringTasksScreen({
   const isInitialCompleteCheckRef = useRef(true);
 
   const tasksQuery = useQuery({
-    queryKey: ['recurring-tasks'],
+    queryKey: recurringTasksQueryKey(accessToken),
     queryFn: () => authApi.getRecurringTasks(),
+    enabled: !!accessToken,
     retry: shouldRetryApiQuery,
   });
 
   const progressQuery = useQuery({
-    queryKey: ['recurring-task-progress'],
+    queryKey: recurringTaskProgressQueryKey(accessToken),
     queryFn: () => authApi.getRecurringTaskProgress(),
+    enabled: !!accessToken,
     retry: shouldRetryApiQuery,
   });
 
@@ -96,8 +104,10 @@ export default function RecurringTasksScreen({
   });
 
   function patchTaskStatus(taskId: string, status: RecurringTaskStatus) {
-    queryClient.setQueryData<RecurringTask[]>(['recurring-tasks'], (old = []) =>
-      old.map(task => (task.id === taskId ? { ...task, status } : task)),
+    queryClient.setQueryData<RecurringTask[]>(
+      recurringTasksQueryKey(accessToken),
+      (old = []) =>
+        old.map(task => (task.id === taskId ? { ...task, status } : task)),
     );
   }
 
@@ -148,6 +158,7 @@ export default function RecurringTasksScreen({
     tasksQuery.isError && isApiPremiumRequiredError(tasksQuery.error);
   const progressPremiumLocked =
     progressQuery.isError && isApiPremiumRequiredError(progressQuery.error);
+  const isPremiumPreview = tasksPremiumLocked || progressPremiumLocked;
 
   const displayTasks = tasksQuery.data ?? [];
   const sortedTasks = useMemo(
@@ -161,15 +172,15 @@ export default function RecurringTasksScreen({
   const allDailyTasksComplete =
     dailyTaskCount > 0 && doneTasks === dailyTaskCount;
 
-  const progress = normalizeRecurringProgress(progressQuery.data);
-  const displayProgress = progressPremiumLocked
+  const displayProgress = isPremiumPreview
     ? DEFAULT_RECURRING_PROGRESS
-    : progress;
+    : normalizeRecurringProgress(progressQuery.data);
   const masteryLevels = masteryLevelsQuery.data ?? [];
   const tasksAreLoading = tasksQuery.isLoading && !tasksPremiumLocked;
   const tasksFailed = tasksQuery.isError && !tasksPremiumLocked;
-  const progressIsLoading =
-    progressQuery.isLoading && !progressQuery.data && !progressPremiumLocked;
+  const progressIsLoading = progressQuery.isPending && !progressPremiumLocked;
+  const progressFailed =
+    progressQuery.isError && !progressPremiumLocked && !progressQuery.data;
   const canRenderBoard = tasksQuery.isSuccess || tasksPremiumLocked;
   const listScrollEnabled =
     listViewportHeight === 0 || listContentHeight > listViewportHeight + 1;
@@ -289,6 +300,8 @@ export default function RecurringTasksScreen({
               <View style={styles.loadingBlock}>
                 <ActivityIndicator color={recurringTheme.accentBright} />
               </View>
+            ) : progressFailed ? (
+              <Text style={styles.heroErrorText}>{t('recurring.progressError')}</Text>
             ) : (
               <MasteryProfileHero
                 progress={displayProgress}
@@ -309,7 +322,11 @@ export default function RecurringTasksScreen({
             </View>
           ) : null}
 
-          {!progressIsLoading ? (
+          {progressFailed ? (
+            <Text style={styles.errorText}>{t('recurring.progressError')}</Text>
+          ) : null}
+
+          {!progressIsLoading && !progressFailed ? (
             <MasteryStatsGrid progress={displayProgress} />
           ) : null}
 
@@ -618,5 +635,11 @@ const styles = StyleSheet.create({
     color: recurringTheme.fireRedBright,
     fontSize: 13,
     textAlign: 'center',
+  },
+  heroErrorText: {
+    color: recurringTheme.fireRedBright,
+    fontSize: 13,
+    textAlign: 'center',
+    paddingVertical: 12,
   },
 });

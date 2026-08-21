@@ -54,6 +54,13 @@ export const en: Record<TranslationKey, string> = {
   'nav.progress': 'Progress',
   'nav.profile': 'Profile',
   'nav.backToToday': 'Back to Today',
+  'dev.api.title': 'Backend (Dev)',
+  'dev.api.hintLocal':
+    'Local — same data as web at localhost:5173 (test accounts with premium).',
+  'dev.api.hintProduction':
+    'Production — live Railway data (prod accounts).',
+  'dev.api.switchToProduction': 'Switch to production',
+  'dev.api.switchToLocal': 'Switch to local',
   'recurring.loading': 'Loading tasks…',
   'recurring.error': 'Could not load tasks.',
   'recurring.progressError': 'Could not load progress.',

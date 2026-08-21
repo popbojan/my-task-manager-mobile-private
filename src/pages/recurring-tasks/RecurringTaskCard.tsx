@@ -89,9 +89,30 @@ export default function RecurringTaskCard({
             >
               {task.title}
             </Text>
-            <View style={[styles.streakPill, isDone && styles.streakPillDone]}>
-              <FireIcon size={10} />
-              <Text style={[styles.streakText, isDone && styles.streakTextDone]}>
+            <View
+              style={[
+                styles.streakPill,
+                isInProgress && styles.streakPillProgress,
+                isDone && styles.streakPillDone,
+              ]}
+            >
+              <FireIcon
+                size={10}
+                color={
+                  isDone
+                    ? recurringTheme.accentBright
+                    : isInProgress
+                      ? recurringTheme.goldBright
+                      : '#c9a227'
+                }
+              />
+              <Text
+                style={[
+                  styles.streakText,
+                  isInProgress && styles.streakTextProgress,
+                  isDone && styles.streakTextDone,
+                ]}
+              >
                 {t('recurring.streak.count', { count: String(task.streakCount) })}
               </Text>
             </View>
@@ -221,9 +242,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 999,
-    backgroundColor: recurringTheme.fireRedSoft,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.28)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  streakPillProgress: {
+    backgroundColor: recurringTheme.goldSoft,
+    borderColor: 'rgba(212, 168, 67, 0.28)',
   },
   streakPillDone: {
     backgroundColor: 'rgba(82, 183, 136, 0.18)',
@@ -231,8 +256,12 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 10,
+    fontWeight: '700',
+    color: recurringTheme.textSecondary,
+  },
+  streakTextProgress: {
+    color: recurringTheme.goldBright,
     fontWeight: '800',
-    color: recurringTheme.fireRedBright,
   },
   streakTextDone: {
     color: recurringTheme.accentBright,

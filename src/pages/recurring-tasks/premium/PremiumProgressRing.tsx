@@ -6,20 +6,23 @@ type PremiumProgressRingProps = {
   percent: number;
   size?: number;
   stroke?: number;
+  tone?: 'green' | 'gold';
   children: ReactNode;
   style?: ViewStyle;
 };
 
-function segmentColor(percent: number, threshold: number) {
-  return percent >= threshold
-    ? recurringTheme.accentBright
-    : 'rgba(255, 255, 255, 0.07)';
+function segmentColor(percent: number, threshold: number, tone: 'green' | 'gold') {
+  const activeColor =
+    tone === 'gold' ? recurringTheme.goldBright : recurringTheme.accentBright;
+
+  return percent >= threshold ? activeColor : 'rgba(255, 255, 255, 0.07)';
 }
 
 export default function PremiumProgressRing({
   percent,
   size = 64,
   stroke = 3,
+  tone = 'green',
   children,
   style,
 }: PremiumProgressRingProps) {
@@ -33,6 +36,7 @@ export default function PremiumProgressRing({
         <View
           style={[
             styles.glow,
+            tone === 'gold' && styles.glowGold,
             { width: size + 10, height: size + 10, borderRadius: (size + 10) / 2 },
           ]}
         />
@@ -48,10 +52,10 @@ export default function PremiumProgressRing({
             borderWidth: stroke,
             borderColor: 'rgba(255, 255, 255, 0.06)',
             transform: [{ rotate: '-45deg' }],
-            borderTopColor: segmentColor(clamped, 12),
-            borderRightColor: segmentColor(clamped, 37),
-            borderBottomColor: segmentColor(clamped, 62),
-            borderLeftColor: segmentColor(clamped, 87),
+            borderTopColor: segmentColor(clamped, 12, tone),
+            borderRightColor: segmentColor(clamped, 37, tone),
+            borderBottomColor: segmentColor(clamped, 62, tone),
+            borderLeftColor: segmentColor(clamped, 87, tone),
           },
         ]}
       />
@@ -81,6 +85,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: recurringTheme.accentGlow,
     opacity: 0.55,
+  },
+  glowGold: {
+    backgroundColor: 'rgba(212, 168, 67, 0.28)',
   },
   ring: {
     position: 'absolute',

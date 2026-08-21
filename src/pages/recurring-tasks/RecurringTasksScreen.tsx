@@ -28,7 +28,7 @@ import MasteryProfileHero, {
 import { PlusIcon } from '@/pages/recurring-tasks/premium/TabIcons';
 import RecurringTaskCard from '@/pages/recurring-tasks/RecurringTaskCard';
 import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormModal';
-import { compareRecurringTasksByStreak } from '@/pages/recurring-tasks/recurringBoardConfig';
+import { sortTasksStable } from '@/pages/recurring-tasks/recurringBoardConfig';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import TodaySummaryCard from '@/pages/recurring-tasks/TodaySummaryCard';
 import {
@@ -46,23 +46,8 @@ const logoSource = require('@/assets/images/logo.png');
 
 const MAX_TASKS_WITHOUT_SCROLL = 5;
 
-const STATUS_ORDER: RecurringTaskStatus[] = [
-  RecurringTaskStatus.Todo,
-  RecurringTaskStatus.InProgress,
-  RecurringTaskStatus.Done,
-];
-
 function sortTasksForList(tasks: RecurringTask[]): RecurringTask[] {
-  return [...tasks].sort((a, b) => {
-    const statusDiff =
-      STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status);
-
-    if (statusDiff !== 0) {
-      return statusDiff;
-    }
-
-    return compareRecurringTasksByStreak(a, b);
-  });
+  return sortTasksStable(tasks);
 }
 
 export default function RecurringTasksScreen() {

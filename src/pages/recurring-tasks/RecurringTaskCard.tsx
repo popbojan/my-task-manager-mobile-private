@@ -25,6 +25,7 @@ export default function RecurringTaskCard({
 }: RecurringTaskCardProps) {
   const { t } = useLanguage();
   const isDone = task.status === RecurringTaskStatus.Done;
+  const isInProgress = task.status === RecurringTaskStatus.InProgress;
 
   function handleToggleStatus() {
     if (isUpdating) {
@@ -44,7 +45,7 @@ export default function RecurringTaskCard({
 
   return (
     <PremiumSurface
-      accent={isDone ? 'success' : 'none'}
+      accent={isDone ? 'success' : isInProgress ? 'gold' : 'none'}
       compact
       padding={8}
       radius={12}
@@ -53,12 +54,24 @@ export default function RecurringTaskCard({
       <View style={styles.row}>
         <Pressable
           style={styles.checkboxHitArea}
-          accessibilityLabel={t('recurring.status')}
+          accessibilityLabel={t('recurring.status.toggle')}
           onPress={handleToggleStatus}
           disabled={isUpdating}
         >
-          <View style={[styles.checkboxOuter, isDone && styles.checkboxOuterDone]}>
-            <View style={[styles.checkbox, isDone && styles.checkboxDone]}>
+          <View
+            style={[
+              styles.checkboxOuter,
+              isInProgress && styles.checkboxOuterProgress,
+              isDone && styles.checkboxOuterDone,
+            ]}
+          >
+            <View
+              style={[
+                styles.checkbox,
+                isInProgress && styles.checkboxProgress,
+                isDone && styles.checkboxDone,
+              ]}
+            >
               {isDone ? <Text style={styles.checkmark}>✓</Text> : null}
             </View>
           </View>
@@ -124,6 +137,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(82, 183, 136, 0.22)',
   },
+  checkboxOuterProgress: {
+    backgroundColor: 'rgba(212, 168, 67, 0.16)',
+    borderColor: 'rgba(212, 168, 67, 0.45)',
+    shadowColor: recurringTheme.gold,
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 0 },
+  },
   checkboxOuterDone: {
     backgroundColor: 'rgba(82, 183, 136, 0.18)',
     borderColor: 'rgba(82, 183, 136, 0.45)',
@@ -141,6 +162,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
+  },
+  checkboxProgress: {
+    borderWidth: 0,
+    backgroundColor: recurringTheme.goldBright,
+    shadowColor: recurringTheme.gold,
+    shadowOpacity: 0.45,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 0 },
   },
   checkboxDone: {
     backgroundColor: recurringTheme.accentDark,

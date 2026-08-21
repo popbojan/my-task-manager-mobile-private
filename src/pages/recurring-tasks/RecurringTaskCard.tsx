@@ -13,7 +13,6 @@ type RecurringTaskCardProps = {
   onEdit: (taskId: string) => void;
   onDelete: (task: RecurringTask) => void;
   onStatusChange: (taskId: string, status: RecurringTaskStatus) => void;
-  isUpdating?: boolean;
 };
 
 function TaskCheckboxVisual({
@@ -23,23 +22,22 @@ function TaskCheckboxVisual({
   isDone: boolean;
   isInProgress: boolean;
 }) {
+  if (isDone) {
+    return (
+      <View style={styles.checkboxDoneFull}>
+        <Text style={styles.checkmarkDone}>✓</Text>
+      </View>
+    );
+  }
+
   return (
     <View
       style={[
         styles.checkboxOuter,
         isInProgress && styles.checkboxOuterProgress,
-        isDone && styles.checkboxOuterDone,
       ]}
     >
-      <View
-        style={[
-          styles.checkbox,
-          isInProgress && styles.checkboxProgress,
-          isDone && styles.checkboxDone,
-        ]}
-      >
-        {isDone ? <Text style={styles.checkmark}>✓</Text> : null}
-      </View>
+      <View style={[styles.checkbox, isInProgress && styles.checkboxProgress]} />
     </View>
   );
 }
@@ -49,17 +47,12 @@ export default function RecurringTaskCard({
   onEdit,
   onDelete,
   onStatusChange,
-  isUpdating = false,
 }: RecurringTaskCardProps) {
   const { t } = useLanguage();
   const isDone = task.status === RecurringTaskStatus.Done;
   const isInProgress = task.status === RecurringTaskStatus.InProgress;
 
   function handleToggleStatus() {
-    if (isUpdating) {
-      return;
-    }
-
     if (isDone) {
       onStatusChange(task.id, RecurringTaskStatus.Todo);
       return;
@@ -74,10 +67,10 @@ export default function RecurringTaskCard({
   return (
     <PremiumSurface
       accent={isDone ? 'success' : isInProgress ? 'gold' : 'none'}
-      compact
+      compact={!isDone}
       padding={8}
       radius={12}
-      style={isDone ? styles.doneShell : undefined}
+      style={isDone ? styles.doneShell : isInProgress ? styles.progressShell : undefined}
     >
       <View style={styles.row}>
         <Pressable
@@ -86,7 +79,6 @@ export default function RecurringTaskCard({
           accessibilityLabel={t('recurring.status.toggle')}
           accessibilityHint={t('recurring.status.toggleHint')}
           onPress={handleToggleStatus}
-          disabled={isUpdating}
         >
           <TaskCheckboxVisual isDone={isDone} isInProgress={isInProgress} />
 
@@ -97,9 +89,9 @@ export default function RecurringTaskCard({
             >
               {task.title}
             </Text>
-            <View style={styles.streakPill}>
+            <View style={[styles.streakPill, isDone && styles.streakPillDone]}>
               <FireIcon size={10} />
-              <Text style={styles.streakText}>
+              <Text style={[styles.streakText, isDone && styles.streakTextDone]}>
                 {t('recurring.streak.count', { count: String(task.streakCount) })}
               </Text>
             </View>
@@ -111,7 +103,6 @@ export default function RecurringTaskCard({
             style={styles.actionButton}
             accessibilityLabel={t('recurring.edit')}
             onPress={() => onEdit(task.id)}
-            disabled={isUpdating}
           >
             <EditIcon size={14} />
           </Pressable>
@@ -119,7 +110,6 @@ export default function RecurringTaskCard({
             style={styles.actionButton}
             accessibilityLabel={t('recurring.delete')}
             onPress={() => onDelete(task)}
-            disabled={isUpdating}
           >
             <MoreIcon size={14} />
           </Pressable>
@@ -131,7 +121,15 @@ export default function RecurringTaskCard({
 
 const styles = StyleSheet.create({
   doneShell: {
-    opacity: 0.85,
+    backgroundColor: 'rgba(82, 183, 136, 0.12)',
+    shadowOpacity: 0.42,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  progressShell: {
+    shadowOpacity: 0.14,
+    shadowRadius: 6,
+    elevation: 1,
   },
   row: {
     flexDirection: 'row',
@@ -158,19 +156,11 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(82, 183, 136, 0.22)',
   },
   checkboxOuterProgress: {
-    backgroundColor: 'rgba(212, 168, 67, 0.16)',
-    borderColor: 'rgba(212, 168, 67, 0.45)',
+    backgroundColor: 'rgba(212, 168, 67, 0.12)',
+    borderColor: 'rgba(212, 168, 67, 0.32)',
     shadowColor: recurringTheme.gold,
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  checkboxOuterDone: {
-    backgroundColor: 'rgba(82, 183, 136, 0.18)',
-    borderColor: 'rgba(82, 183, 136, 0.45)',
-    shadowColor: recurringTheme.accent,
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
     shadowOffset: { width: 0, height: 0 },
   },
   checkbox: {
@@ -179,26 +169,32 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
     borderColor: recurringTheme.accentBright,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: 'transparent',
   },
   checkboxProgress: {
     borderWidth: 0,
     backgroundColor: recurringTheme.goldBright,
-    shadowColor: recurringTheme.gold,
-    shadowOpacity: 0.45,
-    shadowRadius: 4,
+  },
+  checkboxDoneFull: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: recurringTheme.accentBright,
+    borderWidth: 2,
+    borderColor: '#b7f7d8',
+    shadowColor: recurringTheme.accentBright,
+    shadowOpacity: 0.72,
+    shadowRadius: 12,
     shadowOffset: { width: 0, height: 0 },
   },
-  checkboxDone: {
-    backgroundColor: recurringTheme.accentDark,
-    borderColor: recurringTheme.accentBright,
-  },
-  checkmark: {
+  checkmarkDone: {
     color: '#fff',
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 15,
+    fontWeight: '900',
+    lineHeight: 16,
+    marginTop: -1,
   },
   content: {
     flex: 1,
@@ -212,7 +208,10 @@ const styles = StyleSheet.create({
   },
   titleDone: {
     textDecorationLine: 'line-through',
-    color: recurringTheme.textSecondary,
+    color: recurringTheme.accentBright,
+    textShadowColor: 'rgba(110, 207, 170, 0.35)',
+    textShadowRadius: 8,
+    textShadowOffset: { width: 0, height: 0 },
   },
   streakPill: {
     flexDirection: 'row',
@@ -226,10 +225,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.28)',
   },
+  streakPillDone: {
+    backgroundColor: 'rgba(82, 183, 136, 0.18)',
+    borderColor: 'rgba(110, 207, 170, 0.45)',
+  },
   streakText: {
     fontSize: 10,
     fontWeight: '800',
     color: recurringTheme.fireRedBright,
+  },
+  streakTextDone: {
+    color: recurringTheme.accentBright,
   },
   actions: {
     flexDirection: 'row',

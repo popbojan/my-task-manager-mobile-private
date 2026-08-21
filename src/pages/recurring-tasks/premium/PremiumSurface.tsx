@@ -17,9 +17,9 @@ type PremiumSurfaceProps = {
 const ACCENT_BORDER: Record<PremiumAccent, string> = {
   none: recurringTheme.cardBorder,
   green: recurringTheme.cardBorderAccent,
-  gold: 'rgba(212, 168, 67, 0.38)',
+  gold: 'rgba(212, 168, 67, 0.3)',
   red: 'rgba(239, 68, 68, 0.28)',
-  success: 'rgba(82, 183, 136, 0.48)',
+  success: 'rgba(110, 207, 170, 0.72)',
 };
 
 const ACCENT_GLOW: Record<PremiumAccent, string | undefined> = {
@@ -52,6 +52,7 @@ export default function PremiumSurface({
           shadowColor: glowColor ?? '#000',
         },
         glowColor ? styles.shellGlow : null,
+        accent === 'success' ? styles.shellGlowSuccess : null,
         style,
       ]}
     >
@@ -84,6 +85,11 @@ const styles = StyleSheet.create({
   },
   shellGlow: {
     shadowOpacity: 0.26,
+  },
+  shellGlowSuccess: {
+    shadowOpacity: 0.44,
+    shadowRadius: 18,
+    elevation: 7,
   },
   shine: {
     position: 'absolute',

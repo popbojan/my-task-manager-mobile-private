@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -67,7 +67,8 @@ export default function RecurringTasksScreen() {
     visible: boolean;
     task: RecurringTask | null;
   }>({ visible: false, task: null });
-  const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
+  const statusTargetsRef = useRef(new Map<string, RecurringTaskStatus>());
+  const statusSyncRunningRef = useRef(new Set<string>());
 
   const tasksQuery = useQuery({
     queryKey: ['recurring-tasks'],
@@ -87,44 +88,44 @@ export default function RecurringTasksScreen() {
     staleTime: 1000 * 60 * 30,
   });
 
-  const updateTaskMutation = useMutation({
-    mutationFn: ({
-      recurringTaskId,
-      status,
-    }: {
-      recurringTaskId: string;
-      status: RecurringTaskStatus;
-    }) =>
-      authApi.updateRecurringTask({
-        recurringTaskId,
-        updateRecurringTaskRequest: { status },
-      }),
-    onMutate: async ({ recurringTaskId, status }) => {
-      setUpdatingTaskId(recurringTaskId);
-      await queryClient.cancelQueries({ queryKey: ['recurring-tasks'] });
-      const previous = queryClient.getQueryData<RecurringTask[]>([
-        'recurring-tasks',
-      ]);
+  function patchTaskStatus(taskId: string, status: RecurringTaskStatus) {
+    queryClient.setQueryData<RecurringTask[]>(['recurring-tasks'], (old = []) =>
+      old.map(task => (task.id === taskId ? { ...task, status } : task)),
+    );
+  }
 
-      queryClient.setQueryData<RecurringTask[]>(['recurring-tasks'], (old = []) =>
-        old.map(task =>
-          task.id === recurringTaskId ? { ...task, status } : task,
-        ),
-      );
+  async function drainStatusSync(taskId: string) {
+    if (statusSyncRunningRef.current.has(taskId)) {
+      return;
+    }
 
-      return { previous };
-    },
-    onError: (_error, _variables, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(['recurring-tasks'], context.previous);
+    statusSyncRunningRef.current.add(taskId);
+
+    try {
+      while (statusTargetsRef.current.has(taskId)) {
+        const status = statusTargetsRef.current.get(taskId)!;
+
+        try {
+          const updated = await authApi.updateRecurringTask({
+            recurringTaskId: taskId,
+            updateRecurringTaskRequest: { status },
+          });
+          patchTaskStatus(taskId, updated.status);
+
+          if (statusTargetsRef.current.get(taskId) === status) {
+            statusTargetsRef.current.delete(taskId);
+          }
+        } catch {
+          statusTargetsRef.current.delete(taskId);
+          await queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
+          break;
+        }
       }
-    },
-    onSettled: () => {
-      setUpdatingTaskId(null);
-      queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
+    } finally {
+      statusSyncRunningRef.current.delete(taskId);
       queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
-    },
-  });
+    }
+  }
 
   const deleteTaskMutation = useMutation({
     mutationFn: (recurringTaskId: string) =>
@@ -224,7 +225,9 @@ export default function RecurringTasksScreen() {
       return;
     }
 
-    updateTaskMutation.mutate({ recurringTaskId: taskId, status });
+    patchTaskStatus(taskId, status);
+    statusTargetsRef.current.set(taskId, status);
+    void drainStatusSync(taskId);
   }
 
   return (
@@ -353,7 +356,6 @@ export default function RecurringTasksScreen() {
               onEdit={openEditModal}
               onDelete={openDeleteModal}
               onStatusChange={handleStatusChange}
-              isUpdating={updatingTaskId === item.id}
             />
           )}
           ItemSeparatorComponent={() => <View style={styles.taskSeparator} />}

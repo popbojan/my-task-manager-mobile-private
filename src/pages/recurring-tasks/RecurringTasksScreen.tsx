@@ -269,11 +269,10 @@ export default function RecurringTasksScreen({
           resizeMode="cover"
           accessibilityIgnoresInvertColors
         />
-        <View style={styles.heroOverlayTop} />
-        <View style={styles.heroVignetteLeft} />
-        <View style={styles.heroVignetteRight} />
-        <View style={styles.heroSpotlight} />
-        <View style={styles.heroOverlayBottom} />
+        <View style={styles.heroLeftScrim} />
+        <View style={styles.heroBottomFadeLight} />
+        <View style={styles.heroBottomFadeMid} />
+        <View style={styles.heroBottomFadeDeep} />
 
         <SafeAreaView edges={['top']} style={styles.heroSafeArea}>
           <AppBrandHeader />
@@ -420,49 +419,47 @@ const styles = StyleSheet.create({
   },
   hero: {
     overflow: 'hidden',
-    backgroundColor: '#0a0a0c',
+    backgroundColor: recurringTheme.pageBg,
   },
   heroImage: {
-    ...StyleSheet.absoluteFill,
-  },
-  heroOverlayTop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(4, 6, 5, 0.5)',
-  },
-  heroVignetteLeft: {
     position: 'absolute',
-    top: 0,
+    top: -8,
+    right: -56,
+    width: '118%',
+    height: '115%',
+    opacity: 0.72,
+  },
+  heroLeftScrim: {
+    position: 'absolute',
+    top: 44,
     left: 0,
     bottom: 0,
-    width: '32%',
-    backgroundColor: recurringTheme.vignette,
-    opacity: 0.4,
+    width: '56%',
+    backgroundColor: 'rgba(6, 9, 8, 0.22)',
   },
-  heroVignetteRight: {
+  heroBottomFadeLight: {
     position: 'absolute',
-    top: 0,
+    left: 0,
     right: 0,
-    bottom: 0,
-    width: '32%',
-    backgroundColor: recurringTheme.vignette,
-    opacity: 0.4,
+    bottom: 52,
+    height: 48,
+    backgroundColor: 'rgba(6, 9, 8, 0.16)',
   },
-  heroSpotlight: {
+  heroBottomFadeMid: {
     position: 'absolute',
-    top: '6%',
-    left: '18%',
-    right: '18%',
-    height: '58%',
-    backgroundColor: 'rgba(82, 183, 136, 0.07)',
-    borderRadius: 999,
+    left: 0,
+    right: 0,
+    bottom: 28,
+    height: 40,
+    backgroundColor: 'rgba(6, 9, 8, 0.36)',
   },
-  heroOverlayBottom: {
+  heroBottomFadeDeep: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    height: 64,
-    backgroundColor: 'rgba(6, 9, 8, 0.96)',
+    height: 36,
+    backgroundColor: recurringTheme.pageBg,
   },
   heroSafeArea: {
     flex: 1,

@@ -1,42 +1,33 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Image,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TextInput,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import { useApiLanguage, useLanguage } from '@/i18n/LanguageProvider';
-import LanguagePicker from '@/pages/login/LanguagePicker';
+import AppBrandHeader from '@/components/AppBrandHeader';
 import LoginHelpModal from '@/pages/login/LoginHelpModal';
 import MasteryLevelStrip from '@/pages/login/MasteryLevelStrip';
 import { loginTheme } from '@/pages/login/loginTheme';
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 import type { MasteryLevel } from '@/api/generated/models/MasteryLevel';
 
-const logoSource = require('@/assets/images/logo.png');
 const loginBgSource = require('@/assets/images/login-bg.jpg');
 
 type LoginStep = 'email' | 'otp';
 
 export default function LoginScreen() {
-  const { height: windowHeight } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   const { setAccessToken } = useAuth();
   const { t } = useLanguage();
   const apiLanguage = useApiLanguage();
@@ -129,7 +120,6 @@ export default function LoginScreen() {
 
   const canSendOtp = !!email.trim() && !isSendingOtp;
   const canLogin = !!email.trim() && !!otp.trim() && !isLoggingIn;
-  const contentMinHeight = windowHeight - insets.top - insets.bottom;
 
   return (
     <View style={styles.root}>
@@ -141,46 +131,15 @@ export default function LoginScreen() {
       >
         <View style={styles.overlay} />
 
-        <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+          <AppBrandHeader />
+
           <KeyboardAvoidingView
             style={styles.flex}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           >
-            <ScrollView
-              contentContainerStyle={[
-                styles.scrollContent,
-                {
-                  minHeight: contentMinHeight,
-                  justifyContent: 'space-between',
-                  paddingTop: insets.top + 16,
-                },
-              ]}
-              keyboardShouldPersistTaps="handled"
-              showsVerticalScrollIndicator={false}
-            >
+            <View style={styles.pageColumn}>
               <View style={styles.topSection}>
-                <View style={styles.header}>
-                  <View style={styles.brandChip}>
-                    <View style={styles.logoShell}>
-                      <Image
-                        source={logoSource}
-                        style={styles.logo}
-                        accessibilityIgnoresInvertColors
-                      />
-                    </View>
-                    <View style={styles.brandCopy}>
-                      <Text style={styles.brandName} numberOfLines={1}>
-                        {t('header.brand')}
-                      </Text>
-                      <Text style={styles.brandTagline} numberOfLines={1}>
-                        {t('login.brand.tagline')}
-                      </Text>
-                    </View>
-                  </View>
-                  <LanguagePicker />
-                </View>
-
                 <View style={styles.hero}>
                   <Text
                     style={styles.heroTitle}
@@ -197,111 +156,109 @@ export default function LoginScreen() {
               </View>
 
               <View style={styles.mainContent}>
-                <View style={styles.middleSection}>
-                  <View style={styles.panel}>
-                <View style={styles.panelHeader}>
-                  <View style={styles.titleRow}>
-                    <Text style={styles.panelTitle}>
-                      {step === 'email'
-                        ? t('login.title')
-                        : t('login.titleOtp')}
-                    </Text>
-                    <Pressable
-                      style={styles.helpButton}
-                      accessibilityLabel={t('login.help.trigger')}
-                      onPress={() => setHelpOpen(true)}
-                    >
-                      <Text style={styles.helpButtonText}>?</Text>
-                    </Pressable>
-                  </View>
-                  {step === 'email' ? (
-                    <Text style={styles.panelSubtitle}>{t('login.subtitle')}</Text>
-                  ) : (
-                    <Text style={styles.stepHint}>
-                      {t('login.subtitleOtp', { email: email.trim() })}
-                    </Text>
-                  )}
-                </View>
-
-                {step === 'email' ? (
-                  <View>
-                    <Text style={styles.label}>{t('login.email')}</Text>
-                    <View style={styles.inputRow}>
-                      <Text style={styles.inputIcon}>✉</Text>
-                      <TextInput
-                        style={styles.input}
-                        value={email}
-                        onChangeText={setEmail}
-                        placeholder={t('login.emailPlaceholder')}
-                        placeholderTextColor="rgba(255, 255, 255, 0.42)"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoComplete="email"
-                        textContentType="emailAddress"
-                        returnKeyType="next"
-                        onSubmitEditing={handleSendOtp}
-                      />
+                <View style={styles.panel}>
+                  <View style={styles.panelHeader}>
+                    <View style={styles.titleRow}>
+                      <Text style={styles.panelTitle}>
+                        {step === 'email'
+                          ? t('login.title')
+                          : t('login.titleOtp')}
+                      </Text>
+                      <Pressable
+                        style={styles.helpButton}
+                        accessibilityLabel={t('login.help.trigger')}
+                        onPress={() => setHelpOpen(true)}
+                      >
+                        <Text style={styles.helpButtonText}>?</Text>
+                      </Pressable>
                     </View>
-                    <Pressable
-                      style={[styles.button, !canSendOtp && styles.buttonDisabled]}
-                      disabled={!canSendOtp}
-                      onPress={handleSendOtp}
-                    >
-                      {isSendingOtp ? (
-                        <ActivityIndicator color="#fff" />
-                      ) : (
-                        <Text style={styles.buttonText}>{t('login.sendCode')}</Text>
-                      )}
-                    </Pressable>
-                    <Text style={styles.otpHint}>🔒 {t('login.otpHint')}</Text>
-                    {otpError ? (
-                      <Text style={styles.error}>{otpError}</Text>
-                    ) : null}
+                    {step === 'email' ? (
+                      <Text style={styles.panelSubtitle}>{t('login.subtitle')}</Text>
+                    ) : (
+                      <Text style={styles.stepHint}>
+                        {t('login.subtitleOtp', { email: email.trim() })}
+                      </Text>
+                    )}
                   </View>
-                ) : (
-                  <View>
-                    <Text style={styles.label}>{t('login.otp')}</Text>
-                    <TextInput
-                      style={styles.inputStandalone}
-                      value={otp}
-                      onChangeText={setOtp}
-                      placeholder={t('login.otpPlaceholder')}
-                      placeholderTextColor="rgba(255, 255, 255, 0.42)"
-                      keyboardType="number-pad"
-                      autoComplete={
-                        Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'
-                      }
-                      textContentType="oneTimeCode"
-                      returnKeyType="done"
-                      onSubmitEditing={handleLogin}
-                    />
-                    <Pressable
-                      style={[styles.button, !canLogin && styles.buttonDisabled]}
-                      disabled={!canLogin}
-                      onPress={handleLogin}
-                    >
-                      {isLoggingIn ? (
-                        <ActivityIndicator color="#fff" />
-                      ) : (
-                        <Text style={styles.buttonText}>{t('login.submit')}</Text>
-                      )}
-                    </Pressable>
-                    {loginError ? (
-                      <Text style={styles.error}>{loginError}</Text>
-                    ) : null}
-                    <Pressable
-                      style={styles.backLink}
-                      onPress={() => {
-                        setStep('email');
-                        setOtp('');
-                        setLoginError(null);
-                      }}
-                    >
-                      <Text style={styles.backLinkText}>← {t('login.email')}</Text>
-                    </Pressable>
-                  </View>
-                )}
-              </View>
+
+                  {step === 'email' ? (
+                    <View>
+                      <Text style={styles.label}>{t('login.email')}</Text>
+                      <View style={styles.inputRow}>
+                        <Text style={styles.inputIcon}>✉</Text>
+                        <TextInput
+                          style={styles.input}
+                          value={email}
+                          onChangeText={setEmail}
+                          placeholder={t('login.emailPlaceholder')}
+                          placeholderTextColor="rgba(255, 255, 255, 0.42)"
+                          keyboardType="email-address"
+                          autoCapitalize="none"
+                          autoComplete="email"
+                          textContentType="emailAddress"
+                          returnKeyType="next"
+                          onSubmitEditing={handleSendOtp}
+                        />
+                      </View>
+                      <Pressable
+                        style={[styles.button, !canSendOtp && styles.buttonDisabled]}
+                        disabled={!canSendOtp}
+                        onPress={handleSendOtp}
+                      >
+                        {isSendingOtp ? (
+                          <ActivityIndicator color="#fff" />
+                        ) : (
+                          <Text style={styles.buttonText}>{t('login.sendCode')}</Text>
+                        )}
+                      </Pressable>
+                      <Text style={styles.otpHint}>🔒 {t('login.otpHint')}</Text>
+                      {otpError ? (
+                        <Text style={styles.error}>{otpError}</Text>
+                      ) : null}
+                    </View>
+                  ) : (
+                    <View>
+                      <Text style={styles.label}>{t('login.otp')}</Text>
+                      <TextInput
+                        style={styles.inputStandalone}
+                        value={otp}
+                        onChangeText={setOtp}
+                        placeholder={t('login.otpPlaceholder')}
+                        placeholderTextColor="rgba(255, 255, 255, 0.42)"
+                        keyboardType="number-pad"
+                        autoComplete={
+                          Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'
+                        }
+                        textContentType="oneTimeCode"
+                        returnKeyType="done"
+                        onSubmitEditing={handleLogin}
+                      />
+                      <Pressable
+                        style={[styles.button, !canLogin && styles.buttonDisabled]}
+                        disabled={!canLogin}
+                        onPress={handleLogin}
+                      >
+                        {isLoggingIn ? (
+                          <ActivityIndicator color="#fff" />
+                        ) : (
+                          <Text style={styles.buttonText}>{t('login.submit')}</Text>
+                        )}
+                      </Pressable>
+                      {loginError ? (
+                        <Text style={styles.error}>{loginError}</Text>
+                      ) : null}
+                      <Pressable
+                        style={styles.backLink}
+                        onPress={() => {
+                          setStep('email');
+                          setOtp('');
+                          setLoginError(null);
+                        }}
+                      >
+                        <Text style={styles.backLinkText}>← {t('login.email')}</Text>
+                      </Pressable>
+                    </View>
+                  )}
                 </View>
               </View>
 
@@ -314,7 +271,7 @@ export default function LoginScreen() {
                   🛡 {t('login.security')}
                 </Text>
               </View>
-            </ScrollView>
+            </View>
           </KeyboardAvoidingView>
         </SafeAreaView>
       </ImageBackground>
@@ -341,90 +298,34 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
+    minHeight: 0,
   },
-  scrollContent: {
-    flexGrow: 1,
+  pageColumn: {
+    flex: 1,
+    minHeight: 0,
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 8,
   },
   topSection: {
     flexShrink: 0,
     width: '100%',
   },
   mainContent: {
-    flexGrow: 1,
+    flex: 1,
+    minHeight: 0,
     width: '100%',
     justifyContent: 'center',
-    paddingVertical: 12,
-  },
-  middleSection: {
-    flexShrink: 0,
-    width: '100%',
+    paddingVertical: 8,
   },
   bottomSection: {
     flexShrink: 0,
-    paddingTop: 8,
     width: '100%',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginBottom: 4,
-  },
-  brandChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 4,
-    paddingVertical: 8,
-    paddingLeft: 6,
-    paddingRight: 12,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    backgroundColor: 'rgba(0, 0, 0, 0.58)',
-  },
-  logoShell: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'visible',
-  },
-  logo: {
-    width: 62,
-    height: 62,
-    resizeMode: 'contain',
-  },
-  brandCopy: {
-    paddingRight: 2,
-  },
-  brandName: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '800',
-    letterSpacing: -0.3,
-    textShadowColor: 'rgba(0, 0, 0, 0.45)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-  },
-  brandTagline: {
-    color: loginTheme.brandTagline,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1.3,
-    marginTop: 2,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 6,
   },
   hero: {
     width: '100%',
     alignItems: 'center',
-    marginTop: 14,
-    marginBottom: 18,
+    marginTop: 8,
+    marginBottom: 10,
     paddingHorizontal: 4,
   },
   heroTitle: {

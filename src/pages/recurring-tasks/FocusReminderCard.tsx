@@ -38,7 +38,6 @@ export default function FocusReminderCard({
               : t('recurring.banner.warningLine')}
           </Text>
         </View>
-        <Text style={styles.chevron}>›</Text>
       </View>
     </PremiumSurface>
   );
@@ -67,10 +66,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
     fontWeight: '500',
-  },
-  chevron: {
-    color: recurringTheme.textMuted,
-    fontSize: 18,
-    fontWeight: '300',
   },
 });

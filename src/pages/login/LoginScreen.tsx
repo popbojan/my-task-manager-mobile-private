@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { authApi } from '@/api/authClient';
+import { authApi, authRequestInit } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import { useApiLanguage, useLanguage } from '@/i18n/LanguageProvider';
 import AppBrandHeader from '@/components/AppBrandHeader';
@@ -99,13 +99,16 @@ export default function LoginScreen() {
     setIsLoggingIn(true);
 
     try {
-      const data = await authApi.loginWithOtp({
-        loginRequest: {
-          email: email.trim(),
-          otp: otp.trim(),
-          language: apiLanguage,
+      const data = await authApi.loginWithOtp(
+        {
+          loginRequest: {
+            email: email.trim(),
+            otp: otp.trim(),
+            language: apiLanguage,
+          },
         },
-      });
+        authRequestInit,
+      );
 
       if (data.accessToken) {
         clearRecurringSessionQueries(queryClient);

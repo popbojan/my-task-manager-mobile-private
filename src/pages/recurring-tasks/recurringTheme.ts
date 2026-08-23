@@ -4,6 +4,7 @@ export const recurringTheme = {
   surfaceCard: '#101512',
   surfaceElevated: '#161d19',
   surfaceInset: '#0b100e',
+  statCardBg: 'rgba(12, 20, 16, 0.92)',
   cardBorder: 'rgba(255, 255, 255, 0.09)',
   cardBorderAccent: 'rgba(82, 183, 136, 0.35)',
   textPrimary: '#f8faf9',
@@ -13,6 +14,8 @@ export const recurringTheme = {
   accentBright: '#6ecfaa',
   accentDark: '#1b4332',
   accentGlow: 'rgba(82, 183, 136, 0.32)',
+  streakOrange: '#F97316',
+  streakOrangeBright: '#FF7043',
   fireRed: '#ef4444',
   fireRedBright: '#f87171',
   fireRedSoft: 'rgba(239, 68, 68, 0.14)',
@@ -21,6 +24,7 @@ export const recurringTheme = {
   goldSoft: 'rgba(212, 168, 67, 0.14)',
   shineLine: 'rgba(255, 255, 255, 0.14)',
   vignette: 'rgba(0, 0, 0, 0.55)',
+  cardRadius: 16,
 } as const;
 
 export const premiumType = {
@@ -30,14 +34,29 @@ export const premiumType = {
     letterSpacing: 2,
     textTransform: 'uppercase' as const,
   },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '700' as const,
+    letterSpacing: 1.8,
+    textTransform: 'uppercase' as const,
+  },
   title: {
     fontSize: 17,
     fontWeight: '800' as const,
     letterSpacing: -0.4,
   },
+  taskTitle: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    letterSpacing: -0.2,
+  },
   statValue: {
     fontSize: 14,
     fontWeight: '800' as const,
     letterSpacing: -0.3,
+  },
+  caption: {
+    fontSize: 12,
+    fontWeight: '600' as const,
   },
 };

@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
-import { authApi } from '@/api/authClient';
+import { authApi, authRequestInit } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import { useApiEnvironment } from '@/config/ApiEnvironmentProvider';
 import type { ApiEnvironment } from '@/config/api';
@@ -33,7 +33,7 @@ export default function TabPlaceholderScreen({
 
   async function handleLogout() {
     try {
-      await authApi.logout();
+      await authApi.logout(authRequestInit);
     } catch {
       // Session may already be invalid.
     } finally {
@@ -48,7 +48,7 @@ export default function TabPlaceholderScreen({
     }
 
     try {
-      await authApi.logout();
+      await authApi.logout(authRequestInit);
     } catch {
       // Ignore — session may belong to the other backend.
     }

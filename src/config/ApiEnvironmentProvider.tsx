@@ -14,7 +14,9 @@ import {
   applyApiEnvironment,
   DEFAULT_API_ENVIRONMENT,
   getApiBaseUrl,
+  isLocalDevHostPreferred,
   resolveApiBaseUrl,
+  resolveDefaultApiEnvironment,
   type ApiEnvironment,
 } from '@/config/api';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
@@ -35,9 +37,22 @@ function isApiEnvironment(value: string | null): value is ApiEnvironment {
   return value === 'local' || value === 'production';
 }
 
+function resolveStoredEnvironment(stored: string | null): ApiEnvironment {
+  if (isApiEnvironment(stored)) {
+    if (stored === 'local' && !isLocalDevHostPreferred()) {
+      return 'production';
+    }
+
+    return stored;
+  }
+
+  return resolveDefaultApiEnvironment();
+}
+
 export function ApiEnvironmentProvider({ children }: { children: ReactNode }) {
   const [environment, setEnvironmentState] =
     useState<ApiEnvironment>(DEFAULT_API_ENVIRONMENT);
+  const [apiBaseUrl, setApiBaseUrl] = useState(getApiBaseUrl());
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -46,14 +61,17 @@ export function ApiEnvironmentProvider({ children }: { children: ReactNode }) {
     async function loadEnvironment() {
       try {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
-        const nextEnvironment = isApiEnvironment(stored)
-          ? stored
-          : DEFAULT_API_ENVIRONMENT;
+        const nextEnvironment = resolveStoredEnvironment(stored);
         applyApiEnvironment(nextEnvironment);
         setApiBasePath(resolveApiBaseUrl(nextEnvironment));
 
+        if (stored !== nextEnvironment) {
+          await AsyncStorage.setItem(STORAGE_KEY, nextEnvironment);
+        }
+
         if (!cancelled) {
           setEnvironmentState(nextEnvironment);
+          setApiBaseUrl(getApiBaseUrl());
         }
       } finally {
         if (!cancelled) {
@@ -71,18 +89,20 @@ export function ApiEnvironmentProvider({ children }: { children: ReactNode }) {
 
   const setEnvironment = useCallback(async (nextEnvironment: ApiEnvironment) => {
     applyApiEnvironment(nextEnvironment);
-    setApiBasePath(resolveApiBaseUrl(nextEnvironment));
-    await AsyncStorage.setItem(STORAGE_KEY, nextEnvironment);
+    const nextBaseUrl = resolveApiBaseUrl(nextEnvironment);
+    setApiBasePath(nextBaseUrl);
     setEnvironmentState(nextEnvironment);
+    setApiBaseUrl(nextBaseUrl);
+    await AsyncStorage.setItem(STORAGE_KEY, nextEnvironment);
   }, []);
 
   const value = useMemo(
     () => ({
       environment,
-      apiBaseUrl: getApiBaseUrl(),
+      apiBaseUrl,
       setEnvironment,
     }),
-    [environment, setEnvironment],
+    [apiBaseUrl, environment, setEnvironment],
   );
 
   if (!isReady) {

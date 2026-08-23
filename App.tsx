@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
-import { authApi } from '@/api/authClient';
+import { authApi, authRequestInit } from '@/api/authClient';
 import QueryProvider from '@/api/QueryProvider';
 import { AuthProvider, useAuth } from '@/auth/AuthContext';
 import { LanguageProvider } from '@/i18n/LanguageProvider';
@@ -11,6 +11,8 @@ import TabPlaceholderScreen from '@/pages/home/TabPlaceholderScreen';
 import LoginScreen from '@/pages/login/LoginScreen';
 import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormModal';
 import RecurringTasksScreen from '@/pages/recurring-tasks/RecurringTasksScreen';
+import TaskFormModal from '@/pages/tasks/TaskFormModal';
+import TasksScreen from '@/pages/tasks/TasksScreen';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import CurrentUserBootstrap from '@/user/CurrentUserBootstrap';
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
@@ -20,6 +22,11 @@ function MainAppShell() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<MainTab>('today');
   const [taskForm, setTaskForm] = useState<{
+    visible: boolean;
+    taskId: string | null;
+    session: number;
+  }>({ visible: false, taskId: null, session: 0 });
+  const [boardTaskForm, setBoardTaskForm] = useState<{
     visible: boolean;
     taskId: string | null;
     session: number;
@@ -37,6 +44,18 @@ function MainAppShell() {
     setTaskForm(prev => ({ ...prev, visible: false, taskId: null }));
   }
 
+  function openBoardTaskForm(taskId: string | null) {
+    setBoardTaskForm(prev => ({
+      visible: true,
+      taskId,
+      session: prev.session + 1,
+    }));
+  }
+
+  function closeBoardTaskForm() {
+    setBoardTaskForm(prev => ({ ...prev, visible: false, taskId: null }));
+  }
+
   return (
     <View style={shellStyles.root}>
       <View style={shellStyles.content}>
@@ -47,7 +66,10 @@ function MainAppShell() {
           />
         ) : null}
         {activeTab === 'tasks' ? (
-          <TabPlaceholderScreen tab="tasks" onGoToday={() => setActiveTab('today')} />
+          <TasksScreen
+            onOpenCreateTask={() => openBoardTaskForm(null)}
+            onOpenEditTask={openBoardTaskForm}
+          />
         ) : null}
         {activeTab === 'progress' ? (
           <TabPlaceholderScreen
@@ -74,6 +96,16 @@ function MainAppShell() {
           }}
         />
       ) : null}
+      {boardTaskForm.visible ? (
+        <TaskFormModal
+          key={`board-task-form-${boardTaskForm.session}`}
+          taskId={boardTaskForm.taskId}
+          onClose={closeBoardTaskForm}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+          }}
+        />
+      ) : null}
     </View>
   );
 }
@@ -92,7 +124,7 @@ function AppContent() {
 
     async function refreshSession() {
       try {
-        const data = await authApi.refreshAccessToken();
+        const data = await authApi.refreshAccessToken(authRequestInit);
         clearRecurringSessionQueries(queryClient);
         setAccessToken(data.accessToken);
       } catch {

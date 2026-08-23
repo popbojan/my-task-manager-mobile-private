@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { authApi } from '@/api/authClient';
+import { authApi, authRequestInit } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
 
@@ -10,7 +10,7 @@ export default function HomePlaceholder() {
 
   async function handleLogout() {
     try {
-      await authApi.logout();
+      await authApi.logout(authRequestInit);
     } catch {
       // Session may already be invalid; still clear local access token.
     } finally {

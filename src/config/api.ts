@@ -32,6 +32,34 @@ function isAndroidEmulator(): boolean {
   );
 }
 
+function isIosSimulator(): boolean {
+  if (Platform.OS !== 'ios') {
+    return false;
+  }
+
+  return Platform.constants.systemName === 'iOS Simulator';
+}
+
+export function isLocalDevHostPreferred(): boolean {
+  if (Platform.OS === 'web') {
+    return true;
+  }
+
+  if (Platform.OS === 'android') {
+    return isAndroidEmulator();
+  }
+
+  if (Platform.OS === 'ios') {
+    return isIosSimulator();
+  }
+
+  return false;
+}
+
+export function resolveDefaultApiEnvironment(): ApiEnvironment {
+  return isLocalDevHostPreferred() ? 'local' : 'production';
+}
+
 function devHost(localhostPort: number): string {
   if (Platform.OS === 'android') {
     const host = isAndroidEmulator() ? '10.0.2.2' : DEV_MACHINE_HOST;
@@ -61,8 +89,8 @@ export function resolveAssetsBaseUrl(environment: ApiEnvironment): string {
     : devHost(5173);
 }
 
-/** Default for fresh installs / dev — matches local web frontend (localhost:5173). */
-export const DEFAULT_API_ENVIRONMENT: ApiEnvironment = 'local';
+/** Default: local on emulator/simulator, production on physical devices. */
+export const DEFAULT_API_ENVIRONMENT: ApiEnvironment = resolveDefaultApiEnvironment();
 
 let activeApiEnvironment: ApiEnvironment = DEFAULT_API_ENVIRONMENT;
 let activeApiBaseUrl = resolveApiBaseUrl(DEFAULT_API_ENVIRONMENT);

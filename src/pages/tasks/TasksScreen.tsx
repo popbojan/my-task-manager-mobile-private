@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -67,8 +67,9 @@ export default function TasksScreen({
     visible: boolean;
     task: Task | null;
   }>({ visible: false, task: null });
-  const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
   const [taskOrderIds, setTaskOrderIds] = useState<string[]>([]);
+  const statusTargetsRef = useRef(new Map<string, TaskStatus>());
+  const statusSyncRunningRef = useRef(new Set<string>());
   const previousFilterRef = useRef<TaskFilterId>(activeFilter);
 
   const tasksQuery = useQuery({
@@ -78,43 +79,43 @@ export default function TasksScreen({
     retry: shouldRetryApiQuery,
   });
 
-  const updateTaskMutation = useMutation({
-    mutationFn: ({
-      taskId,
-      status,
-    }: {
-      taskId: string;
-      status: TaskStatus;
-    }) =>
-      authApi.updateTask({
-        taskId,
-        updateTaskRequest: { status },
-      }),
-    onMutate: async ({ taskId, status }) => {
-      setUpdatingTaskId(taskId);
-      await queryClient.cancelQueries({ queryKey: tasksQueryKey(accessToken) });
-      const previous = queryClient.getQueryData<Task[]>(tasksQueryKey(accessToken));
+  function patchTaskStatus(taskId: string, status: TaskStatus) {
+    queryClient.setQueryData<Task[]>(tasksQueryKey(accessToken), (old = []) =>
+      patchTaskInCache(old, taskId, { status }),
+    );
+  }
 
-      queryClient.setQueryData<Task[]>(tasksQueryKey(accessToken), (old = []) =>
-        patchTaskInCache(old, taskId, { status }),
-      );
+  async function drainStatusSync(taskId: string) {
+    if (statusSyncRunningRef.current.has(taskId)) {
+      return;
+    }
 
-      return { previous };
-    },
-    onSuccess: (updatedTask, { taskId }) => {
-      queryClient.setQueryData<Task[]>(tasksQueryKey(accessToken), (old = []) =>
-        patchTaskInCache(old, taskId, { status: updatedTask.status }),
-      );
-    },
-    onError: (_error, _variables, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(tasksQueryKey(accessToken), context.previous);
+    statusSyncRunningRef.current.add(taskId);
+
+    try {
+      while (statusTargetsRef.current.has(taskId)) {
+        const status = statusTargetsRef.current.get(taskId)!;
+
+        try {
+          const updated = await authApi.updateTask({
+            taskId,
+            updateTaskRequest: { status },
+          });
+          patchTaskStatus(taskId, updated.status);
+
+          if (statusTargetsRef.current.get(taskId) === status) {
+            statusTargetsRef.current.delete(taskId);
+          }
+        } catch {
+          statusTargetsRef.current.delete(taskId);
+          await queryClient.invalidateQueries({ queryKey: tasksQueryKey(accessToken) });
+          break;
+        }
       }
-    },
-    onSettled: () => {
-      setUpdatingTaskId(null);
-    },
-  });
+    } finally {
+      statusSyncRunningRef.current.delete(taskId);
+    }
+  }
 
   const deleteTaskMutation = useMutation({
     mutationFn: (taskId: string) => authApi.deleteTask({ taskId }),
@@ -177,25 +178,11 @@ export default function TasksScreen({
     deleteTaskMutation.mutate(deleteModal.task.id);
   }
 
-  const handleStatusChange = useCallback(
-    (taskId: string, status: TaskStatus) => {
-      updateTaskMutation.mutate({ taskId, status });
-    },
-    [updateTaskMutation],
-  );
-
-  const renderTaskItem = useCallback(
-    ({ item }: { item: Task }) => (
-      <TaskCard
-        task={item}
-        onEdit={onOpenEditTask}
-        onDelete={openDeleteModal}
-        onStatusChange={handleStatusChange}
-        isUpdating={updatingTaskId === item.id}
-      />
-    ),
-    [handleStatusChange, onOpenEditTask, updatingTaskId],
-  );
+  function handleStatusChange(taskId: string, status: TaskStatus) {
+    patchTaskStatus(taskId, status);
+    statusTargetsRef.current.set(taskId, status);
+    void drainStatusSync(taskId);
+  }
 
   return (
     <View style={styles.root}>
@@ -258,8 +245,14 @@ export default function TasksScreen({
         <FlatList
           data={tasksQuery.isSuccess ? filteredTasks : []}
           keyExtractor={item => item.id}
-          extraData={updatingTaskId}
-          renderItem={renderTaskItem}
+          renderItem={({ item }) => (
+            <TaskCard
+              task={item}
+              onEdit={onOpenEditTask}
+              onDelete={openDeleteModal}
+              onStatusChange={handleStatusChange}
+            />
+          )}
           style={styles.taskList}
           contentContainerStyle={
             filteredTasks.length === 0 && !tasksQuery.isLoading

@@ -18,7 +18,6 @@ type TaskCardProps = {
   onEdit: (taskId: string) => void;
   onDelete: (task: Task) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
-  isUpdating?: boolean;
 };
 
 function TaskStatusCircle({
@@ -61,25 +60,16 @@ function TaskStatusCircle({
 function TaskStatusIndicator({
   status,
   label,
-  onPress,
-  disabled,
 }: {
   status: TaskStatus;
   label: string;
-  onPress: () => void;
-  disabled?: boolean;
 }) {
   const isDone = status === TaskStatus.Done;
   const isInProgress = status === TaskStatus.InProgress;
   const isReview = status === TaskStatus.Review;
 
   return (
-    <Pressable
-      style={({ pressed }) => [styles.statusColumn, pressed && styles.pressed]}
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityLabel={label}
-    >
+    <View style={styles.statusColumn}>
       <TaskStatusCircle status={status} />
       <Text
         style={[
@@ -92,7 +82,7 @@ function TaskStatusIndicator({
       >
         {label}
       </Text>
-    </Pressable>
+    </View>
   );
 }
 
@@ -114,7 +104,6 @@ function TaskCard({
   onEdit,
   onDelete,
   onStatusChange,
-  isUpdating = false,
 }: TaskCardProps) {
   const { t, language } = useLanguage();
   const isDone = task.status === TaskStatus.Done;
@@ -140,10 +129,6 @@ function TaskCard({
           : 'tasks.status.done';
 
   function handleToggleStatus() {
-    if (isUpdating) {
-      return;
-    }
-
     onStatusChange(task.id, getNextTaskStatus(task.status));
   }
 
@@ -164,38 +149,43 @@ function TaskCard({
       }
     >
       <View style={styles.row}>
-        <TaskStatusIndicator
-          status={task.status}
-          label={t(statusLabelKey)}
+        <Pressable
+          style={styles.mainTapArea}
+          accessibilityRole="button"
+          accessibilityLabel={t('recurring.status.toggle')}
+          accessibilityHint={t('recurring.status.toggleHint')}
           onPress={handleToggleStatus}
-          disabled={isUpdating}
-        />
+        >
+          <TaskStatusIndicator
+            status={task.status}
+            label={t(statusLabelKey)}
+          />
 
-        <View style={styles.content}>
-          <Text style={[styles.title, isDone && styles.titleDone]} numberOfLines={1}>
-            {task.title}
-          </Text>
-          <View style={styles.metaRow}>
-            {deadlineBadge ? <DeadlineBadge kind={deadlineBadge} /> : null}
-            <Text
-              style={[
-                styles.dateText,
-                deadlineBadge === 'overdue' && styles.dateTextOverdue,
-                deadlineBadge === 'thisWeek' && styles.dateTextWeek,
-              ]}
-              numberOfLines={1}
-            >
-              {displayDate}
+          <View style={styles.content}>
+            <Text style={[styles.title, isDone && styles.titleDone]} numberOfLines={1}>
+              {task.title}
             </Text>
+            <View style={styles.metaRow}>
+              {deadlineBadge ? <DeadlineBadge kind={deadlineBadge} /> : null}
+              <Text
+                style={[
+                  styles.dateText,
+                  deadlineBadge === 'overdue' && styles.dateTextOverdue,
+                  deadlineBadge === 'thisWeek' && styles.dateTextWeek,
+                ]}
+                numberOfLines={1}
+              >
+                {displayDate}
+              </Text>
+            </View>
           </View>
-        </View>
+        </Pressable>
 
         <View style={styles.actions}>
           <Pressable
             style={styles.actionButton}
             accessibilityLabel={t('tasks.edit')}
             onPress={() => onEdit(task.id)}
-            disabled={isUpdating}
           >
             <EditIcon size={14} />
           </Pressable>
@@ -203,7 +193,6 @@ function TaskCard({
             style={styles.actionButton}
             accessibilityLabel={t('tasks.delete')}
             onPress={() => onDelete(task)}
-            disabled={isUpdating}
           >
             <TrashIcon size={14} />
           </Pressable>
@@ -235,18 +224,23 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
     direction: 'ltr',
+  },
+  mainTapArea: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 2,
+    paddingRight: 4,
   },
   statusColumn: {
     width: 48,
     flexShrink: 0,
     alignItems: 'center',
     gap: 5,
-  },
-  pressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.97 }],
   },
   checkboxOuter: {
     width: 28,
@@ -337,7 +331,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     minWidth: 0,
-    gap: 5,
+    gap: 3,
   },
   title: {
     ...premiumType.title,

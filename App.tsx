@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
+import { TaskPriority } from '@/api/generated';
 import { authApi, authRequestInit } from '@/api/authClient';
 import QueryProvider from '@/api/QueryProvider';
 import { AuthProvider, useAuth } from '@/auth/AuthContext';
@@ -13,6 +14,10 @@ import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormMod
 import RecurringTasksScreen from '@/pages/recurring-tasks/RecurringTasksScreen';
 import TaskFormModal from '@/pages/tasks/TaskFormModal';
 import TasksScreen from '@/pages/tasks/TasksScreen';
+import {
+  defaultPriorityForCreateFilter,
+  type TaskFilterId,
+} from '@/pages/tasks/taskBoardConfig';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import CurrentUserBootstrap from '@/user/CurrentUserBootstrap';
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
@@ -29,8 +34,9 @@ function MainAppShell() {
   const [boardTaskForm, setBoardTaskForm] = useState<{
     visible: boolean;
     taskId: string | null;
+    initialPriority: TaskPriority | null;
     session: number;
-  }>({ visible: false, taskId: null, session: 0 });
+  }>({ visible: false, taskId: null, initialPriority: null, session: 0 });
 
   function openTaskForm(taskId: string | null) {
     setTaskForm(prev => ({
@@ -44,16 +50,29 @@ function MainAppShell() {
     setTaskForm(prev => ({ ...prev, visible: false, taskId: null }));
   }
 
-  function openBoardTaskForm(taskId: string | null) {
+  function openBoardTaskForm(
+    taskId: string | null,
+    initialPriority: TaskPriority | null = null,
+  ) {
     setBoardTaskForm(prev => ({
       visible: true,
       taskId,
+      initialPriority: taskId ? null : initialPriority,
       session: prev.session + 1,
     }));
   }
 
   function closeBoardTaskForm() {
-    setBoardTaskForm(prev => ({ ...prev, visible: false, taskId: null }));
+    setBoardTaskForm(prev => ({
+      ...prev,
+      visible: false,
+      taskId: null,
+      initialPriority: null,
+    }));
+  }
+
+  function openBoardTaskCreate(activeFilter: TaskFilterId) {
+    openBoardTaskForm(null, defaultPriorityForCreateFilter(activeFilter));
   }
 
   return (
@@ -67,7 +86,7 @@ function MainAppShell() {
         ) : null}
         {activeTab === 'tasks' ? (
           <TasksScreen
-            onOpenCreateTask={() => openBoardTaskForm(null)}
+            onOpenCreateTask={openBoardTaskCreate}
             onOpenEditTask={openBoardTaskForm}
           />
         ) : null}
@@ -100,6 +119,7 @@ function MainAppShell() {
         <TaskFormModal
           key={`board-task-form-${boardTaskForm.session}`}
           taskId={boardTaskForm.taskId}
+          initialPriority={boardTaskForm.initialPriority}
           onClose={closeBoardTaskForm}
           onSaved={() => {
             queryClient.invalidateQueries({ queryKey: ['tasks'] });

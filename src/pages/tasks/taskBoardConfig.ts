@@ -50,6 +50,14 @@ export function getPrioritySectionMeta(priority: TaskPriority) {
   return PRIORITY_FILTER_BY_VALUE.get(priority)!;
 }
 
+export function defaultPriorityForCreateFilter(filter: TaskFilterId): TaskPriority {
+  if (filter === 'all') {
+    return TaskPriority.ImportantUrgent;
+  }
+
+  return filter;
+}
+
 const STATUS_ORDER = TASK_STATUS_FLOW.map(column => column.status);
 
 export function getNextTaskStatus(current: TaskStatus): TaskStatus {

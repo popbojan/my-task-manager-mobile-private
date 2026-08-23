@@ -25,15 +25,20 @@ import { authApi } from '@/api/authClient';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import type { TranslationKey } from '@/i18n/locales/de';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
-import { TASK_STATUS_FLOW } from '@/pages/tasks/taskBoardConfig';
+import {
+  TASK_PRIORITY_SECTIONS,
+  TASK_STATUS_FLOW,
+} from '@/pages/tasks/taskBoardConfig';
 import {
   formatDeadlineInput,
+  getDefaultDeadlineInput,
   parseDeadlineInput,
 } from '@/pages/tasks/taskDeadlineUtils';
 import { shouldRetryApiQuery } from '@/utils/apiError';
 
 type TaskFormModalProps = {
   taskId: string | null;
+  initialPriority?: TaskPriorityType | null;
   onClose: () => void;
   onSaved: () => void;
 };
@@ -46,29 +51,32 @@ type FormState = {
   deadlineInput: string;
 };
 
-const PRIORITY_OPTIONS: {
-  value: TaskPriorityType;
-  labelKey: TranslationKey;
-}[] = [
-  { value: TaskPriority.None, labelKey: 'tasks.priority.none' },
-  { value: TaskPriority.Important, labelKey: 'tasks.priority.important' },
-  { value: TaskPriority.Urgent, labelKey: 'tasks.priority.urgent' },
-  {
-    value: TaskPriority.ImportantUrgent,
-    labelKey: 'tasks.priority.importantUrgent',
-  },
-];
+const PRIORITY_LABEL_KEYS: Record<TaskPriorityType, TranslationKey> = {
+  [TaskPriority.ImportantUrgent]: 'tasks.priority.importantUrgent',
+  [TaskPriority.Important]: 'tasks.priority.important',
+  [TaskPriority.Urgent]: 'tasks.priority.urgent',
+  [TaskPriority.None]: 'tasks.priority.none',
+};
 
 const INITIAL_FORM: FormState = {
   title: '',
   description: '',
   status: TaskStatus.Todo,
-  priority: TaskPriority.None,
-  deadlineInput: '',
+  priority: TaskPriority.ImportantUrgent,
+  deadlineInput: getDefaultDeadlineInput(),
 };
+
+function createInitialForm(initialPriority: TaskPriorityType = TaskPriority.ImportantUrgent): FormState {
+  return {
+    ...INITIAL_FORM,
+    priority: initialPriority,
+    deadlineInput: getDefaultDeadlineInput(),
+  };
+}
 
 export default function TaskFormModal({
   taskId,
+  initialPriority = TaskPriority.ImportantUrgent,
   onClose,
   onSaved,
 }: TaskFormModalProps) {
@@ -115,7 +123,7 @@ export default function TaskFormModal({
 
   useEffect(() => {
     if (!isEdit) {
-      setForm(INITIAL_FORM);
+      setForm(createInitialForm(initialPriority ?? TaskPriority.ImportantUrgent));
       setError(null);
       return;
     }
@@ -130,7 +138,7 @@ export default function TaskFormModal({
         deadlineInput: formatDeadlineInput(task.deadline),
       });
     }
-  }, [isEdit, taskQuery.data]);
+  }, [initialPriority, isEdit, taskQuery.data]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -195,9 +203,144 @@ export default function TaskFormModal({
 
   const availableHeight = windowHeight - keyboardHeight - insets.top - 12;
   const panelHeight = Math.min(
-    Math.round(windowHeight * 0.72),
-    560,
-    Math.max(360, availableHeight),
+    Math.round(windowHeight * 0.54),
+    440,
+    Math.max(320, availableHeight),
+  );
+  const useFormScroll = keyboardHeight > 0;
+
+  const formFields = (
+    <>
+      <View style={styles.fieldsTop}>
+        <View style={styles.fieldBlock}>
+          <Text style={styles.label}>{t('tasks.form.titleLabel')} *</Text>
+          <TextInput
+            style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
+            value={form.title}
+            onChangeText={title => {
+              setForm(current => ({ ...current, title }));
+              if (error && title.trim()) {
+                setError(null);
+              }
+            }}
+            placeholder={t('tasks.form.titlePlaceholder')}
+            placeholderTextColor={recurringTheme.textMuted}
+            autoFocus
+          />
+        </View>
+
+        <View style={[styles.fieldBlock, styles.descriptionBlock]}>
+          <Text style={styles.label}>{t('tasks.form.descriptionLabel')}</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            value={form.description}
+            onChangeText={description =>
+              setForm(current => ({ ...current, description }))
+            }
+            placeholder={t('tasks.form.descriptionPlaceholder')}
+            placeholderTextColor={recurringTheme.textMuted}
+            multiline
+            textAlignVertical="top"
+          />
+        </View>
+
+        <View style={styles.fieldBlock}>
+          <Text style={styles.label}>{t('tasks.form.statusLabel')}</Text>
+          <View style={styles.statusRow}>
+            {TASK_STATUS_FLOW.map(({ status, labelKey }) => {
+              const active = form.status === status;
+
+              return (
+                <Pressable
+                  key={status}
+                  style={[styles.compactChip, active && styles.chipActive]}
+                  onPress={() => setForm(current => ({ ...current, status }))}
+                >
+                  <Text
+                    style={[styles.compactChipText, active && styles.chipTextActive]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.75}
+                  >
+                    {t(labelKey)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={styles.fieldBlock}>
+          <Text style={styles.label}>{t('tasks.form.priorityLabel')}</Text>
+          <View style={styles.priorityRow}>
+            {TASK_PRIORITY_SECTIONS.map(priority => {
+              const active = form.priority === priority;
+
+              return (
+                <Pressable
+                  key={priority}
+                  style={[styles.compactChip, active && styles.chipActive]}
+                  onPress={() => setForm(current => ({ ...current, priority }))}
+                >
+                  <Text
+                    style={[styles.compactChipText, active && styles.chipTextActive]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.65}
+                  >
+                    {t(PRIORITY_LABEL_KEYS[priority])}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={styles.deadlineRow}>
+          <Text style={styles.deadlineLabel}>{t('tasks.form.deadlineLabel')}</Text>
+          <TextInput
+            style={[styles.input, styles.deadlineInput]}
+            value={form.deadlineInput}
+            onChangeText={deadlineInput =>
+              setForm(current => ({ ...current, deadlineInput }))
+            }
+            placeholder={t('tasks.form.deadlinePlaceholder')}
+            placeholderTextColor={recurringTheme.textMuted}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
+      </View>
+
+      <View style={styles.footer}>
+        <View style={styles.errorSlot}>
+          {error ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.error} numberOfLines={2}>
+                {error}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
+        <View style={styles.actions}>
+          <Pressable style={styles.cancelButton} onPress={onClose}>
+            <Text style={styles.cancelText}>{t('common.cancel')}</Text>
+          </Pressable>
+          <Pressable
+            style={styles.saveButton}
+            onPress={handleSavePress}
+            disabled={saveMutation.isPending}
+          >
+            {saveMutation.isPending ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.saveText}>{t('tasks.form.save')}</Text>
+            )}
+          </Pressable>
+        </View>
+      </View>
+    </>
   );
 
   return (
@@ -232,132 +375,17 @@ export default function TaskFormModal({
                 <ActivityIndicator color={recurringTheme.accentBright} />
                 <Text style={styles.loadingText}>{t('tasks.loadingTask')}</Text>
               </View>
-            ) : (
+            ) : useFormScroll ? (
               <ScrollView
                 style={styles.scroll}
                 contentContainerStyle={styles.formBody}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
               >
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>{t('tasks.form.titleLabel')} *</Text>
-                  <TextInput
-                    style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
-                    value={form.title}
-                    onChangeText={title => {
-                      setForm(current => ({ ...current, title }));
-                      if (error && title.trim()) {
-                        setError(null);
-                      }
-                    }}
-                    placeholder={t('tasks.form.titlePlaceholder')}
-                    placeholderTextColor={recurringTheme.textMuted}
-                    autoFocus
-                  />
-                </View>
-
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>{t('tasks.form.descriptionLabel')}</Text>
-                  <TextInput
-                    style={[styles.input, styles.textArea]}
-                    value={form.description}
-                    onChangeText={description =>
-                      setForm(current => ({ ...current, description }))
-                    }
-                    placeholder={t('tasks.form.descriptionPlaceholder')}
-                    placeholderTextColor={recurringTheme.textMuted}
-                    multiline
-                    numberOfLines={3}
-                    textAlignVertical="top"
-                  />
-                </View>
-
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>{t('tasks.form.statusLabel')}</Text>
-                  <View style={styles.chipGrid}>
-                    {TASK_STATUS_FLOW.map(({ status, labelKey }) => {
-                      const active = form.status === status;
-
-                      return (
-                        <Pressable
-                          key={status}
-                          style={[styles.chip, active && styles.chipActive]}
-                          onPress={() => setForm(current => ({ ...current, status }))}
-                        >
-                          <Text
-                            style={[styles.chipText, active && styles.chipTextActive]}
-                            numberOfLines={1}
-                          >
-                            {t(labelKey)}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                </View>
-
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>{t('tasks.form.priorityLabel')}</Text>
-                  <View style={styles.chipGrid}>
-                    {PRIORITY_OPTIONS.map(({ value, labelKey }) => {
-                      const active = form.priority === value;
-
-                      return (
-                        <Pressable
-                          key={value}
-                          style={[styles.chip, active && styles.chipActive]}
-                          onPress={() => setForm(current => ({ ...current, priority: value }))}
-                        >
-                          <Text
-                            style={[styles.chipText, active && styles.chipTextActive]}
-                            numberOfLines={1}
-                          >
-                            {t(labelKey)}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                </View>
-
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>{t('tasks.form.deadlineLabel')}</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={form.deadlineInput}
-                    onChangeText={deadlineInput =>
-                      setForm(current => ({ ...current, deadlineInput }))
-                    }
-                    placeholder={t('tasks.form.deadlinePlaceholder')}
-                    placeholderTextColor={recurringTheme.textMuted}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                  />
-                </View>
-
-                {error ? (
-                  <View style={styles.errorBox}>
-                    <Text style={styles.error}>{error}</Text>
-                  </View>
-                ) : null}
-
-                <View style={styles.actions}>
-                  <Pressable style={styles.cancelButton} onPress={onClose}>
-                    <Text style={styles.cancelText}>{t('common.cancel')}</Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.saveButton}
-                    onPress={handleSavePress}
-                    disabled={saveMutation.isPending}
-                  >
-                    {saveMutation.isPending ? (
-                      <ActivityIndicator color="#fff" />
-                    ) : (
-                      <Text style={styles.saveText}>{t('tasks.form.save')}</Text>
-                    )}
-                  </Pressable>
-                </View>
+                {formFields}
               </ScrollView>
+            ) : (
+              <View style={styles.formBody}>{formFields}</View>
             )}
           </View>
         </SafeAreaView>
@@ -397,8 +425,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: 10,
+    paddingBottom: 6,
     borderBottomWidth: 1,
     borderBottomColor: recurringTheme.cardBorder,
   },
@@ -450,13 +478,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   formBody: {
+    flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 16,
-    gap: 12,
+    paddingTop: 8,
+    paddingBottom: 10,
+    justifyContent: 'space-between',
+  },
+  fieldsTop: {
+    flex: 1,
+    minHeight: 0,
+    gap: 6,
   },
   fieldBlock: {
-    gap: 6,
+    gap: 3,
+  },
+  descriptionBlock: {
+    flex: 1,
+    minHeight: 0,
   },
   label: {
     color: recurringTheme.textSecondary,
@@ -468,7 +506,7 @@ const styles = StyleSheet.create({
     borderColor: recurringTheme.cardBorder,
     borderRadius: 12,
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 8,
     color: recurringTheme.textPrimary,
     fontSize: 15,
     backgroundColor: recurringTheme.surfaceInset,
@@ -477,34 +515,68 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(239, 68, 68, 0.45)',
   },
   textArea: {
-    minHeight: 88,
-    paddingTop: 10,
+    flex: 1,
+    minHeight: 96,
+    paddingTop: 8,
     lineHeight: 20,
   },
-  chipGrid: {
+  deadlineRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
+    alignItems: 'center',
+    gap: 8,
   },
-  chip: {
+  deadlineLabel: {
+    color: recurringTheme.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+    flexShrink: 0,
+  },
+  deadlineInput: {
+    flex: 1,
+    minWidth: 0,
+    fontSize: 12,
+    paddingVertical: 6,
     paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 10,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  priorityRow: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  compactChip: {
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: 3,
+    paddingVertical: 5,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
     backgroundColor: recurringTheme.surfaceInset,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactChipText: {
+    color: recurringTheme.textMuted,
+    fontSize: 9,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   chipActive: {
     borderColor: recurringTheme.cardBorderAccent,
     backgroundColor: 'rgba(34, 197, 94, 0.12)',
   },
-  chipText: {
-    color: recurringTheme.textMuted,
-    fontSize: 11,
-    fontWeight: '700',
-  },
   chipTextActive: {
     color: recurringTheme.accentBright,
+  },
+  footer: {
+    gap: 6,
+    marginTop: 4,
+  },
+  errorSlot: {
+    minHeight: 0,
   },
   errorBox: {
     borderRadius: 10,
@@ -523,7 +595,6 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 4,
   },
   cancelButton: {
     flex: 1,

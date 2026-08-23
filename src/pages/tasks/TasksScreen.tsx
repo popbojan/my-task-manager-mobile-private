@@ -43,7 +43,7 @@ function patchTaskInCache(
 }
 
 type TasksScreenProps = {
-  onOpenCreateTask: () => void;
+  onOpenCreateTask: (activeFilter: TaskFilterId) => void;
   onOpenEditTask: (taskId: string) => void;
 };
 
@@ -220,7 +220,7 @@ export default function TasksScreen({
                 <Pressable
                   style={styles.addFab}
                   accessibilityLabel={t('tasks.addTask')}
-                  onPress={onOpenCreateTask}
+                  onPress={() => onOpenCreateTask(activeFilter)}
                 >
                   <PlusIcon size={14} color="#fff" />
                 </Pressable>

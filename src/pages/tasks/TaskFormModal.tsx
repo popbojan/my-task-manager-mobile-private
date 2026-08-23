@@ -14,14 +14,16 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   TaskPriority,
   TaskStatus,
+  type Task,
   type TaskPriority as TaskPriorityType,
   type TaskStatus as TaskStatusType,
 } from '@/api/generated';
 import { authApi } from '@/api/authClient';
+import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import type { TranslationKey } from '@/i18n/locales/de';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
@@ -74,6 +76,20 @@ function createInitialForm(initialPriority: TaskPriorityType = TaskPriority.Impo
   };
 }
 
+function taskToFormState(task: Task): FormState {
+  return {
+    title: task.title,
+    description: task.description ?? '',
+    status: task.status,
+    priority: task.priority,
+    deadlineInput: formatDeadlineInput(task.deadline),
+  };
+}
+
+function tasksListQueryKey(accessToken: string | null) {
+  return ['tasks', accessToken] as const;
+}
+
 export default function TaskFormModal({
   taskId,
   initialPriority = TaskPriority.ImportantUrgent,
@@ -81,6 +97,8 @@ export default function TaskFormModal({
   onSaved,
 }: TaskFormModalProps) {
   const { t } = useLanguage();
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isEdit = taskId !== null;
@@ -91,8 +109,10 @@ export default function TaskFormModal({
   const taskQuery = useQuery({
     queryKey: ['task', taskId],
     queryFn: () => authApi.getTask({ taskId: taskId! }),
-    enabled: isEdit,
+    enabled: isEdit && !!taskId,
     retry: shouldRetryApiQuery,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   useEffect(() => {
@@ -128,17 +148,31 @@ export default function TaskFormModal({
       return;
     }
 
-    if (taskQuery.data) {
-      const task = taskQuery.data;
-      setForm({
-        title: task.title,
-        description: task.description ?? '',
-        status: task.status,
-        priority: task.priority,
-        deadlineInput: formatDeadlineInput(task.deadline),
-      });
+    if (!taskId) {
+      return;
     }
-  }, [initialPriority, isEdit, taskQuery.data]);
+
+    const listTask = queryClient
+      .getQueryData<Task[]>(tasksListQueryKey(accessToken))
+      ?.find(task => task.id === taskId);
+    const fetchedTask = taskQuery.data;
+
+    if (!listTask && !fetchedTask) {
+      return;
+    }
+
+    const task = fetchedTask
+      ? listTask
+        ? {
+            ...fetchedTask,
+            status: listTask.status,
+            priority: listTask.priority,
+          }
+        : fetchedTask
+      : listTask!;
+
+    setForm(taskToFormState(task));
+  }, [accessToken, initialPriority, isEdit, queryClient, taskId, taskQuery.data]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {

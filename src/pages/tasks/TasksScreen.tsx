@@ -84,6 +84,9 @@ export default function TasksScreen({
     queryClient.setQueryData<Task[]>(tasksQueryKey(accessToken), (old = []) =>
       patchTaskInCache(old, taskId, { status }),
     );
+    queryClient.setQueryData<Task>(['task', taskId], old =>
+      old ? { ...old, status } : old,
+    );
   }
 
   async function drainStatusSync(taskId: string) {
@@ -103,6 +106,7 @@ export default function TasksScreen({
             updateTaskRequest: { status },
           });
           patchTaskStatus(taskId, updated.status);
+          queryClient.setQueryData<Task>(['task', taskId], updated);
 
           if (statusTargetsRef.current.get(taskId) === status) {
             statusTargetsRef.current.delete(taskId);

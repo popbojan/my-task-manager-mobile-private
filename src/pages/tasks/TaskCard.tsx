@@ -21,6 +21,43 @@ type TaskCardProps = {
   isUpdating?: boolean;
 };
 
+function TaskStatusCircle({
+  status,
+}: {
+  status: TaskStatus;
+}) {
+  const isDone = status === TaskStatus.Done;
+  const isInProgress = status === TaskStatus.InProgress;
+  const isReview = status === TaskStatus.Review;
+
+  if (isDone) {
+    return (
+      <View style={styles.checkboxDoneFull}>
+        <Text style={styles.checkmarkDone}>✓</Text>
+      </View>
+    );
+  }
+
+  if (isReview) {
+    return (
+      <View style={styles.checkboxOuterReview}>
+        <Text style={styles.reviewEye}>👁</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View
+      style={[
+        styles.checkboxOuter,
+        isInProgress && styles.checkboxOuterProgress,
+      ]}
+    >
+      <View style={[styles.checkbox, isInProgress && styles.checkboxProgress]} />
+    </View>
+  );
+}
+
 function TaskStatusIndicator({
   status,
   label,
@@ -43,22 +80,7 @@ function TaskStatusIndicator({
       disabled={disabled}
       accessibilityLabel={label}
     >
-      <View
-        style={[
-          styles.statusRingOuter,
-          isInProgress && styles.statusRingOuterProgress,
-          isReview && styles.statusRingOuterReview,
-          isDone && styles.statusRingOuterDone,
-        ]}
-      >
-        {isInProgress ? (
-          <View style={styles.halfFillWrap}>
-            <View style={styles.halfFill} />
-          </View>
-        ) : null}
-        {isReview ? <Text style={styles.reviewEye}>👁</Text> : null}
-        {isDone ? <Text style={styles.doneMark}>✓</Text> : null}
-      </View>
+      <TaskStatusCircle status={status} />
       <Text
         style={[
           styles.statusLabel,
@@ -207,48 +229,74 @@ const styles = StyleSheet.create({
     opacity: 0.85,
     transform: [{ scale: 0.97 }],
   },
-  statusRingOuter: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.28)',
+  checkboxOuter: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: 'rgba(82, 183, 136, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(82, 183, 136, 0.22)',
   },
-  statusRingOuterProgress: {
-    borderColor: recurringTheme.streakOrange,
-    backgroundColor: 'rgba(249, 115, 22, 0.08)',
+  checkboxOuterProgress: {
+    backgroundColor: 'rgba(212, 168, 67, 0.12)',
+    borderColor: 'rgba(212, 168, 67, 0.32)',
+    shadowColor: recurringTheme.gold,
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 0 },
   },
-  statusRingOuterReview: {
-    borderColor: '#A855F7',
-    backgroundColor: 'rgba(168, 85, 247, 0.12)',
+  checkboxOuterReview: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(168, 85, 247, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.42)',
+    shadowColor: '#A855F7',
+    shadowOpacity: 0.22,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 0 },
   },
-  statusRingOuterDone: {
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
     borderColor: recurringTheme.accentBright,
-    backgroundColor: recurringTheme.accentDark,
+    backgroundColor: 'transparent',
   },
-  halfFillWrap: {
-    ...StyleSheet.absoluteFill,
-    overflow: 'hidden',
+  checkboxProgress: {
+    borderWidth: 0,
+    backgroundColor: recurringTheme.goldBright,
   },
-  halfFill: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: '50%',
-    backgroundColor: recurringTheme.streakOrange,
+  checkboxDoneFull: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: recurringTheme.accentBright,
+    borderWidth: 2,
+    borderColor: '#b7f7d8',
+    shadowColor: recurringTheme.accentBright,
+    shadowOpacity: 0.72,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 0 },
+  },
+  checkmarkDone: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '900',
+    lineHeight: 16,
+    marginTop: -1,
   },
   reviewEye: {
-    fontSize: 14,
-  },
-  doneMark: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 13,
+    lineHeight: 15,
   },
   statusLabel: {
     fontSize: 8,
@@ -259,7 +307,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   statusLabelProgress: {
-    color: recurringTheme.streakOrange,
+    color: recurringTheme.goldBright,
   },
   statusLabelReview: {
     color: '#C084FC',

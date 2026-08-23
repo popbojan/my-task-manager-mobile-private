@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
-export type PremiumAccent = 'none' | 'green' | 'gold' | 'red' | 'success';
+export type PremiumAccent = 'none' | 'green' | 'gold' | 'red' | 'success' | 'review';
 
 type PremiumSurfaceProps = {
   children: ReactNode;
@@ -20,6 +20,7 @@ const ACCENT_BORDER: Record<PremiumAccent, string> = {
   gold: 'rgba(212, 168, 67, 0.3)',
   red: 'rgba(239, 68, 68, 0.28)',
   success: 'rgba(110, 207, 170, 0.72)',
+  review: 'rgba(192, 132, 252, 0.28)',
 };
 
 const ACCENT_GLOW: Record<PremiumAccent, string | undefined> = {
@@ -28,6 +29,7 @@ const ACCENT_GLOW: Record<PremiumAccent, string | undefined> = {
   gold: recurringTheme.gold,
   red: recurringTheme.fireRed,
   success: recurringTheme.accentBright,
+  review: '#C084FC',
 };
 
 export default function PremiumSurface({

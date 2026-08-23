@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { TaskStatus, type Task } from '@/api/generated';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import { EditIcon, MoreIcon } from '@/pages/recurring-tasks/premium/TabIcons';
+import { EditIcon, TrashIcon } from '@/pages/recurring-tasks/premium/TabIcons';
 import PremiumSurface from '@/pages/recurring-tasks/premium/PremiumSurface';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { getNextTaskStatus } from '@/pages/tasks/taskBoardConfig';
@@ -147,18 +147,6 @@ function TaskCard({
     onStatusChange(task.id, getNextTaskStatus(task.status));
   }
 
-  function handleMorePress() {
-    Alert.alert(task.title, undefined, [
-      { text: t('tasks.edit'), onPress: () => onEdit(task.id) },
-      {
-        text: t('tasks.delete'),
-        style: 'destructive',
-        onPress: () => onDelete(task),
-      },
-      { text: t('common.cancel'), style: 'cancel' },
-    ]);
-  }
-
   return (
     <PremiumSurface
       accent={cardAccent}
@@ -209,15 +197,15 @@ function TaskCard({
             onPress={() => onEdit(task.id)}
             disabled={isUpdating}
           >
-            <EditIcon size={15} />
+            <EditIcon size={14} />
           </Pressable>
           <Pressable
             style={styles.actionButton}
             accessibilityLabel={t('tasks.delete')}
-            onPress={handleMorePress}
+            onPress={() => onDelete(task)}
             disabled={isUpdating}
           >
-            <MoreIcon size={15} />
+            <TrashIcon size={14} />
           </Pressable>
         </View>
       </View>
@@ -406,9 +394,8 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
-    gap: 4,
+    gap: 2,
     flexShrink: 0,
-    marginLeft: 'auto',
   },
   actionButton: {
     width: 28,

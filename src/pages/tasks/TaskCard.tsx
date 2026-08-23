@@ -118,10 +118,17 @@ function TaskCard({
 }: TaskCardProps) {
   const { t, language } = useLanguage();
   const isDone = task.status === TaskStatus.Done;
+  const isInProgress = task.status === TaskStatus.InProgress;
+  const isReview = task.status === TaskStatus.Review;
   const deadlineBadge = getDeadlineBadge(task.deadline);
   const displayDate = formatTaskDateTime(getTaskDisplayDate(task), language);
-  const cardAccent =
-    isDone ? 'success' : deadlineBadge === 'overdue' ? 'red' : 'none';
+  const cardAccent = isDone
+    ? 'success'
+    : isInProgress
+      ? 'gold'
+      : isReview
+        ? 'review'
+        : 'none';
 
   const statusLabelKey =
     task.status === TaskStatus.Todo
@@ -155,10 +162,18 @@ function TaskCard({
   return (
     <PremiumSurface
       accent={cardAccent}
-      compact
-      padding={12}
-      radius={recurringTheme.cardRadius}
-      style={isDone ? styles.cardDone : undefined}
+      compact={!isDone}
+      padding={8}
+      radius={12}
+      style={
+        isDone
+          ? styles.doneShell
+          : isInProgress
+            ? styles.progressShell
+            : isReview
+              ? styles.reviewShell
+              : undefined
+      }
     >
       <View style={styles.row}>
         <TaskStatusIndicator
@@ -213,6 +228,22 @@ function TaskCard({
 export default memo(TaskCard);
 
 const styles = StyleSheet.create({
+  doneShell: {
+    backgroundColor: 'rgba(82, 183, 136, 0.12)',
+    shadowOpacity: 0.42,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  progressShell: {
+    shadowOpacity: 0.14,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  reviewShell: {
+    shadowOpacity: 0.14,
+    shadowRadius: 6,
+    elevation: 1,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -380,16 +411,13 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   actionButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.04)',
     borderWidth: 1,
-    borderColor: recurringTheme.cardBorder,
-  },
-  cardDone: {
-    opacity: 0.9,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
   },
 });

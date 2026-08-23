@@ -69,8 +69,6 @@ export default function TasksScreen({
   }>({ visible: false, task: null });
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
   const [taskOrderIds, setTaskOrderIds] = useState<string[]>([]);
-  const [listViewportHeight, setListViewportHeight] = useState(0);
-  const [listContentHeight, setListContentHeight] = useState(0);
   const previousFilterRef = useRef<TaskFilterId>(activeFilter);
 
   const tasksQuery = useQuery({
@@ -157,9 +155,6 @@ export default function TasksScreen({
     () => orderTasksByIds(filteredByPriority, taskOrderIds),
     [filteredByPriority, taskOrderIds],
   );
-
-  const listScrollEnabled =
-    listViewportHeight === 0 || listContentHeight > listViewportHeight + 1;
 
   const deleteErrorMessage = deleteTaskMutation.isError
     ? t('tasks.deleteError')
@@ -266,22 +261,13 @@ export default function TasksScreen({
           extraData={updatingTaskId}
           renderItem={renderTaskItem}
           style={styles.taskList}
-          contentContainerStyle={[
-            styles.taskListContent,
+          contentContainerStyle={
             filteredTasks.length === 0 && !tasksQuery.isLoading
               ? styles.taskListContentEmpty
-              : null,
-          ]}
+              : styles.taskListContent
+          }
           showsVerticalScrollIndicator={false}
-          scrollEnabled={listScrollEnabled}
-          bounces={listScrollEnabled}
           nestedScrollEnabled
-          onLayout={event => {
-            setListViewportHeight(event.nativeEvent.layout.height);
-          }}
-          onContentSizeChange={(_, height) => {
-            setListContentHeight(height);
-          }}
           ItemSeparatorComponent={TaskSeparator}
           ListEmptyComponent={
             tasksQuery.isLoading
@@ -378,19 +364,19 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 0,
     paddingHorizontal: 16,
-    paddingTop: 6,
     gap: 5,
     paddingBottom: 4,
   },
   bodyFixed: {
     gap: 5,
+    flexShrink: 0,
+    paddingTop: 6,
   },
   taskList: {
     flex: 1,
     minHeight: 0,
   },
   taskListContent: {
-    flexGrow: 1,
     paddingBottom: 2,
   },
   taskListContentEmpty: {

@@ -172,7 +172,7 @@ function TaskCard({
         />
 
         <View style={styles.content}>
-          <Text style={[styles.title, isDone && styles.titleDone]} numberOfLines={2}>
+          <Text style={[styles.title, isDone && styles.titleDone]} numberOfLines={1}>
             {task.title}
           </Text>
           <View style={styles.metaRow}>
@@ -340,10 +340,9 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   title: {
-    ...premiumType.taskTitle,
+    ...premiumType.title,
     color: recurringTheme.textPrimary,
-    fontSize: 16,
-    lineHeight: 20,
+    fontSize: 14,
   },
   titleDone: {
     color: recurringTheme.textSecondary,

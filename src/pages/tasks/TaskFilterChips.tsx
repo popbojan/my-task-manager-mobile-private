@@ -62,7 +62,6 @@ export default function TaskFilterChips({
 const styles = StyleSheet.create({
   row: {
     gap: 8,
-    paddingHorizontal: 16,
     paddingBottom: 2,
   },
   chip: {

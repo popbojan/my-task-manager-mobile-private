@@ -56,8 +56,8 @@ export default function TasksScreen({
 }: TasksScreenProps) {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const heroHeight = Math.min(
-    Math.max(Math.round(windowHeight * 0.17), 132),
-    156,
+    Math.max(Math.round(windowHeight * 0.21), 175),
+    198,
   );
   const { t } = useLanguage();
   const { accessToken } = useAuth();
@@ -200,25 +200,6 @@ export default function TasksScreen({
   const listHeader = useMemo(
     () => (
       <View style={styles.listHeader}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t('tasks.sectionTitle')}</Text>
-          <View style={styles.sectionHeaderRight}>
-            <View style={styles.countBadge}>
-              <Text style={styles.countBadgeText}>{displayTasks.length}</Text>
-            </View>
-            <Pressable
-              style={({ pressed }) => [
-                styles.addButton,
-                pressed && styles.addButtonPressed,
-              ]}
-              accessibilityLabel={t('tasks.addTask')}
-              onPress={onOpenCreateTask}
-            >
-              <PlusIcon size={16} color="#fff" />
-            </Pressable>
-          </View>
-        </View>
-
         <TaskFilterChips
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
@@ -238,8 +219,6 @@ export default function TasksScreen({
     ),
     [
       activeFilter,
-      displayTasks.length,
-      onOpenCreateTask,
       t,
       tasksQuery.isError,
       tasksQuery.isLoading,
@@ -276,27 +255,47 @@ export default function TasksScreen({
 
         <SafeAreaView edges={['top']} style={styles.heroSafeArea}>
           <AppBrandHeader />
+
+          <View style={styles.heroFooter}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('tasks.sectionTitle')}</Text>
+              <View style={styles.sectionHeaderRight}>
+                <View style={styles.sectionBadge}>
+                  <Text style={styles.sectionBadgeText}>{displayTasks.length}</Text>
+                </View>
+                <Pressable
+                  style={styles.addFab}
+                  accessibilityLabel={t('tasks.addTask')}
+                  onPress={onOpenCreateTask}
+                >
+                  <PlusIcon size={14} color="#fff" />
+                </Pressable>
+              </View>
+            </View>
+          </View>
         </SafeAreaView>
       </View>
 
-      <FlatList
-        data={tasksQuery.isSuccess ? filteredTasks : []}
-        keyExtractor={item => item.id}
-        extraData={updatingTaskId}
-        renderItem={renderTaskItem}
-        style={styles.taskList}
-        contentContainerStyle={[
-          styles.taskListContent,
-          filteredTasks.length === 0 && !tasksQuery.isLoading
-            ? styles.taskListContentEmpty
-            : null,
-        ]}
-        showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={TaskSeparator}
-        ListHeaderComponent={listHeader}
-        ListEmptyComponent={listEmpty}
-        keyboardShouldPersistTaps="handled"
-      />
+      <View style={styles.body}>
+        <FlatList
+          data={tasksQuery.isSuccess ? filteredTasks : []}
+          keyExtractor={item => item.id}
+          extraData={updatingTaskId}
+          renderItem={renderTaskItem}
+          style={styles.taskList}
+          contentContainerStyle={[
+            styles.taskListContent,
+            filteredTasks.length === 0 && !tasksQuery.isLoading
+              ? styles.taskListContentEmpty
+              : null,
+          ]}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={TaskSeparator}
+          ListHeaderComponent={listHeader}
+          ListEmptyComponent={listEmpty}
+          keyboardShouldPersistTaps="handled"
+        />
+      </View>
 
       <DeleteTaskModal
         visible={deleteModal.visible}
@@ -366,7 +365,18 @@ const styles = StyleSheet.create({
   },
   heroSafeArea: {
     flex: 1,
+    gap: 4,
+  },
+  heroFooter: {
+    flex: 1,
     justifyContent: 'flex-end',
+    paddingHorizontal: 16,
+    paddingBottom: 6,
+  },
+  body: {
+    flex: 1,
+    minHeight: 0,
+    paddingHorizontal: 16,
     paddingBottom: 4,
   },
   taskList: {
@@ -374,8 +384,8 @@ const styles = StyleSheet.create({
     minHeight: 0,
   },
   taskListContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
+    flexGrow: 1,
+    paddingBottom: 8,
   },
   taskListContentEmpty: {
     flexGrow: 1,
@@ -383,66 +393,56 @@ const styles = StyleSheet.create({
   listHeader: {
     direction: 'ltr',
     gap: 10,
-    paddingTop: 4,
-    paddingBottom: 8,
-    marginHorizontal: -16,
+    paddingBottom: 4,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    gap: 12,
   },
   sectionTitle: {
-    ...premiumType.sectionTitle,
+    ...premiumType.overline,
     color: recurringTheme.accentBright,
-    flex: 1,
-    fontSize: 14,
-    letterSpacing: 2,
+    fontSize: 10,
   },
   sectionHeaderRight: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  countBadge: {
-    minWidth: 36,
-    height: 36,
-    paddingHorizontal: 8,
-    borderRadius: 18,
+  sectionBadge: {
+    minWidth: 24,
+    height: 24,
+    paddingHorizontal: 7,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: recurringTheme.surfaceInset,
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorder,
+  },
+  sectionBadgeText: {
+    color: recurringTheme.textSecondary,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  addFab: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: recurringTheme.accentDark,
     borderWidth: 1,
     borderColor: recurringTheme.cardBorderAccent,
-  },
-  countBadgeText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  addButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: recurringTheme.accentBright,
-    borderWidth: 1,
-    borderColor: recurringTheme.cardBorderAccent,
-    shadowColor: recurringTheme.accentBright,
+    shadowColor: recurringTheme.accent,
     shadowOpacity: 0.35,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
-  addButtonPressed: {
-    transform: [{ scale: 0.96 }],
-    opacity: 0.92,
-  },
   taskSeparator: {
-    height: 8,
+    height: 5,
   },
   loadingBlock: {
     alignItems: 'center',
@@ -457,7 +457,6 @@ const styles = StyleSheet.create({
     color: recurringTheme.fireRedBright,
     fontSize: 13,
     textAlign: 'center',
-    paddingHorizontal: 16,
   },
   emptyText: {
     color: recurringTheme.textMuted,

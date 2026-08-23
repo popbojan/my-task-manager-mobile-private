@@ -85,3 +85,10 @@ export function formatDeadlineInput(date: Date | null | undefined): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+
+export function getDefaultDeadlineInput(now = new Date()): string {
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(19, 0, 0, 0);
+  return formatDeadlineInput(tomorrow);
+}

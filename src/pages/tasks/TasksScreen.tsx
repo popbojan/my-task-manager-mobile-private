@@ -219,7 +219,7 @@ export default function TasksScreen({
               <Text style={styles.sectionTitle}>{t('tasks.sectionTitle')}</Text>
               <View style={styles.sectionHeaderRight}>
                 <View style={styles.sectionBadge}>
-                  <Text style={styles.sectionBadgeText}>{displayTasks.length}</Text>
+                  <Text style={styles.sectionBadgeText}>{filteredByPriority.length}</Text>
                 </View>
                 <Pressable
                   style={styles.addFab}

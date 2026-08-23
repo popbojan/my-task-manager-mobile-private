@@ -29,6 +29,27 @@ export const TASK_FILTERS: {
   { id: TaskPriority.None, labelKey: 'tasks.filter.other', icon: 'doc' },
 ];
 
+export const TASK_PRIORITY_SECTIONS: TaskPriority[] = [
+  TaskPriority.ImportantUrgent,
+  TaskPriority.Important,
+  TaskPriority.Urgent,
+  TaskPriority.None,
+];
+
+export type TaskListItem =
+  | { kind: 'section'; priority: TaskPriority; id: string }
+  | { kind: 'task'; task: Task; id: string };
+
+const PRIORITY_FILTER_BY_VALUE = new Map(
+  TASK_FILTERS.filter(
+    (filter): filter is typeof filter & { id: TaskPriority } => filter.id !== 'all',
+  ).map(filter => [filter.id, filter]),
+);
+
+export function getPrioritySectionMeta(priority: TaskPriority) {
+  return PRIORITY_FILTER_BY_VALUE.get(priority)!;
+}
+
 const STATUS_ORDER = TASK_STATUS_FLOW.map(column => column.status);
 
 export function getNextTaskStatus(current: TaskStatus): TaskStatus {
@@ -92,7 +113,12 @@ export function orderTasksByIds(tasks: Task[], orderedIds: string[]): Task[] {
 export function syncTaskOrderIds(
   previousOrder: string[],
   tasks: Task[],
+  filter: TaskFilterId = 'all',
 ): string[] {
+  if (filter === 'all') {
+    return buildGroupedTaskOrder(previousOrder, tasks);
+  }
+
   const taskIds = new Set(tasks.map(task => task.id));
   const kept = previousOrder.filter(id => taskIds.has(id));
   const keptSet = new Set(kept);
@@ -105,4 +131,76 @@ export function syncTaskOrderIds(
   }
 
   return [...kept, ...newIds];
+}
+
+function buildGroupedTaskOrder(previousOrder: string[], tasks: Task[]): string[] {
+  const taskById = new Map(tasks.map(task => [task.id, task]));
+
+  return TASK_PRIORITY_SECTIONS.flatMap(priority => {
+    const sectionIds = new Set(
+      tasks.filter(task => task.priority === priority).map(task => task.id),
+    );
+    const kept = previousOrder.filter(id => {
+      const task = taskById.get(id);
+      return task?.priority === priority && sectionIds.has(id);
+    });
+    const keptSet = new Set(kept);
+    const newIds = sortTasksStable(
+      tasks.filter(task => task.priority === priority && !keptSet.has(task.id)),
+    ).map(task => task.id);
+
+    return [...kept, ...newIds];
+  });
+}
+
+export function buildInitialTaskOrder(
+  tasks: Task[],
+  filter: TaskFilterId,
+): string[] {
+  if (filter === 'all') {
+    return buildGroupedTaskOrder([], tasks);
+  }
+
+  return sortTasksStable(tasks).map(task => task.id);
+}
+
+export function buildTaskListItems(
+  tasks: Task[],
+  orderedIds: string[],
+  filter: TaskFilterId,
+): TaskListItem[] {
+  const orderedTasks = orderTasksByIds(tasks, orderedIds);
+
+  if (filter !== 'all') {
+    return orderedTasks.map(task => ({
+      kind: 'task',
+      task,
+      id: task.id,
+    }));
+  }
+
+  const items: TaskListItem[] = [];
+
+  for (const priority of TASK_PRIORITY_SECTIONS) {
+    const sectionTasks = orderedTasks.filter(task => task.priority === priority);
+    if (sectionTasks.length === 0) {
+      continue;
+    }
+
+    items.push({
+      kind: 'section',
+      priority,
+      id: `section-${priority}`,
+    });
+
+    for (const task of sectionTasks) {
+      items.push({
+        kind: 'task',
+        task,
+        id: task.id,
+      });
+    }
+  }
+
+  return items;
 }

@@ -22,10 +22,11 @@ import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTh
 import DeleteTaskModal from '@/pages/tasks/DeleteTaskModal';
 import TaskCard from '@/pages/tasks/TaskCard';
 import TaskFilterChips from '@/pages/tasks/TaskFilterChips';
+import TaskPrioritySectionHeader from '@/pages/tasks/TaskPrioritySectionHeader';
 import {
+  buildInitialTaskOrder,
+  buildTaskListItems,
   filterTasksByPriority,
-  orderTasksByIds,
-  sortTasksStable,
   syncTaskOrderIds,
   type TaskFilterId,
 } from '@/pages/tasks/taskBoardConfig';
@@ -134,12 +135,16 @@ export default function TasksScreen({
   useEffect(() => {
     if (previousFilterRef.current !== activeFilter) {
       previousFilterRef.current = activeFilter;
-      setTaskOrderIds(sortTasksStable(filteredByPriority).map(task => task.id));
+      setTaskOrderIds(buildInitialTaskOrder(filteredByPriority, activeFilter));
       return;
     }
 
     setTaskOrderIds(previousOrder => {
-      const nextOrder = syncTaskOrderIds(previousOrder, filteredByPriority);
+      const nextOrder = syncTaskOrderIds(
+        previousOrder,
+        filteredByPriority,
+        activeFilter,
+      );
 
       if (
         nextOrder.length === previousOrder.length &&
@@ -152,10 +157,12 @@ export default function TasksScreen({
     });
   }, [activeFilter, filteredByPriority]);
 
-  const filteredTasks = useMemo(
-    () => orderTasksByIds(filteredByPriority, taskOrderIds),
-    [filteredByPriority, taskOrderIds],
+  const listItems = useMemo(
+    () => buildTaskListItems(filteredByPriority, taskOrderIds, activeFilter),
+    [activeFilter, filteredByPriority, taskOrderIds],
   );
+
+  const hasVisibleTasks = listItems.some(item => item.kind === 'task');
 
   const deleteErrorMessage = deleteTaskMutation.isError
     ? t('tasks.deleteError')
@@ -243,25 +250,44 @@ export default function TasksScreen({
         </View>
 
         <FlatList
-          data={tasksQuery.isSuccess ? filteredTasks : []}
+          data={tasksQuery.isSuccess ? listItems : []}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <TaskCard
-              task={item}
-              onEdit={onOpenEditTask}
-              onDelete={openDeleteModal}
-              onStatusChange={handleStatusChange}
-            />
-          )}
+          renderItem={({ item, index }) => {
+            const previousItem = index > 0 ? listItems[index - 1] : null;
+
+            if (item.kind === 'section') {
+              const isFirst = !listItems
+                .slice(0, index)
+                .some(listItem => listItem.kind === 'section');
+
+              return (
+                <TaskPrioritySectionHeader
+                  priority={item.priority}
+                  isFirst={isFirst}
+                />
+              );
+            }
+
+            return (
+              <>
+                {previousItem?.kind === 'task' ? <TaskSeparator /> : null}
+                <TaskCard
+                  task={item.task}
+                  onEdit={onOpenEditTask}
+                  onDelete={openDeleteModal}
+                  onStatusChange={handleStatusChange}
+                />
+              </>
+            );
+          }}
           style={styles.taskList}
           contentContainerStyle={
-            filteredTasks.length === 0 && !tasksQuery.isLoading
+            !hasVisibleTasks && !tasksQuery.isLoading
               ? styles.taskListContentEmpty
               : styles.taskListContent
           }
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled
-          ItemSeparatorComponent={TaskSeparator}
           ListEmptyComponent={
             tasksQuery.isLoading
               ? undefined

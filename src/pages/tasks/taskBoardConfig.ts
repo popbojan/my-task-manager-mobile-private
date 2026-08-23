@@ -67,3 +67,42 @@ export function sortTasksForBoard(tasks: Task[]): Task[] {
     return b.updatedAt.getTime() - a.updatedAt.getTime();
   });
 }
+
+/** Stable order within a priority filter — cards stay put when status changes. */
+export function sortTasksStable(tasks: Task[]): Task[] {
+  return [...tasks].sort((a, b) => {
+    const timeDiff = a.createdAt.getTime() - b.createdAt.getTime();
+    if (timeDiff !== 0) {
+      return timeDiff;
+    }
+
+    return a.id.localeCompare(b.id);
+  });
+}
+
+export function orderTasksByIds(tasks: Task[], orderedIds: string[]): Task[] {
+  const byId = new Map(tasks.map(task => [task.id, task]));
+
+  return orderedIds
+    .map(id => byId.get(id))
+    .filter((task): task is Task => task !== undefined);
+}
+
+/** Keep existing card positions; append new tasks; drop removed ones. */
+export function syncTaskOrderIds(
+  previousOrder: string[],
+  tasks: Task[],
+): string[] {
+  const taskIds = new Set(tasks.map(task => task.id));
+  const kept = previousOrder.filter(id => taskIds.has(id));
+  const keptSet = new Set(kept);
+  const newIds = sortTasksStable(
+    tasks.filter(task => !keptSet.has(task.id)),
+  ).map(task => task.id);
+
+  if (kept.length === 0) {
+    return sortTasksStable(tasks).map(task => task.id);
+  }
+
+  return [...kept, ...newIds];
+}

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -24,12 +24,22 @@ import TaskCard from '@/pages/tasks/TaskCard';
 import TaskFilterChips from '@/pages/tasks/TaskFilterChips';
 import {
   filterTasksByPriority,
-  sortTasksForBoard,
+  orderTasksByIds,
+  sortTasksStable,
+  syncTaskOrderIds,
   type TaskFilterId,
 } from '@/pages/tasks/taskBoardConfig';
 import { shouldRetryApiQuery } from '@/utils/apiError';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
+
+function patchTaskInCache(
+  tasks: Task[],
+  taskId: string,
+  patch: Partial<Task>,
+): Task[] {
+  return tasks.map(task => (task.id === taskId ? { ...task, ...patch } : task));
+}
 
 type TasksScreenProps = {
   onOpenCreateTask: () => void;
@@ -58,6 +68,8 @@ export default function TasksScreen({
     task: Task | null;
   }>({ visible: false, task: null });
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
+  const [taskOrderIds, setTaskOrderIds] = useState<string[]>([]);
+  const previousFilterRef = useRef<TaskFilterId>(activeFilter);
 
   const tasksQuery = useQuery({
     queryKey: tasksQueryKey(accessToken),
@@ -84,10 +96,15 @@ export default function TasksScreen({
       const previous = queryClient.getQueryData<Task[]>(tasksQueryKey(accessToken));
 
       queryClient.setQueryData<Task[]>(tasksQueryKey(accessToken), (old = []) =>
-        old.map(task => (task.id === taskId ? { ...task, status } : task)),
+        patchTaskInCache(old, taskId, { status }),
       );
 
       return { previous };
+    },
+    onSuccess: (updatedTask, { taskId }) => {
+      queryClient.setQueryData<Task[]>(tasksQueryKey(accessToken), (old = []) =>
+        patchTaskInCache(old, taskId, { status: updatedTask.status }),
+      );
     },
     onError: (_error, _variables, context) => {
       if (context?.previous) {
@@ -96,7 +113,6 @@ export default function TasksScreen({
     },
     onSettled: () => {
       setUpdatingTaskId(null);
-      queryClient.invalidateQueries({ queryKey: tasksQueryKey(accessToken) });
     },
   });
 
@@ -109,9 +125,35 @@ export default function TasksScreen({
   });
 
   const displayTasks = tasksQuery.data ?? [];
-  const filteredTasks = useMemo(
-    () => sortTasksForBoard(filterTasksByPriority(displayTasks, activeFilter)),
+  const filteredByPriority = useMemo(
+    () => filterTasksByPriority(displayTasks, activeFilter),
     [activeFilter, displayTasks],
+  );
+
+  useEffect(() => {
+    if (previousFilterRef.current !== activeFilter) {
+      previousFilterRef.current = activeFilter;
+      setTaskOrderIds(sortTasksStable(filteredByPriority).map(task => task.id));
+      return;
+    }
+
+    setTaskOrderIds(previousOrder => {
+      const nextOrder = syncTaskOrderIds(previousOrder, filteredByPriority);
+
+      if (
+        nextOrder.length === previousOrder.length &&
+        nextOrder.every((id, index) => id === previousOrder[index])
+      ) {
+        return previousOrder;
+      }
+
+      return nextOrder;
+    });
+  }, [activeFilter, filteredByPriority]);
+
+  const filteredTasks = useMemo(
+    () => orderTasksByIds(filteredByPriority, taskOrderIds),
+    [filteredByPriority, taskOrderIds],
   );
 
   const deleteErrorMessage = deleteTaskMutation.isError
@@ -240,6 +282,7 @@ export default function TasksScreen({
       <FlatList
         data={tasksQuery.isSuccess ? filteredTasks : []}
         keyExtractor={item => item.id}
+        extraData={updatingTaskId}
         renderItem={renderTaskItem}
         style={styles.taskList}
         contentContainerStyle={[

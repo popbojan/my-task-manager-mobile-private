@@ -42,6 +42,33 @@ function TaskCheckboxVisual({
   );
 }
 
+function RecurringStatusIndicator({
+  status,
+  label,
+}: {
+  status: RecurringTaskStatus;
+  label: string;
+}) {
+  const isDone = status === RecurringTaskStatus.Done;
+  const isInProgress = status === RecurringTaskStatus.InProgress;
+
+  return (
+    <View style={styles.statusColumn}>
+      <TaskCheckboxVisual isDone={isDone} isInProgress={isInProgress} />
+      <Text
+        style={[
+          styles.statusLabel,
+          isInProgress && styles.statusLabelProgress,
+          isDone && styles.statusLabelDone,
+        ]}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
 export default function RecurringTaskCard({
   task,
   onEdit,
@@ -51,6 +78,13 @@ export default function RecurringTaskCard({
   const { t } = useLanguage();
   const isDone = task.status === RecurringTaskStatus.Done;
   const isInProgress = task.status === RecurringTaskStatus.InProgress;
+
+  const statusLabelKey =
+    task.status === RecurringTaskStatus.Todo
+      ? 'recurring.status.todo'
+      : task.status === RecurringTaskStatus.InProgress
+        ? 'recurring.status.inProgress'
+        : 'recurring.status.done';
 
   function handleToggleStatus() {
     if (isDone) {
@@ -80,7 +114,10 @@ export default function RecurringTaskCard({
           accessibilityHint={t('recurring.status.toggleHint')}
           onPress={handleToggleStatus}
         >
-          <TaskCheckboxVisual isDone={isDone} isInProgress={isInProgress} />
+          <RecurringStatusIndicator
+            status={task.status}
+            label={t(statusLabelKey)}
+          />
 
           <View style={styles.content}>
             <Text
@@ -162,9 +199,29 @@ const styles = StyleSheet.create({
     minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     paddingVertical: 2,
     paddingRight: 4,
+  },
+  statusColumn: {
+    width: 48,
+    flexShrink: 0,
+    alignItems: 'center',
+    gap: 5,
+  },
+  statusLabel: {
+    fontSize: 8,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    color: recurringTheme.textMuted,
+    textAlign: 'center',
+  },
+  statusLabelProgress: {
+    color: recurringTheme.goldBright,
+  },
+  statusLabelDone: {
+    color: recurringTheme.accentBright,
   },
   checkboxOuter: {
     width: 28,

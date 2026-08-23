@@ -69,6 +69,8 @@ export default function TasksScreen({
   }>({ visible: false, task: null });
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
   const [taskOrderIds, setTaskOrderIds] = useState<string[]>([]);
+  const [listViewportHeight, setListViewportHeight] = useState(0);
+  const [listContentHeight, setListContentHeight] = useState(0);
   const previousFilterRef = useRef<TaskFilterId>(activeFilter);
 
   const tasksQuery = useQuery({
@@ -156,6 +158,9 @@ export default function TasksScreen({
     [filteredByPriority, taskOrderIds],
   );
 
+  const listScrollEnabled =
+    listViewportHeight === 0 || listContentHeight > listViewportHeight + 1;
+
   const deleteErrorMessage = deleteTaskMutation.isError
     ? t('tasks.deleteError')
     : null;
@@ -197,46 +202,6 @@ export default function TasksScreen({
     [handleStatusChange, onOpenEditTask, updatingTaskId],
   );
 
-  const listHeader = useMemo(
-    () => (
-      <View style={styles.listHeader}>
-        <TaskFilterChips
-          activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
-        />
-
-        {tasksQuery.isLoading ? (
-          <View style={styles.loadingBlock}>
-            <ActivityIndicator color={recurringTheme.accentBright} />
-            <Text style={styles.loadingText}>{t('tasks.loading')}</Text>
-          </View>
-        ) : null}
-
-        {tasksQuery.isError ? (
-          <Text style={styles.errorText}>{t('tasks.error')}</Text>
-        ) : null}
-      </View>
-    ),
-    [
-      activeFilter,
-      t,
-      tasksQuery.isError,
-      tasksQuery.isLoading,
-    ],
-  );
-
-  const listEmpty = useMemo(() => {
-    if (tasksQuery.isLoading) {
-      return undefined;
-    }
-
-    return (
-      <Text style={styles.emptyText}>
-        {activeFilter === 'all' ? t('tasks.noTasks') : t('tasks.noTasksFiltered')}
-      </Text>
-    );
-  }, [activeFilter, t, tasksQuery.isLoading]);
-
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" />
@@ -277,6 +242,24 @@ export default function TasksScreen({
       </View>
 
       <View style={styles.body}>
+        <View style={styles.bodyFixed}>
+          <TaskFilterChips
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+          />
+
+          {tasksQuery.isLoading ? (
+            <View style={styles.loadingBlock}>
+              <ActivityIndicator color={recurringTheme.accentBright} />
+              <Text style={styles.loadingText}>{t('tasks.loading')}</Text>
+            </View>
+          ) : null}
+
+          {tasksQuery.isError ? (
+            <Text style={styles.errorText}>{t('tasks.error')}</Text>
+          ) : null}
+        </View>
+
         <FlatList
           data={tasksQuery.isSuccess ? filteredTasks : []}
           keyExtractor={item => item.id}
@@ -290,9 +273,27 @@ export default function TasksScreen({
               : null,
           ]}
           showsVerticalScrollIndicator={false}
+          scrollEnabled={listScrollEnabled}
+          bounces={listScrollEnabled}
+          nestedScrollEnabled
+          onLayout={event => {
+            setListViewportHeight(event.nativeEvent.layout.height);
+          }}
+          onContentSizeChange={(_, height) => {
+            setListContentHeight(height);
+          }}
           ItemSeparatorComponent={TaskSeparator}
-          ListHeaderComponent={listHeader}
-          ListEmptyComponent={listEmpty}
+          ListEmptyComponent={
+            tasksQuery.isLoading
+              ? undefined
+              : () => (
+                  <Text style={styles.emptyText}>
+                    {activeFilter === 'all'
+                      ? t('tasks.noTasks')
+                      : t('tasks.noTasksFiltered')}
+                  </Text>
+                )
+          }
           keyboardShouldPersistTaps="handled"
         />
       </View>
@@ -377,7 +378,12 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 0,
     paddingHorizontal: 16,
+    paddingTop: 6,
+    gap: 5,
     paddingBottom: 4,
+  },
+  bodyFixed: {
+    gap: 5,
   },
   taskList: {
     flex: 1,
@@ -385,15 +391,10 @@ const styles = StyleSheet.create({
   },
   taskListContent: {
     flexGrow: 1,
-    paddingBottom: 8,
+    paddingBottom: 2,
   },
   taskListContentEmpty: {
     flexGrow: 1,
-  },
-  listHeader: {
-    direction: 'ltr',
-    gap: 10,
-    paddingBottom: 4,
   },
   sectionHeader: {
     flexDirection: 'row',

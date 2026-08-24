@@ -126,7 +126,6 @@ export default function ProgressScreen() {
               <MasteryProfileHero
                 progress={displayProgress}
                 levels={masteryLevels}
-                showProgressPercent
               />
             )}
           </View>

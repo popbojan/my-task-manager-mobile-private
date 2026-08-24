@@ -1,12 +1,20 @@
 import { StyleSheet, View } from 'react-native';
+import { CalendarIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
-import { FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 
 type TabIconProps = {
   size?: number;
   color?: string;
   active?: boolean;
 };
+
+export function TabCalendarIcon({
+  size = 20,
+  active = false,
+}: TabIconProps) {
+  const color = active ? recurringTheme.accentBright : recurringTheme.textMuted;
+  return <CalendarIcon size={size * 0.92} color={color} />;
+}
 
 export function TabFlameIcon({
   size = 24,

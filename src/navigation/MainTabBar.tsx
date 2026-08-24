@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import {
+  TabCalendarIcon,
   TabChartIcon,
-  TabFlameIcon,
   TabListIcon,
   TabProfileIcon,
 } from '@/pages/recurring-tasks/premium/TabIcons';
@@ -25,7 +25,7 @@ const TABS: {
   {
     id: 'today',
     labelKey: 'nav.today',
-    renderIcon: active => <TabFlameIcon active={active} />,
+    renderIcon: active => <TabCalendarIcon active={active} />,
   },
   {
     id: 'tasks',

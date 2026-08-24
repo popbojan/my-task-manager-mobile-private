@@ -114,7 +114,7 @@ export function MasteryStatsGrid({
     {
       key: 'current-streak',
       tone: 'red' as const,
-      icon: <FireIcon size={iconSize(20, 22)} />,
+      icon: <FireIcon size={iconSize(13, 15)} />,
       label: t('recurring.stats.currentStreak'),
       value: t('recurring.stats.daysValue', {
         days: String(progress.currentStreak),

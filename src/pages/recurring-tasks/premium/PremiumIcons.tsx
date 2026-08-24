@@ -1,32 +1,38 @@
 import type { ReactNode } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
-import { streakFlameSource } from '@/assets/streakFlame';
+import { StyleSheet, View } from 'react-native';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 type IconProps = { size?: number; color?: string; active?: boolean };
 
 export function FireIcon({
-  size = 20,
-  color,
-  active = false,
+  size = 14,
+  color = recurringTheme.fireRed,
 }: IconProps) {
-  const height = size * 1.12;
-  const scale = active ? 1.06 : 1;
-
   return (
-    <View style={[styles.flameWrap, { width: size, height }]}>
-      <Image
-        source={streakFlameSource}
+    <View style={[styles.fireWrap, { width: size, height: size }]}>
+      <View
         style={[
-          styles.flameImage,
+          styles.fireCore,
           {
-            width: size * scale,
-            height: height * scale,
+            width: size * 0.55,
+            height: size * 0.72,
+            borderTopLeftRadius: size * 0.45,
+            borderTopRightRadius: size * 0.45,
+            backgroundColor: color,
           },
-          color ? { tintColor: color } : null,
         ]}
-        resizeMode="contain"
-        accessibilityIgnoresInvertColors
+      />
+      <View
+        style={[
+          styles.fireInner,
+          {
+            width: size * 0.28,
+            height: size * 0.38,
+            borderTopLeftRadius: size * 0.2,
+            borderTopRightRadius: size * 0.2,
+            bottom: size * 0.12,
+          },
+        ]}
       />
     </View>
   );
@@ -286,14 +292,16 @@ const styles = StyleSheet.create({
   fireWrap: {
     alignItems: 'center',
     justifyContent: 'flex-end',
-    overflow: 'visible',
   },
-  flameWrap: {
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+  fireCore: {
+    shadowColor: recurringTheme.fireRed,
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 0 },
   },
-  flameImage: {
-    resizeMode: 'contain',
+  fireInner: {
+    position: 'absolute',
+    backgroundColor: '#fca5a5',
   },
   badge: {
     alignItems: 'center',

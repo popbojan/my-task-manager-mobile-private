@@ -169,6 +169,71 @@ export function ClockIcon({ size = 18, color = recurringTheme.accentBright }: Ic
   );
 }
 
+export function CalendarIcon({
+  size = 14,
+  color = recurringTheme.accentBright,
+}: IconProps) {
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: 3,
+        borderWidth: 1.5,
+        borderColor: color,
+        overflow: 'hidden',
+        backgroundColor: 'rgba(82, 183, 136, 0.12)',
+      }}
+    >
+      <View style={{ height: size * 0.22, backgroundColor: color }} />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View
+          style={{
+            width: size * 0.34,
+            height: 1.5,
+            backgroundColor: color,
+            borderRadius: 1,
+          }}
+        />
+      </View>
+    </View>
+  );
+}
+
+export function CheckIcon({
+  size = 14,
+  color = recurringTheme.accentBright,
+}: IconProps) {
+  return (
+    <View style={{ width: size, height: size }}>
+      <View
+        style={{
+          position: 'absolute',
+          left: size * 0.12,
+          bottom: size * 0.34,
+          width: size * 0.28,
+          height: 2,
+          backgroundColor: color,
+          borderRadius: 1,
+          transform: [{ rotate: '-45deg' }],
+        }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          left: size * 0.28,
+          bottom: size * 0.38,
+          width: size * 0.52,
+          height: 2,
+          backgroundColor: color,
+          borderRadius: 1,
+          transform: [{ rotate: '45deg' }],
+        }}
+      />
+    </View>
+  );
+}
+
 export function ShieldCrownIcon({ size = 20, color = recurringTheme.goldBright }: IconProps) {
   return (
     <View style={{ width: size, height: size, alignItems: 'center' }}>

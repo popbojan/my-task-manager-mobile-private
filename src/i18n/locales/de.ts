@@ -165,6 +165,17 @@ export const de = {
   'tasks.form.deadlineInvalid': 'Ungültiges Datumsformat.',
   'tasks.form.save': 'Speichern',
   'tasks.form.error': 'Speichern fehlgeschlagen.',
+  'progress.sectionTitle': 'FORTSCHRITT',
+  'progress.last7Days': 'LETZTE 7 TAGE',
+  'progress.remainingToday': 'Noch {{count}} Aufgaben heute',
+  'progress.remainingTodayOne': 'Noch 1 Aufgabe heute',
+  'progress.allDoneToday': 'Alles erledigt heute!',
+  'progress.nextGoal': 'NÄCHSTES ZIEL',
+  'progress.nextGoalTitle': 'Level {{level}} • {{name}}',
+  'progress.daysToNextLevel': 'Noch {{count}} erfolgreiche Tage',
+  'progress.recordInSight': 'NEUER REKORD IN SICHT',
+  'progress.daysToRecord': 'Noch {{count}} Tage bis zu deiner längsten Kette.',
+  'progress.recordAchieved': 'Neuer Rekord! Glückwunsch!',
 } as const;
 
 export type TranslationKey = keyof typeof de;

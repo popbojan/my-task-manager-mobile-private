@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from '@/auth/AuthContext';
 import { LanguageProvider } from '@/i18n/LanguageProvider';
 import MainTabBar, { type MainTab } from '@/navigation/MainTabBar';
 import TabPlaceholderScreen from '@/pages/home/TabPlaceholderScreen';
+import ProgressScreen from '@/pages/progress/ProgressScreen';
 import LoginScreen from '@/pages/login/LoginScreen';
 import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormModal';
 import RecurringTasksScreen from '@/pages/recurring-tasks/RecurringTasksScreen';
@@ -90,12 +91,7 @@ function MainAppShell() {
             onOpenEditTask={openBoardTaskForm}
           />
         ) : null}
-        {activeTab === 'progress' ? (
-          <TabPlaceholderScreen
-            tab="progress"
-            onGoToday={() => setActiveTab('today')}
-          />
-        ) : null}
+        {activeTab === 'progress' ? <ProgressScreen /> : null}
         {activeTab === 'profile' ? (
           <TabPlaceholderScreen
             tab="profile"

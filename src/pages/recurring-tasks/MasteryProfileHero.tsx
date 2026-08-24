@@ -5,6 +5,7 @@ import type { RecurringTaskProgress } from '@/api/generated/models/RecurringTask
 import { getMasteryAvatarSource } from '@/assets/masteryAvatars';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import {
+  CalendarIcon,
   CrownIcon,
   FireIcon,
   IconBadge,
@@ -55,45 +56,72 @@ function StatCard({
 
 export function MasteryStatsGrid({
   progress,
+  layout = 'row',
 }: {
   progress: RecurringTaskProgress;
+  layout?: 'row' | 'grid';
 }) {
   const { t } = useLanguage();
 
+  const cards = [
+    {
+      key: 'current-streak',
+      tone: 'green' as const,
+      icon: layout === 'grid' ? <CalendarIcon size={11} /> : <FireIcon size={11} />,
+      label: t('recurring.stats.currentStreak'),
+      value: t('recurring.stats.daysValue', {
+        days: String(progress.currentStreak),
+      }),
+    },
+    {
+      key: 'highest-streak',
+      tone: 'gold' as const,
+      icon: <TrophyIcon size={13} />,
+      label: t('recurring.stats.highestStreak'),
+      value: t('recurring.stats.daysValue', {
+        days: String(progress.highestStreakReached),
+      }),
+    },
+    {
+      key: 'current-level',
+      tone: 'green' as const,
+      icon: <StarIcon size={13} />,
+      label: t('recurring.stats.currentLevel'),
+      value: t('recurring.stats.levelValue', {
+        level: String(progress.currentLevel),
+      }),
+    },
+    {
+      key: 'highest-level',
+      tone: 'gold' as const,
+      icon: <CrownIcon size={13} />,
+      label: t('recurring.stats.highestLevel'),
+      value: t('recurring.stats.levelValue', {
+        level: String(progress.highestLevelReached),
+      }),
+    },
+  ];
+
+  if (layout === 'grid') {
+    return (
+      <View style={styles.statsGridLayout}>
+        <View style={styles.statsGridRow}>
+          <StatCard {...cards[0]!} />
+          <StatCard {...cards[1]!} />
+        </View>
+        <View style={styles.statsGridRow}>
+          <StatCard {...cards[2]!} />
+          <StatCard {...cards[3]!} />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.statsGrid}>
-      <StatCard
-        tone="red"
-        icon={<FireIcon size={11} />}
-        label={t('recurring.stats.currentStreak')}
-        value={t('recurring.stats.daysValue', {
-          days: String(progress.currentStreak),
-        })}
-      />
-      <StatCard
-        tone="gold"
-        icon={<TrophyIcon size={13} />}
-        label={t('recurring.stats.highestStreak')}
-        value={t('recurring.stats.daysValue', {
-          days: String(progress.highestStreakReached),
-        })}
-      />
-      <StatCard
-        tone="green"
-        icon={<StarIcon size={13} />}
-        label={t('recurring.stats.currentLevel')}
-        value={t('recurring.stats.levelValue', {
-          level: String(progress.currentLevel),
-        })}
-      />
-      <StatCard
-        tone="gold"
-        icon={<CrownIcon size={13} />}
-        label={t('recurring.stats.highestLevel')}
-        value={t('recurring.stats.levelValue', {
-          level: String(progress.highestLevelReached),
-        })}
-      />
+      {cards.map(({ key, ...card }) => (
+        <StatCard key={key} {...card} />
+      ))}
     </View>
   );
 }
@@ -101,9 +129,11 @@ export function MasteryStatsGrid({
 export default function MasteryProfileHero({
   progress,
   levels,
+  showProgressPercent = false,
 }: {
   progress: RecurringTaskProgress;
   levels: MasteryLevel[];
+  showProgressPercent?: boolean;
 }) {
   const { t, language } = useLanguage();
   const levelProgress = computeLevelProgress(
@@ -175,13 +205,20 @@ export default function MasteryProfileHero({
                 next: String(nextLevel.number),
               })}
             </Text>
-            <View style={styles.progressBarTrack}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${levelProgress.progressPercent}%` },
-                ]}
-              />
+            <View style={styles.progressBarRow}>
+              <View style={styles.progressBarTrack}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${levelProgress.progressPercent}%` },
+                  ]}
+                />
+              </View>
+              {showProgressPercent ? (
+                <Text style={styles.progressPercentLabel}>
+                  {levelProgress.progressPercent}%
+                </Text>
+              ) : null}
             </View>
           </>
         ) : (
@@ -194,6 +231,13 @@ export default function MasteryProfileHero({
 
 const styles = StyleSheet.create({
   statsGrid: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  statsGridLayout: {
+    gap: 5,
+  },
+  statsGridRow: {
     flexDirection: 'row',
     gap: 5,
   },
@@ -302,13 +346,26 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
   },
+  progressBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   progressBarTrack: {
+    flex: 1,
     height: 5,
     borderRadius: 999,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  progressPercentLabel: {
+    color: recurringTheme.accentBright,
+    fontSize: 10,
+    fontWeight: '800',
+    minWidth: 28,
+    textAlign: 'right',
   },
   progressFill: {
     height: '100%',

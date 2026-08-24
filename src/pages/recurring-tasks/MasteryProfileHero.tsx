@@ -24,32 +24,63 @@ function StatCard({
   value,
   tone,
   icon,
+  variant = 'stacked',
 }: {
   label: string;
   value: string;
   tone: StatTone;
   icon: ReactNode;
+  variant?: 'stacked' | 'inline';
 }) {
   const accent = tone === 'red' ? 'red' : tone === 'gold' ? 'gold' : 'green';
+  const isInline = variant === 'inline';
 
   return (
     <PremiumSurface
       accent={accent}
       compact
-      padding={7}
+      padding={isInline ? 10 : 7}
       radius={12}
-      style={styles.statShell}
-      contentStyle={styles.statContent}
+      style={[styles.statShell, isInline && styles.statShellInline]}
+      contentStyle={[styles.statContent, isInline && styles.statContentInline]}
     >
-      <IconBadge tone={tone} size={24}>
-        {icon}
-      </IconBadge>
-      <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
-        {value}
-      </Text>
-      <Text style={styles.statLabel} numberOfLines={2}>
-        {label}
-      </Text>
+      {isInline ? (
+        <>
+          <IconBadge tone={tone} size={34}>
+            {icon}
+          </IconBadge>
+          <View style={styles.statCopyInline}>
+            <Text
+              style={styles.statValueInline}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}
+            >
+              {value}
+            </Text>
+            <Text style={styles.statLabelInline} numberOfLines={2}>
+              {label}
+            </Text>
+          </View>
+        </>
+      ) : (
+        <>
+          <IconBadge tone={tone} size={24}>
+            {icon}
+          </IconBadge>
+          <Text
+            style={styles.statValue}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+          >
+            {value}
+          </Text>
+          <Text style={styles.statLabel} numberOfLines={2}>
+            {label}
+          </Text>
+        </>
+      )}
     </PremiumSurface>
   );
 }
@@ -62,8 +93,11 @@ type StatCardConfig = {
   icon: ReactNode;
 };
 
-function renderStatCard({ key: _key, ...card }: StatCardConfig) {
-  return <StatCard {...card} />;
+function renderStatCard(
+  { key: _key, ...card }: StatCardConfig,
+  variant: 'stacked' | 'inline' = 'stacked',
+) {
+  return <StatCard {...card} variant={variant} />;
 }
 
 export function MasteryStatsGrid({
@@ -79,7 +113,7 @@ export function MasteryStatsGrid({
     {
       key: 'current-streak',
       tone: 'green' as const,
-      icon: layout === 'grid' ? <CalendarIcon size={11} /> : <FireIcon size={11} />,
+      icon: layout === 'grid' ? <CalendarIcon size={14} /> : <FireIcon size={11} />,
       label: t('recurring.stats.currentStreak'),
       value: t('recurring.stats.daysValue', {
         days: String(progress.currentStreak),
@@ -88,7 +122,7 @@ export function MasteryStatsGrid({
     {
       key: 'highest-streak',
       tone: 'gold' as const,
-      icon: <TrophyIcon size={13} />,
+      icon: <TrophyIcon size={layout === 'grid' ? 15 : 13} />,
       label: t('recurring.stats.highestStreak'),
       value: t('recurring.stats.daysValue', {
         days: String(progress.highestStreakReached),
@@ -97,7 +131,7 @@ export function MasteryStatsGrid({
     {
       key: 'current-level',
       tone: 'green' as const,
-      icon: <StarIcon size={13} />,
+      icon: <StarIcon size={layout === 'grid' ? 15 : 13} />,
       label: t('recurring.stats.currentLevel'),
       value: t('recurring.stats.levelValue', {
         level: String(progress.currentLevel),
@@ -106,7 +140,7 @@ export function MasteryStatsGrid({
     {
       key: 'highest-level',
       tone: 'gold' as const,
-      icon: <CrownIcon size={13} />,
+      icon: <CrownIcon size={layout === 'grid' ? 15 : 13} />,
       label: t('recurring.stats.highestLevel'),
       value: t('recurring.stats.levelValue', {
         level: String(progress.highestLevelReached),
@@ -118,12 +152,12 @@ export function MasteryStatsGrid({
     return (
       <View style={styles.statsGridLayout}>
         <View style={styles.statsGridRow}>
-          {renderStatCard(cards[0]!)}
-          {renderStatCard(cards[1]!)}
+          {renderStatCard(cards[0]!, 'inline')}
+          {renderStatCard(cards[1]!, 'inline')}
         </View>
         <View style={styles.statsGridRow}>
-          {renderStatCard(cards[2]!)}
-          {renderStatCard(cards[3]!)}
+          {renderStatCard(cards[2]!, 'inline')}
+          {renderStatCard(cards[3]!, 'inline')}
         </View>
       </View>
     );
@@ -247,29 +281,56 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   statsGridLayout: {
-    gap: 5,
+    gap: 6,
   },
   statsGridRow: {
     flexDirection: 'row',
-    gap: 5,
+    gap: 6,
   },
   statShell: {
     flex: 1,
     minWidth: 0,
   },
+  statShellInline: {
+    minHeight: 72,
+    justifyContent: 'center',
+  },
   statContent: {
     gap: 2,
+  },
+  statContentInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statCopyInline: {
+    flex: 1,
+    minWidth: 0,
+    gap: 3,
   },
   statValue: {
     ...premiumType.statValue,
     color: recurringTheme.textPrimary,
     fontSize: 12,
   },
+  statValueInline: {
+    color: recurringTheme.textPrimary,
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+    lineHeight: 20,
+  },
   statLabel: {
     color: recurringTheme.textMuted,
     fontSize: 7,
     fontWeight: '600',
     lineHeight: 10,
+  },
+  statLabelInline: {
+    color: recurringTheme.textSecondary,
+    fontSize: 10,
+    fontWeight: '700',
+    lineHeight: 13,
   },
   profileRow: {
     flexDirection: 'row',

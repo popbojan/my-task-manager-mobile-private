@@ -54,6 +54,18 @@ function StatCard({
   );
 }
 
+type StatCardConfig = {
+  key: string;
+  label: string;
+  value: string;
+  tone: StatTone;
+  icon: ReactNode;
+};
+
+function renderStatCard({ key: _key, ...card }: StatCardConfig) {
+  return <StatCard {...card} />;
+}
+
 export function MasteryStatsGrid({
   progress,
   layout = 'row',
@@ -63,7 +75,7 @@ export function MasteryStatsGrid({
 }) {
   const { t } = useLanguage();
 
-  const cards = [
+  const cards: StatCardConfig[] = [
     {
       key: 'current-streak',
       tone: 'green' as const,
@@ -106,12 +118,12 @@ export function MasteryStatsGrid({
     return (
       <View style={styles.statsGridLayout}>
         <View style={styles.statsGridRow}>
-          <StatCard {...cards[0]!} />
-          <StatCard {...cards[1]!} />
+          {renderStatCard(cards[0]!)}
+          {renderStatCard(cards[1]!)}
         </View>
         <View style={styles.statsGridRow}>
-          <StatCard {...cards[2]!} />
-          <StatCard {...cards[3]!} />
+          {renderStatCard(cards[2]!)}
+          {renderStatCard(cards[3]!)}
         </View>
       </View>
     );

@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { AppLanguage } from '@/i18n/types';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import PremiumProgressRing from '@/pages/recurring-tasks/premium/PremiumProgressRing';
+import PremiumSurface from '@/pages/recurring-tasks/premium/PremiumSurface';
 import { CheckIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
@@ -88,7 +89,7 @@ export default function ProgressWeekStrip({
           : t('progress.remainingToday', { count: String(openTasks) });
 
   return (
-    <View style={styles.wrap}>
+    <PremiumSurface accent="green" compact padding={12} radius={14} contentStyle={styles.wrap}>
       <View style={styles.row}>
         {weekDays.map((day, index) => (
           <View key={day.toISOString()} style={styles.dayItem}>
@@ -98,7 +99,7 @@ export default function ProgressWeekStrip({
         ))}
       </View>
       <Text style={styles.footer}>{footerLabel}</Text>
-    </View>
+    </PremiumSurface>
   );
 }
 

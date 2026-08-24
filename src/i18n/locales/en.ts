@@ -174,6 +174,7 @@ export const en: Record<TranslationKey, string> = {
   'progress.nextGoal': 'NEXT GOAL',
   'progress.nextGoalTitle': 'Level {{level}} • {{name}}',
   'progress.daysToNextLevel': '{{count}} successful days left',
+  'progress.nextMilestone': 'NEXT MILESTONE',
   'progress.recordInSight': 'NEW RECORD IN SIGHT',
   'progress.daysToRecord': '{{count}} days until your longest streak.',
   'progress.recordAchieved': 'New record! Congratulations!',

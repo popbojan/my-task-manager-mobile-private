@@ -177,6 +177,7 @@ export const fr: Record<TranslationKey, string> = {
   'progress.nextGoal': 'PROCHAIN OBJECTIF',
   'progress.nextGoalTitle': 'Niveau {{level}} • {{name}}',
   'progress.daysToNextLevel': 'Encore {{count}} jours réussis',
+  'progress.nextMilestone': 'PROCHAIN JALON',
   'progress.recordInSight': 'NOUVEAU RECORD EN VUE',
   'progress.daysToRecord': 'Encore {{count}} jours avant ta plus longue série.',
   'progress.recordAchieved': 'Nouveau record ! Félicitations !',

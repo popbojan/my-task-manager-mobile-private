@@ -176,6 +176,7 @@ export const sr: Record<TranslationKey, string> = {
   'progress.nextGoal': 'SLEDEĆI CILJ',
   'progress.nextGoalTitle': 'Nivo {{level}} • {{name}}',
   'progress.daysToNextLevel': 'Još {{count}} uspešnih dana',
+  'progress.nextMilestone': 'SLEDEĆI MEĐUREZULTAT',
   'progress.recordInSight': 'NOVI REKORD NA VIDIKU',
   'progress.daysToRecord': 'Još {{count}} dana do najdužeg niza.',
   'progress.recordAchieved': 'Novi rekord! Čestitamo!',

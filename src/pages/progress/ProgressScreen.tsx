@@ -169,7 +169,7 @@ export default function ProgressScreen() {
               </>
             ) : null}
 
-            <ProgressSectionHeader label={t('progress.recordInSight')} />
+            <ProgressSectionHeader label={t('progress.nextMilestone')} />
             <StreakRecordCard progress={displayProgress} />
           </>
         ) : null}

@@ -173,6 +173,7 @@ export const de = {
   'progress.nextGoal': 'NÄCHSTES ZIEL',
   'progress.nextGoalTitle': 'Level {{level}} • {{name}}',
   'progress.daysToNextLevel': 'Noch {{count}} erfolgreiche Tage',
+  'progress.nextMilestone': 'NÄCHSTER MEILENSTEIN',
   'progress.recordInSight': 'NEUER REKORD IN SICHT',
   'progress.daysToRecord': 'Noch {{count}} Tage bis zu deiner längsten Kette.',
   'progress.recordAchieved': 'Neuer Rekord! Glückwunsch!',

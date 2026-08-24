@@ -5,7 +5,6 @@ import type { RecurringTaskProgress } from '@/api/generated/models/RecurringTask
 import { getMasteryAvatarSource } from '@/assets/masteryAvatars';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import {
-  CalendarIcon,
   CrownIcon,
   FireIcon,
   IconBadge,
@@ -108,12 +107,14 @@ export function MasteryStatsGrid({
   layout?: 'row' | 'grid';
 }) {
   const { t } = useLanguage();
+  const iconSize = (compact: number, expanded: number) =>
+    layout === 'grid' ? expanded : compact;
 
   const cards: StatCardConfig[] = [
     {
       key: 'current-streak',
-      tone: 'green' as const,
-      icon: layout === 'grid' ? <CalendarIcon size={14} /> : <FireIcon size={11} />,
+      tone: 'red' as const,
+      icon: <FireIcon size={iconSize(11, 14)} />,
       label: t('recurring.stats.currentStreak'),
       value: t('recurring.stats.daysValue', {
         days: String(progress.currentStreak),
@@ -122,7 +123,7 @@ export function MasteryStatsGrid({
     {
       key: 'highest-streak',
       tone: 'gold' as const,
-      icon: <TrophyIcon size={layout === 'grid' ? 15 : 13} />,
+      icon: <TrophyIcon size={iconSize(13, 15)} />,
       label: t('recurring.stats.highestStreak'),
       value: t('recurring.stats.daysValue', {
         days: String(progress.highestStreakReached),
@@ -131,7 +132,7 @@ export function MasteryStatsGrid({
     {
       key: 'current-level',
       tone: 'green' as const,
-      icon: <StarIcon size={layout === 'grid' ? 15 : 13} />,
+      icon: <StarIcon size={iconSize(13, 15)} />,
       label: t('recurring.stats.currentLevel'),
       value: t('recurring.stats.levelValue', {
         level: String(progress.currentLevel),
@@ -140,7 +141,7 @@ export function MasteryStatsGrid({
     {
       key: 'highest-level',
       tone: 'gold' as const,
-      icon: <CrownIcon size={layout === 'grid' ? 15 : 13} />,
+      icon: <CrownIcon size={iconSize(13, 15)} />,
       label: t('recurring.stats.highestLevel'),
       value: t('recurring.stats.levelValue', {
         level: String(progress.highestLevelReached),

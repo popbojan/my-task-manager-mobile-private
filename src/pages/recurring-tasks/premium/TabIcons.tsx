@@ -9,11 +9,10 @@ type TabIconProps = {
 };
 
 export function TabFlameIcon({
-  size = 20,
+  size = 24,
   active = false,
 }: TabIconProps) {
-  const color = active ? recurringTheme.accentBright : recurringTheme.fireRed;
-  return <FireIcon size={size * 0.72} color={color} />;
+  return <FireIcon size={size} active={active} />;
 }
 
 export function TabListIcon({

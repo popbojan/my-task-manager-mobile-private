@@ -1,38 +1,32 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
+import { streakFlameSource } from '@/assets/streakFlame';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 type IconProps = { size?: number; color?: string; active?: boolean };
 
 export function FireIcon({
-  size = 14,
-  color = recurringTheme.fireRed,
+  size = 20,
+  color,
+  active = false,
 }: IconProps) {
+  const height = size * 1.12;
+  const scale = active ? 1.06 : 1;
+
   return (
-    <View style={[styles.fireWrap, { width: size, height: size }]}>
-      <View
+    <View style={[styles.flameWrap, { width: size, height }]}>
+      <Image
+        source={streakFlameSource}
         style={[
-          styles.fireCore,
+          styles.flameImage,
           {
-            width: size * 0.55,
-            height: size * 0.72,
-            borderTopLeftRadius: size * 0.45,
-            borderTopRightRadius: size * 0.45,
-            backgroundColor: color,
+            width: size * scale,
+            height: height * scale,
           },
+          color ? { tintColor: color } : null,
         ]}
-      />
-      <View
-        style={[
-          styles.fireInner,
-          {
-            width: size * 0.28,
-            height: size * 0.38,
-            borderTopLeftRadius: size * 0.2,
-            borderTopRightRadius: size * 0.2,
-            bottom: size * 0.12,
-          },
-        ]}
+        resizeMode="contain"
+        accessibilityIgnoresInvertColors
       />
     </View>
   );
@@ -292,21 +286,19 @@ const styles = StyleSheet.create({
   fireWrap: {
     alignItems: 'center',
     justifyContent: 'flex-end',
+    overflow: 'visible',
   },
-  fireCore: {
-    shadowColor: recurringTheme.fireRed,
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 0 },
+  flameWrap: {
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
-  fireInner: {
-    position: 'absolute',
-    backgroundColor: '#fca5a5',
+  flameImage: {
+    resizeMode: 'contain',
   },
   badge: {
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    overflow: 'visible',
     borderWidth: 1,
   },
   badgeShine: {

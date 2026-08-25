@@ -1,4 +1,4 @@
-package com.mytaskmanagermobile
+package app.mytaskmanager
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

@@ -89,3 +89,5 @@ yarn-error.log
 
 # macOS
 .DS_Store
+/android/gradle/gradle-daemon-jvm.properties
+/android/app/release/app-release.aab

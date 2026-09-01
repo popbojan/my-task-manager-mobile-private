@@ -8,7 +8,7 @@ import QueryProvider from '@/api/QueryProvider';
 import { AuthProvider, useAuth } from '@/auth/AuthContext';
 import { LanguageProvider } from '@/i18n/LanguageProvider';
 import MainTabBar, { type MainTab } from '@/navigation/MainTabBar';
-import TabPlaceholderScreen from '@/pages/home/TabPlaceholderScreen';
+import ProfileScreen from '@/pages/profile/ProfileScreen';
 import ProgressScreen from '@/pages/progress/ProgressScreen';
 import LoginScreen from '@/pages/login/LoginScreen';
 import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormModal';
@@ -21,6 +21,10 @@ import {
 } from '@/pages/tasks/taskBoardConfig';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import CurrentUserBootstrap from '@/user/CurrentUserBootstrap';
+import RevenueCatBootstrap from '@/revenuecat/RevenueCatBootstrap';
+import SubscriptionBootstrap from '@/subscription/SubscriptionBootstrap';
+import { SubscriptionSessionProvider } from '@/subscription/SubscriptionSessionProvider';
+import { clearSubscriptionSessionQueries } from '@/subscription/clearSubscriptionSession';
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 import { ApiEnvironmentProvider } from '@/config/ApiEnvironmentProvider';
 
@@ -38,6 +42,7 @@ function MainAppShell() {
     initialPriority: TaskPriority | null;
     session: number;
   }>({ visible: false, taskId: null, initialPriority: null, session: 0 });
+  const [openProfileSubscription, setOpenProfileSubscription] = useState(false);
 
   function openTaskForm(taskId: string | null) {
     setTaskForm(prev => ({
@@ -79,25 +84,52 @@ function MainAppShell() {
   return (
     <View style={shellStyles.root}>
       <View style={shellStyles.content}>
-        {activeTab === 'today' ? (
+        <View
+          style={[
+            shellStyles.tabPane,
+            activeTab !== 'today' ? shellStyles.tabPaneHidden : null,
+          ]}
+        >
           <RecurringTasksScreen
             onOpenCreateTask={() => openTaskForm(null)}
             onOpenEditTask={openTaskForm}
+            onOpenSubscription={() => {
+              setOpenProfileSubscription(true);
+              setActiveTab('profile');
+            }}
           />
-        ) : null}
-        {activeTab === 'tasks' ? (
+        </View>
+        <View
+          style={[
+            shellStyles.tabPane,
+            activeTab !== 'tasks' ? shellStyles.tabPaneHidden : null,
+          ]}
+        >
           <TasksScreen
             onOpenCreateTask={openBoardTaskCreate}
             onOpenEditTask={openBoardTaskForm}
           />
-        ) : null}
-        {activeTab === 'progress' ? <ProgressScreen /> : null}
-        {activeTab === 'profile' ? (
-          <TabPlaceholderScreen
-            tab="profile"
+        </View>
+        <View
+          style={[
+            shellStyles.tabPane,
+            activeTab !== 'progress' ? shellStyles.tabPaneHidden : null,
+          ]}
+        >
+          <ProgressScreen />
+        </View>
+        <View
+          style={[
+            shellStyles.tabPane,
+            activeTab !== 'profile' ? shellStyles.tabPaneHidden : null,
+          ]}
+        >
+          <ProfileScreen
             onGoToday={() => setActiveTab('today')}
+            openSubscription={openProfileSubscription}
+            onSubscriptionOpened={() => setOpenProfileSubscription(false)}
           />
-        ) : null}
+        </View>
       </View>
       <MainTabBar activeTab={activeTab} onTabChange={setActiveTab} />
       {taskForm.visible ? (
@@ -142,9 +174,11 @@ function AppContent() {
       try {
         const data = await authApi.refreshAccessToken(authRequestInit);
         clearRecurringSessionQueries(queryClient);
+        clearSubscriptionSessionQueries(queryClient);
         setAccessToken(data.accessToken);
       } catch {
         clearRecurringSessionQueries(queryClient);
+        clearSubscriptionSessionQueries(queryClient);
         setAccessToken(null);
       } finally {
         setIsAuthReady(true);
@@ -163,12 +197,17 @@ function AppContent() {
   }
 
   return accessToken ? (
-    <>
+    <SubscriptionSessionProvider>
+      <RevenueCatBootstrap />
       <CurrentUserBootstrap />
+      <SubscriptionBootstrap />
       <MainAppShell />
-    </>
+    </SubscriptionSessionProvider>
   ) : (
-    <LoginScreen />
+    <>
+      <RevenueCatBootstrap />
+      <LoginScreen />
+    </>
   );
 }
 
@@ -205,5 +244,12 @@ const shellStyles = StyleSheet.create({
   content: {
     flex: 1,
     minHeight: 0,
+    position: 'relative',
+  },
+  tabPane: {
+    ...StyleSheet.absoluteFill,
+  },
+  tabPaneHidden: {
+    display: 'none',
   },
 });

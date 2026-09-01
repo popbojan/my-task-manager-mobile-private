@@ -31,6 +31,9 @@ import RecurringTaskCard from '@/pages/recurring-tasks/RecurringTaskCard';
 import { sortTasksStable } from '@/pages/recurring-tasks/recurringBoardConfig';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import TodaySummaryCard from '@/pages/recurring-tasks/TodaySummaryCard';
+import PremiumUpsellModal from '@/pages/subscription/PremiumUpsellModal';
+import PremiumStatusBar from '@/pages/subscription/PremiumStatusBar';
+import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import {
   isApiConflictError,
   isApiPremiumRequiredError,
@@ -43,6 +46,7 @@ import {
 import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
+  invalidateRecurringQueries,
 } from '@/recurring/recurringQueryKeys';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
@@ -54,11 +58,13 @@ function sortTasksForList(tasks: RecurringTask[]): RecurringTask[] {
 type RecurringTasksScreenProps = {
   onOpenCreateTask: () => void;
   onOpenEditTask: (taskId: string) => void;
+  onOpenSubscription?: () => void;
 };
 
 export default function RecurringTasksScreen({
   onOpenCreateTask,
   onOpenEditTask,
+  onOpenSubscription,
 }: RecurringTasksScreenProps) {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const heroHeight = Math.min(
@@ -68,6 +74,8 @@ export default function RecurringTasksScreen({
   const { t } = useLanguage();
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
+  const subscriptionQuery = useSubscriptionAccess();
+  const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
 
   const [deleteModal, setDeleteModal] = useState<{
     visible: boolean;
@@ -76,6 +84,7 @@ export default function RecurringTasksScreen({
   const [listViewportHeight, setListViewportHeight] = useState(0);
   const [listContentHeight, setListContentHeight] = useState(0);
   const [celebrationVisible, setCelebrationVisible] = useState(false);
+  const [isPremiumUpsellOpen, setIsPremiumUpsellOpen] = useState(false);
   const statusTargetsRef = useRef(new Map<string, RecurringTaskStatus>());
   const statusSyncRunningRef = useRef(new Set<string>());
   const wasAllCompleteRef = useRef(false);
@@ -153,10 +162,31 @@ export default function RecurringTasksScreen({
   });
 
   const tasksPremiumLocked =
-    tasksQuery.isError && isApiPremiumRequiredError(tasksQuery.error);
+    !hasPremiumAccess &&
+    tasksQuery.isError &&
+    isApiPremiumRequiredError(tasksQuery.error);
   const progressPremiumLocked =
-    progressQuery.isError && isApiPremiumRequiredError(progressQuery.error);
+    !hasPremiumAccess &&
+    progressQuery.isError &&
+    isApiPremiumRequiredError(progressQuery.error);
   const isPremiumPreview = tasksPremiumLocked || progressPremiumLocked;
+
+  useEffect(() => {
+    if (!hasPremiumAccess) {
+      return;
+    }
+
+    if (!tasksQuery.isError && !progressQuery.isError) {
+      return;
+    }
+
+    invalidateRecurringQueries(queryClient);
+  }, [
+    hasPremiumAccess,
+    progressQuery.isError,
+    queryClient,
+    tasksQuery.isError,
+  ]);
 
   const displayTasks = tasksQuery.data ?? [];
   const sortedTasks = useMemo(
@@ -211,8 +241,25 @@ export default function RecurringTasksScreen({
     return t('recurring.deleteError');
   }, [deleteTaskMutation.error, deleteTaskMutation.isError, t]);
 
+  function openPremiumUpsell() {
+    setIsPremiumUpsellOpen(true);
+  }
+
+  function closePremiumUpsell() {
+    setIsPremiumUpsellOpen(false);
+  }
+
+  function guardPremiumInteraction(): boolean {
+    if (!tasksPremiumLocked) {
+      return false;
+    }
+
+    openPremiumUpsell();
+    return true;
+  }
+
   function openCreateModal() {
-    if (tasksPremiumLocked) {
+    if (guardPremiumInteraction()) {
       return;
     }
 
@@ -220,7 +267,7 @@ export default function RecurringTasksScreen({
   }
 
   function openEditModal(taskId: string) {
-    if (tasksPremiumLocked) {
+    if (guardPremiumInteraction()) {
       return;
     }
 
@@ -228,7 +275,7 @@ export default function RecurringTasksScreen({
   }
 
   function openDeleteModal(task: RecurringTask) {
-    if (tasksPremiumLocked) {
+    if (guardPremiumInteraction()) {
       return;
     }
 
@@ -249,7 +296,7 @@ export default function RecurringTasksScreen({
   }
 
   function handleStatusChange(taskId: string, status: RecurringTaskStatus) {
-    if (tasksPremiumLocked) {
+    if (guardPremiumInteraction()) {
       return;
     }
 
@@ -296,13 +343,7 @@ export default function RecurringTasksScreen({
 
       <View style={styles.body}>
         <View style={styles.bodyFixed}>
-          {tasksPremiumLocked ? (
-            <View style={styles.premiumNotice}>
-              <Text style={styles.premiumNoticeText}>
-                {t('recurring.premiumRequired')}
-              </Text>
-            </View>
-          ) : null}
+          <PremiumStatusBar onOpenSubscription={onOpenSubscription} />
 
           {progressFailed ? (
             <Text style={styles.errorText}>{t('recurring.progressError')}</Text>
@@ -329,15 +370,13 @@ export default function RecurringTasksScreen({
                 <View style={styles.sectionBadge}>
                   <Text style={styles.sectionBadgeText}>{dailyTaskCount}</Text>
                 </View>
-                {!tasksPremiumLocked ? (
-                  <Pressable
-                    style={styles.addFab}
-                    accessibilityLabel={t('recurring.addTaskDaily')}
-                    onPress={openCreateModal}
-                  >
-                    <PlusIcon size={14} color="#fff" />
-                  </Pressable>
-                ) : null}
+                <Pressable
+                  style={styles.addFab}
+                  accessibilityLabel={t('recurring.addTaskDaily')}
+                  onPress={openCreateModal}
+                >
+                  <PlusIcon size={14} color="#fff" />
+                </Pressable>
               </View>
             </View>
           ) : null}
@@ -407,6 +446,19 @@ export default function RecurringTasksScreen({
       <AllTasksCompleteCelebration
         visible={celebrationVisible}
         onDismiss={() => setCelebrationVisible(false)}
+      />
+
+      <PremiumUpsellModal
+        visible={isPremiumUpsellOpen}
+        onClose={closePremiumUpsell}
+        onOpenSubscriptionSettings={
+          onOpenSubscription
+            ? () => {
+                closePremiumUpsell();
+                onOpenSubscription();
+              }
+            : undefined
+        }
       />
     </View>
   );
@@ -496,18 +548,6 @@ const styles = StyleSheet.create({
   loadingBlock: {
     alignItems: 'center',
     paddingVertical: 8,
-  },
-  premiumNotice: {
-    borderRadius: 12,
-    padding: 10,
-    backgroundColor: recurringTheme.goldSoft,
-    borderWidth: 1,
-    borderColor: 'rgba(212, 168, 67, 0.35)',
-  },
-  premiumNoticeText: {
-    color: recurringTheme.goldBright,
-    fontSize: 13,
-    fontWeight: '600',
   },
   sectionHeader: {
     flexDirection: 'row',

@@ -14,3 +14,9 @@ export function clearRecurringSessionQueries(queryClient: QueryClient) {
   queryClient.removeQueries({ queryKey: ['recurring-task-progress'] });
   queryClient.removeQueries({ queryKey: ['current-user'] });
 }
+
+/** Refetch premium-gated recurring data after subscription unlocks. */
+export function invalidateRecurringQueries(queryClient: QueryClient): void {
+  void queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
+  void queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
+}

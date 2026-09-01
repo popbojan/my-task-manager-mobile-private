@@ -2,6 +2,7 @@ import type { TranslationKey } from './de';
 
 export const sr: Record<TranslationKey, string> = {
   'common.loading': 'Učitavanje…',
+  'common.back': 'Nazad',
   'common.close': 'Zatvori',
   'common.cancel': 'Otkaži',
   'common.save': 'Sačuvaj',
@@ -180,4 +181,104 @@ export const sr: Record<TranslationKey, string> = {
   'progress.recordInSight': 'NOVI REKORD NA VIDIKU',
   'progress.daysToRecord': 'Još {{count}} dana do najdužeg niza.',
   'progress.recordAchieved': 'Novi rekord! Čestitamo!',
+  'premium.badge': 'Premium',
+  'premium.title': 'Otključaj svoj pun potencijal',
+  'premium.subtitle':
+    'Dnevni zadaci, nizovi i 24 nivoa pomažu ti da svakog dana budeš bolji.',
+  'premium.feature.recurring.title': 'Postani najbolja verzija sebe.',
+  'premium.feature.recurring.description': 'Savladaj svoje navike.',
+  'premium.feature.streaks.title': 'Gradi niz',
+  'premium.feature.streaks.description':
+    'Budi dosledan, produži niz i nikada ne gubi napredak.',
+  'premium.feature.levels.title': 'Dostigni nivo 24.',
+  'premium.feature.levels.description':
+    'Pretvori male navike u novi život.',
+  'premium.feature.secure.title': 'Tvoj napredak je siguran',
+  'premium.feature.secure.description':
+    'Tvoji podaci, nizovi i uspesi se trajno čuvaju.',
+  'premium.feature.access.title': 'Pristup web i mobilnoj aplikaciji',
+  'premium.feature.access.description':
+    'Koristi Today svuda — na računaru i na telefonu.',
+  'premium.guarantee': 'Otkaži bilo kada. Bez skrivenih troškova.',
+  'premium.footer': 'Obični zadaci ostaju besplatni.',
+  'premium.cta': 'Otključaj Premium',
+  'recurring.premiumUnlockCta': 'Otključaj Premium',
+  'subscription.checkStatus.cta': 'Proveri status ponovo',
+  'subscription.settings.title': 'Tvoja Premium pretplata',
+  'subscription.settings.subtitle': 'Upravljaj pretplatom i vidi Premium status.',
+  'subscription.settings.loading': 'Učitavanje statusa pretplate…',
+  'subscription.settings.error': 'Status pretplate nije učitan.',
+  'subscription.settings.statusLabel': 'Status',
+  'subscription.settings.status.inactive': 'Nema aktivne pretplate',
+  'subscription.settings.status.pending': 'Na čekanju',
+  'subscription.settings.status.active': 'Aktivna',
+  'subscription.settings.status.trialing': 'Probni period',
+  'subscription.settings.status.gracePeriod': 'Grejs period',
+  'subscription.settings.status.pastDue': 'Plaćanje kasni',
+  'subscription.settings.status.canceled': 'Otkazana',
+  'subscription.settings.status.expired': 'Istekla',
+  'subscription.settings.status.revoked': 'Opozvana',
+  'subscription.settings.planLabel': 'Plan',
+  'subscription.settings.plan.monthly': 'Premium – Mesečno',
+  'subscription.settings.plan.yearly': 'Premium – Godišnje',
+  'subscription.settings.plan.lifetime': 'Premium – Doživotno',
+  'subscription.settings.billingDateLabel': 'Sledeći datum naplate',
+  'subscription.settings.billingDateUnavailable': 'Još nije dostupno',
+  'subscription.settings.cancellationLabel': 'Otkazivanje',
+  'subscription.settings.cancellationExpiresWithDate':
+    'Pretplata je otkazana i ističe {{date}}.',
+  'subscription.settings.cancellationExpires':
+    'Pretplata je otkazana i ističe na kraju tekućeg perioda.',
+  'subscription.settings.syncFailedNotice':
+    'Stripe trenutno nije dostupan. Prikazani status se oslanja na poslednje poznate podatke.',
+  'subscription.settings.subscribeCta': 'Otključaj Premium',
+  'subscription.settings.subscribeHint':
+    'Još nemaš Premium? Započni pretplatu ovde.',
+  'subscription.settings.manageCta': 'Upravljaj pretplatom',
+  'subscription.settings.manageLoading': 'Otvaranje upravljanja pretplatom…',
+  'subscription.settings.manageErrorNoCustomer':
+    'Na ovom nalogu nema web pretplate (Stripe) za upravljanje.',
+  'subscription.settings.manageErrorOpenFailed':
+    'Upravljanje pretplatom nije moglo da se otvori. Pokušaj ponovo.',
+  'subscription.settings.manageErrorTestStore':
+    'Test Store kupovine postoje samo u RevenueCat sandboxu — nema prave Google Play stranice. Za pravo upravljanje koristi Play Store ili release build.',
+  'subscription.mobile.provider.stripe': 'Premium je aktivan preko web pretplate (Stripe).',
+  'subscription.mobile.provider.apple': 'Premium je aktivan preko Apple App Store-a.',
+  'subscription.mobile.provider.googlePlay': 'Premium je aktivan preko Google Play-a.',
+  'subscription.mobile.stripeActive':
+    'Već imaš Premium preko web pretplate. Dodatna kupovina u aplikaciji nije potrebna.',
+  'subscription.mobile.alreadyPremium':
+    'Premium je već aktivan za ovaj nalog. Dodatna kupovina nije potrebna.',
+  'subscription.mobile.purchaseMonthly': 'Mesečno – {{price}}',
+  'subscription.mobile.purchaseLifetime': 'Doživotno – {{price}}',
+  'subscription.mobile.restore': 'Vrati kupovine',
+  'subscription.mobile.offeringsLoading': 'Učitavanje ponuda iz prodavnice…',
+  'subscription.mobile.offeringsError':
+    'Ponude iz prodavnice nisu učitane. Proveri RevenueCat konfiguraciju.',
+  'subscription.mobile.revenueCatUnavailable':
+    'Kupovine u aplikaciji još nisu podešene na ovom uređaju. Aplikacija ostaje upotrebljiva.',
+  'subscription.mobile.panelUnavailable':
+    'Odeljak za pretplatu trenutno nije mogao da se učita. RevenueCat greške ne blokiraju aplikaciju — osvežite ili pokušajte kasnije.',
+  'subscription.mobile.purchaseError':
+    'Kupovina nije završena. Pokušaj ponovo.',
+  'subscription.mobile.restoreError':
+    'Kupovine nisu vraćene. Pokušaj ponovo.',
+  'subscription.mobile.restoreNothing': 'Nije pronađena nijedna kupovina za vraćanje.',
+  'subscription.mobile.purchaseInFlight': 'Kupovina je već u toku.',
+  'subscription.mobile.identityMismatch':
+    'RevenueCat još nije povezan sa tvojim nalogom. Sačekaj, prijavi se ponovo i pokušaj opet.',
+  'subscription.mobile.processing.title': 'Kupovina uspešna – aktivacija se obrađuje',
+  'subscription.mobile.processing.message':
+    'Kupovina je uspešna. Premium će biti aktivan čim server potvrdi kupovinu.',
+  'subscription.mobile.processing.hint':
+    'Kupovina je stigla do RevenueCat-a. Backend je još mora da potvrdi (webhook ili sync). Pritisni „Proveri status ponovo“ ili sačekaj.',
+  'subscription.mobile.syncFailedRevenueCat':
+    'RevenueCat trenutno nije dostupan. Prikazani status se oslanja na poslednje poznate podatke.',
+  'subscription.mobile.syncFailedBoth':
+    'Stripe i RevenueCat trenutno nisu dostupni. Prikazani status se oslanja na poslednje poznate podatke.',
+  'profile.signedInAs': 'Prijavljen kao',
+  'profile.emailUnavailable': 'E-pošta nije dostupna',
+  'profile.accountMenu.title': 'Nalog',
+  'profile.accountMenu.subscription': 'Pretplata i naplata',
+  'profile.accountMenu.subscriptionHint': 'Premium status, kupovina i vraćanje',
 };

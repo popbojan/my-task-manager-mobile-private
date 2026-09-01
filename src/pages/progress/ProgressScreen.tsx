@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { RecurringTaskStatus } from '@/api/generated';
 import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
@@ -27,7 +27,9 @@ import StreakRecordCard from '@/pages/progress/StreakRecordCard';
 import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
+  invalidateRecurringQueries,
 } from '@/recurring/recurringQueryKeys';
+import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import { isApiPremiumRequiredError, shouldRetryApiQuery } from '@/utils/apiError';
 import { computeLevelProgress } from '@/utils/masteryProgress';
 import {
@@ -45,6 +47,9 @@ export default function ProgressScreen() {
   );
   const { t } = useLanguage();
   const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+  const subscriptionQuery = useSubscriptionAccess();
+  const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
 
   const tasksQuery = useQuery({
     queryKey: recurringTasksQueryKey(accessToken),
@@ -67,10 +72,31 @@ export default function ProgressScreen() {
   });
 
   const tasksPremiumLocked =
-    tasksQuery.isError && isApiPremiumRequiredError(tasksQuery.error);
+    !hasPremiumAccess &&
+    tasksQuery.isError &&
+    isApiPremiumRequiredError(tasksQuery.error);
   const progressPremiumLocked =
-    progressQuery.isError && isApiPremiumRequiredError(progressQuery.error);
+    !hasPremiumAccess &&
+    progressQuery.isError &&
+    isApiPremiumRequiredError(progressQuery.error);
   const isPremiumPreview = tasksPremiumLocked || progressPremiumLocked;
+
+  useEffect(() => {
+    if (!hasPremiumAccess) {
+      return;
+    }
+
+    if (!tasksQuery.isError && !progressQuery.isError) {
+      return;
+    }
+
+    invalidateRecurringQueries(queryClient);
+  }, [
+    hasPremiumAccess,
+    progressQuery.isError,
+    queryClient,
+    tasksQuery.isError,
+  ]);
 
   const displayTasks = tasksQuery.data ?? [];
   const doneTasksToday = displayTasks.filter(

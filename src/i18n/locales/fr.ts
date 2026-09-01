@@ -2,6 +2,7 @@ import type { TranslationKey } from './de';
 
 export const fr: Record<TranslationKey, string> = {
   'common.loading': 'Chargement…',
+  'common.back': 'Retour',
   'common.close': 'Fermer',
   'common.cancel': 'Annuler',
   'common.save': 'Enregistrer',
@@ -181,4 +182,104 @@ export const fr: Record<TranslationKey, string> = {
   'progress.recordInSight': 'NOUVEAU RECORD EN VUE',
   'progress.daysToRecord': 'Encore {{count}} jours avant ta plus longue série.',
   'progress.recordAchieved': 'Nouveau record ! Félicitations !',
+  'premium.badge': 'Premium',
+  'premium.title': 'Libère ton plein potentiel',
+  'premium.subtitle':
+    'Les tâches quotidiennes, les séries et 24 niveaux t’aident à progresser chaque jour.',
+  'premium.feature.recurring.title': 'Deviens la meilleure version de toi-même.',
+  'premium.feature.recurring.description': 'Maîtrise tes habitudes.',
+  'premium.feature.streaks.title': 'Construire ta chaîne',
+  'premium.feature.streaks.description':
+    'Reste régulier, fais grandir ta série et ne perds jamais ton progrès.',
+  'premium.feature.levels.title': 'Atteins le niveau 24.',
+  'premium.feature.levels.description':
+    'Transforme de petites habitudes en une nouvelle vie.',
+  'premium.feature.secure.title': 'Ta progression est en sécurité',
+  'premium.feature.secure.description':
+    'Tes données, séries et succès sont stockés durablement.',
+  'premium.feature.access.title': 'Accès à l’app web et mobile',
+  'premium.feature.access.description':
+    'Utilise Today partout — sur ordinateur et sur ton téléphone.',
+  'premium.guarantee': 'Résiliable à tout moment. Sans frais cachés.',
+  'premium.footer': 'Les tâches normales restent gratuites pour toi.',
+  'premium.cta': 'Activer Premium',
+  'recurring.premiumUnlockCta': 'Activer Premium',
+  'subscription.checkStatus.cta': 'Vérifier le statut',
+  'subscription.settings.title': 'Ton abonnement Premium',
+  'subscription.settings.subtitle': 'Gère ton abo et consulte ton statut Premium.',
+  'subscription.settings.loading': 'Chargement du statut d’abonnement…',
+  'subscription.settings.error': 'Impossible de charger le statut d’abonnement.',
+  'subscription.settings.statusLabel': 'Statut',
+  'subscription.settings.status.inactive': 'Aucun abo actif',
+  'subscription.settings.status.pending': 'En attente',
+  'subscription.settings.status.active': 'Actif',
+  'subscription.settings.status.trialing': 'Essai',
+  'subscription.settings.status.gracePeriod': 'Période de grâce',
+  'subscription.settings.status.pastDue': 'Paiement en retard',
+  'subscription.settings.status.canceled': 'Résilié',
+  'subscription.settings.status.expired': 'Expiré',
+  'subscription.settings.status.revoked': 'Révoqué',
+  'subscription.settings.planLabel': 'Formule',
+  'subscription.settings.plan.monthly': 'Premium – Mensuel',
+  'subscription.settings.plan.yearly': 'Premium – Annuel',
+  'subscription.settings.plan.lifetime': 'Premium – À vie',
+  'subscription.settings.billingDateLabel': 'Prochaine date de facturation',
+  'subscription.settings.billingDateUnavailable': 'Pas encore disponible',
+  'subscription.settings.cancellationLabel': 'Résiliation',
+  'subscription.settings.cancellationExpiresWithDate':
+    'Ton abo a été résilié et expire le {{date}}.',
+  'subscription.settings.cancellationExpires':
+    'Ton abo a été résilié et expire à la fin de la période en cours.',
+  'subscription.settings.syncFailedNotice':
+    'Stripe est indisponible. Le statut affiché repose sur les dernières données connues.',
+  'subscription.settings.subscribeCta': 'Activer Premium',
+  'subscription.settings.subscribeHint':
+    'Pas encore Premium ? Commence ton abonnement ici.',
+  'subscription.settings.manageCta': 'Gérer l’abonnement',
+  'subscription.settings.manageLoading': 'Ouverture de la gestion d’abonnement…',
+  'subscription.settings.manageErrorNoCustomer':
+    'Aucun abo web (Stripe) gérable n’est lié à ce compte.',
+  'subscription.settings.manageErrorOpenFailed':
+    'Impossible d’ouvrir la gestion de l’abonnement. Réessaie.',
+  'subscription.settings.manageErrorTestStore':
+    'Les achats Test Store n’existent que dans le bac à sable RevenueCat — pas de page Google Play réelle. Utilise un build Play Store ou release pour gérer un vrai abo.',
+  'subscription.mobile.provider.stripe': 'Premium est actif via ton abo web (Stripe).',
+  'subscription.mobile.provider.apple': 'Premium est actif via l’App Store Apple.',
+  'subscription.mobile.provider.googlePlay': 'Premium est actif via Google Play.',
+  'subscription.mobile.stripeActive':
+    'Tu as déjà Premium via ton abo web. Aucun achat in-app supplémentaire n’est nécessaire.',
+  'subscription.mobile.alreadyPremium':
+    'Premium est déjà actif pour ce compte. Aucun achat supplémentaire n’est nécessaire.',
+  'subscription.mobile.purchaseMonthly': 'Mensuel – {{price}}',
+  'subscription.mobile.purchaseLifetime': 'À vie – {{price}}',
+  'subscription.mobile.restore': 'Restaurer les achats',
+  'subscription.mobile.offeringsLoading': 'Chargement des offres du store…',
+  'subscription.mobile.offeringsError':
+    'Impossible de charger les offres du store. Vérifie la configuration RevenueCat.',
+  'subscription.mobile.revenueCatUnavailable':
+    'Les achats in-app ne sont pas encore configurés sur cet appareil. L’app reste utilisable.',
+  'subscription.mobile.panelUnavailable':
+    'La section abonnement n’a pas pu être chargée pour le moment. Les erreurs RevenueCat ne bloquent pas l’app — rechargez ou réessayez plus tard.',
+  'subscription.mobile.purchaseError':
+    'L’achat n’a pas pu être finalisé. Réessaie.',
+  'subscription.mobile.restoreError':
+    'Impossible de restaurer les achats. Réessaie.',
+  'subscription.mobile.restoreNothing': 'Aucun achat à restaurer n’a été trouvé.',
+  'subscription.mobile.purchaseInFlight': 'Un achat est déjà en cours.',
+  'subscription.mobile.identityMismatch':
+    'RevenueCat n’est pas encore lié à votre compte. Attendez, reconnectez-vous, puis réessayez.',
+  'subscription.mobile.processing.title': 'Achat réussi – activation en cours',
+  'subscription.mobile.processing.message':
+    'Ton achat a réussi. Premium s’activera dès que le serveur l’aura confirmé.',
+  'subscription.mobile.processing.hint':
+    'L’achat est bien arrivé chez RevenueCat. Ton backend doit encore le confirmer (webhook ou sync). Appuie sur « Vérifier le statut » ou attends un instant.',
+  'subscription.mobile.syncFailedRevenueCat':
+    'RevenueCat est indisponible. Le statut affiché repose sur les dernières données connues.',
+  'subscription.mobile.syncFailedBoth':
+    'Stripe et RevenueCat sont indisponibles. Le statut affiché repose sur les dernières données connues.',
+  'profile.signedInAs': 'Connecté en tant que',
+  'profile.emailUnavailable': 'E-mail indisponible',
+  'profile.accountMenu.title': 'Compte',
+  'profile.accountMenu.subscription': 'Abonnement & facturation',
+  'profile.accountMenu.subscriptionHint': 'Statut Premium, achat et restauration',
 };

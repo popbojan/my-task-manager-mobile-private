@@ -38,6 +38,10 @@ function isApiEnvironment(value: string | null): value is ApiEnvironment {
 }
 
 function resolveStoredEnvironment(stored: string | null): ApiEnvironment {
+  if (__DEV__) {
+    return 'local';
+  }
+
   if (isApiEnvironment(stored)) {
     if (stored === 'local' && !isLocalDevHostPreferred()) {
       return 'production';
@@ -72,6 +76,15 @@ export function ApiEnvironmentProvider({ children }: { children: ReactNode }) {
         if (!cancelled) {
           setEnvironmentState(nextEnvironment);
           setApiBaseUrl(getApiBaseUrl());
+
+          if (__DEV__) {
+            console.log(
+              '[API] environment:',
+              nextEnvironment,
+              'url:',
+              resolveApiBaseUrl(nextEnvironment),
+            );
+          }
         }
       } finally {
         if (!cancelled) {

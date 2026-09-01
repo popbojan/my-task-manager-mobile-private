@@ -7,6 +7,7 @@ import { useApiEnvironment } from '@/config/ApiEnvironmentProvider';
 import type { ApiEnvironment } from '@/config/api';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import LanguagePicker from '@/pages/login/LanguagePicker';
+import ProfileScreen from '@/pages/profile/ProfileScreen';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 
@@ -15,21 +16,24 @@ type TabPlaceholderScreenProps = {
   onGoToday: () => void;
 };
 
+/**
+ * Legacy tab shell — profile now uses the real ProfileScreen (subscription UI).
+ * Kept so older App.tsx bundles still show subscription after a JS reload.
+ */
 export default function TabPlaceholderScreen({
   tab,
   onGoToday,
 }: TabPlaceholderScreenProps) {
+  if (tab === 'profile') {
+    return <ProfileScreen onGoToday={onGoToday} />;
+  }
+
   const { setAccessToken } = useAuth();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const { environment, apiBaseUrl, setEnvironment } = useApiEnvironment();
 
-  const titleKey =
-    tab === 'tasks'
-      ? 'nav.tasks'
-      : tab === 'progress'
-        ? 'nav.progress'
-        : 'nav.profile';
+  const titleKey = tab === 'tasks' ? 'nav.tasks' : 'nav.progress';
 
   async function handleLogout() {
     try {
@@ -62,14 +66,13 @@ export default function TabPlaceholderScreen({
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{t(titleKey)}</Text>
-        {tab === 'profile' ? <LanguagePicker /> : null}
       </View>
       <View style={styles.content}>
         <Text style={styles.subtitle}>{t('home.placeholder')}</Text>
         <Pressable style={styles.button} onPress={onGoToday}>
           <Text style={styles.buttonText}>{t('nav.backToToday')}</Text>
         </Pressable>
-        {tab === 'profile' && __DEV__ ? (
+        {tab === 'progress' && __DEV__ ? (
           <View style={styles.devPanel}>
             <Text style={styles.devTitle}>{t('dev.api.title')}</Text>
             <Text style={styles.devUrl}>{apiBaseUrl}</Text>
@@ -94,7 +97,7 @@ export default function TabPlaceholderScreen({
             </Pressable>
           </View>
         ) : null}
-        {tab === 'profile' ? (
+        {tab === 'progress' ? (
           <Pressable style={styles.logoutButton} onPress={handleLogout}>
             <Text style={styles.logoutText}>{t('header.logout')}</Text>
           </Pressable>

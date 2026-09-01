@@ -20,6 +20,7 @@ import AppBrandHeader from '@/components/AppBrandHeader';
 import LoginHelpModal from '@/pages/login/LoginHelpModal';
 import MasteryLevelStrip from '@/pages/login/MasteryLevelStrip';
 import { loginTheme } from '@/pages/login/loginTheme';
+import { clearSubscriptionSessionQueries } from '@/subscription/clearSubscriptionSession';
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 import type { MasteryLevel } from '@/api/generated/models/MasteryLevel';
 
@@ -112,6 +113,7 @@ export default function LoginScreen() {
 
       if (data.accessToken) {
         clearRecurringSessionQueries(queryClient);
+        clearSubscriptionSessionQueries(queryClient);
         setAccessToken(data.accessToken);
       }
     } catch {

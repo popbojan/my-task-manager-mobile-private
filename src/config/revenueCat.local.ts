@@ -4,7 +4,7 @@
  */
 export const revenueCatLocalOverrides = {
   /** Google Play public SDK key (`goog_…`) — required for release / Play sandbox builds. */
-  androidPublicSdkKey: '',
+  androidPublicSdkKey: 'goog_VqbBitdpQtvWjQPOUEfnifJyQqP',
   /** Test Store key (`test_…`) — DEBUG builds only; crashes release if used there. */
   androidTestStoreSdkKey: 'test_ZnngtRpsQhLKsYQgzrQytpSLPHT',
   iosPublicSdkKey: '',

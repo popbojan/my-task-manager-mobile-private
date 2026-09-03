@@ -9,6 +9,15 @@ export type RevenueCatStorePackages = {
   lifetime: PurchasesPackage | null;
 };
 
+function normalizeStoreProductId(productId: string): string {
+  const separatorIndex = productId.indexOf(':');
+  if (separatorIndex === -1) {
+    return productId;
+  }
+
+  return productId.slice(0, separatorIndex);
+}
+
 function findPackageByTypeOrProductId(
   packages: PurchasesPackage[],
   packageType: PACKAGE_TYPE,
@@ -17,6 +26,9 @@ function findPackageByTypeOrProductId(
   return (
     packages.find(pkg => pkg.packageType === packageType) ??
     packages.find(pkg => pkg.product.identifier === productId) ??
+    packages.find(
+      pkg => normalizeStoreProductId(pkg.product.identifier) === productId,
+    ) ??
     null
   );
 }

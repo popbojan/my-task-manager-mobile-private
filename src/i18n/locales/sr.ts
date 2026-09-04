@@ -255,6 +255,10 @@ export const sr: Record<TranslationKey, string> = {
   'subscription.mobile.offeringsLoading': 'Učitavanje ponuda iz prodavnice…',
   'subscription.mobile.offeringsError':
     'Ponude iz prodavnice nisu učitane. Proveri RevenueCat konfiguraciju.',
+  'subscription.mobile.offeringsErrorPlayProducts':
+    'RevenueCat nema Google Play proizvode u trenutnom offering-u. U dashboard-u uvezi Play proizvode i dodeli ih offering-u (ne samo Test Store).',
+  'subscription.mobile.offeringsErrorEmptyOffering':
+    'RevenueCat offering je prazan ili nema pakete za monthly/lifetime.',
   'subscription.mobile.revenueCatUnavailable':
     'Kupovine u aplikaciji još nisu podešene na ovom uređaju. Aplikacija ostaje upotrebljiva.',
   'subscription.mobile.panelUnavailable':

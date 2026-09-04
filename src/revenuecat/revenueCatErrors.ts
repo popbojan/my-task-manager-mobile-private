@@ -13,6 +13,16 @@ export function isRevenueCatUserCancelledError(error: unknown): boolean {
   return purchasesError.code === Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR;
 }
 
+export function isRevenueCatConfigurationError(error: unknown): boolean {
+  if (!error || typeof error !== 'object' || !('code' in error)) {
+    return false;
+  }
+
+  return (
+    (error as PurchasesError).code === Purchases.PURCHASES_ERROR_CODE.CONFIGURATION_ERROR
+  );
+}
+
 export function isRevenueCatPurchaseNotAllowedError(error: unknown): boolean {
   if (!error || typeof error !== 'object' || !('code' in error)) {
     return false;

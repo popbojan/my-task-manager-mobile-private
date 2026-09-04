@@ -253,6 +253,10 @@ export const de = {
   'subscription.mobile.offeringsLoading': 'Store-Angebote werden geladen…',
   'subscription.mobile.offeringsError':
     'Store-Angebote konnten nicht geladen werden. Bitte prüfe die RevenueCat-Konfiguration.',
+  'subscription.mobile.offeringsErrorPlayProducts':
+    'RevenueCat hat keine Google-Play-Produkte im Current Offering. Im Dashboard Play-Produkte importieren und dem Offering zuweisen (nicht nur Test Store).',
+  'subscription.mobile.offeringsErrorEmptyOffering':
+    'Das RevenueCat-Offering ist leer oder enthält keine Pakete für monthly/lifetime.',
   'subscription.mobile.revenueCatUnavailable':
     'In-App-Käufe sind auf diesem Gerät noch nicht konfiguriert. Die App bleibt nutzbar.',
   'subscription.mobile.panelUnavailable':

@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import PremiumFeatureList from '@/pages/subscription/PremiumFeatureList';
+import { getOfferingsErrorTranslationKey } from '@/revenuecat/revenueCatOfferingsErrors';
 import { usePremiumPurchaseFlow } from '@/pages/subscription/usePremiumPurchaseFlow';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
@@ -55,7 +56,9 @@ export default function PremiumSubscribeSection({
       ) : flow.offeringsQuery.isLoading ? (
         <Text style={styles.message}>{t('subscription.mobile.offeringsLoading')}</Text>
       ) : flow.offeringsQuery.isError ? (
-        <Text style={styles.error}>{t('subscription.mobile.offeringsError')}</Text>
+        <Text style={styles.error}>
+          {t(getOfferingsErrorTranslationKey(flow.offeringsQuery.error))}
+        </Text>
       ) : (
         <>
           {flow.monthlyPackage ? (

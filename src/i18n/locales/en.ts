@@ -252,6 +252,10 @@ export const en: Record<TranslationKey, string> = {
   'subscription.mobile.offeringsLoading': 'Loading store offerings…',
   'subscription.mobile.offeringsError':
     'Store offerings could not be loaded. Please check the RevenueCat configuration.',
+  'subscription.mobile.offeringsErrorPlayProducts':
+    'RevenueCat has no Google Play products in the current offering. Import Play products in the dashboard and assign them to the offering (not Test Store only).',
+  'subscription.mobile.offeringsErrorEmptyOffering':
+    'The RevenueCat offering is empty or has no packages for monthly/lifetime.',
   'subscription.mobile.revenueCatUnavailable':
     'In-app purchases are not configured on this device yet. The app remains usable.',
   'subscription.mobile.panelUnavailable':

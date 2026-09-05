@@ -34,6 +34,8 @@ export const en: Record<TranslationKey, string> = {
   'login.submit': 'Sign in',
   'login.checking': 'Checking…',
   'login.errorOtpRequest': 'Could not send OTP.',
+  'login.errorOtpRequestDev':
+    'OTP failed ({{url}}). Is the backend reachable? Check the IP in the dev panel or switch to production.',
   'login.errorLogin': 'OTP is invalid or expired.',
   'login.levels.title': 'Mastery levels',
   'login.levels.hintHighlight': '24 levels',
@@ -62,6 +64,10 @@ export const en: Record<TranslationKey, string> = {
     'Production — live Railway data (prod accounts).',
   'dev.api.switchToProduction': 'Switch to production',
   'dev.api.switchToLocal': 'Switch to local',
+  'dev.api.devHostLabel': 'Mac IP (LAN)',
+  'dev.api.devHostPlaceholder': '192.168.178.29',
+  'dev.api.saveDevHost': 'Save IP',
+  'dev.api.invalidHost': 'Invalid IP address.',
   'recurring.loading': 'Loading tasks…',
   'recurring.error': 'Could not load tasks.',
   'recurring.progressError': 'Could not load progress.',
@@ -196,7 +202,10 @@ export const en: Record<TranslationKey, string> = {
   'premium.feature.access.title': 'Access to web and mobile app',
   'premium.feature.access.description':
     'Use Today everywhere — on desktop and on your phone.',
-  'premium.guarantee': 'Cancel anytime. No hidden fees.',
+  'premium.guaranteeMonthly':
+    'Cancel monthly anytime. No hidden fees.',
+  'premium.guaranteeLifetime':
+    'Lifetime: pay once, use forever.',
   'premium.footer': 'Regular tasks stay free for you.',
   'premium.cta': 'Unlock Premium',
   'recurring.premiumUnlockCta': 'Unlock Premium',
@@ -279,6 +288,8 @@ export const en: Record<TranslationKey, string> = {
     'Stripe and RevenueCat are currently unavailable. The status shown is based on the last known data.',
   'profile.signedInAs': 'Signed in as',
   'profile.emailUnavailable': 'Email unavailable',
+  'profile.session.title': 'Session',
+  'profile.logout.hint': 'Sign out of your account on this device',
   'profile.accountMenu.title': 'Account',
   'profile.accountMenu.subscription': 'Subscription & billing',
   'profile.accountMenu.subscriptionHint': 'Premium status, purchase and restore',

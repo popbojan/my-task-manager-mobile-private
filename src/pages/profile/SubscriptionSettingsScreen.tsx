@@ -4,6 +4,8 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import SubscriptionPanelErrorBoundary from '@/pages/profile/SubscriptionPanelErrorBoundary';
 import SubscriptionSettingsPanel from '@/pages/profile/SubscriptionSettingsPanel';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import { useAppRefresh } from '@/refresh/useAppRefresh';
+import { useRefreshControl } from '@/refresh/useRefreshControl';
 
 type SubscriptionSettingsScreenProps = {
   onBack: () => void;
@@ -13,6 +15,8 @@ export default function SubscriptionSettingsScreen({
   onBack,
 }: SubscriptionSettingsScreenProps) {
   const { t } = useLanguage();
+  const { refreshing, onRefresh } = useAppRefresh();
+  const refreshControl = useRefreshControl({ refreshing, onRefresh });
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -20,11 +24,15 @@ export default function SubscriptionSettingsScreen({
         <Pressable style={styles.backButton} onPress={onBack} accessibilityRole="button">
           <Text style={styles.backButtonText}>← {t('common.back')}</Text>
         </Pressable>
-        <Text style={styles.headerTitle}>{t('subscription.settings.title')}</Text>
+        <Text style={styles.headerTitle}>{t('profile.accountMenu.subscription')}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={refreshControl}
+      >
         <SubscriptionPanelErrorBoundary
           title={t('subscription.settings.title')}
           fallbackMessage={t('subscription.mobile.panelUnavailable')}
@@ -68,6 +76,9 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     minWidth: 72,
+  },
+  scroll: {
+    flex: 1,
   },
   scrollContent: {
     padding: 16,

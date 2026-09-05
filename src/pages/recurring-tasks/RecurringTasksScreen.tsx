@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   Image,
   Pressable,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -48,6 +48,8 @@ import {
   recurringTasksQueryKey,
   invalidateRecurringQueries,
 } from '@/recurring/recurringQueryKeys';
+import { useAppRefresh } from '@/refresh/useAppRefresh';
+import { useRefreshControl } from '@/refresh/useRefreshControl';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
@@ -74,6 +76,8 @@ export default function RecurringTasksScreen({
   const { t } = useLanguage();
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
+  const { refreshing, onRefresh } = useAppRefresh();
+  const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
 
@@ -81,8 +85,6 @@ export default function RecurringTasksScreen({
     visible: boolean;
     task: RecurringTask | null;
   }>({ visible: false, task: null });
-  const [listViewportHeight, setListViewportHeight] = useState(0);
-  const [listContentHeight, setListContentHeight] = useState(0);
   const [celebrationVisible, setCelebrationVisible] = useState(false);
   const [isPremiumUpsellOpen, setIsPremiumUpsellOpen] = useState(false);
   const statusTargetsRef = useRef(new Map<string, RecurringTaskStatus>());
@@ -210,8 +212,6 @@ export default function RecurringTasksScreen({
   const progressFailed =
     progressQuery.isError && !progressPremiumLocked && !progressQuery.data;
   const canRenderBoard = tasksQuery.isSuccess || tasksPremiumLocked;
-  const listScrollEnabled =
-    listViewportHeight === 0 || listContentHeight > listViewportHeight + 1;
 
   useEffect(() => {
     if (isInitialCompleteCheckRef.current) {
@@ -342,95 +342,88 @@ export default function RecurringTasksScreen({
       </View>
 
       <View style={styles.body}>
-        <View style={styles.bodyFixed}>
-          <PremiumStatusBar onOpenSubscription={onOpenSubscription} />
-
-          {progressFailed ? (
-            <Text style={styles.errorText}>{t('recurring.progressError')}</Text>
-          ) : null}
-
-          {!progressIsLoading && !progressFailed ? (
-            <MasteryStatsGrid progress={displayProgress} />
-          ) : null}
-
-          {canRenderBoard ? (
-            <TodaySummaryCard
-              totalTasks={dailyTaskCount}
-              doneTasks={doneTasks}
-              allComplete={allDailyTasksComplete}
-            />
-          ) : null}
-
-          {canRenderBoard ? (
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>
-                {t('recurring.tasks.sectionTitle')}
-              </Text>
-              <View style={styles.sectionHeaderRight}>
-                <View style={styles.sectionBadge}>
-                  <Text style={styles.sectionBadgeText}>{dailyTaskCount}</Text>
-                </View>
-                <Pressable
-                  style={styles.addFab}
-                  accessibilityLabel={t('recurring.addTaskDaily')}
-                  onPress={openCreateModal}
-                >
-                  <PlusIcon size={14} color="#fff" />
-                </Pressable>
-              </View>
-            </View>
-          ) : null}
-
-          {tasksAreLoading ? (
-            <View style={styles.loadingBlock}>
-              <ActivityIndicator color={recurringTheme.accentBright} />
-            </View>
-          ) : null}
-
-          {tasksFailed ? (
-            <Text style={styles.errorText}>{t('recurring.error')}</Text>
-          ) : null}
-        </View>
-
-        <FlatList
-          data={canRenderBoard ? sortedTasks : []}
-          keyExtractor={item => item.id}
-          style={styles.taskList}
-          contentContainerStyle={styles.taskListContent}
+        <ScrollView
+          style={styles.bodyScroll}
+          contentContainerStyle={styles.bodyScrollContent}
           showsVerticalScrollIndicator={false}
-          scrollEnabled={listScrollEnabled}
-          bounces={listScrollEnabled}
-          nestedScrollEnabled
-          onLayout={event => {
-            setListViewportHeight(event.nativeEvent.layout.height);
-          }}
-          onContentSizeChange={(_, height) => {
-            setListContentHeight(height);
-          }}
-          ListEmptyComponent={
-            tasksAreLoading || !canRenderBoard
-              ? undefined
-              : () => (
-                  <Text style={styles.emptyText}>{t('recurring.noTasks')}</Text>
-                )
-          }
-          renderItem={({ item }) => (
-            <RecurringTaskCard
-              task={item}
-              onEdit={openEditModal}
-              onDelete={openDeleteModal}
-              onStatusChange={handleStatusChange}
-            />
-          )}
-          ItemSeparatorComponent={() => <View style={styles.taskSeparator} />}
-        />
+          refreshControl={refreshControl}
+        >
+          <View style={styles.bodyFixed}>
+            <PremiumStatusBar onOpenSubscription={onOpenSubscription} />
 
-        {canRenderBoard ? (
-          <FocusReminderCard
-            allTasksComplete={allDailyTasksComplete}
-            hasTasks={dailyTaskCount > 0}
-          />
-        ) : null}
+            {progressFailed ? (
+              <Text style={styles.errorText}>{t('recurring.progressError')}</Text>
+            ) : null}
+
+            {!progressIsLoading && !progressFailed ? (
+              <MasteryStatsGrid progress={displayProgress} />
+            ) : null}
+
+            {canRenderBoard ? (
+              <TodaySummaryCard
+                totalTasks={dailyTaskCount}
+                doneTasks={doneTasks}
+                allComplete={allDailyTasksComplete}
+              />
+            ) : null}
+
+            {canRenderBoard ? (
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>
+                  {t('recurring.tasks.sectionTitle')}
+                </Text>
+                <View style={styles.sectionHeaderRight}>
+                  <View style={styles.sectionBadge}>
+                    <Text style={styles.sectionBadgeText}>{dailyTaskCount}</Text>
+                  </View>
+                  <Pressable
+                    style={styles.addFab}
+                    accessibilityLabel={t('recurring.addTaskDaily')}
+                    onPress={openCreateModal}
+                  >
+                    <PlusIcon size={14} color="#fff" />
+                  </Pressable>
+                </View>
+              </View>
+            ) : null}
+
+            {tasksAreLoading ? (
+              <View style={styles.loadingBlock}>
+                <ActivityIndicator color={recurringTheme.accentBright} />
+              </View>
+            ) : null}
+
+            {tasksFailed ? (
+              <Text style={styles.errorText}>{t('recurring.error')}</Text>
+            ) : null}
+          </View>
+
+          {canRenderBoard ? (
+            <View style={styles.taskList}>
+              {sortedTasks.length === 0 && !tasksAreLoading ? (
+                <Text style={styles.emptyText}>{t('recurring.noTasks')}</Text>
+              ) : null}
+              {sortedTasks.map((task, index) => (
+                <View key={task.id}>
+                  {index > 0 ? <View style={styles.taskSeparator} /> : null}
+                  <RecurringTaskCard
+                    task={task}
+                    onEdit={openEditModal}
+                    onDelete={openDeleteModal}
+                    onStatusChange={handleStatusChange}
+                  />
+                </View>
+              ))}
+            </View>
+          ) : null}
+
+          {canRenderBoard ? (
+            <FocusReminderCard
+              allTasksComplete={allDailyTasksComplete}
+              hasTasks={dailyTaskCount > 0}
+            />
+          ) : null}
+        </ScrollView>
       </View>
 
       <DeleteRecurringTaskModal
@@ -528,6 +521,12 @@ const styles = StyleSheet.create({
     minHeight: 0,
     paddingHorizontal: 16,
     paddingTop: 6,
+    paddingBottom: 4,
+  },
+  bodyScroll: {
+    flex: 1,
+  },
+  bodyScrollContent: {
     gap: 5,
     paddingBottom: 4,
   },
@@ -535,12 +534,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   taskList: {
-    flex: 1,
-    minHeight: 0,
-  },
-  taskListContent: {
-    flexGrow: 1,
-    paddingBottom: 2,
+    gap: 0,
   },
   taskSeparator: {
     height: 5,

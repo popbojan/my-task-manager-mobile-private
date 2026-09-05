@@ -32,6 +32,8 @@ export const de = {
   'login.submit': 'Einloggen',
   'login.checking': 'Prüfe…',
   'login.errorOtpRequest': 'OTP konnte nicht gesendet werden.',
+  'login.errorOtpRequestDev':
+    'OTP fehlgeschlagen ({{url}}). Backend erreichbar? IP im Dev-Panel prüfen oder zu Production wechseln.',
   'login.errorLogin': 'OTP ist ungültig oder abgelaufen.',
   'login.levels.title': 'Mastery-Level',
   'login.levels.hintHighlight': '24 Ebenen',
@@ -61,6 +63,10 @@ export const de = {
     'Production — live Railway-Daten (Prod-Accounts).',
   'dev.api.switchToProduction': 'Zu Production wechseln',
   'dev.api.switchToLocal': 'Zu Lokal wechseln',
+  'dev.api.devHostLabel': 'Mac-IP (LAN)',
+  'dev.api.devHostPlaceholder': '192.168.178.29',
+  'dev.api.saveDevHost': 'IP speichern',
+  'dev.api.invalidHost': 'Ungültige IP-Adresse.',
   'recurring.loading': 'Lade Aufgaben…',
   'recurring.error': 'Aufgaben konnten nicht geladen werden.',
   'recurring.progressError': 'Fortschritt konnte nicht geladen werden.',
@@ -196,7 +202,10 @@ export const de = {
   'premium.feature.access.title': 'Zugang zu Web- und Mobile-App',
   'premium.feature.access.description':
     'Nutze Today überall – am Desktop und unterwegs auf dem Handy.',
-  'premium.guarantee': 'Jederzeit kündbar. Keine versteckten Kosten.',
+  'premium.guaranteeMonthly':
+    'Beim Monatsabo jederzeit kündbar. Keine versteckten Kosten.',
+  'premium.guaranteeLifetime':
+    'Beim Lifetime-Abo einmal zahlen, dauerhaft nutzen.',
   'premium.footer': 'Normale Aufgaben bleiben für dich kostenlos.',
   'premium.cta': 'Premium freischalten',
   'recurring.premiumUnlockCta': 'Premium freischalten',
@@ -280,6 +289,8 @@ export const de = {
     'Stripe und RevenueCat sind gerade nicht erreichbar. Der angezeigte Status basiert auf den zuletzt bekannten Daten.',
   'profile.signedInAs': 'Angemeldet als',
   'profile.emailUnavailable': 'E-Mail nicht verfügbar',
+  'profile.session.title': 'Sitzung',
+  'profile.logout.hint': 'Vom Konto auf diesem Gerät abmelden',
   'profile.accountMenu.title': 'Konto',
   'profile.accountMenu.subscription': 'Abo & Abrechnung',
   'profile.accountMenu.subscriptionHint': 'Premium-Status, Kauf und Wiederherstellung',

@@ -15,6 +15,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { authApi, authRequestInit } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
+import { useApiEnvironment } from '@/config/ApiEnvironmentProvider';
+import DevApiPanel from '@/config/DevApiPanel';
+import type { ApiEnvironment } from '@/config/api';
 import { useApiLanguage, useLanguage } from '@/i18n/LanguageProvider';
 import AppBrandHeader from '@/components/AppBrandHeader';
 import LoginHelpModal from '@/pages/login/LoginHelpModal';
@@ -33,6 +36,7 @@ export default function LoginScreen() {
   const { t } = useLanguage();
   const apiLanguage = useApiLanguage();
   const queryClient = useQueryClient();
+  const { apiBaseUrl } = useApiEnvironment();
 
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -85,11 +89,15 @@ export default function LoginScreen() {
       });
       setStep('otp');
     } catch {
-      setOtpError(t('login.errorOtpRequest'));
+      setOtpError(
+        __DEV__
+          ? t('login.errorOtpRequestDev', { url: apiBaseUrl })
+          : t('login.errorOtpRequest'),
+      );
     } finally {
       setIsSendingOtp(false);
     }
-  }, [apiLanguage, email, isSendingOtp, t]);
+  }, [apiBaseUrl, apiLanguage, email, isSendingOtp, t]);
 
   const handleLogin = useCallback(async () => {
     if (!email.trim() || !otp.trim() || isLoggingIn) {
@@ -122,6 +130,27 @@ export default function LoginScreen() {
       setIsLoggingIn(false);
     }
   }, [apiLanguage, email, isLoggingIn, otp, queryClient, setAccessToken, t]);
+
+  async function handleDevApiChange(_nextEnvironment: ApiEnvironment) {
+    clearRecurringSessionQueries(queryClient);
+    clearSubscriptionSessionQueries(queryClient);
+    setAccessToken(null);
+    setStep('email');
+    setOtp('');
+    setOtpError(null);
+    setLoginError(null);
+    setLevelsLoading(true);
+    setLevels([]);
+
+    try {
+      const data = await authApi.getMasteryLevels();
+      setLevels(data);
+    } catch {
+      setLevels([]);
+    } finally {
+      setLevelsLoading(false);
+    }
+  }
 
   const canSendOtp = !!email.trim() && !isSendingOtp;
   const canLogin = !!email.trim() && !!otp.trim() && !isLoggingIn;
@@ -272,6 +301,12 @@ export default function LoginScreen() {
                   levels={levels}
                   isLoading={levelsLoading}
                 />
+                {__DEV__ ? (
+                  <DevApiPanel
+                    tone="login"
+                    onEnvironmentSwitch={handleDevApiChange}
+                  />
+                ) : null}
                 <Text style={styles.securityFooter}>
                   🛡 {t('login.security')}
                 </Text>

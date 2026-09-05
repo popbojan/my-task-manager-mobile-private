@@ -62,26 +62,29 @@ export default function PremiumSubscribeSection({
       ) : (
         <>
           {flow.monthlyPackage ? (
-            <Pressable
-              style={[
-                styles.primaryButton,
-                flow.purchasesDisabled && styles.buttonDisabled,
-              ]}
-              disabled={flow.purchasesDisabled}
-              onPress={() =>
-                flow.handlePurchase(flow.monthlyPackage!, 'monthly')
-              }
-            >
-              {flow.purchaseLoading === 'monthly' ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.primaryButtonText}>
-                  {monthlyPrice
-                    ? t('subscription.mobile.purchaseMonthly', { price: monthlyPrice })
-                    : t('subscription.settings.subscribeCta')}
-                </Text>
-              )}
-            </Pressable>
+            <View style={styles.planOption}>
+              <Pressable
+                style={[
+                  styles.primaryButton,
+                  flow.purchasesDisabled && styles.buttonDisabled,
+                ]}
+                disabled={flow.purchasesDisabled}
+                onPress={() =>
+                  flow.handlePurchase(flow.monthlyPackage!, 'monthly')
+                }
+              >
+                {flow.purchaseLoading === 'monthly' ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.primaryButtonText}>
+                    {monthlyPrice
+                      ? t('subscription.mobile.purchaseMonthly', { price: monthlyPrice })
+                      : t('subscription.settings.subscribeCta')}
+                  </Text>
+                )}
+              </Pressable>
+              <Text style={styles.planHint}>{t('premium.guaranteeMonthly')}</Text>
+            </View>
           ) : (
             <Pressable
               style={[styles.primaryButton, styles.buttonDisabled]}
@@ -94,31 +97,32 @@ export default function PremiumSubscribeSection({
           )}
 
           {flow.lifetimePackage ? (
-            <Pressable
-              style={[
-                styles.secondaryButton,
-                flow.purchasesDisabled && styles.buttonDisabled,
-              ]}
-              disabled={flow.purchasesDisabled}
-              onPress={() =>
-                flow.handlePurchase(flow.lifetimePackage!, 'lifetime')
-              }
-            >
-              {flow.purchaseLoading === 'lifetime' ? (
-                <ActivityIndicator color={recurringTheme.accentBright} />
-              ) : (
-                <Text style={styles.secondaryButtonText}>
-                  {t('subscription.mobile.purchaseLifetime', {
-                    price: flow.lifetimePackage.product.priceString,
-                  })}
-                </Text>
-              )}
-            </Pressable>
+            <View style={styles.planOption}>
+              <Pressable
+                style={[
+                  styles.secondaryButton,
+                  flow.purchasesDisabled && styles.buttonDisabled,
+                ]}
+                disabled={flow.purchasesDisabled}
+                onPress={() =>
+                  flow.handlePurchase(flow.lifetimePackage!, 'lifetime')
+                }
+              >
+                {flow.purchaseLoading === 'lifetime' ? (
+                  <ActivityIndicator color={recurringTheme.accentBright} />
+                ) : (
+                  <Text style={styles.secondaryButtonText}>
+                    {t('subscription.mobile.purchaseLifetime', {
+                      price: flow.lifetimePackage.product.priceString,
+                    })}
+                  </Text>
+                )}
+              </Pressable>
+              <Text style={styles.planHint}>{t('premium.guaranteeLifetime')}</Text>
+            </View>
           ) : null}
         </>
       )}
-
-      <Text style={styles.guarantee}>{t('premium.guarantee')}</Text>
 
       <Pressable
         style={[
@@ -179,7 +183,6 @@ const styles = StyleSheet.create({
     backgroundColor: recurringTheme.accentDark,
     borderWidth: 1,
     borderColor: recurringTheme.cardBorderAccent,
-    marginBottom: 10,
   },
   primaryButtonText: {
     color: recurringTheme.accentBright,
@@ -196,7 +199,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
     backgroundColor: recurringTheme.surfaceCard,
-    marginBottom: 10,
   },
   secondaryButtonText: {
     color: recurringTheme.accentBright,
@@ -214,12 +216,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  guarantee: {
+  planOption: {
+    marginBottom: 14,
+    gap: 6,
+  },
+  planHint: {
     color: recurringTheme.textMuted,
     fontSize: 12,
     lineHeight: 18,
     textAlign: 'center',
-    marginBottom: 8,
+    paddingHorizontal: 4,
   },
   footer: {
     color: recurringTheme.textMuted,

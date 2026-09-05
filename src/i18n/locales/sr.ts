@@ -34,6 +34,8 @@ export const sr: Record<TranslationKey, string> = {
   'login.submit': 'Prijavi se',
   'login.checking': 'Provera…',
   'login.errorOtpRequest': 'OTP nije mogao biti poslat.',
+  'login.errorOtpRequestDev':
+    'OTP nije uspeo ({{url}}). Da li je backend dostupan? Proveri IP u dev panelu ili prebaci na production.',
   'login.errorLogin': 'OTP je nevažeći ili je istekao.',
   'login.levels.title': 'Nivoi majstorstva',
   'login.levels.hintHighlight': '24 nivoa',
@@ -63,6 +65,10 @@ export const sr: Record<TranslationKey, string> = {
     'Production — live Railway podaci (prod nalozi).',
   'dev.api.switchToProduction': 'Prebaci na production',
   'dev.api.switchToLocal': 'Prebaci na lokalno',
+  'dev.api.devHostLabel': 'Mac IP (LAN)',
+  'dev.api.devHostPlaceholder': '192.168.178.29',
+  'dev.api.saveDevHost': 'Sačuvaj IP',
+  'dev.api.invalidHost': 'Neispravna IP adresa.',
   'recurring.loading': 'Učitavanje zadataka…',
   'recurring.error': 'Zadaci nisu učitani.',
   'recurring.progressError': 'Napredak nije učitan.',
@@ -199,7 +205,10 @@ export const sr: Record<TranslationKey, string> = {
   'premium.feature.access.title': 'Pristup web i mobilnoj aplikaciji',
   'premium.feature.access.description':
     'Koristi Today svuda — na računaru i na telefonu.',
-  'premium.guarantee': 'Otkaži bilo kada. Bez skrivenih troškova.',
+  'premium.guaranteeMonthly':
+    'Mesečna pretplata: otkaži bilo kada. Bez skrivenih troškova.',
+  'premium.guaranteeLifetime':
+    'Lifetime: jednom plati, trajno koristi.',
   'premium.footer': 'Obični zadaci ostaju besplatni.',
   'premium.cta': 'Otključaj Premium',
   'recurring.premiumUnlockCta': 'Otključaj Premium',
@@ -251,7 +260,7 @@ export const sr: Record<TranslationKey, string> = {
     'Premium je već aktivan za ovaj nalog. Dodatna kupovina nije potrebna.',
   'subscription.mobile.purchaseMonthly': 'Mesečno – {{price}}',
   'subscription.mobile.purchaseLifetime': 'Doživotno – {{price}}',
-  'subscription.mobile.restore': 'Vrati kupovine',
+  'subscription.mobile.restore': 'Vrati kupovinu',
   'subscription.mobile.offeringsLoading': 'Učitavanje ponuda iz prodavnice…',
   'subscription.mobile.offeringsError':
     'Ponude iz prodavnice nisu učitane. Proveri RevenueCat konfiguraciju.',
@@ -282,6 +291,8 @@ export const sr: Record<TranslationKey, string> = {
     'Stripe i RevenueCat trenutno nisu dostupni. Prikazani status se oslanja na poslednje poznate podatke.',
   'profile.signedInAs': 'Prijavljen kao',
   'profile.emailUnavailable': 'E-pošta nije dostupna',
+  'profile.session.title': 'Sesija',
+  'profile.logout.hint': 'Odjavi se sa naloga na ovom uređaju',
   'profile.accountMenu.title': 'Nalog',
   'profile.accountMenu.subscription': 'Pretplata i naplata',
   'profile.accountMenu.subscriptionHint': 'Premium status, kupovina i vraćanje',

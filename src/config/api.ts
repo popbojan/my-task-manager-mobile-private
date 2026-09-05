@@ -1,10 +1,12 @@
 import { Platform } from 'react-native';
+import { getDevMachineHost } from '@/config/devMachineHost';
 
 /**
  * LAN IP of your dev machine (Mac/PC running backend + frontend).
- * Update when your network changes: `ipconfig getifaddr en0`
+ * Prefer setting the host in the dev panel — it is persisted on device.
+ * Fallback update: `ipconfig getifaddr en0`
  */
-export const DEV_MACHINE_HOST = '192.168.178.29';
+export { DEFAULT_DEV_MACHINE_HOST as DEV_MACHINE_HOST } from '@/config/devMachineHost';
 
 export const PRODUCTION_API_BASE_URL =
   'https://my-task-manager-server.up.railway.app';
@@ -57,16 +59,12 @@ export function isLocalDevHostPreferred(): boolean {
 }
 
 export function resolveDefaultApiEnvironment(): ApiEnvironment {
-  if (__DEV__) {
-    return 'local';
-  }
-
   return isLocalDevHostPreferred() ? 'local' : 'production';
 }
 
 function devHost(localhostPort: number): string {
   if (Platform.OS === 'android') {
-    const host = isAndroidEmulator() ? '10.0.2.2' : DEV_MACHINE_HOST;
+    const host = isAndroidEmulator() ? '10.0.2.2' : getDevMachineHost();
     return `http://${host}:${localhostPort}`;
   }
 
@@ -93,7 +91,7 @@ export function resolveAssetsBaseUrl(environment: ApiEnvironment): string {
     : devHost(5173);
 }
 
-/** Default: local in dev builds, local on emulator/simulator otherwise, production on release devices. */
+/** Default: local on emulator/simulator, production on physical devices (even in dev builds). */
 export const DEFAULT_API_ENVIRONMENT: ApiEnvironment = resolveDefaultApiEnvironment();
 
 let activeApiEnvironment: ApiEnvironment = DEFAULT_API_ENVIRONMENT;

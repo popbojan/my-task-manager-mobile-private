@@ -34,6 +34,8 @@ export const fr: Record<TranslationKey, string> = {
   'login.submit': 'Se connecter',
   'login.checking': 'Vérification…',
   'login.errorOtpRequest': 'Impossible d’envoyer le code.',
+  'login.errorOtpRequestDev':
+    'Échec OTP ({{url}}). Backend joignable ? Vérifie l’IP dans le panneau dev ou passe en production.',
   'login.errorLogin': 'Le code est invalide ou expiré.',
   'login.levels.title': 'Niveaux de maîtrise',
   'login.levels.hintHighlight': '24 niveaux',
@@ -62,6 +64,10 @@ export const fr: Record<TranslationKey, string> = {
     'Production — données Railway live (comptes prod).',
   'dev.api.switchToProduction': 'Passer en production',
   'dev.api.switchToLocal': 'Passer en local',
+  'dev.api.devHostLabel': 'IP Mac (LAN)',
+  'dev.api.devHostPlaceholder': '192.168.178.29',
+  'dev.api.saveDevHost': 'Enregistrer l’IP',
+  'dev.api.invalidHost': 'Adresse IP invalide.',
   'recurring.loading': 'Chargement des tâches…',
   'recurring.error': 'Impossible de charger les tâches.',
   'recurring.progressError': 'Impossible de charger la progression.',
@@ -200,7 +206,10 @@ export const fr: Record<TranslationKey, string> = {
   'premium.feature.access.title': 'Accès à l’app web et mobile',
   'premium.feature.access.description':
     'Utilise Today partout — sur ordinateur et sur ton téléphone.',
-  'premium.guarantee': 'Résiliable à tout moment. Sans frais cachés.',
+  'premium.guaranteeMonthly':
+    'Abonnement mensuel résiliable à tout moment. Sans frais cachés.',
+  'premium.guaranteeLifetime':
+    'Lifetime : un paiement, accès permanent.',
   'premium.footer': 'Les tâches normales restent gratuites pour toi.',
   'premium.cta': 'Activer Premium',
   'recurring.premiumUnlockCta': 'Activer Premium',
@@ -283,6 +292,8 @@ export const fr: Record<TranslationKey, string> = {
     'Stripe et RevenueCat sont indisponibles. Le statut affiché repose sur les dernières données connues.',
   'profile.signedInAs': 'Connecté en tant que',
   'profile.emailUnavailable': 'E-mail indisponible',
+  'profile.session.title': 'Session',
+  'profile.logout.hint': 'Se déconnecter de ce compte sur cet appareil',
   'profile.accountMenu.title': 'Compte',
   'profile.accountMenu.subscription': 'Abonnement & facturation',
   'profile.accountMenu.subscriptionHint': 'Statut Premium, achat et restauration',

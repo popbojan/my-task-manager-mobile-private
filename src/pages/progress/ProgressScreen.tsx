@@ -36,6 +36,8 @@ import {
   DEFAULT_RECURRING_PROGRESS,
   normalizeRecurringProgress,
 } from '@/utils/recurringProgress';
+import { useAppRefresh } from '@/refresh/useAppRefresh';
+import { useRefreshControl } from '@/refresh/useRefreshControl';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
@@ -48,6 +50,8 @@ export default function ProgressScreen() {
   const { t } = useLanguage();
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
+  const { refreshing, onRefresh } = useAppRefresh();
+  const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
 
@@ -162,6 +166,7 @@ export default function ProgressScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={refreshControl}
       >
         {tasksPremiumLocked ? (
           <View style={styles.premiumNotice}>

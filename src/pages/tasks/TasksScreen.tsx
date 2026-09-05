@@ -31,6 +31,8 @@ import {
   type TaskFilterId,
 } from '@/pages/tasks/taskBoardConfig';
 import { shouldRetryApiQuery } from '@/utils/apiError';
+import { useAppRefresh } from '@/refresh/useAppRefresh';
+import { useRefreshControl } from '@/refresh/useRefreshControl';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
@@ -63,6 +65,8 @@ export default function TasksScreen({
   const { t } = useLanguage();
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
+  const { refreshing, onRefresh } = useAppRefresh();
+  const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const [activeFilter, setActiveFilter] = useState<TaskFilterId>('all');
   const [deleteModal, setDeleteModal] = useState<{
     visible: boolean;
@@ -292,6 +296,7 @@ export default function TasksScreen({
           }
           showsVerticalScrollIndicator={false}
           nestedScrollEnabled
+          refreshControl={refreshControl}
           ListEmptyComponent={
             tasksQuery.isLoading
               ? undefined

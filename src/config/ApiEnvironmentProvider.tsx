@@ -19,14 +19,28 @@ import {
   resolveDefaultApiEnvironment,
   type ApiEnvironment,
 } from '@/config/api';
+import {
+  getDevMachineHost,
+  loadDevMachineHost,
+  persistDevMachineHost,
+} from '@/config/devMachineHost';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 const STORAGE_KEY = 'my-task-manager.api-environment';
 
+function refreshApiBasePath(environment: ApiEnvironment): string {
+  const nextBaseUrl = resolveApiBaseUrl(environment);
+  applyApiEnvironment(environment);
+  setApiBasePath(nextBaseUrl);
+  return nextBaseUrl;
+}
+
 type ApiEnvironmentContextValue = {
   environment: ApiEnvironment;
   apiBaseUrl: string;
+  devMachineHost: string;
   setEnvironment: (environment: ApiEnvironment) => Promise<void>;
+  setDevMachineHost: (host: string) => Promise<void>;
 };
 
 const ApiEnvironmentContext = createContext<ApiEnvironmentContextValue | undefined>(
@@ -38,12 +52,8 @@ function isApiEnvironment(value: string | null): value is ApiEnvironment {
 }
 
 function resolveStoredEnvironment(stored: string | null): ApiEnvironment {
-  if (__DEV__) {
-    return 'local';
-  }
-
   if (isApiEnvironment(stored)) {
-    if (stored === 'local' && !isLocalDevHostPreferred()) {
+    if (stored === 'local' && !isLocalDevHostPreferred() && !__DEV__) {
       return 'production';
     }
 
@@ -57,6 +67,7 @@ export function ApiEnvironmentProvider({ children }: { children: ReactNode }) {
   const [environment, setEnvironmentState] =
     useState<ApiEnvironment>(DEFAULT_API_ENVIRONMENT);
   const [apiBaseUrl, setApiBaseUrl] = useState(getApiBaseUrl());
+  const [devMachineHost, setDevMachineHostState] = useState(getDevMachineHost());
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -64,10 +75,10 @@ export function ApiEnvironmentProvider({ children }: { children: ReactNode }) {
 
     async function loadEnvironment() {
       try {
+        await loadDevMachineHost();
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         const nextEnvironment = resolveStoredEnvironment(stored);
-        applyApiEnvironment(nextEnvironment);
-        setApiBasePath(resolveApiBaseUrl(nextEnvironment));
+        const nextBaseUrl = refreshApiBasePath(nextEnvironment);
 
         if (stored !== nextEnvironment) {
           await AsyncStorage.setItem(STORAGE_KEY, nextEnvironment);
@@ -75,14 +86,17 @@ export function ApiEnvironmentProvider({ children }: { children: ReactNode }) {
 
         if (!cancelled) {
           setEnvironmentState(nextEnvironment);
-          setApiBaseUrl(getApiBaseUrl());
+          setApiBaseUrl(nextBaseUrl);
+          setDevMachineHostState(getDevMachineHost());
 
           if (__DEV__) {
             console.log(
               '[API] environment:',
               nextEnvironment,
               'url:',
-              resolveApiBaseUrl(nextEnvironment),
+              nextBaseUrl,
+              'devHost:',
+              getDevMachineHost(),
             );
           }
         }
@@ -101,21 +115,31 @@ export function ApiEnvironmentProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setEnvironment = useCallback(async (nextEnvironment: ApiEnvironment) => {
-    applyApiEnvironment(nextEnvironment);
-    const nextBaseUrl = resolveApiBaseUrl(nextEnvironment);
-    setApiBasePath(nextBaseUrl);
+    const nextBaseUrl = refreshApiBasePath(nextEnvironment);
     setEnvironmentState(nextEnvironment);
     setApiBaseUrl(nextBaseUrl);
     await AsyncStorage.setItem(STORAGE_KEY, nextEnvironment);
   }, []);
 
+  const setDevMachineHost = useCallback(async (host: string) => {
+    const nextHost = await persistDevMachineHost(host);
+    setDevMachineHostState(nextHost);
+
+    if (environment === 'local') {
+      const nextBaseUrl = refreshApiBasePath('local');
+      setApiBaseUrl(nextBaseUrl);
+    }
+  }, [environment]);
+
   const value = useMemo(
     () => ({
       environment,
       apiBaseUrl,
+      devMachineHost,
       setEnvironment,
+      setDevMachineHost,
     }),
-    [apiBaseUrl, environment, setEnvironment],
+    [apiBaseUrl, devMachineHost, environment, setDevMachineHost, setEnvironment],
   );
 
   if (!isReady) {

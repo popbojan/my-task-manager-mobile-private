@@ -10,13 +10,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import { useApiEnvironment } from '@/config/ApiEnvironmentProvider';
-import type { ApiEnvironment } from '@/config/api';
+import DevApiPanel from '@/config/DevApiPanel';
 import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import LanguagePicker from '@/pages/login/LanguagePicker';
 import SubscriptionSettingsScreen from '@/pages/profile/SubscriptionSettingsScreen';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { clearUserSession } from '@/session/clearUserSession';
+import { useAppRefresh } from '@/refresh/useAppRefresh';
+import { useRefreshControl } from '@/refresh/useRefreshControl';
 import { useCurrentUser } from '@/user/useCurrentUser';
 
 type ProfileScreenProps = {
@@ -33,7 +35,9 @@ export default function ProfileScreen({
   const { setAccessToken } = useAuth();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const { environment, apiBaseUrl, setEnvironment } = useApiEnvironment();
+  const { environment } = useApiEnvironment();
+  const { refreshing, onRefresh } = useAppRefresh();
+  const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const currentUserQuery = useCurrentUser();
   const [showSubscriptionSettings, setShowSubscriptionSettings] = useState(false);
 
@@ -48,19 +52,6 @@ export default function ProfileScreen({
 
   async function handleLogout() {
     await clearUserSession({ queryClient, setAccessToken });
-  }
-
-  async function handleSwitchApiEnvironment(nextEnvironment: ApiEnvironment) {
-    if (nextEnvironment === environment) {
-      return;
-    }
-
-    await clearUserSession({
-      queryClient,
-      setAccessToken,
-      callBackendLogout: true,
-    });
-    await setEnvironment(nextEnvironment);
   }
 
   if (showSubscriptionSettings) {
@@ -79,8 +70,10 @@ export default function ProfileScreen({
       </View>
 
       <ScrollView
+        style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        refreshControl={refreshControl}
       >
         <View style={styles.userCard}>
           <Text style={styles.userLabel}>{t('profile.signedInAs')}</Text>
@@ -111,42 +104,35 @@ export default function ProfileScreen({
             </View>
             <Text style={styles.accountMenuChevron}>›</Text>
           </Pressable>
-
-          <View style={styles.accountMenuFooter}>
-            <Pressable
-              style={styles.logoutButton}
-              accessibilityRole="button"
-              onPress={handleLogout}
-            >
-              <Text style={styles.logoutText}>{t('header.logout')}</Text>
-            </Pressable>
-          </View>
         </View>
 
-        {__DEV__ ? (
-          <View style={styles.devPanel}>
-            <Text style={styles.devTitle}>{t('dev.api.title')}</Text>
-            <Text style={styles.devUrl}>{apiBaseUrl}</Text>
-            <Text style={styles.devHint}>
-              {environment === 'local'
-                ? t('dev.api.hintLocal')
-                : t('dev.api.hintProduction')}
-            </Text>
-            <Pressable
-              style={styles.devSwitchButton}
-              onPress={() =>
-                handleSwitchApiEnvironment(
-                  environment === 'local' ? 'production' : 'local',
-                )
-              }
-            >
-              <Text style={styles.devSwitchText}>
-                {environment === 'local'
-                  ? t('dev.api.switchToProduction')
-                  : t('dev.api.switchToLocal')}
-              </Text>
-            </Pressable>
+        <Pressable
+          style={styles.logoutCard}
+          accessibilityRole="button"
+          onPress={handleLogout}
+        >
+          <Text style={styles.userLabel}>{t('profile.session.title')}</Text>
+          <View style={styles.logoutRow}>
+            <View style={styles.logoutCopy}>
+              <Text style={styles.logoutLabel}>{t('header.logout')}</Text>
+              <Text style={styles.logoutHint}>{t('profile.logout.hint')}</Text>
+            </View>
+            <Text style={styles.logoutChevron}>›</Text>
           </View>
+        </Pressable>
+
+        {__DEV__ ? (
+          <DevApiPanel
+            onEnvironmentSwitch={async nextEnvironment => {
+              if (nextEnvironment !== environment) {
+                await clearUserSession({
+                  queryClient,
+                  setAccessToken,
+                  callBackendLogout: true,
+                });
+              }
+            }}
+          />
         ) : null}
 
         <Pressable style={styles.linkButton} onPress={onGoToday}>
@@ -175,6 +161,9 @@ const styles = StyleSheet.create({
     color: recurringTheme.textPrimary,
     fontSize: 18,
     fontWeight: '800',
+  },
+  scroll: {
+    flex: 1,
   },
   scrollContent: {
     padding: 16,
@@ -249,59 +238,41 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 22,
   },
-  accountMenuFooter: {
-    borderTopWidth: 1,
-    borderTopColor: recurringTheme.cardBorder,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  logoutButton: {
-    paddingVertical: 10,
-  },
-  logoutText: {
-    color: recurringTheme.textSecondary,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  devPanel: {
-    marginBottom: 16,
-    padding: 14,
+  logoutCard: {
+    padding: 16,
     borderRadius: 14,
     backgroundColor: recurringTheme.surfaceCard,
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
+    marginBottom: 16,
   },
-  devTitle: {
+  logoutRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginTop: 2,
+  },
+  logoutCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: 4,
+  },
+  logoutLabel: {
     color: recurringTheme.textPrimary,
-    fontSize: 13,
-    fontWeight: '800',
-    marginBottom: 8,
-  },
-  devUrl: {
-    color: recurringTheme.accentBright,
-    fontSize: 11,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  devHint: {
-    color: recurringTheme.textMuted,
-    fontSize: 11,
-    lineHeight: 16,
-    marginBottom: 8,
-  },
-  devSwitchButton: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    backgroundColor: 'rgba(212, 168, 67, 0.14)',
-    borderWidth: 1,
-    borderColor: 'rgba(212, 168, 67, 0.35)',
-  },
-  devSwitchText: {
-    color: recurringTheme.goldBright,
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '700',
+  },
+  logoutHint: {
+    color: recurringTheme.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  logoutChevron: {
+    color: recurringTheme.textMuted,
+    fontSize: 22,
+    fontWeight: '600',
+    lineHeight: 22,
   },
   linkButton: {
     alignSelf: 'center',

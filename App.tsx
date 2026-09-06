@@ -116,7 +116,12 @@ function MainAppShell() {
             activeTab !== 'progress' ? shellStyles.tabPaneHidden : null,
           ]}
         >
-          <ProgressScreen />
+          <ProgressScreen
+            onOpenSubscription={() => {
+              setOpenProfileSubscription(true);
+              setActiveTab('profile');
+            }}
+          />
         </View>
         <View
           style={[

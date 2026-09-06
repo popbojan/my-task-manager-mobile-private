@@ -36,12 +36,17 @@ import {
   DEFAULT_RECURRING_PROGRESS,
   normalizeRecurringProgress,
 } from '@/utils/recurringProgress';
+import PremiumStatusBar from '@/pages/subscription/PremiumStatusBar';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
-export default function ProgressScreen() {
+type ProgressScreenProps = {
+  onOpenSubscription?: () => void;
+};
+
+export default function ProgressScreen({ onOpenSubscription }: ProgressScreenProps) {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const heroHeight = Math.min(
     Math.max(Math.round(windowHeight * 0.21), 175),
@@ -168,13 +173,7 @@ export default function ProgressScreen() {
         showsVerticalScrollIndicator={false}
         refreshControl={refreshControl}
       >
-        {tasksPremiumLocked ? (
-          <View style={styles.premiumNotice}>
-            <Text style={styles.premiumNoticeText}>
-              {t('recurring.premiumRequired')}
-            </Text>
-          </View>
-        ) : null}
+        <PremiumStatusBar onOpenSubscription={onOpenSubscription} />
 
         {progressFailed ? (
           <Text style={styles.errorText}>{t('recurring.progressError')}</Text>
@@ -279,18 +278,6 @@ const styles = StyleSheet.create({
   loadingBlock: {
     alignItems: 'center',
     paddingVertical: 8,
-  },
-  premiumNotice: {
-    borderRadius: 12,
-    padding: 10,
-    backgroundColor: recurringTheme.goldSoft,
-    borderWidth: 1,
-    borderColor: 'rgba(212, 168, 67, 0.35)',
-  },
-  premiumNoticeText: {
-    color: recurringTheme.goldBright,
-    fontSize: 13,
-    fontWeight: '600',
   },
   errorText: {
     color: recurringTheme.fireRedBright,

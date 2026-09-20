@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /** Fallback when nothing is stored — update via `ipconfig getifaddr en0`. */
 export const DEFAULT_DEV_MACHINE_HOST = '' +
-  '192.168.124.85';
+  '192.168.178.29';
 
 const STORAGE_KEY = 'my-task-manager.dev-machine-host';
 

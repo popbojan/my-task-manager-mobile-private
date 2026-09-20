@@ -1,11 +1,14 @@
+import { useEffect } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useQueryClient } from '@tanstack/react-query';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import SubscriptionPanelErrorBoundary from '@/pages/profile/SubscriptionPanelErrorBoundary';
 import SubscriptionSettingsPanel from '@/pages/profile/SubscriptionSettingsPanel';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
+import { refreshSubscriptionFromBackend } from '@/subscription/subscriptionQuery';
 
 type SubscriptionSettingsScreenProps = {
   onBack: () => void;
@@ -15,8 +18,13 @@ export default function SubscriptionSettingsScreen({
   onBack,
 }: SubscriptionSettingsScreenProps) {
   const { t } = useLanguage();
+  const queryClient = useQueryClient();
   const { refreshing, onRefresh } = useAppRefresh();
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
+
+  useEffect(() => {
+    void refreshSubscriptionFromBackend(queryClient);
+  }, [queryClient]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>

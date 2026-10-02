@@ -3,7 +3,8 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import { TaskPriority } from '@/api/generated';
-import { authApi, authRequestInit } from '@/api/authClient';
+import { refreshAccessSession } from '@/auth/refreshAccessSession';
+import { useSessionRefreshOnForeground } from '@/auth/useSessionRefreshOnForeground';
 import QueryProvider from '@/api/QueryProvider';
 import { AuthProvider, useAuth } from '@/auth/AuthContext';
 import { LanguageProvider } from '@/i18n/LanguageProvider';
@@ -24,8 +25,6 @@ import CurrentUserBootstrap from '@/user/CurrentUserBootstrap';
 import RevenueCatBootstrap from '@/revenuecat/RevenueCatBootstrap';
 import SubscriptionBootstrap from '@/subscription/SubscriptionBootstrap';
 import { SubscriptionSessionProvider } from '@/subscription/SubscriptionSessionProvider';
-import { clearSubscriptionSessionQueries } from '@/subscription/clearSubscriptionSession';
-import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 import { ApiEnvironmentProvider } from '@/config/ApiEnvironmentProvider';
 
 function MainAppShell() {
@@ -175,23 +174,12 @@ function AppContent() {
 
     hasInitializedRef.current = true;
 
-    async function refreshSession() {
-      try {
-        const data = await authApi.refreshAccessToken(authRequestInit);
-        clearRecurringSessionQueries(queryClient);
-        clearSubscriptionSessionQueries(queryClient);
-        setAccessToken(data.accessToken);
-      } catch {
-        clearRecurringSessionQueries(queryClient);
-        clearSubscriptionSessionQueries(queryClient);
-        setAccessToken(null);
-      } finally {
-        setIsAuthReady(true);
-      }
-    }
-
-    refreshSession();
+    void refreshAccessSession({ queryClient, setAccessToken }).finally(() => {
+      setIsAuthReady(true);
+    });
   }, [queryClient, setAccessToken, setIsAuthReady]);
+
+  useSessionRefreshOnForeground(!!accessToken);
 
   if (!isAuthReady) {
     return (

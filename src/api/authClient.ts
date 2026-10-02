@@ -15,11 +15,29 @@ export const authRequestInit = { credentials: 'include' as RequestCredentials };
  * React Native Android often fails HTTPS requests when credentials is "include".
  * Public endpoints omit cookies; auth endpoints opt in via authRequestInit.
  */
-const reactNativeFetch: FetchAPI = (url, init) =>
-  fetch(url, {
+const REQUEST_TIMEOUT_MS = 30_000;
+
+const reactNativeFetch: FetchAPI = (url, init) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  const userSignal = init?.signal;
+  if (userSignal) {
+    if (userSignal.aborted) {
+      controller.abort();
+    } else {
+      userSignal.addEventListener('abort', () => controller.abort(), { once: true });
+    }
+  }
+
+  return fetch(url, {
     ...init,
+    signal: controller.signal,
     credentials: init?.credentials ?? 'omit',
+  }).finally(() => {
+    clearTimeout(timeoutId);
   });
+};
 
 export function setAccessTokenGetter(getter: () => string | null) {
   accessTokenGetter = getter;

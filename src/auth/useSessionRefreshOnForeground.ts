@@ -3,8 +3,10 @@ import { AppState, type AppStateStatus } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/auth/AuthContext';
 import { refreshAccessSession } from '@/auth/refreshAccessSession';
+import { withTimeout } from '@/utils/withTimeout';
 
 const MIN_FOREGROUND_REFRESH_MS = 15_000;
+const FOREGROUND_REFRESH_TIMEOUT_MS = 25_000;
 
 function readInitialAppState(): AppStateStatus {
   const current = AppState.currentState;
@@ -55,15 +57,20 @@ export function useSessionRefreshOnForeground(enabled: boolean): void {
       refreshInFlightRef.current = true;
       lastRefreshAtRef.current = now;
 
-      refreshAccessSession({
-        queryClient,
-        setAccessToken,
-        refetchAppData: true,
-      })
+      void withTimeout(
+        refreshAccessSession({
+          queryClient,
+          setAccessToken,
+          refetchAppData: true,
+        }),
+        FOREGROUND_REFRESH_TIMEOUT_MS,
+      )
+        .catch(() => {
+          void queryClient.cancelQueries();
+        })
         .finally(() => {
           refreshInFlightRef.current = false;
-        })
-        .catch(() => {});
+        });
     });
 
     return () => {

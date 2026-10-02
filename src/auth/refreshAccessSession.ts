@@ -3,6 +3,7 @@ import { authApi, authRequestInit } from '@/api/authClient';
 import { refreshAppData } from '@/refresh/refreshAppData';
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 import { clearSubscriptionSessionQueries } from '@/subscription/clearSubscriptionSession';
+import { invalidateAuthenticatedSessionQueries } from '@/session/invalidateAuthenticatedQueries';
 
 export type RefreshAccessSessionOptions = {
   queryClient: QueryClient;
@@ -22,12 +23,11 @@ export async function refreshAccessSession({
 }: RefreshAccessSessionOptions): Promise<string | null> {
   try {
     const data = await authApi.refreshAccessToken(authRequestInit);
-    clearRecurringSessionQueries(queryClient);
-    clearSubscriptionSessionQueries(queryClient);
     setAccessToken(data.accessToken);
+    invalidateAuthenticatedSessionQueries(queryClient);
 
     if (refetchAppData && data.accessToken) {
-      await refreshAppData(queryClient, data.accessToken);
+      void refreshAppData(queryClient, data.accessToken);
     }
 
     return data.accessToken;

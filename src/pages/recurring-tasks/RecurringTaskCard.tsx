@@ -5,14 +5,13 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import { FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import { EditIcon, TrashIcon } from '@/pages/recurring-tasks/premium/TabIcons';
 import PremiumSurface from '@/pages/recurring-tasks/premium/PremiumSurface';
-import { getNextStatus } from '@/pages/recurring-tasks/recurringBoardConfig';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 type RecurringTaskCardProps = {
   task: RecurringTask;
   onEdit: (taskId: string) => void;
   onDelete: (task: RecurringTask) => void;
-  onStatusChange: (taskId: string, status: RecurringTaskStatus) => void;
+  onToggleStatus: (taskId: string) => void;
 };
 
 function TaskCheckboxVisual({
@@ -73,7 +72,7 @@ export default function RecurringTaskCard({
   task,
   onEdit,
   onDelete,
-  onStatusChange,
+  onToggleStatus,
 }: RecurringTaskCardProps) {
   const { t } = useLanguage();
   const isDone = task.status === RecurringTaskStatus.Done;
@@ -87,15 +86,7 @@ export default function RecurringTaskCard({
         : 'recurring.status.done';
 
   function handleToggleStatus() {
-    if (isDone) {
-      onStatusChange(task.id, RecurringTaskStatus.Todo);
-      return;
-    }
-
-    const nextStatus = getNextStatus(task.status);
-    if (nextStatus) {
-      onStatusChange(task.id, nextStatus);
-    }
+    onToggleStatus(task.id);
   }
 
   return (

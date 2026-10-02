@@ -29,6 +29,17 @@ export function getNextStatus(
   return null;
 }
 
+/** Next status after a status tap (includes Done → Todo). */
+export function getNextRecurringToggleStatus(
+  status: RecurringTaskStatus,
+): RecurringTaskStatus {
+  if (status === RecurringTaskStatus.Done) {
+    return RecurringTaskStatus.Todo;
+  }
+
+  return getNextStatus(status) ?? RecurringTaskStatus.Todo;
+}
+
 export function compareRecurringTasksByStreak(
   a: RecurringTask,
   b: RecurringTask,

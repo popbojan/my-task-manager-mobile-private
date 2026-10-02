@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -28,7 +28,10 @@ import MasteryProfileHero, {
 } from '@/pages/recurring-tasks/MasteryProfileHero';
 import { PlusIcon } from '@/pages/recurring-tasks/premium/TabIcons';
 import RecurringTaskCard from '@/pages/recurring-tasks/RecurringTaskCard';
-import { sortTasksStable } from '@/pages/recurring-tasks/recurringBoardConfig';
+import {
+  getNextRecurringToggleStatus,
+  sortTasksStable,
+} from '@/pages/recurring-tasks/recurringBoardConfig';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import TodaySummaryCard from '@/pages/recurring-tasks/TodaySummaryCard';
 import PremiumUpsellModal from '@/pages/subscription/PremiumUpsellModal';
@@ -39,6 +42,7 @@ import {
   isApiPremiumRequiredError,
   shouldRetryApiQuery,
 } from '@/utils/apiError';
+import { useOptimisticTaskStatusSync } from '@/task-status/useOptimisticTaskStatusSync';
 import {
   DEFAULT_RECURRING_PROGRESS,
   normalizeRecurringProgress,
@@ -89,8 +93,6 @@ export default function RecurringTasksScreen({
   const [listContentHeight, setListContentHeight] = useState(0);
   const [celebrationVisible, setCelebrationVisible] = useState(false);
   const [isPremiumUpsellOpen, setIsPremiumUpsellOpen] = useState(false);
-  const statusTargetsRef = useRef(new Map<string, RecurringTaskStatus>());
-  const statusSyncRunningRef = useRef(new Set<string>());
   const wasAllCompleteRef = useRef(false);
   const isInitialCompleteCheckRef = useRef(true);
 
@@ -114,46 +116,51 @@ export default function RecurringTasksScreen({
     staleTime: 1000 * 60 * 30,
   });
 
-  function patchTaskStatus(taskId: string, status: RecurringTaskStatus) {
-    queryClient.setQueryData<RecurringTask[]>(
-      recurringTasksQueryKey(accessToken),
-      (old = []) =>
-        old.map(task => (task.id === taskId ? { ...task, status } : task)),
-    );
-  }
+  const patchTaskStatus = useCallback(
+    (taskId: string, status: RecurringTaskStatus) => {
+      queryClient.setQueryData<RecurringTask[]>(
+        recurringTasksQueryKey(accessToken),
+        (old = []) =>
+          old.map(task => (task.id === taskId ? { ...task, status } : task)),
+      );
+    },
+    [accessToken, queryClient],
+  );
 
-  async function drainStatusSync(taskId: string) {
-    if (statusSyncRunningRef.current.has(taskId)) {
-      return;
-    }
+  const patchTaskFromServer = useCallback(
+    (updated: RecurringTask) => {
+      queryClient.setQueryData<RecurringTask[]>(
+        recurringTasksQueryKey(accessToken),
+        (old = []) =>
+          old.map(task => (task.id === updated.id ? updated : task)),
+      );
+    },
+    [accessToken, queryClient],
+  );
 
-    statusSyncRunningRef.current.add(taskId);
+  const onRecurringStatusSyncSettled = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
+  }, [queryClient]);
 
-    try {
-      while (statusTargetsRef.current.has(taskId)) {
-        const status = statusTargetsRef.current.get(taskId)!;
+  const onRecurringStatusSyncFailed = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
+  }, [queryClient]);
 
-        try {
-          const updated = await authApi.updateRecurringTask({
-            recurringTaskId: taskId,
-            updateRecurringTaskRequest: { status },
-          });
-          patchTaskStatus(taskId, updated.status);
-
-          if (statusTargetsRef.current.get(taskId) === status) {
-            statusTargetsRef.current.delete(taskId);
-          }
-        } catch {
-          statusTargetsRef.current.delete(taskId);
-          await queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
-          break;
-        }
-      }
-    } finally {
-      statusSyncRunningRef.current.delete(taskId);
-      queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
-    }
-  }
+  const { toggleStatus, taskForDisplay } = useOptimisticTaskStatusSync<
+    RecurringTaskStatus,
+    RecurringTask
+  >({
+    getNextStatus: getNextRecurringToggleStatus,
+    updateStatusOnServer: (taskId, status) =>
+      authApi.updateRecurringTask({
+        recurringTaskId: taskId,
+        updateRecurringTaskRequest: { status },
+      }),
+    applyServerTask: patchTaskFromServer,
+    applyOptimisticStatus: patchTaskStatus,
+    onSyncSettled: onRecurringStatusSyncSettled,
+    onSyncFailed: onRecurringStatusSyncFailed,
+  });
 
   const deleteTaskMutation = useMutation({
     mutationFn: (recurringTaskId: string) =>
@@ -192,7 +199,10 @@ export default function RecurringTasksScreen({
     tasksQuery.isError,
   ]);
 
-  const displayTasks = tasksQuery.data ?? [];
+  const displayTasks = useMemo(
+    () => tasksQuery.data ?? [],
+    [tasksQuery.data],
+  );
   const sortedTasks = useMemo(
     () => sortTasksForList(displayTasks),
     [displayTasks],
@@ -299,14 +309,22 @@ export default function RecurringTasksScreen({
     deleteTaskMutation.mutate(deleteModal.task.id);
   }
 
-  function handleStatusChange(taskId: string, status: RecurringTaskStatus) {
+  function handleToggleStatus(taskId: string) {
     if (guardPremiumInteraction()) {
       return;
     }
 
-    patchTaskStatus(taskId, status);
-    statusTargetsRef.current.set(taskId, status);
-    void drainStatusSync(taskId);
+    const task =
+      queryClient
+        .getQueryData<RecurringTask[]>(recurringTasksQueryKey(accessToken))
+        ?.find(item => item.id === taskId) ??
+      displayTasks.find(item => item.id === taskId);
+
+    if (!task) {
+      return;
+    }
+
+    toggleStatus(task);
   }
 
   return (
@@ -421,10 +439,10 @@ export default function RecurringTasksScreen({
           }
           renderItem={({ item }) => (
             <RecurringTaskCard
-              task={item}
+              task={taskForDisplay(item)}
               onEdit={openEditModal}
               onDelete={openDeleteModal}
-              onStatusChange={handleStatusChange}
+              onToggleStatus={handleToggleStatus}
             />
           )}
           ItemSeparatorComponent={() => <View style={styles.taskSeparator} />}

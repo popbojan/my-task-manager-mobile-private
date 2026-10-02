@@ -5,7 +5,6 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import { EditIcon, TrashIcon } from '@/pages/recurring-tasks/premium/TabIcons';
 import PremiumSurface from '@/pages/recurring-tasks/premium/PremiumSurface';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
-import { getNextTaskStatus } from '@/pages/tasks/taskBoardConfig';
 import {
   formatTaskDateTime,
   getDeadlineBadge,
@@ -17,7 +16,7 @@ type TaskCardProps = {
   task: Task;
   onEdit: (taskId: string) => void;
   onDelete: (task: Task) => void;
-  onStatusChange: (taskId: string, status: TaskStatus) => void;
+  onToggleStatus: (taskId: string) => void;
 };
 
 function TaskStatusCircle({
@@ -103,7 +102,7 @@ function TaskCard({
   task,
   onEdit,
   onDelete,
-  onStatusChange,
+  onToggleStatus,
 }: TaskCardProps) {
   const { t, language } = useLanguage();
   const isDone = task.status === TaskStatus.Done;
@@ -129,7 +128,7 @@ function TaskCard({
           : 'tasks.status.done';
 
   function handleToggleStatus() {
-    onStatusChange(task.id, getNextTaskStatus(task.status));
+    onToggleStatus(task.id);
   }
 
   return (

@@ -6,6 +6,15 @@ import { refreshAccessSession } from '@/auth/refreshAccessSession';
 
 const MIN_FOREGROUND_REFRESH_MS = 15_000;
 
+function readInitialAppState(): AppStateStatus {
+  const current = AppState.currentState;
+  if (current === 'active' || current === 'background' || current === 'inactive') {
+    return current;
+  }
+
+  return 'active';
+}
+
 /**
  * Re-issues the access token when the app returns to the foreground so expired
  * JWTs do not leave tasks/subscription queries in a failed state.
@@ -16,7 +25,7 @@ export function useSessionRefreshOnForeground(enabled: boolean): void {
   const accessTokenRef = useRef(accessToken);
   const refreshInFlightRef = useRef(false);
   const lastRefreshAtRef = useRef(0);
-  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const appStateRef = useRef<AppStateStatus>(readInitialAppState());
 
   accessTokenRef.current = accessToken;
 
@@ -46,13 +55,15 @@ export function useSessionRefreshOnForeground(enabled: boolean): void {
       refreshInFlightRef.current = true;
       lastRefreshAtRef.current = now;
 
-      void refreshAccessSession({
+      refreshAccessSession({
         queryClient,
         setAccessToken,
         refetchAppData: true,
-      }).finally(() => {
-        refreshInFlightRef.current = false;
-      });
+      })
+        .finally(() => {
+          refreshInFlightRef.current = false;
+        })
+        .catch(() => {});
     });
 
     return () => {

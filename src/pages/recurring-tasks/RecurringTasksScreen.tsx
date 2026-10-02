@@ -220,7 +220,7 @@ export default function RecurringTasksScreen({
   const masteryLevels = masteryLevelsQuery.data ?? [];
   const tasksAreLoading = tasksQuery.isLoading && !tasksPremiumLocked;
   const tasksFailed = tasksQuery.isError && !tasksPremiumLocked;
-  const progressIsLoading = progressQuery.isPending && !progressPremiumLocked;
+  const progressIsLoading = progressQuery.isLoading && !progressPremiumLocked;
   const progressFailed =
     progressQuery.isError && !progressPremiumLocked && !progressQuery.data;
   const canRenderBoard = tasksQuery.isSuccess || tasksPremiumLocked;

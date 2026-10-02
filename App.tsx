@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import { TaskPriority } from '@/api/generated';
@@ -21,6 +21,7 @@ import {
   type TaskFilterId,
 } from '@/pages/tasks/taskBoardConfig';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import AppLaunchView from '@/components/AppLaunchView';
 import CurrentUserBootstrap from '@/user/CurrentUserBootstrap';
 import RevenueCatBootstrap from '@/revenuecat/RevenueCatBootstrap';
 import SubscriptionBootstrap from '@/subscription/SubscriptionBootstrap';
@@ -182,11 +183,7 @@ function AppContent() {
   useSessionRefreshOnForeground(!!accessToken);
 
   if (!isAuthReady) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={recurringTheme.accent} />
-      </View>
-    );
+    return <AppLaunchView />;
   }
 
   return accessToken ? (
@@ -219,15 +216,6 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: recurringTheme.pageBg,
-  },
-});
 
 const shellStyles = StyleSheet.create({
   root: {

@@ -31,6 +31,41 @@ export function getWeekDaysMondayStart(now = new Date()): Date[] {
   });
 }
 
+function resolveWeekStreakAnchor(
+  progress: RecurringTaskProgress,
+  today: Date,
+  todayComplete: boolean,
+): { anchorDay: Date | null; streakDays: number } {
+  const streakDays = progress.currentStreak;
+
+  if (streakDays <= 0) {
+    return { anchorDay: null, streakDays: 0 };
+  }
+
+  const lastSuccess = progress.lastSuccessfulDay
+    ? startOfDay(progress.lastSuccessfulDay)
+    : null;
+
+  if (!lastSuccess) {
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    return { anchorDay: startOfDay(yesterday), streakDays };
+  }
+
+  if (lastSuccess.getTime() === today.getTime() && !todayComplete) {
+    const adjustedStreak = Math.max(0, streakDays - 1);
+    if (adjustedStreak <= 0) {
+      return { anchorDay: null, streakDays: 0 };
+    }
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    return { anchorDay: startOfDay(yesterday), streakDays: adjustedStreak };
+  }
+
+  return { anchorDay: lastSuccess, streakDays };
+}
+
 export function buildWeekDayStates(
   progress: RecurringTaskProgress,
   doneTasksToday: number,
@@ -38,9 +73,13 @@ export function buildWeekDayStates(
   now = new Date(),
 ): WeekDayState[] {
   const today = startOfDay(now);
-  const lastSuccess = progress.lastSuccessfulDay
-    ? startOfDay(progress.lastSuccessfulDay)
-    : null;
+  const todayComplete =
+    totalTasksToday > 0 && doneTasksToday >= totalTasksToday;
+  const { anchorDay, streakDays } = resolveWeekStreakAnchor(
+    progress,
+    today,
+    todayComplete,
+  );
 
   return getWeekDaysMondayStart(now).map(day => {
     const dayStart = startOfDay(day);
@@ -57,12 +96,12 @@ export function buildWeekDayStates(
       };
     }
 
-    if (!lastSuccess || dayStart > lastSuccess) {
+    if (!anchorDay || dayStart > anchorDay) {
       return { kind: 'empty' as const };
     }
 
-    const daysFromLastSuccess = diffDays(lastSuccess, dayStart);
-    if (daysFromLastSuccess < progress.currentStreak) {
+    const daysFromAnchor = diffDays(anchorDay, dayStart);
+    if (daysFromAnchor < streakDays) {
       return { kind: 'complete' as const };
     }
 

@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   BackHandler,
-  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -37,6 +36,7 @@ import {
   parseDeadlineInput,
 } from '@/pages/tasks/taskDeadlineUtils';
 import { shouldRetryApiQuery } from '@/utils/apiError';
+import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
 
 type TaskFormModalProps = {
   taskId: string | null;
@@ -104,7 +104,7 @@ export default function TaskFormModal({
   const isEdit = taskId !== null;
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [error, setError] = useState<string | null>(null);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const titleInputRef = useRef<TextInput>(null);
 
   const taskQuery = useQuery({
     queryKey: ['task', taskId],
@@ -114,23 +114,6 @@ export default function TaskFormModal({
     staleTime: 0,
     refetchOnMount: 'always',
   });
-
-  useEffect(() => {
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-
-    const showSub = Keyboard.addListener(showEvent, event => {
-      setKeyboardHeight(event.endCoordinates.height);
-    });
-    const hideSub = Keyboard.addListener(hideEvent, () => {
-      setKeyboardHeight(0);
-    });
-
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -235,13 +218,18 @@ export default function TaskFormModal({
     saveMutation.mutate();
   }
 
-  const availableHeight = windowHeight - keyboardHeight - insets.top - 12;
-  const panelHeight = Math.min(
-    Math.round(windowHeight * 0.54),
-    440,
-    Math.max(320, availableHeight),
-  );
-  const useFormScroll = keyboardHeight > 0;
+  const isLoadingTask = isEdit && taskQuery.isLoading;
+  const canFocusTitle = !isLoadingTask;
+
+  useEffect(() => {
+    if (!canFocusTitle) {
+      return;
+    }
+
+    focusTextInputSoon(titleInputRef);
+  }, [canFocusTitle]);
+
+  const panelHeight = Math.min(Math.round(windowHeight * 0.54), 440);
 
   const formFields = (
     <>
@@ -249,6 +237,7 @@ export default function TaskFormModal({
         <View style={styles.fieldBlock}>
           <Text style={styles.label}>{t('tasks.form.titleLabel')} *</Text>
           <TextInput
+            ref={titleInputRef}
             style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
             value={form.title}
             onChangeText={title => {
@@ -260,6 +249,7 @@ export default function TaskFormModal({
             placeholder={t('tasks.form.titlePlaceholder')}
             placeholderTextColor={recurringTheme.textMuted}
             autoFocus
+            showSoftInputOnFocus
           />
         </View>
 
@@ -379,13 +369,18 @@ export default function TaskFormModal({
 
   return (
     <View style={styles.overlay} accessibilityViewIsModal>
-      <Pressable style={styles.backdropTap} accessibilityLabel={t('common.close')} onPress={onClose} />
+      <Pressable
+        style={styles.backdropTap}
+        accessibilityLabel={t('common.close')}
+        onPress={onClose}
+      />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardWrap}
-        keyboardVerticalOffset={insets.top}
-      >
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          enabled={Platform.OS === 'ios'}
+          style={styles.keyboardWrap}
+          keyboardVerticalOffset={insets.top}
+        >
         <SafeAreaView edges={['top']} style={styles.safeTop}>
           <View style={[styles.panel, { height: panelHeight }]}>
             <View style={styles.panelHeader}>
@@ -404,12 +399,12 @@ export default function TaskFormModal({
               </Pressable>
             </View>
 
-            {isEdit && taskQuery.isLoading ? (
+            {isLoadingTask ? (
               <View style={styles.loadingBlock}>
                 <ActivityIndicator color={recurringTheme.accentBright} />
                 <Text style={styles.loadingText}>{t('tasks.loadingTask')}</Text>
               </View>
-            ) : useFormScroll ? (
+            ) : (
               <ScrollView
                 style={styles.scroll}
                 contentContainerStyle={styles.formBody}
@@ -418,8 +413,6 @@ export default function TaskFormModal({
               >
                 {formFields}
               </ScrollView>
-            ) : (
-              <View style={styles.formBody}>{formFields}</View>
             )}
           </View>
         </SafeAreaView>

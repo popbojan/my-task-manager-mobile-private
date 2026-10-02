@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   BackHandler,
-  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -24,6 +23,7 @@ import { DAILY_STATUS_COLUMNS } from '@/pages/recurring-tasks/recurringBoardConf
 import { recurringTaskToFormState } from '@/pages/recurring-tasks/recurringTaskFormUtils';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { shouldRetryApiQuery } from '@/utils/apiError';
+import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
 
 type RecurringTaskFormModalProps = {
   taskId: string | null;
@@ -54,7 +54,7 @@ export default function RecurringTaskFormModal({
   const isEdit = taskId !== null;
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [error, setError] = useState<string | null>(null);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const titleInputRef = useRef<TextInput>(null);
 
   const taskQuery = useQuery({
     queryKey: ['recurring-task', taskId],
@@ -62,23 +62,6 @@ export default function RecurringTaskFormModal({
     enabled: isEdit,
     retry: shouldRetryApiQuery,
   });
-
-  useEffect(() => {
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-
-    const showSub = Keyboard.addListener(showEvent, event => {
-      setKeyboardHeight(event.endCoordinates.height);
-    });
-    const hideSub = Keyboard.addListener(hideEvent, () => {
-      setKeyboardHeight(0);
-    });
-
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -102,6 +85,15 @@ export default function RecurringTaskFormModal({
   }, [isEdit, taskQuery.data]);
 
   const isLoadingTask = isEdit && taskQuery.isLoading;
+  const canFocusTitle = !isLoadingTask;
+
+  useEffect(() => {
+    if (!canFocusTitle) {
+      return;
+    }
+
+    focusTextInputSoon(titleInputRef);
+  }, [canFocusTitle]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -162,22 +154,22 @@ export default function RecurringTaskFormModal({
     saveMutation.mutate();
   }
 
-  const availableHeight = windowHeight - keyboardHeight - insets.top - 12;
-  const panelHeight = Math.min(
-    Math.round(windowHeight * 0.52),
-    420,
-    Math.max(300, availableHeight),
-  );
+  const panelHeight = Math.min(Math.round(windowHeight * 0.52), 420);
 
   return (
     <View style={styles.overlay} accessibilityViewIsModal>
-      <Pressable style={styles.backdropTap} accessibilityLabel={t('common.close')} onPress={onClose} />
+      <Pressable
+        style={styles.backdropTap}
+        accessibilityLabel={t('common.close')}
+        onPress={onClose}
+      />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardWrap}
-        keyboardVerticalOffset={insets.top}
-      >
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          enabled={Platform.OS === 'ios'}
+          style={styles.keyboardWrap}
+          keyboardVerticalOffset={insets.top}
+        >
         <SafeAreaView edges={['top']} style={styles.safeTop}>
           <View style={[styles.panel, { height: panelHeight }]}>
             <View style={styles.panelHeader}>
@@ -211,6 +203,7 @@ export default function RecurringTaskFormModal({
                     </Text>
                   </Text>
                   <TextInput
+                    ref={titleInputRef}
                     style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
                     value={form.title}
                     onChangeText={title => {

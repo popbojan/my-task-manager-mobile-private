@@ -8,6 +8,7 @@ All URIs are relative to *http://localhost*
 | [**createCustomerPortalSession**](DefaultApi.md#createcustomerportalsession) | **POST** /subscriptions/customer-portal | Create a Stripe Customer Portal session |
 | [**createRecurringTask**](DefaultApi.md#createrecurringtaskoperation) | **POST** /recurring-tasks | Create a new recurring task |
 | [**createTask**](DefaultApi.md#createtaskoperation) | **POST** /tasks | Create a new task |
+| [**deleteCurrentUser**](DefaultApi.md#deletecurrentuser) | **DELETE** /users/me | Permanently delete the current user\&#39;s account |
 | [**deleteRecurringTask**](DefaultApi.md#deleterecurringtask) | **DELETE** /recurring-tasks/{recurringTaskId} | Delete a recurring task |
 | [**deleteTask**](DefaultApi.md#deletetask) | **DELETE** /tasks/{taskId} | Delete a task |
 | [**getCurrentUser**](DefaultApi.md#getcurrentuser) | **GET** /users/me | Get current user |
@@ -298,6 +299,74 @@ example().catch(console.error);
 | **201** | Task created |  -  |
 | **400** | Invalid request |  -  |
 | **401** | Unauthorized |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## deleteCurrentUser
+
+> deleteCurrentUser()
+
+Permanently delete the current user\&#39;s account
+
+Deletes the authenticated user\&#39;s account and associated application data. Requires explicit user confirmation in the client and recent OTP authentication. Checks all subscription providers against fresh provider data before deletion. Running subscriptions must first be canceled; subscriptions already set to cancel at period end do not block deletion. Does not cancel store subscriptions, refund purchases, or delete the user\&#39;s Google, Apple, or Stripe account. 
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { DeleteCurrentUserRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  try {
+    const data = await api.deleteCurrentUser();
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+`void` (Empty response body)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **204** | Application account and data deleted; all sessions revoked. Any required provider cleanup is durably queued and completed with retries.  |  * Set-Cookie - Clears the refresh token cookie using its original path and domain. <br>  |
+| **401** | Missing or invalid authentication, including a previously deleted account. |  -  |
+| **403** | Recent OTP authentication required; code REAUTHENTICATION_REQUIRED. |  -  |
+| **409** | A running subscription must first be canceled. |  -  |
+| **503** | Subscription status could not be verified; code SUBSCRIPTION_VERIFICATION_UNAVAILABLE. No account data is deleted.  |  -  |
+| **500** | Internal error; database deletion is rolled back. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 

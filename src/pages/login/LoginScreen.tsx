@@ -20,6 +20,10 @@ import DevApiPanel from '@/config/DevApiPanel';
 import type { ApiEnvironment } from '@/config/api';
 import { useApiLanguage, useLanguage } from '@/i18n/LanguageProvider';
 import AppBrandHeader from '@/components/AppBrandHeader';
+import {
+  clearAccountDeletedNotice,
+  hasAccountDeletedNotice,
+} from '@/pages/login/accountDeletedNotice';
 import LoginHelpModal from '@/pages/login/LoginHelpModal';
 import MasteryLevelStrip from '@/pages/login/MasteryLevelStrip';
 import { loginTheme } from '@/pages/login/loginTheme';
@@ -48,9 +52,16 @@ export default function LoginScreen() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [levels, setLevels] = useState<MasteryLevel[]>([]);
   const [levelsLoading, setLevelsLoading] = useState(true);
+  const [showAccountDeletedNotice, setShowAccountDeletedNotice] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+
+    void hasAccountDeletedNotice().then(notice => {
+      if (!cancelled) {
+        setShowAccountDeletedNotice(notice);
+      }
+    });
 
     authApi
       .getMasteryLevels()
@@ -120,6 +131,8 @@ export default function LoginScreen() {
       );
 
       if (data.accessToken) {
+        await clearAccountDeletedNotice();
+        setShowAccountDeletedNotice(false);
         clearRecurringSessionQueries(queryClient);
         clearSubscriptionSessionQueries(queryClient);
         setAccessToken(data.accessToken);
@@ -214,6 +227,17 @@ export default function LoginScreen() {
                       </Text>
                     )}
                   </View>
+
+                  {showAccountDeletedNotice ? (
+                    <View style={styles.accountDeletedNotice} accessibilityRole="text">
+                      <Text style={styles.accountDeletedTitle}>
+                        {t('login.accountDeletedTitle')}
+                      </Text>
+                      <Text style={styles.accountDeletedNote}>
+                        {t('login.accountDeletedNewAccountNote')}
+                      </Text>
+                    </View>
+                  ) : null}
 
                   {step === 'email' ? (
                     <View>
@@ -493,6 +517,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'rgba(255, 255, 255, 0.55)',
     fontSize: 12,
+    lineHeight: 18,
+  },
+  accountDeletedNotice: {
+    marginBottom: 14,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(82, 183, 136, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(82, 183, 136, 0.28)',
+    gap: 6,
+  },
+  accountDeletedTitle: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '800',
+    lineHeight: 20,
+  },
+  accountDeletedNote: {
+    color: 'rgba(255, 255, 255, 0.78)',
+    fontSize: 13,
     lineHeight: 18,
   },
   error: {

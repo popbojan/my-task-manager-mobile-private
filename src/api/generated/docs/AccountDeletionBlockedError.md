@@ -1,5 +1,5 @@
 
-# ErrorResponse
+# AccountDeletionBlockedError
 
 
 ## Properties
@@ -10,19 +10,21 @@ Name | Type
 `statusCode` | number
 `error` | string
 `message` | string
+`blockingSubscriptions` | [Array&lt;AccountDeletionBlockingSubscription&gt;](AccountDeletionBlockingSubscription.md)
 
 ## Example
 
 ```typescript
-import type { ErrorResponse } from ''
+import type { AccountDeletionBlockedError } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "code": REAUTHENTICATION_REQUIRED,
-  "statusCode": 400,
+  "code": null,
+  "statusCode": null,
   "error": Bad Request,
   "message": body/email must match format "email",
-} satisfies ErrorResponse
+  "blockingSubscriptions": null,
+} satisfies AccountDeletionBlockedError
 
 console.log(example)
 
@@ -31,7 +33,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as ErrorResponse
+const exampleParsed = JSON.parse(exampleJSON) as AccountDeletionBlockedError
 console.log(exampleParsed)
 ```
 

@@ -6,6 +6,7 @@ export const sr: Record<TranslationKey, string> = {
   'common.close': 'Zatvori',
   'common.cancel': 'Otkaži',
   'common.save': 'Sačuvaj',
+  'common.deleting': 'Brisanje…',
   'language.sr': 'Srpski',
   'language.de': 'Nemački',
   'language.fr': 'Francuski',
@@ -13,6 +14,9 @@ export const sr: Record<TranslationKey, string> = {
   'language.switch': 'Izaberi jezik',
   'header.brand': 'My Task Manager',
   'header.logout': 'Odjava',
+  'login.accountDeletedTitle': 'Vaš nalog je trajno obrisan.',
+  'login.accountDeletedNewAccountNote':
+    'Ako se ponovo prijavite istom e-mail adresom, biće kreiran novi nalog.',
   'login.title': 'Dobrodošli nazad',
   'login.titleOtp': 'Proveri svoj e-mail',
   'login.subtitle': 'Prijavite se i ostanite fokusirani.',
@@ -291,6 +295,38 @@ export const sr: Record<TranslationKey, string> = {
     'Stripe i RevenueCat trenutno nisu dostupni. Prikazani status se oslanja na poslednje poznate podatke.',
   'profile.signedInAs': 'Prijavljen kao',
   'profile.emailUnavailable': 'E-pošta nije dostupna',
+  'profile.deleteAccount.menuItem': 'Obriši nalog',
+  'profile.deleteAccount.title': 'Obriši nalog',
+  'profile.deleteAccount.confirmQuestion': 'Da li ste sigurni da želite da obrišete nalog?',
+  'profile.deleteAccount.newAccountNote':
+    'Ako se ponovo prijavite istom e-mail adresom, biće kreiran novi nalog.',
+  'profile.deleteAccount.dataLoss':
+    'Brisanjem naloga trajno se uklanjaju svi zadaci i povezani podaci poput napretka i istorije, bez mogućnosti vraćanja.',
+  'profile.deleteAccount.personalData':
+    'Biće obrisani i svi lični podaci poput e-mail adrese, korisničkog imena, podešavanja i slično.',
+  'profile.deleteAccount.subscriptionHintPrefix': 'Ako zaista želite da obrišete nalog, ',
+  'profile.deleteAccount.subscriptionHintBold': 'prvo otkažite pretplatu ako je imate.',
+  'profile.deleteAccount.subscriptionHintSuffix':
+    ' Inače brisanje neće uspeti jer se pretplate vode u spoljnim sistemima kao što su Google Play, Stripe ili Apple.',
+  'profile.deleteAccount.continueToVerify': 'Nastavi na potvrdu',
+  'profile.deleteAccount.backToInfo': 'Nazad',
+  'profile.deleteAccount.errorGeneric': 'Brisanje naloga nije uspelo. Pokušajte ponovo.',
+  'profile.deleteAccount.errorBlockedBySubscription':
+    'Aktivna pretplata mora prvo biti otkazana.',
+  'profile.deleteAccount.errorReauthenticationRequired':
+    'Iz bezbednosnih razloga potrebna je ponovna potvrda jednokratnim kodom.',
+  'profile.deleteAccount.errorSubscriptionVerificationUnavailable':
+    'Status pretplate nije mogao biti proveren. Nijedan podatak nije obrisan. Pokušajte ponovo kasnije.',
+  'profile.deleteAccount.errorUnauthorized':
+    'Niste prijavljeni ili vaša sesija više nije važeća.',
+  'profile.deleteAccount.errorServer':
+    'Došlo je do greške na serveru. Vaš nalog nije obrisan.',
+  'profile.deleteAccount.reauthRequired':
+    'Unesite 6-cifreni jednokratni kod. Svež kod sa prijave je dovoljan — Pošalji kod samo ako vam treba novi.',
+  'profile.deleteAccount.reauthSendCode': 'Pošalji kod',
+  'profile.deleteAccount.reauthSendingCode': 'Šaljem kod…',
+  'profile.deleteAccount.reauthCodeSent': 'Poslali smo kod na {{email}}.',
+  'profile.deleteAccount.reauthConfirmButton': 'Potvrdi i obriši nalog',
   'profile.session.title': 'Sesija',
   'profile.logout.hint': 'Odjavi se sa naloga na ovom uređaju',
   'profile.accountMenu.title': 'Nalog',

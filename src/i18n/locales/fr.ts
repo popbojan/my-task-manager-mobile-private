@@ -6,6 +6,7 @@ export const fr: Record<TranslationKey, string> = {
   'common.close': 'Fermer',
   'common.cancel': 'Annuler',
   'common.save': 'Enregistrer',
+  'common.deleting': 'Suppression…',
   'language.sr': 'Serbe',
   'language.de': 'Allemand',
   'language.fr': 'Français',
@@ -13,6 +14,9 @@ export const fr: Record<TranslationKey, string> = {
   'language.switch': 'Choisir la langue',
   'header.brand': 'My Task Manager',
   'header.logout': 'Se déconnecter',
+  'login.accountDeletedTitle': 'Votre compte a été définitivement supprimé.',
+  'login.accountDeletedNewAccountNote':
+    'Si vous vous reconnectez avec la même adresse e-mail, un nouveau compte sera créé.',
   'login.title': 'Bon retour',
   'login.titleOtp': 'Vérifie ton e-mail',
   'login.subtitle': 'Connecte-toi et reste concentré.',
@@ -292,6 +296,39 @@ export const fr: Record<TranslationKey, string> = {
     'Stripe et RevenueCat sont indisponibles. Le statut affiché repose sur les dernières données connues.',
   'profile.signedInAs': 'Connecté en tant que',
   'profile.emailUnavailable': 'E-mail indisponible',
+  'profile.deleteAccount.menuItem': 'Supprimer le compte',
+  'profile.deleteAccount.title': 'Supprimer le compte',
+  'profile.deleteAccount.confirmQuestion': 'Voulez-vous vraiment supprimer votre compte ?',
+  'profile.deleteAccount.newAccountNote':
+    'Si vous vous reconnectez avec la même adresse e-mail, un nouveau compte sera créé.',
+  'profile.deleteAccount.dataLoss':
+    'La suppression de votre compte efface définitivement toutes vos tâches et données associées (progression, historique, etc.), sans possibilité de les récupérer.',
+  'profile.deleteAccount.personalData':
+    'Vos données personnelles comme l’e-mail, le nom d’utilisateur, les paramètres, etc. seront également supprimées.',
+  'profile.deleteAccount.subscriptionHintPrefix': 'Si vous confirmez la suppression, ',
+  'profile.deleteAccount.subscriptionHintBold': 'résiliez d’abord tout abonnement actif.',
+  'profile.deleteAccount.subscriptionHintSuffix':
+    ' Sinon, la suppression échouera, car les abonnements sont gérés par des systèmes externes (Google Play, Stripe, Apple, etc.).',
+  'profile.deleteAccount.continueToVerify': 'Continuer vers la confirmation',
+  'profile.deleteAccount.backToInfo': 'Retour',
+  'profile.deleteAccount.errorGeneric':
+    'La suppression du compte a échoué. Veuillez réessayer.',
+  'profile.deleteAccount.errorBlockedBySubscription':
+    'Un abonnement en cours doit d\'abord être résilié.',
+  'profile.deleteAccount.errorReauthenticationRequired':
+    'Pour des raisons de sécurité, confirmez à nouveau avec un code à usage unique.',
+  'profile.deleteAccount.errorSubscriptionVerificationUnavailable':
+    'Impossible de vérifier l\'état de l\'abonnement. Aucune donnée n\'a été supprimée. Réessayez plus tard.',
+  'profile.deleteAccount.errorUnauthorized':
+    'Vous n\'êtes pas connecté ou votre session n\'est plus valide.',
+  'profile.deleteAccount.errorServer':
+    'Une erreur serveur s\'est produite. Votre compte n\'a pas été supprimé.',
+  'profile.deleteAccount.reauthRequired':
+    'Saisissez votre code à 6 chiffres. Un code récent de la connexion suffit — utilisez Envoyer le code seulement si vous en avez besoin d’un nouveau.',
+  'profile.deleteAccount.reauthSendCode': 'Envoyer le code',
+  'profile.deleteAccount.reauthSendingCode': 'Envoi du code…',
+  'profile.deleteAccount.reauthCodeSent': 'Nous avons envoyé un code à {{email}}.',
+  'profile.deleteAccount.reauthConfirmButton': 'Confirmer et supprimer le compte',
   'profile.session.title': 'Session',
   'profile.logout.hint': 'Se déconnecter de ce compte sur cet appareil',
   'profile.accountMenu.title': 'Compte',

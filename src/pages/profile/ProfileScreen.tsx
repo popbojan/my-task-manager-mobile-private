@@ -13,8 +13,11 @@ import { useApiEnvironment } from '@/config/ApiEnvironmentProvider';
 import DevApiPanel from '@/config/DevApiPanel';
 import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { clearAccountDeletedNotice } from '@/pages/login/accountDeletedNotice';
 import LanguagePicker from '@/pages/login/LanguagePicker';
+import DeleteAccountModal from '@/pages/profile/DeleteAccountModal';
 import SubscriptionSettingsScreen from '@/pages/profile/SubscriptionSettingsScreen';
+import { useDeleteAccountFlow } from '@/pages/profile/useDeleteAccountFlow';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { clearUserSession } from '@/session/clearUserSession';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
@@ -40,6 +43,7 @@ export default function ProfileScreen({
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const currentUserQuery = useCurrentUser();
   const [showSubscriptionSettings, setShowSubscriptionSettings] = useState(false);
+  const deleteAccountFlow = useDeleteAccountFlow({ queryClient, setAccessToken });
 
   useEffect(() => {
     if (!openSubscription) {
@@ -51,6 +55,7 @@ export default function ProfileScreen({
   }, [openSubscription, onSubscriptionOpened]);
 
   async function handleLogout() {
+    await clearAccountDeletedNotice();
     await clearUserSession({ queryClient, setAccessToken });
   }
 
@@ -104,6 +109,16 @@ export default function ProfileScreen({
             </View>
             <Text style={styles.accountMenuChevron}>›</Text>
           </Pressable>
+
+          <Pressable
+            style={styles.deleteAccountItem}
+            accessibilityRole="button"
+            onPress={deleteAccountFlow.openDeleteModal}
+          >
+            <Text style={styles.deleteAccountLabel}>
+              {t('profile.deleteAccount.menuItem')}
+            </Text>
+          </Pressable>
         </View>
 
         <Pressable
@@ -139,6 +154,23 @@ export default function ProfileScreen({
           <Text style={styles.linkButtonText}>{t('nav.backToToday')}</Text>
         </Pressable>
       </ScrollView>
+
+      <DeleteAccountModal
+        visible={deleteAccountFlow.isDeleteModalOpen}
+        step={deleteAccountFlow.deleteModalStep}
+        isPending={deleteAccountFlow.isDeletingAccount}
+        errorMessage={deleteAccountFlow.deleteAccountError}
+        accountEmail={deleteAccountFlow.accountEmail}
+        otp={deleteAccountFlow.deleteOtp}
+        otpSent={deleteAccountFlow.deleteOtpSent}
+        isSendingOtp={deleteAccountFlow.isSendingDeleteOtp}
+        onOtpChange={deleteAccountFlow.setDeleteOtp}
+        onRequestOtp={() => void deleteAccountFlow.requestDeleteOtp()}
+        onClose={deleteAccountFlow.closeDeleteModal}
+        onContinueToVerify={deleteAccountFlow.continueDeleteToVerify}
+        onBackToInfo={deleteAccountFlow.backDeleteToInfo}
+        onConfirm={() => void deleteAccountFlow.confirmDeleteAccount()}
+      />
     </SafeAreaView>
   );
 }
@@ -237,6 +269,17 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '600',
     lineHeight: 22,
+  },
+  deleteAccountItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderTopColor: recurringTheme.cardBorder,
+  },
+  deleteAccountLabel: {
+    color: recurringTheme.fireRedBright,
+    fontSize: 15,
+    fontWeight: '700',
   },
   logoutCard: {
     padding: 16,

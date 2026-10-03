@@ -1,6 +1,7 @@
-.openapi-generator-ignore
 apis/DefaultApi.ts
 apis/index.ts
+docs/AccountDeletionBlockedError.md
+docs/AccountDeletionBlockingSubscription.md
 docs/CheckoutSession.md
 docs/CreateRecurringTaskRequest.md
 docs/CreateTaskRequest.md
@@ -30,6 +31,8 @@ docs/UpdateUserPreferencesRequest.md
 docs/User.md
 docs/UserPreferencesResponse.md
 index.ts
+models/AccountDeletionBlockedError.ts
+models/AccountDeletionBlockingSubscription.ts
 models/CheckoutSession.ts
 models/CreateRecurringTaskRequest.ts
 models/CreateTaskRequest.ts

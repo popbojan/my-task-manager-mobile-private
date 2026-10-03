@@ -4,6 +4,7 @@ export const de = {
   'common.close': 'Schließen',
   'common.cancel': 'Abbrechen',
   'common.save': 'Speichern',
+  'common.deleting': 'Lösche…',
   'language.sr': 'Serbisch',
   'language.de': 'Deutsch',
   'language.fr': 'Französisch',
@@ -11,6 +12,9 @@ export const de = {
   'language.switch': 'Sprache wählen',
   'header.brand': 'My Task Manager',
   'header.logout': 'Abmelden',
+  'login.accountDeletedTitle': 'Ihr Konto wurde dauerhaft gelöscht.',
+  'login.accountDeletedNewAccountNote':
+    'Melden Sie sich mit derselben E-Mail an, wird ein neues Konto erstellt.',
   'login.title': 'Willkommen zurück',
   'login.titleOtp': 'Prüfe deine E-Mail',
   'login.subtitle': 'Melde dich an und bleibe fokussiert.',
@@ -289,6 +293,42 @@ export const de = {
     'Stripe und RevenueCat sind gerade nicht erreichbar. Der angezeigte Status basiert auf den zuletzt bekannten Daten.',
   'profile.signedInAs': 'Angemeldet als',
   'profile.emailUnavailable': 'E-Mail nicht verfügbar',
+  'profile.deleteAccount.menuItem': 'Konto löschen',
+  'profile.deleteAccount.title': 'Konto löschen',
+  'profile.deleteAccount.confirmQuestion':
+    'Sind Sie sicher, dass Sie Ihr Konto löschen möchten?',
+  'profile.deleteAccount.newAccountNote':
+    'Melden Sie sich später mit derselben E-Mail-Adresse an, wird ein neues Konto erstellt.',
+  'profile.deleteAccount.dataLoss':
+    'Beim Löschen Ihres Kontos werden alle Ihre Aufgaben und zusätzlichen Daten wie Fortschritt, Verlauf usw. unwiderruflich gelöscht – ohne Möglichkeit, sie wiederherzustellen.',
+  'profile.deleteAccount.personalData':
+    'Ebenso werden alle Ihre persönlichen Daten wie E-Mail, Benutzername, Einstellungen usw. gelöscht.',
+  'profile.deleteAccount.subscriptionHintPrefix':
+    'Wenn Sie Ihr Konto wirklich löschen möchten, ',
+  'profile.deleteAccount.subscriptionHintBold':
+    'müssen Sie zuerst Ihr Abonnement kündigen, falls Sie eines haben.',
+  'profile.deleteAccount.subscriptionHintSuffix':
+    ' Andernfalls schlägt die Löschung fehl, da Abonnements in externen Systemen wie Google Play, Stripe oder Apple verwaltet werden.',
+  'profile.deleteAccount.continueToVerify': 'Weiter zur Bestätigung',
+  'profile.deleteAccount.backToInfo': 'Zurück',
+  'profile.deleteAccount.errorGeneric':
+    'Die Kontolöschung ist fehlgeschlagen. Bitte versuchen Sie es erneut.',
+  'profile.deleteAccount.errorBlockedBySubscription':
+    'Ein laufendes Abonnement muss zuerst gekündigt werden.',
+  'profile.deleteAccount.errorReauthenticationRequired':
+    'Aus Sicherheitsgründen ist eine erneute Bestätigung per Einmalcode erforderlich.',
+  'profile.deleteAccount.errorSubscriptionVerificationUnavailable':
+    'Der Abo-Status konnte nicht geprüft werden. Es wurden keine Daten gelöscht. Bitte versuchen Sie es später erneut.',
+  'profile.deleteAccount.errorUnauthorized':
+    'Sie sind nicht angemeldet oder Ihre Sitzung ist ungültig.',
+  'profile.deleteAccount.errorServer':
+    'Ein Serverfehler ist aufgetreten. Ihr Konto wurde nicht gelöscht.',
+  'profile.deleteAccount.reauthRequired':
+    'Geben Sie Ihren 6-stelligen Einmalcode ein. Ein frischer Code von der Anmeldung reicht – „Code senden“ nur, wenn Sie einen neuen brauchen.',
+  'profile.deleteAccount.reauthSendCode': 'Code senden',
+  'profile.deleteAccount.reauthSendingCode': 'Sende Code…',
+  'profile.deleteAccount.reauthCodeSent': 'Wir haben einen Code an {{email}} geschickt.',
+  'profile.deleteAccount.reauthConfirmButton': 'Bestätigen und Konto löschen',
   'profile.session.title': 'Sitzung',
   'profile.logout.hint': 'Vom Konto auf diesem Gerät abmelden',
   'profile.accountMenu.title': 'Konto',

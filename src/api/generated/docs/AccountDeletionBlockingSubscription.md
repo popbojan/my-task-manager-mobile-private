@@ -1,28 +1,26 @@
 
-# ErrorResponse
+# AccountDeletionBlockingSubscription
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`code` | string
-`statusCode` | number
-`error` | string
-`message` | string
+`provider` | [SubscriptionProvider](SubscriptionProvider.md)
+`subscriptionId` | string
+`cancellationAction` | string
 
 ## Example
 
 ```typescript
-import type { ErrorResponse } from ''
+import type { AccountDeletionBlockingSubscription } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "code": REAUTHENTICATION_REQUIRED,
-  "statusCode": 400,
-  "error": Bad Request,
-  "message": body/email must match format "email",
-} satisfies ErrorResponse
+  "provider": null,
+  "subscriptionId": null,
+  "cancellationAction": null,
+} satisfies AccountDeletionBlockingSubscription
 
 console.log(example)
 
@@ -31,7 +29,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as ErrorResponse
+const exampleParsed = JSON.parse(exampleJSON) as AccountDeletionBlockingSubscription
 console.log(exampleParsed)
 ```
 

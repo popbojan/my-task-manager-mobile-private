@@ -6,6 +6,7 @@ export const en: Record<TranslationKey, string> = {
   'common.close': 'Close',
   'common.cancel': 'Cancel',
   'common.save': 'Save',
+  'common.deleting': 'Deleting…',
   'language.sr': 'Serbian',
   'language.de': 'German',
   'language.fr': 'French',
@@ -13,6 +14,9 @@ export const en: Record<TranslationKey, string> = {
   'language.switch': 'Choose language',
   'header.brand': 'My Task Manager',
   'header.logout': 'Log out',
+  'login.accountDeletedTitle': 'Your account has been permanently deleted.',
+  'login.accountDeletedNewAccountNote':
+    'If you sign in again with the same email address, a new account will be created.',
   'login.title': 'Welcome back',
   'login.titleOtp': 'Check your email',
   'login.subtitle': 'Sign in and stay focused.',
@@ -288,6 +292,39 @@ export const en: Record<TranslationKey, string> = {
     'Stripe and RevenueCat are currently unavailable. The status shown is based on the last known data.',
   'profile.signedInAs': 'Signed in as',
   'profile.emailUnavailable': 'Email unavailable',
+  'profile.deleteAccount.menuItem': 'Delete account',
+  'profile.deleteAccount.title': 'Delete account',
+  'profile.deleteAccount.confirmQuestion': 'Are you sure you want to delete your account?',
+  'profile.deleteAccount.newAccountNote':
+    'If you sign in again with the same email address, a new account will be created.',
+  'profile.deleteAccount.dataLoss':
+    'Deleting your account permanently removes all your tasks and related data such as progress and history, with no way to restore them.',
+  'profile.deleteAccount.personalData':
+    'Your personal data such as email, username, settings, and similar profile information will also be deleted.',
+  'profile.deleteAccount.subscriptionHintPrefix':
+    'If you are sure you want to delete your account, ',
+  'profile.deleteAccount.subscriptionHintBold': 'cancel any active subscription first.',
+  'profile.deleteAccount.subscriptionHintSuffix':
+    ' Otherwise deletion will fail because subscriptions are managed in external systems such as Google Play, Stripe, or Apple.',
+  'profile.deleteAccount.continueToVerify': 'Continue to verification',
+  'profile.deleteAccount.backToInfo': 'Back',
+  'profile.deleteAccount.errorGeneric': 'Account deletion failed. Please try again.',
+  'profile.deleteAccount.errorBlockedBySubscription':
+    'A running subscription must first be canceled.',
+  'profile.deleteAccount.errorReauthenticationRequired':
+    'For security, you must confirm again with a one-time code.',
+  'profile.deleteAccount.errorSubscriptionVerificationUnavailable':
+    'We could not verify your subscription status. No data was deleted. Please try again later.',
+  'profile.deleteAccount.errorUnauthorized':
+    'You are not signed in or your session is invalid.',
+  'profile.deleteAccount.errorServer':
+    'A server error occurred. Your account was not deleted.',
+  'profile.deleteAccount.reauthRequired':
+    'Enter your 6-digit one-time code. A fresh code from sign-in is fine—use Send code only if you need a new one.',
+  'profile.deleteAccount.reauthSendCode': 'Send code',
+  'profile.deleteAccount.reauthSendingCode': 'Sending code…',
+  'profile.deleteAccount.reauthCodeSent': 'We sent a code to {{email}}.',
+  'profile.deleteAccount.reauthConfirmButton': 'Verify and delete account',
   'profile.session.title': 'Session',
   'profile.logout.hint': 'Sign out of your account on this device',
   'profile.accountMenu.title': 'Account',

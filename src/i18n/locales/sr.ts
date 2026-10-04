@@ -14,6 +14,7 @@ export const sr: Record<TranslationKey, string> = {
   'language.switch': 'Izaberi jezik',
   'header.brand': 'My Task Manager',
   'header.logout': 'Odjava',
+  'header.accountMenu.open': 'Podešavanja',
   'login.accountDeletedTitle': 'Vaš nalog je trajno obrisan.',
   'login.accountDeletedNewAccountNote':
     'Ako se ponovo prijavite istom e-mail adresom, biće kreiran novi nalog.',
@@ -327,9 +328,10 @@ export const sr: Record<TranslationKey, string> = {
   'profile.deleteAccount.reauthSendingCode': 'Šaljem kod…',
   'profile.deleteAccount.reauthCodeSent': 'Poslali smo kod na {{email}}.',
   'profile.deleteAccount.reauthConfirmButton': 'Potvrdi i obriši nalog',
-  'profile.session.title': 'Sesija',
-  'profile.logout.hint': 'Odjavi se sa naloga na ovom uređaju',
   'profile.accountMenu.title': 'Nalog',
   'profile.accountMenu.subscription': 'Pretplata i naplata',
   'profile.accountMenu.subscriptionHint': 'Premium status, kupovina i vraćanje',
+  'profile.legalMenu.title': 'Pravno',
+  'profile.legalMenu.privacy': 'Politika privatnosti',
+  'profile.legalMenu.impressum': 'Impresum / Kontakt',
 };

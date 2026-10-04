@@ -12,6 +12,7 @@ export const de = {
   'language.switch': 'Sprache wählen',
   'header.brand': 'My Task Manager',
   'header.logout': 'Abmelden',
+  'header.accountMenu.open': 'Einstellungen',
   'login.accountDeletedTitle': 'Ihr Konto wurde dauerhaft gelöscht.',
   'login.accountDeletedNewAccountNote':
     'Melden Sie sich mit derselben E-Mail an, wird ein neues Konto erstellt.',
@@ -329,11 +330,12 @@ export const de = {
   'profile.deleteAccount.reauthSendingCode': 'Sende Code…',
   'profile.deleteAccount.reauthCodeSent': 'Wir haben einen Code an {{email}} geschickt.',
   'profile.deleteAccount.reauthConfirmButton': 'Bestätigen und Konto löschen',
-  'profile.session.title': 'Sitzung',
-  'profile.logout.hint': 'Vom Konto auf diesem Gerät abmelden',
   'profile.accountMenu.title': 'Konto',
   'profile.accountMenu.subscription': 'Abo & Abrechnung',
   'profile.accountMenu.subscriptionHint': 'Premium-Status, Kauf und Wiederherstellung',
+  'profile.legalMenu.title': 'Rechtliches',
+  'profile.legalMenu.privacy': 'Datenschutz',
+  'profile.legalMenu.impressum': 'Impressum / Kontakt',
 } as const;
 
 export type TranslationKey = keyof typeof de;

@@ -22,6 +22,7 @@ import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { clearUserSession } from '@/session/clearUserSession';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
+import { openLegalPage } from '@/legal/openLegalPage';
 import { useCurrentUser } from '@/user/useCurrentUser';
 
 type ProfileScreenProps = {
@@ -92,7 +93,7 @@ export default function ProfileScreen({
         </View>
 
         <View style={styles.accountMenu}>
-          <Text style={styles.accountMenuHeading}>{t('profile.accountMenu.title')}</Text>
+          <Text style={styles.accountMenuHeading}>{t('header.accountMenu.open')}</Text>
 
           <Pressable
             style={styles.accountMenuItem}
@@ -109,9 +110,39 @@ export default function ProfileScreen({
             </View>
             <Text style={styles.accountMenuChevron}>›</Text>
           </Pressable>
+        </View>
+
+        <View style={styles.accountMenu}>
+          <Text style={styles.accountMenuHeading}>{t('profile.legalMenu.title')}</Text>
 
           <Pressable
-            style={styles.deleteAccountItem}
+            style={styles.accountMenuItem}
+            accessibilityRole="link"
+            onPress={() => void openLegalPage('privacy')}
+          >
+            <Text style={styles.accountMenuItemLabel}>
+              {t('profile.legalMenu.privacy')}
+            </Text>
+            <Text style={styles.accountMenuChevron}>›</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.accountMenuItem}
+            accessibilityRole="link"
+            onPress={() => void openLegalPage('impressum')}
+          >
+            <Text style={styles.accountMenuItemLabel}>
+              {t('profile.legalMenu.impressum')}
+            </Text>
+            <Text style={styles.accountMenuChevron}>›</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.accountMenu}>
+          <Text style={styles.accountMenuHeading}>{t('profile.accountMenu.title')}</Text>
+
+          <Pressable
+            style={[styles.footerItem, styles.footerItemBordered]}
             accessibilityRole="button"
             onPress={deleteAccountFlow.openDeleteModal}
           >
@@ -119,22 +150,15 @@ export default function ProfileScreen({
               {t('profile.deleteAccount.menuItem')}
             </Text>
           </Pressable>
-        </View>
 
-        <Pressable
-          style={styles.logoutCard}
-          accessibilityRole="button"
-          onPress={handleLogout}
-        >
-          <Text style={styles.userLabel}>{t('profile.session.title')}</Text>
-          <View style={styles.logoutRow}>
-            <View style={styles.logoutCopy}>
-              <Text style={styles.logoutLabel}>{t('header.logout')}</Text>
-              <Text style={styles.logoutHint}>{t('profile.logout.hint')}</Text>
-            </View>
-            <Text style={styles.logoutChevron}>›</Text>
-          </View>
-        </Pressable>
+          <Pressable
+            style={[styles.footerItem, styles.footerItemBordered]}
+            accessibilityRole="button"
+            onPress={() => void handleLogout()}
+          >
+            <Text style={styles.footerLogoutLabel}>{t('header.logout')}</Text>
+          </Pressable>
+        </View>
 
         {__DEV__ ? (
           <DevApiPanel
@@ -270,9 +294,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 22,
   },
-  deleteAccountItem: {
+  footerItem: {
     paddingHorizontal: 16,
     paddingVertical: 14,
+  },
+  footerItemBordered: {
     borderTopWidth: 1,
     borderTopColor: recurringTheme.cardBorder,
   },
@@ -281,41 +307,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
-  logoutCard: {
-    padding: 16,
-    borderRadius: 14,
-    backgroundColor: recurringTheme.surfaceCard,
-    borderWidth: 1,
-    borderColor: recurringTheme.cardBorder,
-    marginBottom: 16,
-  },
-  logoutRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginTop: 2,
-  },
-  logoutCopy: {
-    flex: 1,
-    minWidth: 0,
-    gap: 4,
-  },
-  logoutLabel: {
+  footerLogoutLabel: {
     color: recurringTheme.textPrimary,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-  },
-  logoutHint: {
-    color: recurringTheme.textSecondary,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  logoutChevron: {
-    color: recurringTheme.textMuted,
-    fontSize: 22,
-    fontWeight: '600',
-    lineHeight: 22,
   },
   linkButton: {
     alignSelf: 'center',

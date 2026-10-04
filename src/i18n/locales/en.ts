@@ -14,6 +14,7 @@ export const en: Record<TranslationKey, string> = {
   'language.switch': 'Choose language',
   'header.brand': 'My Task Manager',
   'header.logout': 'Log out',
+  'header.accountMenu.open': 'Settings',
   'login.accountDeletedTitle': 'Your account has been permanently deleted.',
   'login.accountDeletedNewAccountNote':
     'If you sign in again with the same email address, a new account will be created.',
@@ -325,9 +326,10 @@ export const en: Record<TranslationKey, string> = {
   'profile.deleteAccount.reauthSendingCode': 'Sending code…',
   'profile.deleteAccount.reauthCodeSent': 'We sent a code to {{email}}.',
   'profile.deleteAccount.reauthConfirmButton': 'Verify and delete account',
-  'profile.session.title': 'Session',
-  'profile.logout.hint': 'Sign out of your account on this device',
   'profile.accountMenu.title': 'Account',
   'profile.accountMenu.subscription': 'Subscription & billing',
   'profile.accountMenu.subscriptionHint': 'Premium status, purchase and restore',
+  'profile.legalMenu.title': 'Legal',
+  'profile.legalMenu.privacy': 'Privacy policy',
+  'profile.legalMenu.impressum': 'Legal notice / Contact',
 };

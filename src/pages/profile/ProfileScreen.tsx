@@ -22,7 +22,8 @@ import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { clearUserSession } from '@/session/clearUserSession';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
-import { openLegalPage } from '@/legal/openLegalPage';
+import LegalWebViewModal from '@/legal/LegalWebViewModal';
+import type { LegalPage } from '@/legal/openLegalPage';
 import { useCurrentUser } from '@/user/useCurrentUser';
 
 type ProfileScreenProps = {
@@ -44,6 +45,7 @@ export default function ProfileScreen({
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const currentUserQuery = useCurrentUser();
   const [showSubscriptionSettings, setShowSubscriptionSettings] = useState(false);
+  const [legalPage, setLegalPage] = useState<LegalPage | null>(null);
   const deleteAccountFlow = useDeleteAccountFlow({ queryClient, setAccessToken });
 
   useEffect(() => {
@@ -118,7 +120,7 @@ export default function ProfileScreen({
           <Pressable
             style={styles.accountMenuItem}
             accessibilityRole="link"
-            onPress={() => void openLegalPage('privacy')}
+            onPress={() => setLegalPage('privacy')}
           >
             <Text style={styles.accountMenuItemLabel}>
               {t('profile.legalMenu.privacy')}
@@ -129,7 +131,7 @@ export default function ProfileScreen({
           <Pressable
             style={styles.accountMenuItem}
             accessibilityRole="link"
-            onPress={() => void openLegalPage('impressum')}
+            onPress={() => setLegalPage('impressum')}
           >
             <Text style={styles.accountMenuItemLabel}>
               {t('profile.legalMenu.impressum')}
@@ -178,6 +180,8 @@ export default function ProfileScreen({
           <Text style={styles.linkButtonText}>{t('nav.backToToday')}</Text>
         </Pressable>
       </ScrollView>
+
+      <LegalWebViewModal page={legalPage} onClose={() => setLegalPage(null)} />
 
       <DeleteAccountModal
         visible={deleteAccountFlow.isDeleteModalOpen}

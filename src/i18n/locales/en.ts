@@ -70,7 +70,7 @@ export const en: Record<TranslationKey, string> = {
   'dev.api.switchToProduction': 'Switch to production',
   'dev.api.switchToLocal': 'Switch to local',
   'dev.api.devHostLabel': 'Mac IP (LAN)',
-  'dev.api.devHostPlaceholder': '192.168.178.29',
+  'dev.api.devHostPlaceholder': '192.168.178.28',
   'dev.api.saveDevHost': 'Save IP',
   'dev.api.invalidHost': 'Invalid IP address.',
   'recurring.loading': 'Loading tasks…',

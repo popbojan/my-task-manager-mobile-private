@@ -1,13 +1,17 @@
-import { Linking } from 'react-native';
 import { getAssetsBaseUrl } from '@/config/api';
+import type { AppLanguage } from '@/i18n/types';
 
 export type LegalPage = 'privacy' | 'impressum';
 
-export function getLegalPageUrl(page: LegalPage): string {
+export function getLegalPageUrl(
+  page: LegalPage,
+  language: AppLanguage,
+): string {
   const base = getAssetsBaseUrl().replace(/\/$/, '');
-  return `${base}/${page}`;
-}
-
-export async function openLegalPage(page: LegalPage): Promise<void> {
-  await Linking.openURL(getLegalPageUrl(page));
+  const params = new URLSearchParams({
+    lang: language,
+    from: 'app',
+    embed: '1',
+  });
+  return `${base}/${page}?${params.toString()}`;
 }

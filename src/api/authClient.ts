@@ -43,6 +43,10 @@ export function setAccessTokenGetter(getter: () => string | null) {
   accessTokenGetter = getter;
 }
 
+export function getAccessToken(): string | null {
+  return accessTokenGetter();
+}
+
 function createAuthApi(basePath: string): DefaultApi {
   const configuration = new Configuration({
     basePath,

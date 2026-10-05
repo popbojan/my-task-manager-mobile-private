@@ -16,6 +16,7 @@ import {
   getApiBaseUrl,
   isLocalDevHostPreferred,
   resolveApiBaseUrl,
+  resolveAssetsBaseUrl,
   resolveDefaultApiEnvironment,
   type ApiEnvironment,
 } from '@/config/api';
@@ -52,8 +53,12 @@ function isApiEnvironment(value: string | null): value is ApiEnvironment {
 }
 
 function resolveStoredEnvironment(stored: string | null): ApiEnvironment {
+  if (__DEV__) {
+    return 'local';
+  }
+
   if (isApiEnvironment(stored)) {
-    if (stored === 'local' && !isLocalDevHostPreferred() && !__DEV__) {
+    if (stored === 'local' && !isLocalDevHostPreferred()) {
       return 'production';
     }
 
@@ -93,8 +98,10 @@ export function ApiEnvironmentProvider({ children }: { children: ReactNode }) {
             console.log(
               '[API] environment:',
               nextEnvironment,
-              'url:',
+              'api:',
               nextBaseUrl,
+              'assets:',
+              resolveAssetsBaseUrl(nextEnvironment),
               'devHost:',
               getDevMachineHost(),
             );

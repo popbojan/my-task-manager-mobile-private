@@ -59,12 +59,21 @@ export function isLocalDevHostPreferred(): boolean {
 }
 
 export function resolveDefaultApiEnvironment(): ApiEnvironment {
+  if (__DEV__) {
+    return 'local';
+  }
+
   return isLocalDevHostPreferred() ? 'local' : 'production';
 }
 
 function devHost(localhostPort: number): string {
   if (Platform.OS === 'android') {
     const host = isAndroidEmulator() ? '10.0.2.2' : getDevMachineHost();
+    return `http://${host}:${localhostPort}`;
+  }
+
+  if (Platform.OS === 'ios') {
+    const host = isIosSimulator() ? 'localhost' : getDevMachineHost();
     return `http://${host}:${localhostPort}`;
   }
 
@@ -91,7 +100,7 @@ export function resolveAssetsBaseUrl(environment: ApiEnvironment): string {
     : devHost(5173);
 }
 
-/** Default: local on emulator/simulator, production on physical devices (even in dev builds). */
+/** Default: local in dev builds; on release, local only on emulator/simulator. */
 export const DEFAULT_API_ENVIRONMENT: ApiEnvironment = resolveDefaultApiEnvironment();
 
 let activeApiEnvironment: ApiEnvironment = DEFAULT_API_ENVIRONMENT;

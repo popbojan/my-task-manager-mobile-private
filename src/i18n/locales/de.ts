@@ -69,7 +69,7 @@ export const de = {
   'dev.api.switchToProduction': 'Zu Production wechseln',
   'dev.api.switchToLocal': 'Zu Lokal wechseln',
   'dev.api.devHostLabel': 'Mac-IP (LAN)',
-  'dev.api.devHostPlaceholder': '192.168.178.29',
+  'dev.api.devHostPlaceholder': '192.168.178.28',
   'dev.api.saveDevHost': 'IP speichern',
   'dev.api.invalidHost': 'Ungültige IP-Adresse.',
   'recurring.loading': 'Lade Aufgaben…',

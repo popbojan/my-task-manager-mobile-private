@@ -71,7 +71,7 @@ export const sr: Record<TranslationKey, string> = {
   'dev.api.switchToProduction': 'Prebaci na production',
   'dev.api.switchToLocal': 'Prebaci na lokalno',
   'dev.api.devHostLabel': 'Mac IP (LAN)',
-  'dev.api.devHostPlaceholder': '192.168.178.29',
+  'dev.api.devHostPlaceholder': '192.168.178.28',
   'dev.api.saveDevHost': 'Sačuvaj IP',
   'dev.api.invalidHost': 'Neispravna IP adresa.',
   'recurring.loading': 'Učitavanje zadataka…',

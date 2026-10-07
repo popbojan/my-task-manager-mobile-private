@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
@@ -7,8 +8,9 @@ import {
 } from 'react-native';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import PremiumFeatureList from '@/pages/subscription/PremiumFeatureList';
-import { getOfferingsErrorTranslationKey } from '@/revenuecat/revenueCatOfferingsErrors';
+import { getOfferingsUnavailableMessageKey } from '@/revenuecat/revenueCatOfferingsErrors';
 import { usePremiumPurchaseFlow } from '@/pages/subscription/usePremiumPurchaseFlow';
+import { getWebSubscriptionUrl } from '@/subscription/getWebSubscriptionUrl';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 type PremiumSubscribeSectionProps = {
@@ -20,7 +22,7 @@ export default function PremiumSubscribeSection({
   compact = false,
   flow: flowProp,
 }: PremiumSubscribeSectionProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const internalFlow = usePremiumPurchaseFlow();
   const flow = flowProp ?? internalFlow;
 
@@ -38,6 +40,11 @@ export default function PremiumSubscribeSection({
   }
 
   const monthlyPrice = flow.monthlyPackage?.product.priceString ?? null;
+  const webSubscriptionUrl = getWebSubscriptionUrl(language);
+
+  const openWebSubscription = () => {
+    Linking.openURL(webSubscriptionUrl).catch(() => undefined);
+  };
 
   return (
     <View style={styles.root}>
@@ -56,9 +63,26 @@ export default function PremiumSubscribeSection({
       ) : flow.offeringsQuery.isLoading ? (
         <Text style={styles.message}>{t('subscription.mobile.offeringsLoading')}</Text>
       ) : flow.offeringsQuery.isError ? (
-        <Text style={styles.error}>
-          {t(getOfferingsErrorTranslationKey(flow.offeringsQuery.error))}
-        </Text>
+        <View style={styles.offeringsFallback}>
+          <Text style={[styles.notice, styles.noticeInFallback]}>
+            {t(getOfferingsUnavailableMessageKey())}
+          </Text>
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel={t('subscription.mobile.webSubscriptionLinkA11y', {
+              url: webSubscriptionUrl,
+            })}
+            onPress={openWebSubscription}
+            style={styles.webLinkPressable}
+          >
+            <Text style={styles.webLinkLabel}>
+              {t('subscription.mobile.webSubscriptionLinkCta')}
+            </Text>
+            <Text style={styles.webLinkUrl} selectable>
+              {webSubscriptionUrl}
+            </Text>
+          </Pressable>
+        </View>
       ) : (
         <>
           {flow.monthlyPackage ? (
@@ -239,11 +263,38 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 12,
   },
+  offeringsFallback: {
+    marginBottom: 12,
+    gap: 10,
+  },
   notice: {
     color: recurringTheme.textSecondary,
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 12,
+  },
+  noticeInFallback: {
+    marginBottom: 0,
+  },
+  webLinkPressable: {
+    alignSelf: 'stretch',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorderAccent,
+    backgroundColor: recurringTheme.surfaceCard,
+  },
+  webLinkLabel: {
+    color: recurringTheme.accentBright,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  webLinkUrl: {
+    color: recurringTheme.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
   },
   error: {
     color: '#f87171',

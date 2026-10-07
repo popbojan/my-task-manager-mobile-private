@@ -1,18 +1,24 @@
+import { Platform } from 'react-native';
 import type { TranslationKey } from '@/i18n/locales';
+import { logRevenueCatIssue } from '@/revenuecat/revenueCatLogger';
 
-export function getOfferingsErrorTranslationKey(
-  error: unknown,
-): TranslationKey {
+export function getOfferingsUnavailableMessageKey(): TranslationKey {
+  return Platform.OS === 'ios'
+    ? 'subscription.mobile.offeringsUnavailableAppStore'
+    : 'subscription.mobile.offeringsUnavailableGooglePlay';
+}
+
+function describeOfferingsError(error: unknown): string {
   if (error instanceof Error) {
-    switch (error.message) {
-      case 'offerings_no_play_products':
-        return 'subscription.mobile.offeringsErrorPlayProducts';
-      case 'offerings_empty':
-        return 'subscription.mobile.offeringsErrorEmptyOffering';
-      default:
-        break;
-    }
+    return error.message;
   }
 
-  return 'subscription.mobile.offeringsError';
+  return 'unknown';
+}
+
+export function logRevenueCatOfferingsError(error: unknown): void {
+  logRevenueCatIssue(
+    `Store offerings unavailable (${describeOfferingsError(error)})`,
+    error,
+  );
 }

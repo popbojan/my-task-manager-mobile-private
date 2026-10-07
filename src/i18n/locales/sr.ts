@@ -267,16 +267,16 @@ export const sr: Record<TranslationKey, string> = {
   'subscription.mobile.purchaseLifetime': 'Doživotno – {{price}}',
   'subscription.mobile.restore': 'Vrati kupovinu',
   'subscription.mobile.offeringsLoading': 'Učitavanje ponuda iz prodavnice…',
-  'subscription.mobile.offeringsError':
-    'Ponude iz prodavnice nisu učitane. Proveri RevenueCat konfiguraciju.',
-  'subscription.mobile.offeringsErrorPlayProducts':
-    'RevenueCat nema Google Play proizvode u trenutnom offering-u. U dashboard-u uvezi Play proizvode i dodeli ih offering-u (ne samo Test Store).',
-  'subscription.mobile.offeringsErrorEmptyOffering':
-    'RevenueCat offering je prazan ili nema pakete za monthly/lifetime.',
+  'subscription.mobile.offeringsUnavailableGooglePlay':
+    'Trenutno nije moguće uzeti pretplatu preko Google Play-a. Nabavi Premium preko web aplikacije (Stripe). Jednom kupljena pretplata važi i u web- i u mobilnoj aplikaciji, dok god koristiš isti e-mail za prijavu.',
+  'subscription.mobile.offeringsUnavailableAppStore':
+    'Trenutno nije moguće uzeti pretplatu preko App Store-a. Nabavi Premium preko web aplikacije (Stripe). Jednom kupljena pretplata važi i u web- i u mobilnoj aplikaciji, dok god koristiš isti e-mail za prijavu.',
+  'subscription.mobile.webSubscriptionLinkCta': 'Nabavi Premium na web aplikaciji',
+  'subscription.mobile.webSubscriptionLinkA11y': 'Otvori web aplikaciju za Premium: {{url}}',
   'subscription.mobile.revenueCatUnavailable':
     'Kupovine u aplikaciji još nisu podešene na ovom uređaju. Aplikacija ostaje upotrebljiva.',
   'subscription.mobile.panelUnavailable':
-    'Odeljak za pretplatu trenutno nije mogao da se učita. RevenueCat greške ne blokiraju aplikaciju — osvežite ili pokušajte kasnije.',
+    'Odeljak za pretplatu trenutno nije mogao da se učita. Osvežite ili pokušajte kasnije.',
   'subscription.mobile.purchaseError':
     'Kupovina nije završena. Pokušaj ponovo.',
   'subscription.mobile.restoreError':
@@ -284,16 +284,16 @@ export const sr: Record<TranslationKey, string> = {
   'subscription.mobile.restoreNothing': 'Nije pronađena nijedna kupovina za vraćanje.',
   'subscription.mobile.purchaseInFlight': 'Kupovina je već u toku.',
   'subscription.mobile.identityMismatch':
-    'RevenueCat još nije povezan sa tvojim nalogom. Sačekaj, prijavi se ponovo i pokušaj opet.',
+    'Nalog se još priprema za kupovine. Sačekaj, prijavi se ponovo i pokušaj opet.',
   'subscription.mobile.processing.title': 'Kupovina uspešna – aktivacija se obrađuje',
   'subscription.mobile.processing.message':
     'Kupovina je uspešna. Premium će biti aktivan čim server potvrdi kupovinu.',
   'subscription.mobile.processing.hint':
-    'Kupovina je stigla do RevenueCat-a. Backend je još mora da potvrdi (webhook ili sync). Pritisni „Proveri status ponovo“ ili sačekaj.',
+    'Kupovina se još potvrđuje. Pritisni „Proveri status ponovo“ ili sačekaj.',
   'subscription.mobile.syncFailedRevenueCat':
-    'RevenueCat trenutno nije dostupan. Prikazani status se oslanja na poslednje poznate podatke.',
+    'Status pretplate nije mogao da se osveži. Prikaz se oslanja na poslednje poznate podatke.',
   'subscription.mobile.syncFailedBoth':
-    'Stripe i RevenueCat trenutno nisu dostupni. Prikazani status se oslanja na poslednje poznate podatke.',
+    'Status pretplate nije mogao da se osveži. Prikaz se oslanja na poslednje poznate podatke.',
   'profile.signedInAs': 'Prijavljen kao',
   'profile.emailUnavailable': 'E-pošta nije dostupna',
   'profile.deleteAccount.menuItem': 'Obriši nalog',

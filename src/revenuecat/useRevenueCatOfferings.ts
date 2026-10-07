@@ -6,6 +6,8 @@ import {
   resolveStorePackagesFromOffering,
 } from '@/revenuecat/revenueCatOfferings';
 import { isRevenueCatConfigurationError } from '@/revenuecat/revenueCatErrors';
+import { TEMP_FORCE_REVENUECAT_OFFERINGS_FAILURE } from '@/revenuecat/revenueCatOfferingsDebug';
+import { logRevenueCatOfferingsError } from '@/revenuecat/revenueCatOfferingsErrors';
 
 export const revenueCatOfferingsQueryKey = ['revenuecat-offerings'] as const;
 
@@ -13,13 +15,21 @@ export function useRevenueCatOfferings(enabled: boolean) {
   return useQuery({
     queryKey: revenueCatOfferingsQueryKey,
     queryFn: async () => {
+      if (TEMP_FORCE_REVENUECAT_OFFERINGS_FAILURE) {
+        const forcedError = new Error('offerings_empty');
+        logRevenueCatOfferingsError(forcedError);
+        throw forcedError;
+      }
+
       try {
         const offerings = await getRevenueCatOfferings();
         const current = offerings.current ?? null;
         const packages = resolveStorePackagesFromOffering(current);
 
         if (!current || !hasAnyStorePackage(packages)) {
-          throw new Error('offerings_empty');
+          const emptyError = new Error('offerings_empty');
+          logRevenueCatOfferingsError(emptyError);
+          throw emptyError;
         }
 
         return {
@@ -28,9 +38,12 @@ export function useRevenueCatOfferings(enabled: boolean) {
         };
       } catch (error) {
         if (isRevenueCatConfigurationError(error)) {
-          throw new Error('offerings_no_play_products');
+          const configurationError = new Error('offerings_no_play_products');
+          logRevenueCatOfferingsError(configurationError);
+          throw configurationError;
         }
 
+        logRevenueCatOfferingsError(error);
         throw error;
       }
     },

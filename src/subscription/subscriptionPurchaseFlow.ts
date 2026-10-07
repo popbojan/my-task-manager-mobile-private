@@ -11,6 +11,7 @@ import {
   isRevenueCatUserCancelledError,
   getRevenueCatErrorMessage,
 } from '@/revenuecat/revenueCatErrors';
+import { logRevenueCatIssue } from '@/revenuecat/revenueCatLogger';
 import { refreshSubscriptionFromBackend } from '@/subscription/subscriptionQuery';
 import type { SubscriptionAccessResponse } from '@/subscription/subscriptionAccessResponse';
 
@@ -86,6 +87,8 @@ export async function runSubscriptionPurchase(
       return { kind: 'user_cancelled' };
     }
 
+    logRevenueCatIssue('Purchase failed', error);
+
     return {
       kind: 'error',
       message: getRevenueCatErrorMessage(error) ?? 'purchase_failed',
@@ -129,6 +132,8 @@ export async function runSubscriptionRestore(
     if (isRevenueCatUserCancelledError(error)) {
       return { kind: 'user_cancelled' };
     }
+
+    logRevenueCatIssue('Restore purchases failed', error);
 
     return {
       kind: 'error',

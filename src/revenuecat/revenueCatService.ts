@@ -9,16 +9,11 @@ import {
   getRevenueCatPublicSdkKey,
   isRevenueCatConfiguredForPlatform,
 } from '@/config/revenueCat';
+import { logRevenueCatIssue } from '@/revenuecat/revenueCatLogger';
 
 let configurePromise: Promise<void> | null = null;
 let configuredApiKey: string | null = null;
 let logHandlerInstalled = false;
-
-function logRevenueCatWarning(message: string, error?: unknown) {
-  if (__DEV__) {
-    console.warn(`[RevenueCat] ${message}`, error);
-  }
-}
 
 /** Route SDK errors through warn in dev so LogBox does not cover the whole app. */
 function installRevenueCatLogHandler(): void {
@@ -58,7 +53,7 @@ export async function configureRevenueCatOnce(): Promise<void> {
 
     const apiKey = getRevenueCatPublicSdkKey();
     if (!apiKey) {
-      logRevenueCatWarning(
+      logRevenueCatIssue(
         `No public SDK key configured for ${Platform.OS}. Purchases are disabled.`,
       );
       return;
@@ -73,7 +68,7 @@ export async function configureRevenueCatOnce(): Promise<void> {
     configuredApiKey = apiKey;
   })().catch(error => {
     configurePromise = null;
-    logRevenueCatWarning('Configure failed', error);
+    logRevenueCatIssue('Configure failed', error);
     throw error;
   });
 
@@ -122,7 +117,7 @@ export async function ensureRevenueCatLinkedToUser(userId: string): Promise<bool
 
     return linkedAppUserId === trimmedUserId;
   } catch (error) {
-    logRevenueCatWarning('ensureRevenueCatLinkedToUser failed', error);
+    logRevenueCatIssue('ensureRevenueCatLinkedToUser failed', error);
     return false;
   }
 }
@@ -137,7 +132,7 @@ export async function getRevenueCatAppUserId(): Promise<string | null> {
   try {
     return await Purchases.getAppUserID();
   } catch (error) {
-    logRevenueCatWarning('getAppUserID failed', error);
+    logRevenueCatIssue('getAppUserID failed', error);
     return null;
   }
 }
@@ -150,7 +145,7 @@ export async function logOutRevenueCat(): Promise<void> {
   try {
     await Purchases.logOut();
   } catch (error) {
-    logRevenueCatWarning('logOut failed', error);
+    logRevenueCatIssue('logOut failed', error);
   }
 }
 

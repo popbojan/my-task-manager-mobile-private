@@ -268,16 +268,17 @@ export const fr: Record<TranslationKey, string> = {
   'subscription.mobile.purchaseLifetime': 'À vie – {{price}}',
   'subscription.mobile.restore': 'Restaurer les achats',
   'subscription.mobile.offeringsLoading': 'Chargement des offres du store…',
-  'subscription.mobile.offeringsError':
-    'Impossible de charger les offres du store. Vérifie la configuration RevenueCat.',
-  'subscription.mobile.offeringsErrorPlayProducts':
-    'RevenueCat n’a aucun produit Google Play dans l’offre actuelle. Importe les produits Play dans le dashboard et assigne-les à l’offering (pas seulement Test Store).',
-  'subscription.mobile.offeringsErrorEmptyOffering':
-    'L’offering RevenueCat est vide ou ne contient pas de packages monthly/lifetime.',
+  'subscription.mobile.offeringsUnavailableGooglePlay':
+    'Pour le moment, l’abonnement via Google Play n’est pas possible. Prends Premium via l’application web (Stripe). Un abonnement acheté une fois est valable sur le web et sur mobile tant que tu te connectes avec la même adresse e-mail.',
+  'subscription.mobile.offeringsUnavailableAppStore':
+    'Pour le moment, l’abonnement via l’App Store n’est pas possible. Prends Premium via l’application web (Stripe). Un abonnement acheté une fois est valable sur le web et sur mobile tant que tu te connectes avec la même adresse e-mail.',
+  'subscription.mobile.webSubscriptionLinkCta': 'S’abonner via l’application web',
+  'subscription.mobile.webSubscriptionLinkA11y':
+    'Ouvrir l’application web pour Premium : {{url}}',
   'subscription.mobile.revenueCatUnavailable':
     'Les achats in-app ne sont pas encore configurés sur cet appareil. L’app reste utilisable.',
   'subscription.mobile.panelUnavailable':
-    'La section abonnement n’a pas pu être chargée pour le moment. Les erreurs RevenueCat ne bloquent pas l’app — rechargez ou réessayez plus tard.',
+    'La section abonnement n’a pas pu être chargée pour le moment. Rechargez ou réessayez plus tard.',
   'subscription.mobile.purchaseError':
     'L’achat n’a pas pu être finalisé. Réessaie.',
   'subscription.mobile.restoreError':
@@ -285,16 +286,16 @@ export const fr: Record<TranslationKey, string> = {
   'subscription.mobile.restoreNothing': 'Aucun achat à restaurer n’a été trouvé.',
   'subscription.mobile.purchaseInFlight': 'Un achat est déjà en cours.',
   'subscription.mobile.identityMismatch':
-    'RevenueCat n’est pas encore lié à votre compte. Attendez, reconnectez-vous, puis réessayez.',
+    'Ton compte est encore en préparation pour les achats. Attends, reconnecte-toi, puis réessaie.',
   'subscription.mobile.processing.title': 'Achat réussi – activation en cours',
   'subscription.mobile.processing.message':
     'Ton achat a réussi. Premium s’activera dès que le serveur l’aura confirmé.',
   'subscription.mobile.processing.hint':
-    'L’achat est bien arrivé chez RevenueCat. Ton backend doit encore le confirmer (webhook ou sync). Appuie sur « Vérifier le statut » ou attends un instant.',
+    'Ton achat est encore en cours de confirmation. Appuie sur « Vérifier le statut » ou attends un instant.',
   'subscription.mobile.syncFailedRevenueCat':
-    'RevenueCat est indisponible. Le statut affiché repose sur les dernières données connues.',
+    'Le statut d’abonnement n’a pas pu être actualisé. L’affichage repose sur les dernières données connues.',
   'subscription.mobile.syncFailedBoth':
-    'Stripe et RevenueCat sont indisponibles. Le statut affiché repose sur les dernières données connues.',
+    'Le statut d’abonnement n’a pas pu être actualisé. L’affichage repose sur les dernières données connues.',
   'profile.signedInAs': 'Connecté en tant que',
   'profile.emailUnavailable': 'E-mail indisponible',
   'profile.deleteAccount.menuItem': 'Supprimer le compte',

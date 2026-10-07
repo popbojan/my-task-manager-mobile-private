@@ -265,16 +265,16 @@ export const de = {
   'subscription.mobile.purchaseLifetime': 'Lifetime – {{price}}',
   'subscription.mobile.restore': 'Käufe wiederherstellen',
   'subscription.mobile.offeringsLoading': 'Store-Angebote werden geladen…',
-  'subscription.mobile.offeringsError':
-    'Store-Angebote konnten nicht geladen werden. Bitte prüfe die RevenueCat-Konfiguration.',
-  'subscription.mobile.offeringsErrorPlayProducts':
-    'RevenueCat hat keine Google-Play-Produkte im Current Offering. Im Dashboard Play-Produkte importieren und dem Offering zuweisen (nicht nur Test Store).',
-  'subscription.mobile.offeringsErrorEmptyOffering':
-    'Das RevenueCat-Offering ist leer oder enthält keine Pakete für monthly/lifetime.',
+  'subscription.mobile.offeringsUnavailableGooglePlay':
+    'Derzeit ist kein Abo über Google Play möglich. Schließe Premium in der Web-App ab (Stripe). Ein einmal gekauftes Abo gilt in Web- und Mobil-App, solange du dich mit derselben E-Mail anmeldest.',
+  'subscription.mobile.offeringsUnavailableAppStore':
+    'Derzeit ist kein Abo über den App Store möglich. Schließe Premium in der Web-App ab (Stripe). Ein einmal gekauftes Abo gilt in Web- und Mobil-App, solange du dich mit derselben E-Mail anmeldest.',
+  'subscription.mobile.webSubscriptionLinkCta': 'Premium in der Web-App abschließen',
+  'subscription.mobile.webSubscriptionLinkA11y': 'Web-App für Premium öffnen: {{url}}',
   'subscription.mobile.revenueCatUnavailable':
     'In-App-Käufe sind auf diesem Gerät noch nicht konfiguriert. Die App bleibt nutzbar.',
   'subscription.mobile.panelUnavailable':
-    'Der Abo-Bereich konnte gerade nicht geladen werden. RevenueCat-Fehler blockieren die App nicht — bitte App neu laden oder später erneut versuchen.',
+    'Der Abo-Bereich konnte gerade nicht geladen werden. Bitte App neu laden oder später erneut versuchen.',
   'subscription.mobile.purchaseError':
     'Der Kauf konnte nicht abgeschlossen werden. Bitte versuche es erneut.',
   'subscription.mobile.restoreError':
@@ -282,16 +282,16 @@ export const de = {
   'subscription.mobile.restoreNothing': 'Es wurden keine wiederherstellbaren Käufe gefunden.',
   'subscription.mobile.purchaseInFlight': 'Ein Kauf läuft bereits.',
   'subscription.mobile.identityMismatch':
-    'RevenueCat ist noch nicht mit deinem Konto verknüpft. Bitte kurz warten oder neu einloggen und erneut versuchen.',
+    'Dein Konto wird noch für Käufe vorbereitet. Bitte kurz warten, neu einloggen und erneut versuchen.',
   'subscription.mobile.processing.title': 'Kauf erfolgreich – Aktivierung wird verarbeitet',
   'subscription.mobile.processing.message':
     'Dein Kauf war erfolgreich. Premium wird aktiv, sobald der Server den Kauf bestätigt hat.',
   'subscription.mobile.processing.hint':
-    'Der Store-Kauf ist bei RevenueCat angekommen. Dein Backend muss ihn noch über Webhook oder Sync bestätigen. Tippe „Status erneut prüfen“ oder warte kurz.',
+    'Dein Kauf wird noch bestätigt. Tippe „Status erneut prüfen“ oder warte kurz.',
   'subscription.mobile.syncFailedRevenueCat':
-    'RevenueCat ist gerade nicht erreichbar. Der angezeigte Status basiert auf den zuletzt bekannten Daten.',
+    'Der Abo-Status konnte gerade nicht aktualisiert werden. Die Anzeige basiert auf den zuletzt bekannten Daten.',
   'subscription.mobile.syncFailedBoth':
-    'Stripe und RevenueCat sind gerade nicht erreichbar. Der angezeigte Status basiert auf den zuletzt bekannten Daten.',
+    'Der Abo-Status konnte gerade nicht aktualisiert werden. Die Anzeige basiert auf den zuletzt bekannten Daten.',
   'profile.signedInAs': 'Angemeldet als',
   'profile.emailUnavailable': 'E-Mail nicht verfügbar',
   'profile.deleteAccount.menuItem': 'Konto löschen',

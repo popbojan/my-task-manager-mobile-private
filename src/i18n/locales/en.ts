@@ -264,16 +264,16 @@ export const en: Record<TranslationKey, string> = {
   'subscription.mobile.purchaseLifetime': 'Lifetime – {{price}}',
   'subscription.mobile.restore': 'Restore purchases',
   'subscription.mobile.offeringsLoading': 'Loading store offerings…',
-  'subscription.mobile.offeringsError':
-    'Store offerings could not be loaded. Please check the RevenueCat configuration.',
-  'subscription.mobile.offeringsErrorPlayProducts':
-    'RevenueCat has no Google Play products in the current offering. Import Play products in the dashboard and assign them to the offering (not Test Store only).',
-  'subscription.mobile.offeringsErrorEmptyOffering':
-    'The RevenueCat offering is empty or has no packages for monthly/lifetime.',
+  'subscription.mobile.offeringsUnavailableGooglePlay':
+    'Subscriptions through Google Play are not available right now. Get Premium via the web app (Stripe). Once purchased, your subscription works in both the web and mobile app as long as you sign in with the same email.',
+  'subscription.mobile.offeringsUnavailableAppStore':
+    'Subscriptions through the App Store are not available right now. Get Premium via the web app (Stripe). Once purchased, your subscription works in both the web and mobile app as long as you sign in with the same email.',
+  'subscription.mobile.webSubscriptionLinkCta': 'Subscribe on the web app',
+  'subscription.mobile.webSubscriptionLinkA11y': 'Open web app for Premium: {{url}}',
   'subscription.mobile.revenueCatUnavailable':
     'In-app purchases are not configured on this device yet. The app remains usable.',
   'subscription.mobile.panelUnavailable':
-    'The subscription section could not be loaded right now. RevenueCat errors do not block the app — please reload or try again later.',
+    'The subscription section could not be loaded right now. Please reload or try again later.',
   'subscription.mobile.purchaseError':
     'The purchase could not be completed. Please try again.',
   'subscription.mobile.restoreError':
@@ -281,16 +281,16 @@ export const en: Record<TranslationKey, string> = {
   'subscription.mobile.restoreNothing': 'No restorable purchases were found.',
   'subscription.mobile.purchaseInFlight': 'A purchase is already in progress.',
   'subscription.mobile.identityMismatch':
-    'RevenueCat is not linked to your account yet. Wait a moment, sign in again, then retry.',
+    'Your account is still being prepared for purchases. Wait a moment, sign in again, then retry.',
   'subscription.mobile.processing.title': 'Purchase successful – activation is processing',
   'subscription.mobile.processing.message':
     'Your purchase was successful. Premium will activate once the server confirms it.',
   'subscription.mobile.processing.hint':
-    'The store purchase reached RevenueCat. Your backend still needs to confirm it via webhook or sync. Tap “Check status again” or wait a moment.',
+    'Your purchase is still being confirmed. Tap “Check status again” or wait a moment.',
   'subscription.mobile.syncFailedRevenueCat':
-    'RevenueCat is currently unavailable. The status shown is based on the last known data.',
+    'Subscription status could not be refreshed. The display is based on the last known data.',
   'subscription.mobile.syncFailedBoth':
-    'Stripe and RevenueCat are currently unavailable. The status shown is based on the last known data.',
+    'Subscription status could not be refreshed. The display is based on the last known data.',
   'profile.signedInAs': 'Signed in as',
   'profile.emailUnavailable': 'Email unavailable',
   'profile.deleteAccount.menuItem': 'Delete account',

@@ -7,7 +7,7 @@ const logoSource = require('@/assets/images/logo.png');
 export default function AppLaunchView() {
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+      <StatusBar barStyle="light-content" />
       <Image
         source={logoSource}
         style={styles.logo}

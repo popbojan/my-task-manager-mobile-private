@@ -26,10 +26,22 @@ import CurrentUserBootstrap from '@/user/CurrentUserBootstrap';
 import RevenueCatBootstrap from '@/revenuecat/RevenueCatBootstrap';
 import SubscriptionBootstrap from '@/subscription/SubscriptionBootstrap';
 import { SubscriptionSessionProvider } from '@/subscription/SubscriptionSessionProvider';
+import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
+import {
+  recurringTaskProgressQueryKey,
+  recurringTasksQueryKey,
+} from '@/recurring/recurringQueryKeys';
+import { shouldBlockRecurringPremiumInteraction } from '@/recurring/recurringPremiumGate';
+import { isApiPremiumRequiredError } from '@/utils/apiError';
 import { ApiEnvironmentProvider } from '@/config/ApiEnvironmentProvider';
 
 function MainAppShell() {
   const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+  const subscriptionQuery = useSubscriptionAccess();
+  const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
+  const subscriptionReady =
+    !subscriptionQuery.isLoading && subscriptionQuery.isFetched;
   const [activeTab, setActiveTab] = useState<MainTab>('today');
   const [taskForm, setTaskForm] = useState<{
     visible: boolean;
@@ -45,6 +57,26 @@ function MainAppShell() {
   const [openProfileSubscription, setOpenProfileSubscription] = useState(false);
 
   function openTaskForm(taskId: string | null) {
+    const tasksError = queryClient.getQueryState(
+      recurringTasksQueryKey(accessToken),
+    )?.error;
+    const progressError = queryClient.getQueryState(
+      recurringTaskProgressQueryKey(accessToken),
+    )?.error;
+    const isPremiumPreview =
+      (tasksError !== undefined && isApiPremiumRequiredError(tasksError)) ||
+      (progressError !== undefined && isApiPremiumRequiredError(progressError));
+
+    if (
+      shouldBlockRecurringPremiumInteraction({
+        hasPremiumAccess,
+        isPremiumPreview,
+        subscriptionReady,
+      })
+    ) {
+      return;
+    }
+
     setTaskForm(prev => ({
       visible: true,
       taskId,

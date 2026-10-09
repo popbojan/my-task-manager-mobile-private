@@ -6,7 +6,10 @@ import {
   type SubscriptionAccessResponse,
 } from '@/subscription/subscriptionAccessResponse';
 import { subscriptionQueryKey } from '@/subscription/subscriptionQueryOptions';
-import { invalidateRecurringQueries } from '@/recurring/recurringQueryKeys';
+import {
+  clearRecurringSessionQueries,
+  invalidateRecurringQueries,
+} from '@/recurring/recurringQueryKeys';
 
 export async function refreshSubscriptionFromBackend(
   queryClient: QueryClient,
@@ -32,6 +35,10 @@ export async function fetchAndCacheSubscription(
 
   if (access.hasPremiumAccess && !previous?.hasPremiumAccess) {
     invalidateRecurringQueries(queryClient);
+  }
+
+  if (!access.hasPremiumAccess) {
+    clearRecurringSessionQueries(queryClient);
   }
 
   return access;

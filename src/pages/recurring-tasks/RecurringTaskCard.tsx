@@ -13,6 +13,8 @@ type RecurringTaskCardProps = {
   onEdit: (taskId: string) => void;
   onDelete: (task: RecurringTask) => void;
   onToggleStatus: (taskId: string) => void;
+  /** Demo task on the Heute board (no API); same gate as + without toggling status. */
+  onPreviewTaskPress?: () => void;
 };
 
 function TaskCheckboxVisual({
@@ -74,6 +76,7 @@ export default function RecurringTaskCard({
   onEdit,
   onDelete,
   onToggleStatus,
+  onPreviewTaskPress,
 }: RecurringTaskCardProps) {
   const { t } = useLanguage();
   const isPreviewTask = isPremiumPreviewTask(task.id);
@@ -88,6 +91,11 @@ export default function RecurringTaskCard({
         : 'recurring.status.done';
 
   function handleToggleStatus() {
+    if (isPreviewTask) {
+      onPreviewTaskPress?.();
+      return;
+    }
+
     onToggleStatus(task.id);
   }
 

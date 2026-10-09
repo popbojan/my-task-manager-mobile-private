@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   RecurringTaskStatus,
   type RecurringTaskStatus as RecurringTaskStatusType,
@@ -22,7 +22,17 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import { DAILY_STATUS_COLUMNS } from '@/pages/recurring-tasks/recurringBoardConfig';
 import { recurringTaskToFormState } from '@/pages/recurring-tasks/recurringTaskFormUtils';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
-import { shouldRetryApiQuery } from '@/utils/apiError';
+import {
+  isApiPremiumRequiredError,
+  shouldRetryApiQuery,
+} from '@/utils/apiError';
+import {
+  recurringTaskProgressQueryKey,
+  recurringTasksQueryKey,
+} from '@/recurring/recurringQueryKeys';
+import { shouldBlockRecurringPremiumInteraction } from '@/recurring/recurringPremiumGate';
+import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
+import { useAuth } from '@/auth/AuthContext';
 import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
 
 type RecurringTaskFormModalProps = {
@@ -49,6 +59,12 @@ export default function RecurringTaskFormModal({
   onSaved,
 }: RecurringTaskFormModalProps) {
   const { t } = useLanguage();
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+  const subscriptionQuery = useSubscriptionAccess();
+  const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
+  const subscriptionReady =
+    !subscriptionQuery.isLoading && subscriptionQuery.isFetched;
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isEdit = taskId !== null;
@@ -62,6 +78,34 @@ export default function RecurringTaskFormModal({
     enabled: isEdit,
     retry: shouldRetryApiQuery,
   });
+
+  useEffect(() => {
+    const tasksError = queryClient.getQueryState(
+      recurringTasksQueryKey(accessToken),
+    )?.error;
+    const progressError = queryClient.getQueryState(
+      recurringTaskProgressQueryKey(accessToken),
+    )?.error;
+    const isPremiumPreview =
+      (tasksError !== undefined && isApiPremiumRequiredError(tasksError)) ||
+      (progressError !== undefined && isApiPremiumRequiredError(progressError));
+
+    if (
+      shouldBlockRecurringPremiumInteraction({
+        hasPremiumAccess,
+        isPremiumPreview,
+        subscriptionReady,
+      })
+    ) {
+      onClose();
+    }
+  }, [
+    accessToken,
+    hasPremiumAccess,
+    onClose,
+    queryClient,
+    subscriptionReady,
+  ]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -137,6 +181,12 @@ export default function RecurringTaskFormModal({
     onError: err => {
       if (err instanceof Error && err.message === 'empty') {
         setError(t('recurring.form.titleRequired'));
+        return;
+      }
+
+      if (isApiPremiumRequiredError(err)) {
+        setError(t('recurring.premiumRequired'));
+        onClose();
         return;
       }
 

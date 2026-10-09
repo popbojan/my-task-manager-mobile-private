@@ -47,8 +47,12 @@ import {
   DEFAULT_RECURRING_PROGRESS,
   normalizeRecurringProgress,
 } from '@/utils/recurringProgress';
-import { createPremiumPreviewTasks } from '@/utils/recurringPremiumPreview';
+import {
+  createPremiumPreviewTasks,
+  isPremiumPreviewTask,
+} from '@/utils/recurringPremiumPreview';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
+import { shouldBlockRecurringPremiumInteraction } from '@/recurring/recurringPremiumGate';
 import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
@@ -86,6 +90,8 @@ export default function RecurringTasksScreen({
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
+  const subscriptionReady =
+    !subscriptionQuery.isLoading && subscriptionQuery.isFetched;
 
   const [deleteModal, setDeleteModal] = useState<{
     visible: boolean;
@@ -224,7 +230,10 @@ export default function RecurringTasksScreen({
   const progressIsLoading = progressQuery.isLoading && !progressPremiumLocked;
   const progressFailed =
     progressQuery.isError && !progressPremiumLocked && !progressQuery.data;
+  const canManageRecurringTasks =
+    subscriptionReady && hasPremiumAccess && tasksQuery.isSuccess && !isPremiumPreview;
   const canRenderBoard = tasksQuery.isSuccess || isPremiumPreview;
+  const showAddTaskFab = canRenderBoard && (canManageRecurringTasks || isPremiumPreview);
   const listScrollEnabled =
     listViewportHeight === 0 || listContentHeight > listViewportHeight + 1;
 
@@ -265,7 +274,13 @@ export default function RecurringTasksScreen({
   }
 
   function guardPremiumInteraction(): boolean {
-    if (!isPremiumPreview) {
+    const blocked = shouldBlockRecurringPremiumInteraction({
+      hasPremiumAccess,
+      isPremiumPreview,
+      subscriptionReady,
+    });
+
+    if (!blocked) {
       return false;
     }
 
@@ -282,7 +297,7 @@ export default function RecurringTasksScreen({
   }
 
   function openEditModal(taskId: string) {
-    if (guardPremiumInteraction()) {
+    if (isPremiumPreviewTask(taskId) || guardPremiumInteraction()) {
       return;
     }
 
@@ -290,7 +305,7 @@ export default function RecurringTasksScreen({
   }
 
   function openDeleteModal(task: RecurringTask) {
-    if (guardPremiumInteraction()) {
+    if (isPremiumPreviewTask(task.id) || guardPremiumInteraction()) {
       return;
     }
 
@@ -310,8 +325,12 @@ export default function RecurringTasksScreen({
     deleteTaskMutation.mutate(deleteModal.task.id);
   }
 
+  function handlePreviewTaskPress() {
+    guardPremiumInteraction();
+  }
+
   function handleToggleStatus(taskId: string) {
-    if (guardPremiumInteraction()) {
+    if (isPremiumPreviewTask(taskId) || guardPremiumInteraction()) {
       return;
     }
 
@@ -393,13 +412,15 @@ export default function RecurringTasksScreen({
                 <View style={styles.sectionBadge}>
                   <Text style={styles.sectionBadgeText}>{dailyTaskCount}</Text>
                 </View>
-                <Pressable
-                  style={styles.addFab}
-                  accessibilityLabel={t('recurring.addTaskDaily')}
-                  onPress={openCreateModal}
-                >
-                  <PlusIcon size={14} color="#fff" />
-                </Pressable>
+                {showAddTaskFab ? (
+                  <Pressable
+                    style={styles.addFab}
+                    accessibilityLabel={t('recurring.addTaskDaily')}
+                    onPress={openCreateModal}
+                  >
+                    <PlusIcon size={14} color="#fff" />
+                  </Pressable>
+                ) : null}
               </View>
             </View>
           ) : null}
@@ -444,6 +465,7 @@ export default function RecurringTasksScreen({
               onEdit={openEditModal}
               onDelete={openDeleteModal}
               onToggleStatus={handleToggleStatus}
+              onPreviewTaskPress={handlePreviewTaskPress}
             />
           )}
           ItemSeparatorComponent={() => <View style={styles.taskSeparator} />}

@@ -78,6 +78,7 @@ export const fr: Record<TranslationKey, string> = {
   'recurring.progressError': 'Impossible de charger la progression.',
   'recurring.levelsError': 'Impossible de charger les niveaux.',
   'recurring.premiumRequired': 'Premium requis pour les tâches quotidiennes.',
+  'recurring.preview.subscribeTaskTitle': 'Abonne-toi pour pratiquer la discipline',
   'recurring.noTasks': 'Aucune tâche quotidienne pour l’instant.',
   'recurring.addTaskDaily': 'Nouvelle tâche quotidienne',
   'recurring.status.toggle': 'Changer le statut',

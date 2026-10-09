@@ -6,6 +6,7 @@ import { FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import { EditIcon, TrashIcon } from '@/pages/recurring-tasks/premium/TabIcons';
 import PremiumSurface from '@/pages/recurring-tasks/premium/PremiumSurface';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import { isPremiumPreviewTask } from '@/utils/recurringPremiumPreview';
 
 type RecurringTaskCardProps = {
   task: RecurringTask;
@@ -75,6 +76,7 @@ export default function RecurringTaskCard({
   onToggleStatus,
 }: RecurringTaskCardProps) {
   const { t } = useLanguage();
+  const isPreviewTask = isPremiumPreviewTask(task.id);
   const isDone = task.status === RecurringTaskStatus.Done;
   const isInProgress = task.status === RecurringTaskStatus.InProgress;
 
@@ -91,7 +93,9 @@ export default function RecurringTaskCard({
 
   return (
     <PremiumSurface
-      accent={isDone ? 'success' : isInProgress ? 'gold' : 'none'}
+      accent={
+        isPreviewTask ? 'gold' : isDone ? 'success' : isInProgress ? 'gold' : 'none'
+      }
       compact={!isDone}
       padding={8}
       radius={12}
@@ -117,52 +121,56 @@ export default function RecurringTaskCard({
             >
               {task.title}
             </Text>
-            <View
-              style={[
-                styles.streakPill,
-                isInProgress && styles.streakPillProgress,
-                isDone && styles.streakPillDone,
-              ]}
-            >
-              <FireIcon
-                size={10}
-                color={
-                  isDone
-                    ? recurringTheme.accentBright
-                    : isInProgress
-                      ? recurringTheme.goldBright
-                      : '#c9a227'
-                }
-              />
-              <Text
+            {!isPreviewTask ? (
+              <View
                 style={[
-                  styles.streakText,
-                  isInProgress && styles.streakTextProgress,
-                  isDone && styles.streakTextDone,
+                  styles.streakPill,
+                  isInProgress && styles.streakPillProgress,
+                  isDone && styles.streakPillDone,
                 ]}
               >
-                {t('recurring.streak.count', { count: String(task.streakCount) })}
-              </Text>
-            </View>
+                <FireIcon
+                  size={10}
+                  color={
+                    isDone
+                      ? recurringTheme.accentBright
+                      : isInProgress
+                        ? recurringTheme.goldBright
+                        : '#c9a227'
+                  }
+                />
+                <Text
+                  style={[
+                    styles.streakText,
+                    isInProgress && styles.streakTextProgress,
+                    isDone && styles.streakTextDone,
+                  ]}
+                >
+                  {t('recurring.streak.count', { count: String(task.streakCount) })}
+                </Text>
+              </View>
+            ) : null}
           </View>
         </Pressable>
 
-        <View style={styles.actions}>
-          <Pressable
-            style={styles.actionButton}
-            accessibilityLabel={t('recurring.edit')}
-            onPress={() => onEdit(task.id)}
-          >
-            <EditIcon size={14} />
-          </Pressable>
-          <Pressable
-            style={styles.actionButton}
-            accessibilityLabel={t('recurring.delete')}
-            onPress={() => onDelete(task)}
-          >
-            <TrashIcon size={14} />
-          </Pressable>
-        </View>
+        {!isPreviewTask ? (
+          <View style={styles.actions}>
+            <Pressable
+              style={styles.actionButton}
+              accessibilityLabel={t('recurring.edit')}
+              onPress={() => onEdit(task.id)}
+            >
+              <EditIcon size={14} />
+            </Pressable>
+            <Pressable
+              style={styles.actionButton}
+              accessibilityLabel={t('recurring.delete')}
+              onPress={() => onDelete(task)}
+            >
+              <TrashIcon size={14} />
+            </Pressable>
+          </View>
+        ) : null}
       </View>
     </PremiumSurface>
   );

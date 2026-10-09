@@ -78,6 +78,7 @@ export const en: Record<TranslationKey, string> = {
   'recurring.progressError': 'Could not load progress.',
   'recurring.levelsError': 'Could not load levels.',
   'recurring.premiumRequired': 'Premium required for daily tasks.',
+  'recurring.preview.subscribeTaskTitle': 'Subscribe to practice discipline',
   'recurring.noTasks': 'No daily tasks yet.',
   'recurring.addTaskDaily': 'New daily task',
   'recurring.status.toggle': 'Change status',

@@ -77,6 +77,7 @@ export const de = {
   'recurring.progressError': 'Fortschritt konnte nicht geladen werden.',
   'recurring.levelsError': 'Level konnten nicht geladen werden.',
   'recurring.premiumRequired': 'Premium erforderlich für tägliche Aufgaben.',
+  'recurring.preview.subscribeTaskTitle': 'Abonniere, um Disziplin zu üben',
   'recurring.noTasks': 'Noch keine täglichen Aufgaben.',
   'recurring.addTaskDaily': 'Neue tägliche Aufgabe',
   'recurring.status.toggle': 'Status ändern',

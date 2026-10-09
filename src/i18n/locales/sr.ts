@@ -79,6 +79,7 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.progressError': 'Napredak nije učitan.',
   'recurring.levelsError': 'Nivoi nisu učitani.',
   'recurring.premiumRequired': 'Premium potreban za dnevne zadatke.',
+  'recurring.preview.subscribeTaskTitle': 'Pretplati se da vežbaš disciplinu',
   'recurring.noTasks': 'Još nema dnevnih zadataka.',
   'recurring.addTaskDaily': 'Novi dnevni zadatak',
   'recurring.status.toggle': 'Promeni status',

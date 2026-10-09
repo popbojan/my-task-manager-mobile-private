@@ -47,6 +47,8 @@ import {
   DEFAULT_RECURRING_PROGRESS,
   normalizeRecurringProgress,
 } from '@/utils/recurringProgress';
+import { createPremiumPreviewTasks } from '@/utils/recurringPremiumPreview';
+import { getDeviceTimezone } from '@/user/deviceTimezone';
 import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
@@ -173,13 +175,9 @@ export default function RecurringTasksScreen({
   });
 
   const tasksPremiumLocked =
-    !hasPremiumAccess &&
-    tasksQuery.isError &&
-    isApiPremiumRequiredError(tasksQuery.error);
+    tasksQuery.isError && isApiPremiumRequiredError(tasksQuery.error);
   const progressPremiumLocked =
-    !hasPremiumAccess &&
-    progressQuery.isError &&
-    isApiPremiumRequiredError(progressQuery.error);
+    progressQuery.isError && isApiPremiumRequiredError(progressQuery.error);
   const isPremiumPreview = tasksPremiumLocked || progressPremiumLocked;
 
   useEffect(() => {
@@ -200,8 +198,11 @@ export default function RecurringTasksScreen({
   ]);
 
   const displayTasks = useMemo(
-    () => tasksQuery.data ?? [],
-    [tasksQuery.data],
+    () =>
+      isPremiumPreview
+        ? createPremiumPreviewTasks(t, getDeviceTimezone())
+        : (tasksQuery.data ?? []),
+    [isPremiumPreview, t, tasksQuery.data],
   );
   const sortedTasks = useMemo(
     () => sortTasksForList(displayTasks),
@@ -223,7 +224,7 @@ export default function RecurringTasksScreen({
   const progressIsLoading = progressQuery.isLoading && !progressPremiumLocked;
   const progressFailed =
     progressQuery.isError && !progressPremiumLocked && !progressQuery.data;
-  const canRenderBoard = tasksQuery.isSuccess || tasksPremiumLocked;
+  const canRenderBoard = tasksQuery.isSuccess || isPremiumPreview;
   const listScrollEnabled =
     listViewportHeight === 0 || listContentHeight > listViewportHeight + 1;
 
@@ -264,7 +265,7 @@ export default function RecurringTasksScreen({
   }
 
   function guardPremiumInteraction(): boolean {
-    if (!tasksPremiumLocked) {
+    if (!isPremiumPreview) {
       return false;
     }
 

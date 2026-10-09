@@ -8,11 +8,12 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  type TextInputInstance,
   useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   RecurringTaskStatus,
   type RecurringTaskStatus as RecurringTaskStatusType,
@@ -26,13 +27,6 @@ import {
   isApiPremiumRequiredError,
   shouldRetryApiQuery,
 } from '@/utils/apiError';
-import {
-  recurringTaskProgressQueryKey,
-  recurringTasksQueryKey,
-} from '@/recurring/recurringQueryKeys';
-import { shouldBlockRecurringPremiumInteraction } from '@/recurring/recurringPremiumGate';
-import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
-import { useAuth } from '@/auth/AuthContext';
 import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
 
 type RecurringTaskFormModalProps = {
@@ -59,18 +53,12 @@ export default function RecurringTaskFormModal({
   onSaved,
 }: RecurringTaskFormModalProps) {
   const { t } = useLanguage();
-  const { accessToken } = useAuth();
-  const queryClient = useQueryClient();
-  const subscriptionQuery = useSubscriptionAccess();
-  const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
-  const subscriptionReady =
-    !subscriptionQuery.isLoading && subscriptionQuery.isFetched;
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isEdit = taskId !== null;
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [error, setError] = useState<string | null>(null);
-  const titleInputRef = useRef<TextInput>(null);
+  const titleInputRef = useRef<TextInputInstance>(null);
 
   const taskQuery = useQuery({
     queryKey: ['recurring-task', taskId],
@@ -78,34 +66,6 @@ export default function RecurringTaskFormModal({
     enabled: isEdit,
     retry: shouldRetryApiQuery,
   });
-
-  useEffect(() => {
-    const tasksError = queryClient.getQueryState(
-      recurringTasksQueryKey(accessToken),
-    )?.error;
-    const progressError = queryClient.getQueryState(
-      recurringTaskProgressQueryKey(accessToken),
-    )?.error;
-    const isPremiumPreview =
-      (tasksError !== undefined && isApiPremiumRequiredError(tasksError)) ||
-      (progressError !== undefined && isApiPremiumRequiredError(progressError));
-
-    if (
-      shouldBlockRecurringPremiumInteraction({
-        hasPremiumAccess,
-        isPremiumPreview,
-        subscriptionReady,
-      })
-    ) {
-      onClose();
-    }
-  }, [
-    accessToken,
-    hasPremiumAccess,
-    onClose,
-    queryClient,
-    subscriptionReady,
-  ]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {

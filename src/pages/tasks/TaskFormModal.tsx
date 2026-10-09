@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  type TextInputInstance,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -104,7 +105,7 @@ export default function TaskFormModal({
   const isEdit = taskId !== null;
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [error, setError] = useState<string | null>(null);
-  const titleInputRef = useRef<TextInput>(null);
+  const titleInputRef = useRef<TextInputInstance>(null);
 
   const taskQuery = useQuery({
     queryKey: ['task', taskId],
@@ -128,10 +129,11 @@ export default function TaskFormModal({
     if (!isEdit) {
       setForm(createInitialForm(initialPriority ?? TaskPriority.ImportantUrgent));
       setError(null);
-      return;
     }
+  }, [initialPriority, isEdit]);
 
-    if (!taskId) {
+  useEffect(() => {
+    if (!isEdit || !taskId) {
       return;
     }
 
@@ -155,7 +157,7 @@ export default function TaskFormModal({
       : listTask!;
 
     setForm(taskToFormState(task));
-  }, [accessToken, initialPriority, isEdit, queryClient, taskId, taskQuery.data]);
+  }, [accessToken, isEdit, queryClient, taskId, taskQuery.data]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {

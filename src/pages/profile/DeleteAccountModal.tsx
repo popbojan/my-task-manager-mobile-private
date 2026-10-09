@@ -11,8 +11,8 @@ import {
   Text,
   TextInput,
   View,
-  type ScrollView as ScrollViewType,
-  type TextInput as TextInputType,
+  type ScrollViewInstance,
+  type TextInputInstance,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '@/i18n/LanguageProvider';
@@ -59,7 +59,7 @@ function DeleteAccountDialog({
   onConfirm,
   otpInputRef,
 }: Omit<DeleteAccountModalProps, 'visible'> & {
-  otpInputRef: RefObject<TextInputType | null>;
+  otpInputRef: RefObject<TextInputInstance | null>;
 }) {
   const { t } = useLanguage();
   const isVerifyStep = step === 'verify';
@@ -227,8 +227,8 @@ export default function DeleteAccountModal(props: DeleteAccountModalProps) {
   const { visible, step, otpSent } = props;
   const insets = useSafeAreaInsets();
   const isVerifyStep = step === 'verify';
-  const otpInputRef = useRef<TextInputType>(null);
-  const verifyScrollRef = useRef<ScrollViewType>(null);
+  const otpInputRef = useRef<TextInputInstance>(null);
+  const verifyScrollRef = useRef<ScrollViewInstance>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {

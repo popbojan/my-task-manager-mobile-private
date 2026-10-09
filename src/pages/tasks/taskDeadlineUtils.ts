@@ -67,14 +67,53 @@ export function formatTaskDateTime(date: Date, language: AppLanguage): string {
   }).format(date);
 }
 
+/** Full deadline field: `YYYY-MM-DDTHH:mm` (24h, no seconds). */
+export const DEADLINE_INPUT_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
+
 export function parseDeadlineInput(value: string): Date | null {
   const trimmed = value.trim();
   if (!trimmed) {
     return null;
   }
 
-  const parsed = new Date(trimmed);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  const match = DEADLINE_INPUT_PATTERN.exec(trimmed);
+  if (!match) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const hours = Number(match[4]);
+  const minutes = Number(match[5]);
+
+  if (month < 1 || month > 12 || day < 1 || hours > 23 || minutes > 59) {
+    return null;
+  }
+
+  const date = new Date(year, month - 1, day, hours, minutes, 0, 0);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day ||
+    date.getHours() !== hours ||
+    date.getMinutes() !== minutes
+  ) {
+    return null;
+  }
+
+  return date;
+}
+
+export function deadlineInputFromDate(date: Date): string {
+  return formatDeadlineInput(date);
+}
+
+export function defaultDeadlineDate(now = new Date()): Date {
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(19, 0, 0, 0);
+  return tomorrow;
 }
 
 export function formatDeadlineInput(date: Date | null | undefined): string {
@@ -87,8 +126,5 @@ export function formatDeadlineInput(date: Date | null | undefined): string {
 }
 
 export function getDefaultDeadlineInput(now = new Date()): string {
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(19, 0, 0, 0);
-  return formatDeadlineInput(tomorrow);
+  return formatDeadlineInput(defaultDeadlineDate(now));
 }

@@ -31,6 +31,7 @@ import {
   TASK_PRIORITY_SECTIONS,
   TASK_STATUS_FLOW,
 } from '@/pages/tasks/taskBoardConfig';
+import TaskDeadlineField from '@/pages/tasks/TaskDeadlineField';
 import {
   formatDeadlineInput,
   getDefaultDeadlineInput,
@@ -216,9 +217,18 @@ export default function TaskFormModal({
       return;
     }
 
+    if (form.deadlineInput.trim() && !parseDeadlineInput(form.deadlineInput)) {
+      setError(t('tasks.form.deadlineInvalid'));
+      return;
+    }
+
     setError(null);
     saveMutation.mutate();
   }
+
+  const deadlineFieldInvalid =
+    form.deadlineInput.trim().length >= 16 &&
+    parseDeadlineInput(form.deadlineInput) === null;
 
   const isLoadingTask = isEdit && taskQuery.isLoading;
   const canFocusTitle = !isLoadingTask;
@@ -322,20 +332,16 @@ export default function TaskFormModal({
           </View>
         </View>
 
-        <View style={styles.deadlineRow}>
-          <Text style={styles.deadlineLabel}>{t('tasks.form.deadlineLabel')}</Text>
-          <TextInput
-            style={[styles.input, styles.deadlineInput]}
-            value={form.deadlineInput}
-            onChangeText={deadlineInput =>
-              setForm(current => ({ ...current, deadlineInput }))
+        <TaskDeadlineField
+          value={form.deadlineInput}
+          onChange={deadlineInput => {
+            setForm(current => ({ ...current, deadlineInput }));
+            if (error === t('tasks.form.deadlineInvalid') && parseDeadlineInput(deadlineInput)) {
+              setError(null);
             }
-            placeholder={t('tasks.form.deadlinePlaceholder')}
-            placeholderTextColor={recurringTheme.textMuted}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
+          }}
+          showInvalid={deadlineFieldInvalid}
+        />
       </View>
 
       <View style={styles.footer}>
@@ -548,24 +554,6 @@ const styles = StyleSheet.create({
     minHeight: 96,
     paddingTop: 8,
     lineHeight: 20,
-  },
-  deadlineRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  deadlineLabel: {
-    color: recurringTheme.textSecondary,
-    fontSize: 12,
-    fontWeight: '700',
-    flexShrink: 0,
-  },
-  deadlineInput: {
-    flex: 1,
-    minWidth: 0,
-    fontSize: 12,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
   },
   statusRow: {
     flexDirection: 'row',

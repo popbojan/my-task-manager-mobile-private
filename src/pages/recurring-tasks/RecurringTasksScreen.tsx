@@ -36,6 +36,7 @@ import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTh
 import TodaySummaryCard from '@/pages/recurring-tasks/TodaySummaryCard';
 import PremiumUpsellModal from '@/pages/subscription/PremiumUpsellModal';
 import PremiumStatusBar from '@/pages/subscription/PremiumStatusBar';
+import { shouldBlockRecurringPremiumInteraction } from '@/recurring/recurringPremiumGate';
 import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import {
   isApiConflictError,
@@ -52,7 +53,6 @@ import {
   isPremiumPreviewTask,
 } from '@/utils/recurringPremiumPreview';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
-import { shouldBlockRecurringPremiumInteraction } from '@/recurring/recurringPremiumGate';
 import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,

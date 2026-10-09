@@ -15,6 +15,38 @@ export function clearRecurringSessionQueries(queryClient: QueryClient) {
   queryClient.removeQueries({ queryKey: ['current-user'] });
 }
 
+function hasSuccessfulRecurringQueries(queryClient: QueryClient): boolean {
+  const tasksSucceeded = queryClient
+    .getQueryCache()
+    .findAll({ queryKey: ['recurring-tasks'] })
+    .some(
+      query =>
+        query.state.status === 'success' &&
+        query.state.data !== undefined,
+    );
+  const progressSucceeded = queryClient
+    .getQueryCache()
+    .findAll({ queryKey: ['recurring-task-progress'] })
+    .some(
+      query =>
+        query.state.status === 'success' &&
+        query.state.data !== undefined,
+    );
+
+  return tasksSucceeded || progressSucceeded;
+}
+
+/** Drop stale recurring successes after premium ends — skip when nothing was cached. */
+export function clearRecurringSessionQueriesIfCached(
+  queryClient: QueryClient,
+): void {
+  if (!hasSuccessfulRecurringQueries(queryClient)) {
+    return;
+  }
+
+  clearRecurringSessionQueries(queryClient);
+}
+
 /** Refetch premium-gated recurring data after subscription unlocks. */
 export function invalidateRecurringQueries(queryClient: QueryClient): void {
   void queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });

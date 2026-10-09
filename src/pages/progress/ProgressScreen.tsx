@@ -81,13 +81,9 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
   });
 
   const tasksPremiumLocked =
-    !hasPremiumAccess &&
-    tasksQuery.isError &&
-    isApiPremiumRequiredError(tasksQuery.error);
+    tasksQuery.isError && isApiPremiumRequiredError(tasksQuery.error);
   const progressPremiumLocked =
-    !hasPremiumAccess &&
-    progressQuery.isError &&
-    isApiPremiumRequiredError(progressQuery.error);
+    progressQuery.isError && isApiPremiumRequiredError(progressQuery.error);
   const isPremiumPreview = tasksPremiumLocked || progressPremiumLocked;
 
   useEffect(() => {

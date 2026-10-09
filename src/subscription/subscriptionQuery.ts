@@ -7,7 +7,7 @@ import {
 } from '@/subscription/subscriptionAccessResponse';
 import { subscriptionQueryKey } from '@/subscription/subscriptionQueryOptions';
 import {
-  clearRecurringSessionQueries,
+  clearRecurringSessionQueriesIfCached,
   invalidateRecurringQueries,
 } from '@/recurring/recurringQueryKeys';
 
@@ -38,7 +38,7 @@ export async function fetchAndCacheSubscription(
   }
 
   if (!access.hasPremiumAccess) {
-    clearRecurringSessionQueries(queryClient);
+    clearRecurringSessionQueriesIfCached(queryClient);
   }
 
   return access;

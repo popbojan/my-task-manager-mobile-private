@@ -110,7 +110,10 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
   const displayProgress = isPremiumPreview
     ? DEFAULT_RECURRING_PROGRESS
     : normalizeRecurringProgress(progressQuery.data);
-  const masteryLevels = masteryLevelsQuery.data ?? [];
+  const masteryLevels = useMemo(
+    () => masteryLevelsQuery.data ?? [],
+    [masteryLevelsQuery.data],
+  );
 
   const levelProgress = useMemo(
     () =>

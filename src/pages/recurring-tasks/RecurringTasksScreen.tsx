@@ -60,6 +60,7 @@ import {
 } from '@/recurring/recurringQueryKeys';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
+import OnboardingEmptyState from '@/onboarding/OnboardingEmptyState';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
@@ -456,7 +457,12 @@ export default function RecurringTasksScreen({
             tasksAreLoading || !canRenderBoard
               ? undefined
               : () => (
-                  <Text style={styles.emptyText}>{t('recurring.noTasks')}</Text>
+                  <OnboardingEmptyState
+                    titleKey="onboarding.empty.recurring.title"
+                    bodyKey="onboarding.empty.recurring.body"
+                    ctaKey="onboarding.empty.recurring.cta"
+                    onPressCta={onOpenCreateTask}
+                  />
                 )
           }
           renderItem={({ item }) => (

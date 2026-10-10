@@ -63,6 +63,32 @@ export const fr: Record<TranslationKey, string> = {
   'nav.progress': 'Progrès',
   'nav.profile': 'Profil',
   'nav.backToToday': 'Retour à Aujourd’hui',
+  'onboarding.badge': 'Bienvenue',
+  'onboarding.closeAll': 'Fermer l’introduction',
+  'onboarding.skipStep': 'Passer cette étape',
+  'onboarding.next': 'Suivant',
+  'onboarding.finish': 'C’est parti',
+  'onboarding.progress': 'Étape {{current}} sur {{total}}',
+  'onboarding.slide1.title': 'Deux types de tâches',
+  'onboarding.slide1.body':
+    'Aujourd’hui, c’est pour les habitudes quotidiennes avec série et niveaux. Tâches, c’est ton board pour les projets avec échéances et priorités.',
+  'onboarding.slide2.title': 'Par où commencer',
+  'onboarding.slide2.body':
+    'Crée ta première tâche sur le board — gratuit et utilisable tout de suite. Aujourd’hui et Progrès montrent ta discipline quotidienne avec Premium.',
+  'onboarding.slide2.bodyPremium':
+    'Commence avec une à trois tâches quotidiennes sous Aujourd’hui. De petits pas chaque jour — c’est ainsi que ta série grandit.',
+  'onboarding.slide3.title': 'Voir ta progression',
+  'onboarding.slide3.body':
+    'Progrès affiche ta série, ton niveau et ta semaine. Termine tes tâches Aujourd’hui pour avancer.',
+  'onboarding.empty.overline': 'Premier pas',
+  'onboarding.empty.tasks.title': 'Aucune tâche pour l’instant',
+  'onboarding.empty.tasks.body':
+    'Ajoute des projets avec échéance et priorité — ton board pour tout ce qui n’est pas une habitude quotidienne.',
+  'onboarding.empty.tasks.cta': 'Créer la première tâche',
+  'onboarding.empty.recurring.title': 'Aucune tâche quotidienne',
+  'onboarding.empty.recurring.body':
+    'Que veux-tu accomplir chaque jour ? Commence petit — une à trois habitudes suffisent.',
+  'onboarding.empty.recurring.cta': 'Créer la première tâche du jour',
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
     'Local — mêmes données que le web sur localhost:5173 (comptes test avec premium).',

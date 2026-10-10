@@ -34,14 +34,22 @@ import {
 import { shouldBlockRecurringPremiumInteraction } from '@/recurring/recurringPremiumGate';
 import { isApiPremiumRequiredError } from '@/utils/apiError';
 import { ApiEnvironmentProvider } from '@/config/ApiEnvironmentProvider';
+import OnboardingModal from '@/onboarding/OnboardingModal';
+import { useOnboardingVisibility } from '@/onboarding/useOnboardingVisibility';
+import { useCurrentUser } from '@/user/useCurrentUser';
 
 function MainAppShell() {
   const queryClient = useQueryClient();
   const { accessToken } = useAuth();
+  const currentUserQuery = useCurrentUser();
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
   const subscriptionReady =
     !subscriptionQuery.isLoading && subscriptionQuery.isFetched;
+  const onboarding = useOnboardingVisibility({
+    userId: currentUserQuery.data?.id,
+    isNewUser: currentUserQuery.data?.isNewUser,
+  });
   const [activeTab, setActiveTab] = useState<MainTab>('today');
   const [taskForm, setTaskForm] = useState<{
     visible: boolean;
@@ -111,6 +119,23 @@ function MainAppShell() {
 
   function openBoardTaskCreate(activeFilter: TaskFilterId) {
     openBoardTaskForm(null, defaultPriorityForCreateFilter(activeFilter));
+  }
+
+  async function dismissOnboarding() {
+    await onboarding.dismiss();
+  }
+
+  async function completeOnboarding() {
+    await onboarding.dismiss();
+
+    if (hasPremiumAccess) {
+      setActiveTab('today');
+      openTaskForm(null);
+      return;
+    }
+
+    setActiveTab('tasks');
+    openBoardTaskCreate('all');
   }
 
   return (
@@ -188,6 +213,18 @@ function MainAppShell() {
           onClose={closeBoardTaskForm}
           onSaved={() => {
             queryClient.invalidateQueries({ queryKey: ['tasks'] });
+          }}
+        />
+      ) : null}
+      {onboarding.isReady && currentUserQuery.isSuccess ? (
+        <OnboardingModal
+          visible={onboarding.visible}
+          hasPremiumAccess={hasPremiumAccess}
+          onClose={() => {
+            void dismissOnboarding();
+          }}
+          onComplete={() => {
+            void completeOnboarding();
           }}
         />
       ) : null}

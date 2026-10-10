@@ -64,6 +64,32 @@ export const sr: Record<TranslationKey, string> = {
   'nav.progress': 'Napredak',
   'nav.profile': 'Profil',
   'nav.backToToday': 'Nazad na Danas',
+  'onboarding.badge': 'Dobrodošli',
+  'onboarding.closeAll': 'Zatvori uvod',
+  'onboarding.skipStep': 'Preskoči korak',
+  'onboarding.next': 'Dalje',
+  'onboarding.finish': 'Kreni',
+  'onboarding.progress': 'Korak {{current}} od {{total}}',
+  'onboarding.slide1.title': 'Dve vrste zadataka',
+  'onboarding.slide1.body':
+    'Danas je za dnevne navike sa nizom i nivoima. Zadaci su tvoja tabla za projekte sa rokovima i prioritetima.',
+  'onboarding.slide2.title': 'Kako da kreneš',
+  'onboarding.slide2.body':
+    'Napravi prvi zadatak na tabli — besplatno i odmah spremno. Danas i Napredak pokazuju tvoju dnevnu disciplinu sa Premium-om.',
+  'onboarding.slide2.bodyPremium':
+    'Kreni sa jedna do tri dnevna zadatka pod Danas. Mali koraci svaki dan — tako raste tvoj niz.',
+  'onboarding.slide3.title': 'Vidi svoj napredak',
+  'onboarding.slide3.body':
+    'Napredak prikazuje niz, nivo i nedelju. Završi Danas zadatke da napreduješ.',
+  'onboarding.empty.overline': 'Prvi korak',
+  'onboarding.empty.tasks.title': 'Još nema zadataka',
+  'onboarding.empty.tasks.body':
+    'Dodaj projekte sa rokom i prioritetom — tabla za sve što nije dnevna navika.',
+  'onboarding.empty.tasks.cta': 'Napravi prvi zadatak',
+  'onboarding.empty.recurring.title': 'Još nema dnevnih zadataka',
+  'onboarding.empty.recurring.body':
+    'Šta želiš da radiš svaki dan? Kreni malo — jedna do tri navike su dovoljne.',
+  'onboarding.empty.recurring.cta': 'Napravi prvi dnevni zadatak',
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
     'Lokalno — isti podaci kao web na localhost:5173 (test nalozi sa premiumom).',

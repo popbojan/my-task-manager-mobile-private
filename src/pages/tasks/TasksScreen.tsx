@@ -35,6 +35,7 @@ import { shouldRetryApiQuery } from '@/utils/apiError';
 import { useOptimisticTaskStatusSync } from '@/task-status/useOptimisticTaskStatusSync';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
+import OnboardingEmptyState from '@/onboarding/OnboardingEmptyState';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
@@ -309,13 +310,19 @@ export default function TasksScreen({
           ListEmptyComponent={
             tasksQuery.isLoading
               ? undefined
-              : () => (
-                  <Text style={styles.emptyText}>
-                    {activeFilter === 'all'
-                      ? t('tasks.noTasks')
-                      : t('tasks.noTasksFiltered')}
-                  </Text>
-                )
+              : () =>
+                  activeFilter === 'all' ? (
+                    <OnboardingEmptyState
+                      titleKey="onboarding.empty.tasks.title"
+                      bodyKey="onboarding.empty.tasks.body"
+                      ctaKey="onboarding.empty.tasks.cta"
+                      onPressCta={() => onOpenCreateTask('all')}
+                    />
+                  ) : (
+                    <Text style={styles.emptyText}>
+                      {t('tasks.noTasksFiltered')}
+                    </Text>
+                  )
           }
           keyboardShouldPersistTaps="handled"
         />

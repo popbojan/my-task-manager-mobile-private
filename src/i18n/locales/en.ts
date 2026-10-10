@@ -63,6 +63,32 @@ export const en: Record<TranslationKey, string> = {
   'nav.progress': 'Progress',
   'nav.profile': 'Profile',
   'nav.backToToday': 'Back to Today',
+  'onboarding.badge': 'Welcome',
+  'onboarding.closeAll': 'Close onboarding',
+  'onboarding.skipStep': 'Skip step',
+  'onboarding.next': 'Next',
+  'onboarding.finish': 'Get started',
+  'onboarding.progress': 'Step {{current}} of {{total}}',
+  'onboarding.slide1.title': 'Two kinds of tasks',
+  'onboarding.slide1.body':
+    'Today is for daily habits with streaks and levels. Tasks is your board for projects with deadlines and priorities.',
+  'onboarding.slide2.title': 'How to start',
+  'onboarding.slide2.body':
+    'Create your first board task — free and ready to use. Today and Progress show your daily discipline with Premium.',
+  'onboarding.slide2.bodyPremium':
+    'Start with one to three daily tasks under Today. Small steps every day — that is how your streak grows.',
+  'onboarding.slide3.title': 'See your progress',
+  'onboarding.slide3.body':
+    'Progress shows your streak, level, and week at a glance. Complete your Today tasks to move forward there.',
+  'onboarding.empty.overline': 'First step',
+  'onboarding.empty.tasks.title': 'No tasks yet',
+  'onboarding.empty.tasks.body':
+    'Add projects with deadlines and priorities — your board for everything that is not a daily habit.',
+  'onboarding.empty.tasks.cta': 'Create first task',
+  'onboarding.empty.recurring.title': 'No daily tasks yet',
+  'onboarding.empty.recurring.body':
+    'What do you want to accomplish every day? Start small — one to three habits is enough.',
+  'onboarding.empty.recurring.cta': 'Create first daily task',
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
     'Local — same data as web at localhost:5173 (test accounts with premium).',

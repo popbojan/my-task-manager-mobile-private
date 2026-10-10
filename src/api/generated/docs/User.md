@@ -10,6 +10,7 @@ Name | Type
 `email` | string
 `language` | [Language](Language.md)
 `timezone` | string
+`isNewUser` | boolean
 
 ## Example
 
@@ -22,6 +23,7 @@ const example = {
   "email": null,
   "language": null,
   "timezone": Europe/Berlin,
+  "isNewUser": true,
 } satisfies User
 
 console.log(example)

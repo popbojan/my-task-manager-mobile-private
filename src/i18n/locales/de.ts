@@ -62,6 +62,32 @@ export const de = {
   'nav.progress': 'Fortschritt',
   'nav.profile': 'Profil',
   'nav.backToToday': 'Zurück zu Heute',
+  'onboarding.badge': 'Willkommen',
+  'onboarding.closeAll': 'Onboarding schließen',
+  'onboarding.skipStep': 'Schritt überspringen',
+  'onboarding.next': 'Weiter',
+  'onboarding.finish': 'Los geht\'s',
+  'onboarding.progress': 'Schritt {{current}} von {{total}}',
+  'onboarding.slide1.title': 'Zwei Arten von Aufgaben',
+  'onboarding.slide1.body':
+    'Heute ist für tägliche Gewohnheiten mit Streak und Level. Aufgaben ist dein Board für Projekte mit Deadlines und Prioritäten.',
+  'onboarding.slide2.title': 'So startest du',
+  'onboarding.slide2.body':
+    'Leg deine erste Aufgabe im Board an — kostenlos und sofort nutzbar. Heute und Fortschritt zeigen dir mit Premium deine tägliche Disziplin.',
+  'onboarding.slide2.bodyPremium':
+    'Starte mit ein bis drei täglichen Aufgaben unter Heute. Kleine Schritte, jeden Tag — so wächst dein Streak.',
+  'onboarding.slide3.title': 'Fortschritt sichtbar machen',
+  'onboarding.slide3.body':
+    'Unter Fortschritt siehst du Streak, Level und deine Woche. Erledige deine Heute-Tasks, um dort weiterzukommen.',
+  'onboarding.empty.overline': 'Erster Schritt',
+  'onboarding.empty.tasks.title': 'Noch keine Aufgaben',
+  'onboarding.empty.tasks.body':
+    'Lege Projekte mit Deadline und Priorität an — dein Board für alles, was nicht täglich wiederkehrt.',
+  'onboarding.empty.tasks.cta': 'Erste Aufgabe anlegen',
+  'onboarding.empty.recurring.title': 'Noch keine täglichen Aufgaben',
+  'onboarding.empty.recurring.body':
+    'Was willst du jeden Tag schaffen? Starte klein — ein bis drei Gewohnheiten reichen.',
+  'onboarding.empty.recurring.cta': 'Erste Tagesaufgabe anlegen',
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
     'Lokal — gleiche Daten wie Web auf localhost:5173 (Test-Accounts mit Premium).',

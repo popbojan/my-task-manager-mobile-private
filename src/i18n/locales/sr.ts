@@ -71,16 +71,36 @@ export const sr: Record<TranslationKey, string> = {
   'onboarding.finish': 'Kreni',
   'onboarding.progress': 'Korak {{current}} od {{total}}',
   'onboarding.slide1.title': 'Dve vrste zadataka',
-  'onboarding.slide1.body':
-    'Danas je za dnevne navike sa nizom i nivoima. Zadaci su tvoja tabla za projekte sa rokovima i prioritetima.',
+  'onboarding.slide1.today.sectionTitle': 'Danas – tvoje dnevne navike',
+  'onboarding.slide1.today.body':
+    'Ovde su tvoji dnevni, ponavljajući zadaci. Odvoji bar pet minuta za svaki zadatak, pa ga označi kao završen. Kada završiš sve dnevne zadatke, tvoj niz raste za jedan dan. Korak po korak gradiš navike i dostigneš nove nivoe.',
+  'onboarding.slide1.tasks.sectionTitle': 'Zadaci – tvoji to-do-i',
+  'onboarding.slide1.tasks.body':
+    'Ovde organizuješ pojedinačne zadatke i projekte sa rokom i prioritetom.',
+  'onboarding.slide1.habitExample': '10 minuta čitanja',
+  'onboarding.slide1.boardExample': 'Prepravka sajta',
+  'onboarding.slide1.boardDeadline': '14.11., 18:00',
   'onboarding.slide2.title': 'Kako da kreneš',
-  'onboarding.slide2.body':
-    'Napravi prvi zadatak na tabli — besplatno i odmah spremno. Danas i Napredak pokazuju tvoju dnevnu disciplinu sa Premium-om.',
-  'onboarding.slide2.bodyPremium':
-    'Kreni sa jedna do tri dnevna zadatka pod Danas. Mali koraci svaki dan — tako raste tvoj niz.',
-  'onboarding.slide3.title': 'Vidi svoj napredak',
-  'onboarding.slide3.body':
-    'Napredak prikazuje niz, nivo i nedelju. Završi Danas zadatke da napreduješ.',
+  'onboarding.slide2.step1.title': 'Izaberi oblast',
+  'onboarding.slide2.step1.body':
+    'Otvori Zadaci za jedan to-do ili Danas za dnevnu naviku.',
+  'onboarding.slide2.step2.title': 'Napravi zadatak',
+  'onboarding.slide2.step2.body': 'Tapni + i daj zadatku ime.',
+  'onboarding.slide2.step3.title': 'Označi kao završeno',
+  'onboarding.slide2.step3.body':
+    'Kada završiš, postavi status na Završeno.',
+  'onboarding.slide2.premiumNote':
+    'Zadaci na tabli su besplatni. Za dnevne navike i funkcije napretka potreban je Premium.',
+  'onboarding.slide3.title': 'Tvoj napredak na jednom mestu',
+  'onboarding.slide3.intro':
+    'U Napretku vidiš trenutni razvoj i lične rekorde.',
+  'onboarding.slide3.stat.currentLevel.hint': 'Tvoj trenutni nivo',
+  'onboarding.slide3.stat.highestLevel.hint': 'Tvoj dosadašnji rekord nivoa',
+  'onboarding.slide3.stat.currentStreak.hint': 'Uzastopni uspešni dani',
+  'onboarding.slide3.stat.highestStreak.hint': 'Tvoja dosadašnja najduža serija',
+  'onboarding.slide3.streakFootnote':
+    'Svaki dan završi sve dnevne zadatke da tvoj trenutni niz raste.',
+  'onboarding.slide3.weekTitle': 'Tvojih poslednjih 7 dana',
   'onboarding.empty.overline': 'Prvi korak',
   'onboarding.empty.tasks.title': 'Još nema zadataka',
   'onboarding.empty.tasks.body':
@@ -362,6 +382,10 @@ export const sr: Record<TranslationKey, string> = {
   'profile.accountMenu.title': 'Nalog',
   'profile.accountMenu.subscription': 'Pretplata i naplata',
   'profile.accountMenu.subscriptionHint': 'Premium status, kupovina i vraćanje',
+  'profile.helpMenu.title': 'Pomoć',
+  'profile.helpMenu.viewIntroduction': 'Prikaži uvod',
+  'profile.helpMenu.viewIntroductionHint':
+    'Ponovo otvori tri ekrana dobrodošlice.',
   'profile.legalMenu.title': 'Pravno',
   'profile.legalMenu.privacy': 'Politika privatnosti',
   'profile.legalMenu.impressum': 'Impresum / Kontakt',

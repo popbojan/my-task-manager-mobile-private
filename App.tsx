@@ -122,10 +122,20 @@ function MainAppShell() {
   }
 
   async function dismissOnboarding() {
+    if (onboarding.manualOpen) {
+      onboarding.close();
+      return;
+    }
+
     await onboarding.dismiss();
   }
 
   async function completeOnboarding() {
+    if (onboarding.manualOpen) {
+      onboarding.close();
+      return;
+    }
+
     await onboarding.dismiss();
 
     if (hasPremiumAccess) {
@@ -190,6 +200,7 @@ function MainAppShell() {
             onGoToday={() => setActiveTab('today')}
             openSubscription={openProfileSubscription}
             onSubscriptionOpened={() => setOpenProfileSubscription(false)}
+            onOpenIntroduction={onboarding.open}
           />
         </View>
       </View>
@@ -219,7 +230,6 @@ function MainAppShell() {
       {onboarding.isReady && currentUserQuery.isSuccess ? (
         <OnboardingModal
           visible={onboarding.visible}
-          hasPremiumAccess={hasPremiumAccess}
           onClose={() => {
             void dismissOnboarding();
           }}

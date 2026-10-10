@@ -70,16 +70,35 @@ export const en: Record<TranslationKey, string> = {
   'onboarding.finish': 'Get started',
   'onboarding.progress': 'Step {{current}} of {{total}}',
   'onboarding.slide1.title': 'Two kinds of tasks',
-  'onboarding.slide1.body':
-    'Today is for daily habits with streaks and levels. Tasks is your board for projects with deadlines and priorities.',
-  'onboarding.slide2.title': 'How to start',
-  'onboarding.slide2.body':
-    'Create your first board task — free and ready to use. Today and Progress show your daily discipline with Premium.',
-  'onboarding.slide2.bodyPremium':
-    'Start with one to three daily tasks under Today. Small steps every day — that is how your streak grows.',
-  'onboarding.slide3.title': 'See your progress',
-  'onboarding.slide3.body':
-    'Progress shows your streak, level, and week at a glance. Complete your Today tasks to move forward there.',
+  'onboarding.slide1.today.sectionTitle': 'Today – your daily habits',
+  'onboarding.slide1.today.body':
+    'Here you find your daily recurring tasks. Spend at least five minutes on each task, then mark it done. When you complete every task for the day, your streak grows by one day. Step by step you build habits and reach new levels.',
+  'onboarding.slide1.tasks.sectionTitle': 'Tasks – your to-dos',
+  'onboarding.slide1.tasks.body':
+    'Organise individual tasks and projects with deadlines and priority.',
+  'onboarding.slide1.habitExample': 'Read for 10 minutes',
+  'onboarding.slide1.boardExample': 'Revise website',
+  'onboarding.slide1.boardDeadline': '14 Nov, 18:00',
+  'onboarding.slide2.title': 'How to get started',
+  'onboarding.slide2.step1.title': 'Choose an area',
+  'onboarding.slide2.step1.body':
+    'Open Tasks for a single to-do or Today for a daily habit.',
+  'onboarding.slide2.step2.title': 'Create a task',
+  'onboarding.slide2.step2.body': 'Tap + and give your task a name.',
+  'onboarding.slide2.step3.title': 'Mark as done',
+  'onboarding.slide2.step3.body': 'When you are finished, set the status to Done.',
+  'onboarding.slide2.premiumNote':
+    'Tasks are free to use. Daily habits and progress features require Premium.',
+  'onboarding.slide3.title': 'Your progress at a glance',
+  'onboarding.slide3.intro':
+    'In Progress you see your current development and personal records.',
+  'onboarding.slide3.stat.currentLevel.hint': 'Your current level',
+  'onboarding.slide3.stat.highestLevel.hint': 'Your highest level so far',
+  'onboarding.slide3.stat.currentStreak.hint': 'Consecutive successful days',
+  'onboarding.slide3.stat.highestStreak.hint': 'Your longest streak so far',
+  'onboarding.slide3.streakFootnote':
+    'Complete all your daily tasks every day so your current streak keeps growing.',
+  'onboarding.slide3.weekTitle': 'Your last 7 days',
   'onboarding.empty.overline': 'First step',
   'onboarding.empty.tasks.title': 'No tasks yet',
   'onboarding.empty.tasks.body':
@@ -360,6 +379,10 @@ export const en: Record<TranslationKey, string> = {
   'profile.accountMenu.title': 'Account',
   'profile.accountMenu.subscription': 'Subscription & billing',
   'profile.accountMenu.subscriptionHint': 'Premium status, purchase and restore',
+  'profile.helpMenu.title': 'Help',
+  'profile.helpMenu.viewIntroduction': 'View introduction',
+  'profile.helpMenu.viewIntroductionHint':
+    'Open the three welcome screens again.',
   'profile.legalMenu.title': 'Legal',
   'profile.legalMenu.privacy': 'Privacy policy',
   'profile.legalMenu.impressum': 'Legal notice / Contact',

@@ -69,16 +69,37 @@ export const de = {
   'onboarding.finish': 'Los geht\'s',
   'onboarding.progress': 'Schritt {{current}} von {{total}}',
   'onboarding.slide1.title': 'Zwei Arten von Aufgaben',
-  'onboarding.slide1.body':
-    'Heute ist für tägliche Gewohnheiten mit Streak und Level. Aufgaben ist dein Board für Projekte mit Deadlines und Prioritäten.',
-  'onboarding.slide2.title': 'So startest du',
-  'onboarding.slide2.body':
-    'Leg deine erste Aufgabe im Board an — kostenlos und sofort nutzbar. Heute und Fortschritt zeigen dir mit Premium deine tägliche Disziplin.',
-  'onboarding.slide2.bodyPremium':
-    'Starte mit ein bis drei täglichen Aufgaben unter Heute. Kleine Schritte, jeden Tag — so wächst dein Streak.',
-  'onboarding.slide3.title': 'Fortschritt sichtbar machen',
-  'onboarding.slide3.body':
-    'Unter Fortschritt siehst du Streak, Level und deine Woche. Erledige deine Heute-Tasks, um dort weiterzukommen.',
+  'onboarding.slide1.today.sectionTitle': 'Heute – deine täglichen Gewohnheiten',
+  'onboarding.slide1.today.body':
+    'Hier findest du deine täglichen, wiederkehrenden Aufgaben. Nimm dir für jede Aufgabe mindestens fünf Minuten Zeit und markiere sie anschließend als erledigt. Wenn du alle Aufgaben des Tages abschließt, wächst deine Kette um einen Tag. So baust du Schritt für Schritt Gewohnheiten auf und erreichst neue Level.',
+  'onboarding.slide1.tasks.sectionTitle': 'Aufgaben – deine To-dos',
+  'onboarding.slide1.tasks.body':
+    'Hier organisierst du einzelne Aufgaben und Projekte mit Fälligkeit und Priorität.',
+  'onboarding.slide1.habitExample': '10 Minuten lesen',
+  'onboarding.slide1.boardExample': 'Website überarbeiten',
+  'onboarding.slide1.boardDeadline': '14.11., 18:00',
+  'onboarding.slide2.title': 'So legst du los',
+  'onboarding.slide2.step1.title': 'Bereich wählen',
+  'onboarding.slide2.step1.body':
+    'Öffne Aufgaben für ein einzelnes To-do oder Heute für eine tägliche Gewohnheit.',
+  'onboarding.slide2.step2.title': 'Aufgabe erstellen',
+  'onboarding.slide2.step2.body':
+    'Tippe auf + und gib deiner Aufgabe einen Namen.',
+  'onboarding.slide2.step3.title': 'Als erledigt markieren',
+  'onboarding.slide2.step3.body':
+    'Wenn du fertig bist, setze den Status auf Erledigt.',
+  'onboarding.slide2.premiumNote':
+    'Aufgaben kannst du kostenlos nutzen. Für tägliche Gewohnheiten und die Fortschrittsfunktionen brauchst du Premium.',
+  'onboarding.slide3.title': 'Dein Fortschritt auf einen Blick',
+  'onboarding.slide3.intro':
+    'Im Bereich Fortschritt siehst du deine aktuelle Entwicklung und deine persönlichen Rekorde.',
+  'onboarding.slide3.stat.currentLevel.hint': 'Dein derzeitiges Level',
+  'onboarding.slide3.stat.highestLevel.hint': 'Dein bisheriger Levelrekord',
+  'onboarding.slide3.stat.currentStreak.hint': 'Aufeinanderfolgende erfolgreiche Tage',
+  'onboarding.slide3.stat.highestStreak.hint': 'Deine bisher längste Serie',
+  'onboarding.slide3.streakFootnote':
+    'Erledige jeden Tag alle deine täglichen Aufgaben, damit deine aktuelle Kette wächst.',
+  'onboarding.slide3.weekTitle': 'Deine letzten 7 Tage',
   'onboarding.empty.overline': 'Erster Schritt',
   'onboarding.empty.tasks.title': 'Noch keine Aufgaben',
   'onboarding.empty.tasks.body':
@@ -364,6 +385,10 @@ export const de = {
   'profile.accountMenu.title': 'Konto',
   'profile.accountMenu.subscription': 'Abo & Abrechnung',
   'profile.accountMenu.subscriptionHint': 'Premium-Status, Kauf und Wiederherstellung',
+  'profile.helpMenu.title': 'Hilfe',
+  'profile.helpMenu.viewIntroduction': 'Einführung anzeigen',
+  'profile.helpMenu.viewIntroductionHint':
+    'Die drei Willkommens-Screens erneut öffnen.',
   'profile.legalMenu.title': 'Rechtliches',
   'profile.legalMenu.privacy': 'Datenschutz',
   'profile.legalMenu.impressum': 'Impressum / Kontakt',

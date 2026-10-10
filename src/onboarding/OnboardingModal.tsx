@@ -1,21 +1,10 @@
 import { useEffect, useState } from 'react';
-import {
-  Image,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import {
-  ONBOARDING_SLIDES,
-  type OnboardingSlide,
-} from '@/onboarding/onboardingSlides';
+import OnboardingSlideVisual from '@/onboarding/OnboardingSlideVisual';
+import { ONBOARDING_SLIDES } from '@/onboarding/onboardingSlides';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
-
-const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
 type OnboardingModalProps = {
   visible: boolean;
@@ -24,20 +13,8 @@ type OnboardingModalProps = {
   onComplete: () => void;
 };
 
-function resolveSlideBodyKey(
-  slide: OnboardingSlide,
-  hasPremiumAccess: boolean,
-): OnboardingSlide['bodyKey'] {
-  if (slide.usesPremiumBody && hasPremiumAccess) {
-    return 'onboarding.slide2.bodyPremium';
-  }
-
-  return slide.bodyKey;
-}
-
 export default function OnboardingModal({
   visible,
-  hasPremiumAccess,
   onClose,
   onComplete,
 }: OnboardingModalProps) {
@@ -98,33 +75,35 @@ export default function OnboardingModal({
           </Pressable>
         </View>
 
-        <View style={styles.heroWrap}>
-          <Image source={heroSource} style={styles.heroImage} resizeMode="cover" />
-          <View style={styles.heroOverlay} />
-        </View>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.contentHeader}>
+            <Text style={styles.stepLabel}>
+              {t('onboarding.progress', {
+                current: stepIndex + 1,
+                total: ONBOARDING_SLIDES.length,
+              })}
+            </Text>
 
-        <View style={styles.content}>
-          <Text style={styles.stepLabel}>
-            {t('onboarding.progress', {
-              current: stepIndex + 1,
-              total: ONBOARDING_SLIDES.length,
-            })}
-          </Text>
+            <View style={styles.dotsRow}>
+              {ONBOARDING_SLIDES.map((item, index) => (
+                <View
+                  key={item.id}
+                  style={[styles.dot, index === stepIndex ? styles.dotActive : null]}
+                />
+              ))}
+            </View>
 
-          <View style={styles.dotsRow}>
-            {ONBOARDING_SLIDES.map((item, index) => (
-              <View
-                key={item.id}
-                style={[styles.dot, index === stepIndex ? styles.dotActive : null]}
-              />
-            ))}
+            <Text style={styles.title}>{t(slide.titleKey)}</Text>
           </View>
 
-          <Text style={styles.title}>{t(slide.titleKey)}</Text>
-          <Text style={styles.body}>
-            {t(resolveSlideBodyKey(slide, hasPremiumAccess))}
-          </Text>
-        </View>
+          <View style={styles.visualWrap}>
+            <OnboardingSlideVisual slideId={slide.id} />
+          </View>
+        </ScrollView>
 
         <View style={styles.footer}>
           <Pressable
@@ -196,28 +175,21 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     fontWeight: '300',
   },
-  heroWrap: {
-    height: 180,
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: recurringTheme.cardRadius,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: recurringTheme.cardBorder,
-  },
-  heroImage: {
-    width: '100%',
-    height: '100%',
-  },
-  heroOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: recurringTheme.vignette,
-  },
-  content: {
+  scroll: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 12,
+  },
+  contentHeader: {
     paddingHorizontal: 20,
-    paddingTop: 24,
-    gap: 12,
+    paddingTop: 16,
+    gap: 10,
+  },
+  visualWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
   stepLabel: {
     ...premiumType.overline,
@@ -226,7 +198,6 @@ const styles = StyleSheet.create({
   dotsRow: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 4,
   },
   dot: {
     width: 8,
@@ -240,24 +211,22 @@ const styles = StyleSheet.create({
   },
   title: {
     color: recurringTheme.textPrimary,
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '800',
-    letterSpacing: -0.5,
-    lineHeight: 32,
-  },
-  body: {
-    color: recurringTheme.textSecondary,
-    fontSize: 16,
-    lineHeight: 24,
+    letterSpacing: -0.4,
+    lineHeight: 30,
   },
   footer: {
     paddingHorizontal: 16,
     paddingBottom: 8,
     gap: 10,
+    borderTopWidth: 1,
+    borderTopColor: recurringTheme.cardBorder,
+    paddingTop: 8,
   },
   skipButton: {
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   skipButtonText: {
     color: recurringTheme.textMuted,

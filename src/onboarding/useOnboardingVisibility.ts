@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   isOnboardingDismissed,
   markOnboardingDismissed,
@@ -15,12 +15,12 @@ export function useOnboardingVisibility({
   isNewUser,
 }: UseOnboardingVisibilityInput) {
   const [dismissed, setDismissed] = useState<boolean | null>(null);
-  const [visible, setVisible] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
 
   useEffect(() => {
     if (!userId) {
       setDismissed(null);
-      setVisible(false);
+      setManualOpen(false);
       return;
     }
 
@@ -39,28 +39,36 @@ export function useOnboardingVisibility({
     };
   }, [userId]);
 
-  useEffect(() => {
+  const autoVisible = useMemo(() => {
     if (!userId || isNewUser === undefined || dismissed === null) {
-      setVisible(false);
-      return;
+      return false;
     }
 
-    setVisible(
-      shouldShowOnboarding({
-        isNewUser,
-        dismissed,
-      }),
-    );
+    return shouldShowOnboarding({
+      isNewUser,
+      dismissed,
+    });
   }, [dismissed, isNewUser, userId]);
 
+  const visible = manualOpen || autoVisible;
+
+  const open = useCallback(() => {
+    setManualOpen(true);
+  }, []);
+
+  const close = useCallback(() => {
+    setManualOpen(false);
+  }, []);
+
   const dismiss = useCallback(async () => {
+    setManualOpen(false);
+
     if (!userId) {
       return;
     }
 
     await markOnboardingDismissed(userId);
     setDismissed(true);
-    setVisible(false);
   }, [userId]);
 
   const isReady =
@@ -68,6 +76,10 @@ export function useOnboardingVisibility({
 
   return {
     visible,
+    manualOpen,
+    autoVisible,
+    open,
+    close,
     dismiss,
     isReady,
   };

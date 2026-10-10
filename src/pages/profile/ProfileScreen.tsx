@@ -30,12 +30,14 @@ type ProfileScreenProps = {
   onGoToday: () => void;
   openSubscription?: boolean;
   onSubscriptionOpened?: () => void;
+  onOpenIntroduction?: () => void;
 };
 
 export default function ProfileScreen({
   onGoToday,
   openSubscription = false,
   onSubscriptionOpened,
+  onOpenIntroduction,
 }: ProfileScreenProps) {
   const { setAccessToken } = useAuth();
   const { t } = useLanguage();
@@ -139,6 +141,28 @@ export default function ProfileScreen({
             <Text style={styles.accountMenuChevron}>›</Text>
           </Pressable>
         </View>
+
+        {onOpenIntroduction ? (
+          <View style={styles.accountMenu}>
+            <Text style={styles.accountMenuHeading}>{t('profile.helpMenu.title')}</Text>
+
+            <Pressable
+              style={styles.accountMenuItem}
+              accessibilityRole="button"
+              onPress={onOpenIntroduction}
+            >
+              <View style={styles.accountMenuItemCopy}>
+                <Text style={styles.accountMenuItemLabel}>
+                  {t('profile.helpMenu.viewIntroduction')}
+                </Text>
+                <Text style={styles.accountMenuItemHint}>
+                  {t('profile.helpMenu.viewIntroductionHint')}
+                </Text>
+              </View>
+              <Text style={styles.accountMenuChevron}>›</Text>
+            </Pressable>
+          </View>
+        ) : null}
 
         <View style={styles.accountMenu}>
           <Text style={styles.accountMenuHeading}>{t('profile.accountMenu.title')}</Text>

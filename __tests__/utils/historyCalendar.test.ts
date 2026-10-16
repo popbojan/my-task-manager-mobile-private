@@ -7,6 +7,7 @@ import {
   formatHistoryTaskRatioDisplay,
   indexHistoryDaysByDate,
   resolveHistoryDayCellTone,
+  shouldShowHistorySuccessCrown,
 } from '@/utils/historyCalendar';
 import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
@@ -72,6 +73,22 @@ describe('historyCalendar', () => {
     expect(formatHistoryTaskRatioDisplay(inProgress)).toBe('4/7');
     expect(formatHistoryStreakDisplay(inProgress)).toBe('12');
     expect(formatHistoryLevelDisplay(inProgress)).toBe('2');
+    expect(shouldShowHistorySuccessCrown(inProgress)).toBe(false);
+  });
+
+  it('shows success crown only for completed success days', () => {
+    const success: HistoryDay = {
+      date: new Date('2026-10-10T00:00:00.000Z'),
+      status: HistoryDayStatus.Success,
+      completedTasks: 7,
+      totalTasks: 7,
+      note: null,
+      finalizedAt: new Date('2026-10-10T22:05:00Z'),
+      currentStreak: 12,
+      currentLevel: 2,
+    };
+
+    expect(shouldShowHistorySuccessCrown(success)).toBe(true);
   });
 
   it('uses placeholders when history metrics are null', () => {

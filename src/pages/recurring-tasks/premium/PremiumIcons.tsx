@@ -110,7 +110,7 @@ export function StarIcon({ size = 14, color = recurringTheme.accentBright }: Ico
 
 export function CrownIcon({ size = 14, color = recurringTheme.goldBright }: IconProps) {
   return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'flex-end' }}>
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 1 }}>
         {[0.35, 0.55, 0.35].map((h, i) => (
           <View

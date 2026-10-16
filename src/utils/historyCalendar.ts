@@ -178,6 +178,18 @@ export function shouldShowHistoryDayDetails(day: HistoryDay | undefined): boolea
   return day !== undefined;
 }
 
+export function shouldShowHistorySuccessCrown(day: HistoryDay | undefined): boolean {
+  if (!day || day.status !== HistoryDayStatus.Success) {
+    return false;
+  }
+
+  if (day.completedTasks === null || day.totalTasks === null) {
+    return false;
+  }
+
+  return day.totalTasks > 0 && day.completedTasks >= day.totalTasks;
+}
+
 export function monthKeyFromCalendarDate(date: string): string {
   return date.slice(0, 7);
 }

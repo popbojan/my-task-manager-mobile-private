@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
-import { FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
+import { CrownIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
   formatHistoryLevelDisplay,
@@ -8,6 +8,7 @@ import {
   formatHistoryTaskRatioDisplay,
   resolveHistoryDayCellTone,
   shouldShowHistoryDayDetails,
+  shouldShowHistorySuccessCrown,
   type HistoryDayCellTone,
 } from '@/utils/historyCalendar';
 
@@ -63,6 +64,7 @@ export default function HistoryDayCell({
 }: HistoryDayCellProps) {
   const tone = resolveHistoryDayCellTone(entry);
   const showDetails = shouldShowHistoryDayDetails(entry);
+  const showSuccessCrown = shouldShowHistorySuccessCrown(entry);
 
   return (
     <View style={[toneStyles(tone, isToday, isAdjacentMonth), { minHeight: height }]}>
@@ -78,9 +80,22 @@ export default function HistoryDayCell({
 
       {showDetails ? (
         <View style={styles.detailsColumn}>
-          <Text style={[styles.ratio, isAdjacentMonth && styles.metricAdjacent]}>
-            {formatHistoryTaskRatioDisplay(entry)}
-          </Text>
+          <View style={styles.ratioBlock}>
+            {showSuccessCrown ? (
+              <View
+                style={[
+                  styles.successCrownBadge,
+                  isAdjacentMonth && styles.successCrownBadgeAdjacent,
+                ]}
+              >
+                <View style={styles.successCrownFillDeep} />
+                <CrownIcon size={12} color={recurringTheme.goldBright} />
+              </View>
+            ) : null}
+            <Text style={[styles.ratio, isAdjacentMonth && styles.metricAdjacent]}>
+              {formatHistoryTaskRatioDisplay(entry)}
+            </Text>
+          </View>
 
           <View style={styles.streakRow}>
             <FireIcon size={9} color={recurringTheme.goldBright} />
@@ -167,6 +182,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 3,
     width: '100%',
+  },
+  ratioBlock: {
+    alignItems: 'center',
+    gap: 2,
+  },
+  successCrownBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    backgroundColor: recurringTheme.goldSoft,
+    borderWidth: 1.5,
+    borderColor: 'rgba(240, 204, 98, 0.75)',
+    marginBottom: 1,
+  },
+  successCrownBadgeAdjacent: {
+    backgroundColor: 'rgba(212, 168, 67, 0.1)',
+    borderColor: 'rgba(240, 204, 98, 0.42)',
+    opacity: 0.9,
+  },
+  successCrownFillDeep: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(72, 52, 14, 0.42)',
   },
   ratio: {
     color: recurringTheme.textPrimary,

@@ -174,6 +174,7 @@ function MainAppShell() {
           ]}
         >
           <HistoryScreen
+            isActive={activeTab === 'history'}
             onOpenSubscription={() => {
               setOpenProfileSubscription(true);
               setActiveTab('profile');

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -10,11 +10,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import AppBrandHeader from '@/components/AppBrandHeader';
-import { historyMonthQueryKey } from '@/history/historyQueryKeys';
+import {
+  historyMonthQueryKey,
+  historyQueryKeyPrefix,
+} from '@/history/historyQueryKeys';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import type { AppLanguage } from '@/i18n/types';
 import HistoryDayCell from '@/pages/history/HistoryDayCell';
@@ -35,6 +38,7 @@ import {
   parseMonthKey,
 } from '@/utils/historyCalendar';
 type HistoryScreenProps = {
+  isActive?: boolean;
   onOpenSubscription?: () => void;
 };
 
@@ -63,11 +67,16 @@ function formatMonthTitle(monthKey: string, language: AppLanguage): string {
   }).format(new Date(year, monthIndex, 1));
 }
 
-export default function HistoryScreen({ onOpenSubscription }: HistoryScreenProps) {
+export default function HistoryScreen({
+  isActive = true,
+  onOpenSubscription,
+}: HistoryScreenProps) {
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { t, language } = useLanguage();
   const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+  const wasActiveRef = useRef(false);
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
   const subscriptionReady =
@@ -86,6 +95,26 @@ export default function HistoryScreen({ onOpenSubscription }: HistoryScreenProps
     enabled: !!accessToken && hasPremiumAccess,
     retry: shouldRetryApiQuery,
   });
+
+  useEffect(() => {
+    if (!isActive || wasActiveRef.current) {
+      wasActiveRef.current = isActive;
+      return;
+    }
+
+    wasActiveRef.current = isActive;
+    const currentMonth = defaultVisibleMonthKey();
+    setVisibleMonth(currentMonth);
+    setPickerOpen(false);
+
+    if (!accessToken || !hasPremiumAccess) {
+      return;
+    }
+
+    void queryClient.invalidateQueries({
+      queryKey: historyQueryKeyPrefix(accessToken),
+    });
+  }, [accessToken, hasPremiumAccess, isActive, queryClient]);
 
   const today = historyQuery.data?.today
     ? formatApiCalendarDate(historyQuery.data.today)

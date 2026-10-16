@@ -3,9 +3,11 @@ import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 import { FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
-  formatHistoryTaskRatio,
+  formatHistoryLevelDisplay,
+  formatHistoryStreakDisplay,
+  formatHistoryTaskRatioDisplay,
   resolveHistoryDayCellTone,
-  shouldShowHistoryMetrics,
+  shouldShowHistoryDayDetails,
   type HistoryDayCellTone,
 } from '@/utils/historyCalendar';
 
@@ -38,8 +40,7 @@ export default function HistoryDayCell({
   height,
 }: HistoryDayCellProps) {
   const tone = resolveHistoryDayCellTone(entry);
-  const ratio = formatHistoryTaskRatio(entry);
-  const showMetrics = shouldShowHistoryMetrics(entry);
+  const showDetails = shouldShowHistoryDayDetails(entry);
 
   return (
     <View style={[toneStyles(tone, isToday), { minHeight: height }]}>
@@ -47,22 +48,21 @@ export default function HistoryDayCell({
         {dayOfMonth}
       </Text>
 
-      {ratio ? <Text style={styles.ratio}>{ratio}</Text> : <View style={styles.ratioSpacer} />}
+      {showDetails ? (
+        <View style={styles.detailsColumn}>
+          <Text style={styles.ratio}>{formatHistoryTaskRatioDisplay(entry)}</Text>
 
-      {showMetrics && entry ? (
-        <View style={styles.metricsRow}>
-          {entry.currentStreak !== null ? (
-            <View style={styles.metricItem}>
-              <FireIcon size={9} color={recurringTheme.goldBright} />
-              <Text style={styles.metricText}>{entry.currentStreak}</Text>
-            </View>
-          ) : null}
-          {entry.currentLevel !== null ? (
-            <Text style={styles.levelText}>Lv {entry.currentLevel}</Text>
-          ) : null}
+          <View style={styles.streakRow}>
+            <FireIcon size={9} color={recurringTheme.goldBright} />
+            <Text style={styles.metricText}>{formatHistoryStreakDisplay(entry)}</Text>
+          </View>
+
+          <Text style={styles.levelText}>
+            Lv {formatHistoryLevelDisplay(entry)}
+          </Text>
         </View>
       ) : (
-        <View style={styles.metricsSpacer} />
+        <View style={styles.detailsPlaceholder} />
       )}
     </View>
   );
@@ -107,38 +107,40 @@ const styles = StyleSheet.create({
   dayNumberToday: {
     color: recurringTheme.accentBright,
   },
+  detailsColumn: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    width: '100%',
+  },
   ratio: {
     color: recurringTheme.textPrimary,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
     letterSpacing: -0.3,
+    lineHeight: 18,
   },
-  ratioSpacer: {
-    height: 18,
-  },
-  metricsRow: {
+  streakRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    flexWrap: 'wrap',
-  },
-  metricItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
+    gap: 3,
+    minHeight: 14,
   },
   metricText: {
     color: recurringTheme.textPrimary,
     fontSize: 10,
     fontWeight: '800',
+    lineHeight: 12,
   },
   levelText: {
     color: recurringTheme.textSecondary,
     fontSize: 10,
     fontWeight: '700',
+    lineHeight: 12,
   },
-  metricsSpacer: {
-    height: 14,
+  detailsPlaceholder: {
+    flex: 1,
+    minHeight: 36,
   },
 });

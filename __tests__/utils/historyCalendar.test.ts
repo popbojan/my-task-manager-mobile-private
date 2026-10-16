@@ -1,7 +1,10 @@
 import {
   addMonths,
   buildMonthCalendarGrid,
+  formatHistoryLevelDisplay,
+  formatHistoryStreakDisplay,
   formatHistoryTaskRatio,
+  formatHistoryTaskRatioDisplay,
   indexHistoryDaysByDate,
   resolveHistoryDayCellTone,
 } from '@/utils/historyCalendar';
@@ -57,5 +60,25 @@ describe('historyCalendar', () => {
 
     expect(resolveHistoryDayCellTone(inProgress)).toBe('in_progress');
     expect(formatHistoryTaskRatio(inProgress)).toBe('4/7');
+    expect(formatHistoryTaskRatioDisplay(inProgress)).toBe('4/7');
+    expect(formatHistoryStreakDisplay(inProgress)).toBe('12');
+    expect(formatHistoryLevelDisplay(inProgress)).toBe('2');
+  });
+
+  it('uses placeholders when history metrics are null', () => {
+    const unknown: HistoryDay = {
+      date: new Date('2026-10-12T00:00:00.000Z'),
+      status: HistoryDayStatus.Unknown,
+      completedTasks: null,
+      totalTasks: null,
+      note: null,
+      finalizedAt: null,
+      currentStreak: null,
+      currentLevel: null,
+    };
+
+    expect(formatHistoryTaskRatioDisplay(unknown)).toBe('—');
+    expect(formatHistoryStreakDisplay(unknown)).toBe('—');
+    expect(formatHistoryLevelDisplay(unknown)).toBe('—');
   });
 });

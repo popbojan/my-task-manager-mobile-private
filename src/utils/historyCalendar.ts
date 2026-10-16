@@ -125,12 +125,30 @@ export function formatHistoryTaskRatio(day: HistoryDay | undefined): string | nu
   return `${day.completedTasks}/${day.totalTasks}`;
 }
 
-export function shouldShowHistoryMetrics(day: HistoryDay | undefined): boolean {
-  if (!day) {
-    return false;
+/** Task ratio for calendar cells; shows a placeholder when counts are unknown. */
+export function formatHistoryTaskRatioDisplay(day: HistoryDay | undefined): string {
+  const ratio = formatHistoryTaskRatio(day);
+  return ratio ?? '—';
+}
+
+export function formatHistoryStreakDisplay(day: HistoryDay | undefined): string {
+  if (!day || day.currentStreak === null) {
+    return '—';
   }
 
-  return day.currentStreak !== null || day.currentLevel !== null;
+  return String(day.currentStreak);
+}
+
+export function formatHistoryLevelDisplay(day: HistoryDay | undefined): string {
+  if (!day || day.currentLevel === null) {
+    return '—';
+  }
+
+  return String(day.currentLevel);
+}
+
+export function shouldShowHistoryDayDetails(day: HistoryDay | undefined): boolean {
+  return day !== undefined;
 }
 
 export function monthKeyFromCalendarDate(date: string): string {

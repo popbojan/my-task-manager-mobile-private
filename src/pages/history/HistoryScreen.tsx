@@ -89,10 +89,31 @@ export default function HistoryScreen({
   const { refreshing, onRefresh } = useAppRefresh();
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
 
+  const previousMonth = useMemo(
+    () => addMonths(visibleMonth, -1),
+    [visibleMonth],
+  );
+  const nextMonth = useMemo(() => addMonths(visibleMonth, 1), [visibleMonth]);
+  const historyQueryEnabled = !!accessToken && hasPremiumAccess;
+
+  const previousMonthQuery = useQuery({
+    queryKey: historyMonthQueryKey(accessToken, previousMonth),
+    queryFn: () => authApi.getHistory({ month: previousMonth }),
+    enabled: historyQueryEnabled,
+    retry: shouldRetryApiQuery,
+  });
+
   const historyQuery = useQuery({
     queryKey: historyMonthQueryKey(accessToken, visibleMonth),
     queryFn: () => authApi.getHistory({ month: visibleMonth }),
-    enabled: !!accessToken && hasPremiumAccess,
+    enabled: historyQueryEnabled,
+    retry: shouldRetryApiQuery,
+  });
+
+  const nextMonthQuery = useQuery({
+    queryKey: historyMonthQueryKey(accessToken, nextMonth),
+    queryFn: () => authApi.getHistory({ month: nextMonth }),
+    enabled: historyQueryEnabled,
     retry: shouldRetryApiQuery,
   });
 
@@ -120,8 +141,17 @@ export default function HistoryScreen({
     ? formatApiCalendarDate(historyQuery.data.today)
     : null;
   const daysByDate = useMemo(
-    () => indexHistoryDaysByDate(historyQuery.data?.days ?? []),
-    [historyQuery.data?.days],
+    () =>
+      indexHistoryDaysByDate([
+        ...(previousMonthQuery.data?.days ?? []),
+        ...(historyQuery.data?.days ?? []),
+        ...(nextMonthQuery.data?.days ?? []),
+      ]),
+    [
+      historyQuery.data?.days,
+      nextMonthQuery.data?.days,
+      previousMonthQuery.data?.days,
+    ],
   );
 
   const gridCells = useMemo(
@@ -247,16 +277,7 @@ export default function HistoryScreen({
           <View style={styles.grid}>
             {Array.from({ length: rowCount }, (_, rowIndex) => (
               <View key={rowIndex} style={styles.gridRow}>
-                {gridCells.slice(rowIndex * 7, rowIndex * 7 + 7).map((cell, columnIndex) => {
-                  if (cell.kind === 'blank') {
-                    return (
-                      <View
-                        key={`blank-${rowIndex}-${columnIndex}`}
-                        style={[styles.blankCell, { minHeight: rowHeight }]}
-                      />
-                    );
-                  }
-
+                {gridCells.slice(rowIndex * 7, rowIndex * 7 + 7).map(cell => {
                   const entry = daysByDate.get(cell.date);
                   const isToday = today === cell.date;
 
@@ -265,6 +286,7 @@ export default function HistoryScreen({
                       key={cell.date}
                       dayOfMonth={cell.dayOfMonth}
                       entry={entry}
+                      isAdjacentMonth={cell.isAdjacentMonth}
                       isToday={isToday}
                       height={rowHeight}
                     />
@@ -395,8 +417,5 @@ const styles = StyleSheet.create({
   gridRow: {
     flexDirection: 'row',
     gap: 4,
-  },
-  blankCell: {
-    flex: 1,
   },
 });

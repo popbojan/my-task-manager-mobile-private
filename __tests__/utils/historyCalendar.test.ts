@@ -12,18 +12,27 @@ import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 
 describe('historyCalendar', () => {
-  it('builds a Monday-start grid for October 2026', () => {
+  it('builds a Monday-start grid for October 2026 with adjacent month days', () => {
     const cells = buildMonthCalendarGrid('2026-10');
-    const dayCells = cells.filter(cell => cell.kind === 'day');
-    const blankCells = cells.filter(cell => cell.kind === 'blank');
-    expect(dayCells).toHaveLength(31);
-    expect(blankCells.length).toBeGreaterThanOrEqual(3);
-    expect(dayCells[0]).toEqual({
+    const currentMonthCells = cells.filter(cell => !cell.isAdjacentMonth);
+    const adjacentCells = cells.filter(cell => cell.isAdjacentMonth);
+
+    expect(currentMonthCells).toHaveLength(31);
+    expect(adjacentCells.length).toBeGreaterThan(0);
+    expect(cells[0]).toEqual({
+      kind: 'day',
+      date: '2026-09-28',
+      dayOfMonth: 28,
+      isAdjacentMonth: true,
+    });
+    expect(currentMonthCells[0]).toEqual({
       kind: 'day',
       date: '2026-10-01',
       dayOfMonth: 1,
+      isAdjacentMonth: false,
     });
     expect(cells.length % 7).toBe(0);
+    expect(cells.at(-1)?.isAdjacentMonth).toBe(true);
   });
 
   it('shifts months with addMonths', () => {

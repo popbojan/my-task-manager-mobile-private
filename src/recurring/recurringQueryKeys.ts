@@ -51,4 +51,5 @@ export function clearRecurringSessionQueriesIfCached(
 export function invalidateRecurringQueries(queryClient: QueryClient): void {
   void queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
   void queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
+  void queryClient.invalidateQueries({ queryKey: ['history'] });
 }

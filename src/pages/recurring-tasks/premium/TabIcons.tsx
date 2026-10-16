@@ -16,6 +16,41 @@ export function TabCalendarIcon({
   return <CalendarIcon size={size * 0.92} color={color} />;
 }
 
+export function TabHistoryIcon({
+  size = 20,
+  active = false,
+}: TabIconProps) {
+  const c = active ? recurringTheme.accentBright : recurringTheme.textMuted;
+  const gap = 2;
+  const cell = size * 0.22;
+
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap,
+        justifyContent: 'center',
+        alignContent: 'center',
+      }}
+    >
+      {Array.from({ length: 9 }).map((_, index) => (
+        <View
+          key={index}
+          style={{
+            width: cell,
+            height: cell,
+            borderRadius: 2,
+            backgroundColor: index === 4 && active ? c : `${c}99`,
+          }}
+        />
+      ))}
+    </View>
+  );
+}
+
 export function TabFlameIcon({
   size = 24,
   active = false,

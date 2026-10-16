@@ -1,0 +1,142 @@
+import type { HistoryDay } from '@/api/generated/models/HistoryDay';
+import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
+
+export type HistoryDayCellTone = 'success' | 'missed' | 'in_progress' | 'neutral';
+
+const MONTH_KEY_PATTERN = /^[0-9]{4}-(0[1-9]|1[0-2])$/;
+
+export function isValidMonthKey(month: string): boolean {
+  return MONTH_KEY_PATTERN.test(month);
+}
+
+export function parseMonthKey(monthKey: string): { year: number; monthIndex: number } {
+  if (!isValidMonthKey(monthKey)) {
+    throw new Error(`Invalid month key: ${monthKey}`);
+  }
+
+  const [yearPart, monthPart] = monthKey.split('-');
+  return {
+    year: Number(yearPart),
+    monthIndex: Number(monthPart) - 1,
+  };
+}
+
+export function formatMonthKey(year: number, monthIndex: number): string {
+  const month = String(monthIndex + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+export function formatCalendarDate(year: number, monthIndex: number, day: number): string {
+  const month = String(monthIndex + 1).padStart(2, '0');
+  const dayPart = String(day).padStart(2, '0');
+  return `${year}-${month}-${dayPart}`;
+}
+
+export function parseCalendarDate(date: string): Date {
+  const [yearPart, monthPart, dayPart] = date.split('-');
+  return new Date(Number(yearPart), Number(monthPart) - 1, Number(dayPart));
+}
+
+export function getMondayBasedWeekday(date: Date): number {
+  const day = date.getDay();
+  return day === 0 ? 6 : day - 1;
+}
+
+export function addMonths(monthKey: string, delta: number): string {
+  const { year, monthIndex } = parseMonthKey(monthKey);
+  const date = new Date(year, monthIndex + delta, 1);
+  return formatMonthKey(date.getFullYear(), date.getMonth());
+}
+
+export function getDaysInMonth(monthKey: string): number {
+  const { year, monthIndex } = parseMonthKey(monthKey);
+  return new Date(year, monthIndex + 1, 0).getDate();
+}
+
+export type MonthCalendarCell =
+  | { kind: 'blank' }
+  | { kind: 'day'; date: string; dayOfMonth: number };
+
+export function buildMonthCalendarGrid(monthKey: string): MonthCalendarCell[] {
+  const { year, monthIndex } = parseMonthKey(monthKey);
+  const daysInMonth = getDaysInMonth(monthKey);
+  const firstWeekday = getMondayBasedWeekday(new Date(year, monthIndex, 1));
+  const cells: MonthCalendarCell[] = [];
+
+  for (let i = 0; i < firstWeekday; i++) {
+    cells.push({ kind: 'blank' });
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    cells.push({
+      kind: 'day',
+      date: formatCalendarDate(year, monthIndex, day),
+      dayOfMonth: day,
+    });
+  }
+
+  while (cells.length % 7 !== 0) {
+    cells.push({ kind: 'blank' });
+  }
+
+  return cells;
+}
+
+export function formatApiCalendarDate(value: Date | string): string {
+  if (typeof value === 'string') {
+    return value.slice(0, 10);
+  }
+
+  return value.toISOString().slice(0, 10);
+}
+
+export function indexHistoryDaysByDate(days: HistoryDay[]): Map<string, HistoryDay> {
+  const map = new Map<string, HistoryDay>();
+  for (const day of days) {
+    map.set(formatApiCalendarDate(day.date), day);
+  }
+  return map;
+}
+
+export function resolveHistoryDayCellTone(
+  day: HistoryDay | undefined,
+): HistoryDayCellTone {
+  if (!day) {
+    return 'neutral';
+  }
+
+  switch (day.status) {
+    case HistoryDayStatus.Success:
+      return 'success';
+    case HistoryDayStatus.Missed:
+      return 'missed';
+    case HistoryDayStatus.InProgress:
+      return 'in_progress';
+    default:
+      return 'neutral';
+  }
+}
+
+export function formatHistoryTaskRatio(day: HistoryDay | undefined): string | null {
+  if (!day || day.completedTasks === null || day.totalTasks === null) {
+    return null;
+  }
+
+  return `${day.completedTasks}/${day.totalTasks}`;
+}
+
+export function shouldShowHistoryMetrics(day: HistoryDay | undefined): boolean {
+  if (!day) {
+    return false;
+  }
+
+  return day.currentStreak !== null || day.currentLevel !== null;
+}
+
+export function monthKeyFromCalendarDate(date: string): string {
+  return date.slice(0, 7);
+}
+
+export function defaultVisibleMonthKey(today = new Date()): string {
+  return formatMonthKey(today.getFullYear(), today.getMonth());
+}

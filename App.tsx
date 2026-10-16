@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from '@/auth/AuthContext';
 import { LanguageProvider } from '@/i18n/LanguageProvider';
 import MainTabBar, { type MainTab } from '@/navigation/MainTabBar';
 import ProfileScreen from '@/pages/profile/ProfileScreen';
+import HistoryScreen from '@/pages/history/HistoryScreen';
 import ProgressScreen from '@/pages/progress/ProgressScreen';
 import LoginScreen from '@/pages/login/LoginScreen';
 import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormModal';
@@ -169,12 +170,14 @@ function MainAppShell() {
         <View
           style={[
             shellStyles.tabPane,
-            activeTab !== 'tasks' ? shellStyles.tabPaneHidden : null,
+            activeTab !== 'history' ? shellStyles.tabPaneHidden : null,
           ]}
         >
-          <TasksScreen
-            onOpenCreateTask={openBoardTaskCreate}
-            onOpenEditTask={openBoardTaskForm}
+          <HistoryScreen
+            onOpenSubscription={() => {
+              setOpenProfileSubscription(true);
+              setActiveTab('profile');
+            }}
           />
         </View>
         <View
@@ -188,6 +191,17 @@ function MainAppShell() {
               setOpenProfileSubscription(true);
               setActiveTab('profile');
             }}
+          />
+        </View>
+        <View
+          style={[
+            shellStyles.tabPane,
+            activeTab !== 'tasks' ? shellStyles.tabPaneHidden : null,
+          ]}
+        >
+          <TasksScreen
+            onOpenCreateTask={openBoardTaskCreate}
+            onOpenEditTask={openBoardTaskForm}
           />
         </View>
         <View
@@ -213,6 +227,7 @@ function MainAppShell() {
           onSaved={() => {
             queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
             queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
+            queryClient.invalidateQueries({ queryKey: ['history'] });
           }}
         />
       ) : null}

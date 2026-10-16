@@ -52,6 +52,7 @@ export async function refreshAppData(
       queryFn: () => authApi.getMasteryLevels(),
       staleTime: 0,
     }),
+    queryClient.invalidateQueries({ queryKey: ['history'] }),
     queryClient.invalidateQueries({ queryKey: revenueCatOfferingsQueryKey }),
   ]);
 }

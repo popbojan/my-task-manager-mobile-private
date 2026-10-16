@@ -9,10 +9,12 @@ All URIs are relative to *http://localhost*
 | [**createRecurringTask**](DefaultApi.md#createrecurringtaskoperation) | **POST** /recurring-tasks | Create a new recurring task |
 | [**createTask**](DefaultApi.md#createtaskoperation) | **POST** /tasks | Create a new task |
 | [**deleteCurrentUser**](DefaultApi.md#deletecurrentuser) | **DELETE** /users/me | Permanently delete the current user\&#39;s account |
+| [**deleteHistoryNote**](DefaultApi.md#deletehistorynote) | **DELETE** /history/{date}/note | Delete a daily history note |
 | [**deleteRecurringTask**](DefaultApi.md#deleterecurringtask) | **DELETE** /recurring-tasks/{recurringTaskId} | Delete a recurring task |
 | [**deleteTask**](DefaultApi.md#deletetask) | **DELETE** /tasks/{taskId} | Delete a task |
 | [**getCurrentUser**](DefaultApi.md#getcurrentuser) | **GET** /users/me | Get current user |
 | [**getCurrentUserSubscription**](DefaultApi.md#getcurrentusersubscription) | **GET** /subscriptions/me | Get current user\&#39;s subscription |
+| [**getHistory**](DefaultApi.md#gethistory) | **GET** /history | Get monthly daily history for the authenticated user |
 | [**getMasteryLevels**](DefaultApi.md#getmasterylevels) | **GET** /mastery-levels | Get all mastery levels |
 | [**getRecurringTask**](DefaultApi.md#getrecurringtask) | **GET** /recurring-tasks/{recurringTaskId} | Get a single recurring task |
 | [**getRecurringTaskProgress**](DefaultApi.md#getrecurringtaskprogress) | **GET** /recurring-task-progress | Get recurring task progress for the authenticated user |
@@ -21,6 +23,7 @@ All URIs are relative to *http://localhost*
 | [**getTasks**](DefaultApi.md#gettasks) | **GET** /tasks | Get tasks for the authenticated user |
 | [**loginWithOtp**](DefaultApi.md#loginwithotp) | **POST** /auth/login-with-otp | Login using an email and the received OTP |
 | [**logout**](DefaultApi.md#logout) | **POST** /auth/logout | Logout user and invalidate refresh token |
+| [**putHistoryNote**](DefaultApi.md#puthistorynoteoperation) | **PUT** /history/{date}/note | Create or replace a daily history note |
 | [**refreshAccessToken**](DefaultApi.md#refreshaccesstoken) | **POST** /auth/refresh | Refresh access token using refresh token cookie |
 | [**requestOtp**](DefaultApi.md#requestotp) | **POST** /auth/request-otp | Request a one-time password via email |
 | [**updateRecurringTask**](DefaultApi.md#updaterecurringtaskoperation) | **PATCH** /recurring-tasks/{recurringTaskId} | Update a recurring task |
@@ -371,6 +374,80 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
+## deleteHistoryNote
+
+> deleteHistoryNote(date)
+
+Delete a daily history note
+
+Deletes only the authenticated user\&#39;s note for this date, preserving any daily result. Returns 204 even when no note exists. After deletion, a date without a recorded result is omitted from GET /history. 
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { DeleteHistoryNoteRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // Date | Valid calendar date in YYYY-MM-DD format.           Past, present, and future dates are allowed,           including dates before account creation. 
+    date: 2026-10-10,
+  } satisfies DeleteHistoryNoteRequest;
+
+  try {
+    const data = await api.deleteHistoryNote(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **date** | `Date` | Valid calendar date in YYYY-MM-DD format.           Past, present, and future dates are allowed,           including dates before account creation.  | [Defaults to `undefined`] |
+
+### Return type
+
+`void` (Empty response body)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **204** | Note removed or already absent. |  -  |
+| **400** | Invalid input. |  -  |
+| **401** | Missing or invalid bearer authentication. |  -  |
+| **500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
 ## deleteRecurringTask
 
 > deleteRecurringTask(recurringTaskId)
@@ -636,6 +713,80 @@ This endpoint does not need any parameter.
 |-------------|-------------|------------------|
 | **200** | Current subscription |  -  |
 | **401** | Unauthorized |  -  |
+| **500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## getHistory
+
+> HistoryResponse getHistory(month)
+
+Get monthly daily history for the authenticated user
+
+Returns the authenticated user\&#39;s recurring-task history and notes for the requested month. Ordinary board tasks are excluded. Entries are ordered by date ascending and unique per user and date. Every completed day with recurring tasks must have a recorded result, even if the user did not open the app. If at least one counted task was not completed by the daily cutoff, the day is marked as missed, including days with zero completed tasks. Dates before history tracking began may have no recorded data. Future dates are included when a note exists. Note-only entries have status unknown and null task counts. Current-day results are provisional and may change until finalized. Success is visible immediately when all counted tasks are completed. Finalized results remain unchanged; notes remain editable. Each finalized day stores a snapshot of the global recurring-task currentStreak and currentLevel after that day\&#39;s evaluation. Historical dates retain their original local date after timezone changes. No subscription requirement is added by this contract. 
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { GetHistoryRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // string | Calendar month in YYYY-MM format; year 0001 through 9999. Invalid months are rejected. 
+    month: 2026-10,
+  } satisfies GetHistoryRequest;
+
+  try {
+    const data = await api.getHistory(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **month** | `string` | Calendar month in YYYY-MM format; year 0001 through 9999. Invalid months are rejected.  | [Defaults to `undefined`] |
+
+### Return type
+
+[**HistoryResponse**](HistoryResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Monthly history; days may be empty. |  -  |
+| **400** | Invalid input. |  -  |
+| **401** | Missing or invalid bearer authentication. |  -  |
 | **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
@@ -1158,6 +1309,83 @@ No authorization required
 |-------------|-------------|------------------|
 | **204** | Successfully logged out. Refresh token cookie is cleared. |  * Set-Cookie - Clears the refresh token cookie (refreshToken&#x3D;; Max-Age&#x3D;0; ...) <br>  |
 | **401** | No valid refresh token provided |  -  |
+| **500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## putHistoryNote
+
+> HistoryNoteResponse putHistoryNote(date, putHistoryNoteRequest)
+
+Create or replace a daily history note
+
+Stores one note per authenticated user and date. Trim leading and trailing whitespace before storage. Reject blank text and text longer than 2000 Unicode code points before trimming. Preserve internal whitespace and line breaks. Repeating the same request has the same effect. Last committed write wins. Notes are allowed without a recorded daily result and must not create success, missed, or task counts. Task results cannot be modified through this endpoint. 
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { PutHistoryNoteOperationRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // Date | Valid calendar date in YYYY-MM-DD format.           Past, present, and future dates are allowed,           including dates before account creation. 
+    date: 2026-10-10,
+    // PutHistoryNoteRequest
+    putHistoryNoteRequest: ...,
+  } satisfies PutHistoryNoteOperationRequest;
+
+  try {
+    const data = await api.putHistoryNote(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **date** | `Date` | Valid calendar date in YYYY-MM-DD format.           Past, present, and future dates are allowed,           including dates before account creation.  | [Defaults to `undefined`] |
+| **putHistoryNoteRequest** | [PutHistoryNoteRequest](PutHistoryNoteRequest.md) |  | |
+
+### Return type
+
+[**HistoryNoteResponse**](HistoryNoteResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Note created or replaced; returns normalized stored text. |  -  |
+| **400** | Invalid input. |  -  |
+| **401** | Missing or invalid bearer authentication. |  -  |
 | **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)

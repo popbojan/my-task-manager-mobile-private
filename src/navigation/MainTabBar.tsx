@@ -5,12 +5,13 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import {
   TabCalendarIcon,
   TabChartIcon,
+  TabHistoryIcon,
   TabListIcon,
   TabProfileIcon,
 } from '@/pages/recurring-tasks/premium/TabIcons';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
-export type MainTab = 'today' | 'tasks' | 'progress' | 'profile';
+export type MainTab = 'today' | 'history' | 'progress' | 'tasks' | 'profile';
 
 type MainTabBarProps = {
   activeTab: MainTab;
@@ -19,7 +20,12 @@ type MainTabBarProps = {
 
 const TABS: {
   id: MainTab;
-  labelKey: 'nav.today' | 'nav.tasks' | 'nav.progress' | 'nav.profile';
+  labelKey:
+    | 'nav.today'
+    | 'nav.history'
+    | 'nav.progress'
+    | 'nav.tasks'
+    | 'nav.profile';
   renderIcon: (active: boolean) => ReactNode;
 }[] = [
   {
@@ -28,14 +34,19 @@ const TABS: {
     renderIcon: active => <TabCalendarIcon active={active} />,
   },
   {
-    id: 'tasks',
-    labelKey: 'nav.tasks',
-    renderIcon: active => <TabListIcon active={active} />,
+    id: 'history',
+    labelKey: 'nav.history',
+    renderIcon: active => <TabHistoryIcon active={active} />,
   },
   {
     id: 'progress',
     labelKey: 'nav.progress',
     renderIcon: active => <TabChartIcon active={active} />,
+  },
+  {
+    id: 'tasks',
+    labelKey: 'nav.tasks',
+    renderIcon: active => <TabListIcon active={active} />,
   },
   {
     id: 'profile',
@@ -128,7 +139,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: recurringTheme.textMuted,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
   },
   labelActive: {

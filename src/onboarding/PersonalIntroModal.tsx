@@ -1,8 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
-  Animated,
   BackHandler,
-  Easing,
+  Dimensions,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -24,14 +23,28 @@ import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTh
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 const PERSONAL_INTRO_STEPS = 4;
-const HERO_HEIGHT = 160;
-const HERO_TOP_MARGIN = 16;
-const HERO_SLOT_HEIGHT = HERO_HEIGHT + HERO_TOP_MARGIN;
-const HERO_COLLAPSE_DURATION = 540;
-const HERO_EXPAND_DURATION_IOS = 500;
-const HERO_EXPAND_DURATION_ANDROID = 520;
-const HERO_COLLAPSE_EASING = Easing.bezier(0.33, 0, 0.1, 1);
-const HERO_EXPAND_EASING = Easing.bezier(0.16, 0.84, 0.2, 1);
+const FOOTER_HEIGHT_LAST_STEP = 74;
+const FOOTER_HEIGHT_WITH_SKIP = 124;
+
+type KeyboardLayoutEvent = {
+  endCoordinates: {
+    height: number;
+    screenY: number;
+  };
+};
+
+function resolveKeyboardInset(event: KeyboardLayoutEvent): number {
+  const windowHeight = Dimensions.get('window').height;
+  const { height, screenY } = event.endCoordinates;
+  const insetFromScreenY =
+    screenY > 0 ? Math.max(0, windowHeight - screenY) : height;
+
+  if (Platform.OS === 'android') {
+    return Math.max(height, insetFromScreenY);
+  }
+
+  return height;
+}
 
 const introInputProps = {
   autoCorrect: false,
@@ -61,54 +74,107 @@ export default function PersonalIntroModal({
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollViewType>(null);
-  const heroProgress = useRef(new Animated.Value(1)).current;
+  const blurResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRetryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stepIndexRef = useRef(draft.stepIndex);
+  const [inputFocused, setInputFocused] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const { stepIndex, taskName, whyText } = draft;
+  stepIndexRef.current = stepIndex;
   const trimmedTaskName = taskName.trim();
   const trimmedWhyText = whyText.trim();
   const isLastStep = stepIndex >= PERSONAL_INTRO_STEPS - 1;
   const canGoBack = stepIndex > 0;
+  const hasInputStep = stepIndex === 0 || stepIndex === 1;
+  const hideHeroImage = hasInputStep && (inputFocused || keyboardHeight > 0);
 
   function updateDraft(partial: Partial<PersonalIntroDraft>) {
     onDraftChange({ ...draft, ...partial });
   }
 
-  function animateHero(expanded: boolean, duration: number) {
-    heroProgress.stopAnimation();
-
-    Animated.timing(heroProgress, {
-      toValue: expanded ? 1 : 0,
-      duration,
-      easing: expanded ? HERO_EXPAND_EASING : HERO_COLLAPSE_EASING,
-      useNativeDriver: false,
-    }).start();
+  function clearBlurReset() {
+    if (blurResetRef.current) {
+      clearTimeout(blurResetRef.current);
+      blurResetRef.current = null;
+    }
   }
 
-  function collapseHeroForKeyboard() {
-    animateHero(false, HERO_COLLAPSE_DURATION);
+  function clearScrollRetry() {
+    if (scrollRetryRef.current) {
+      clearTimeout(scrollRetryRef.current);
+      scrollRetryRef.current = null;
+    }
   }
 
-  function expandHeroAfterKeyboard(eventDuration?: number) {
-    const fallback =
-      Platform.OS === 'ios' ? HERO_EXPAND_DURATION_IOS : HERO_EXPAND_DURATION_ANDROID;
-    animateHero(true, Math.max(eventDuration ?? 0, fallback));
+  function resetScrollToTop() {
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    });
+  }
+
+  function scrollInputIntoView() {
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollToEnd({ animated: Platform.OS === 'ios' });
+    });
+  }
+
+  function scheduleScrollInputIntoView() {
+    clearScrollRetry();
+    scrollInputIntoView();
+    scrollRetryRef.current = setTimeout(scrollInputIntoView, 120);
+  }
+
+  function handleKeyboardShow(height: number) {
+    if (stepIndexRef.current > 1) {
+      return;
+    }
+
+    setKeyboardHeight(height);
+    scheduleScrollInputIntoView();
+  }
+
+  function handleKeyboardHide() {
+    setKeyboardHeight(0);
+    setInputFocused(false);
+    clearBlurReset();
+    clearScrollRetry();
+    resetScrollToTop();
   }
 
   useEffect(() => {
     if (!visible) {
-      heroProgress.setValue(1);
+      setInputFocused(false);
+      setKeyboardHeight(0);
+      clearBlurReset();
+      clearScrollRetry();
       return;
     }
 
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = 'keyboardDidHide';
 
-    const hideSubscription = Keyboard.addListener(hideEvent, event => {
-      expandHeroAfterKeyboard(event.duration);
+    const showSubscription = Keyboard.addListener(showEvent, event => {
+      handleKeyboardShow(resolveKeyboardInset(event));
     });
+    const hideSubscription = Keyboard.addListener(hideEvent, handleKeyboardHide);
 
     return () => {
+      showSubscription.remove();
       hideSubscription.remove();
+      clearBlurReset();
+      clearScrollRetry();
     };
-  }, [visible, heroProgress]);
+  }, [visible]);
+
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    setInputFocused(false);
+    setKeyboardHeight(0);
+    resetScrollToTop();
+  }, [visible, stepIndex]);
 
   useEffect(() => {
     if (!visible) {
@@ -150,7 +216,19 @@ export default function PersonalIntroModal({
   }
 
   function handleInputFocus() {
-    collapseHeroForKeyboard();
+    clearBlurReset();
+    setInputFocused(true);
+    scheduleScrollInputIntoView();
+  }
+
+  function handleInputBlur() {
+    clearBlurReset();
+    blurResetRef.current = setTimeout(() => {
+      setInputFocused(false);
+      if (keyboardHeight === 0) {
+        resetScrollToTop();
+      }
+    }, 150);
   }
 
   const primaryDisabled =
@@ -184,26 +262,20 @@ export default function PersonalIntroModal({
 
   const primaryLabel = isLastStep ? t('personalIntro.page4.cta') : t('personalIntro.next');
 
-  const heroSlotHeight = heroProgress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, HERO_SLOT_HEIGHT],
-  });
-  const heroOpacity = heroProgress;
-  const contentPaddingTop = heroProgress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [12, 24],
-  });
+  const keyboardOpen = keyboardHeight > 0;
+  const dockFooterAboveKeyboard = keyboardOpen && Platform.OS === 'android';
+  const footerReservedHeight = isLastStep
+    ? FOOTER_HEIGHT_LAST_STEP
+    : FOOTER_HEIGHT_WITH_SKIP;
+  const scrollBottomPadding = keyboardOpen ? footerReservedHeight + 12 : 16;
 
   const heroBlock = (
-    <Animated.View
-      style={[styles.heroSlot, { height: heroSlotHeight, opacity: heroOpacity }]}
-      pointerEvents="none"
-    >
+    <View style={styles.heroSlot}>
       <View style={styles.heroWrap}>
         <Image source={heroSource} style={styles.heroImage} resizeMode="cover" />
         <View style={styles.heroOverlay} />
       </View>
-    </Animated.View>
+    </View>
   );
 
   const progressHeader = (
@@ -243,6 +315,7 @@ export default function PersonalIntroModal({
         keyboardVerticalOffset={insets.top}
       >
         <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+          <View style={styles.shell}>
           <View style={styles.header}>
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{t('personalIntro.badge')}</Text>
@@ -264,14 +337,18 @@ export default function PersonalIntroModal({
           <ScrollView
             ref={scrollRef}
             style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingBottom: scrollBottomPadding },
+            ]}
             keyboardShouldPersistTaps="handled"
-            automaticallyAdjustKeyboardInsets
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
             showsVerticalScrollIndicator={false}
             bounces={false}
           >
-            {heroBlock}
-            <Animated.View style={[styles.content, { paddingTop: contentPaddingTop }]}>
+            {!hideHeroImage ? heroBlock : null}
+
+            <View style={styles.content}>
               {progressHeader}
 
               {stepIndex === 0 ? (
@@ -284,6 +361,7 @@ export default function PersonalIntroModal({
                     onChangeText={value => updateDraft({ taskName: value })}
                     returnKeyType="next"
                     onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
                     onSubmitEditing={() => {
                       if (trimmedTaskName) {
                         handlePrimary();
@@ -302,15 +380,11 @@ export default function PersonalIntroModal({
                     value={whyText}
                     onChangeText={value => updateDraft({ whyText: value })}
                     multiline
+                    submitBehavior="newline"
                     textAlignVertical="top"
-                    returnKeyType="done"
-                    blurOnSubmit
+                    scrollEnabled
                     onFocus={handleInputFocus}
-                    onSubmitEditing={() => {
-                      if (trimmedWhyText) {
-                        handlePrimary();
-                      }
-                    }}
+                    onBlur={handleInputBlur}
                   />
                 </View>
               ) : null}
@@ -322,10 +396,16 @@ export default function PersonalIntroModal({
                   </Text>
                 </View>
               ) : null}
-            </Animated.View>
+            </View>
           </ScrollView>
 
-          <View style={styles.footer}>
+          <View
+            style={[
+              styles.footer,
+              dockFooterAboveKeyboard ? styles.footerDockedAboveKeyboard : null,
+              dockFooterAboveKeyboard ? { bottom: keyboardHeight } : null,
+            ]}
+          >
             {!isLastStep ? (
               <Pressable
                 style={styles.skipButton}
@@ -348,11 +428,15 @@ export default function PersonalIntroModal({
               <Text style={styles.primaryButtonText}>{primaryLabel}</Text>
             </Pressable>
           </View>
+          </View>
         </SafeAreaView>
       </KeyboardAvoidingView>
     </View>
   );
 }
+
+const HERO_HEIGHT = 160;
+const HERO_TOP_MARGIN = 16;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -364,6 +448,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: recurringTheme.pageBg,
+  },
+  shell: {
+    flex: 1,
+    position: 'relative',
   },
   flex: {
     flex: 1,
@@ -437,12 +525,13 @@ const styles = StyleSheet.create({
     backgroundColor: recurringTheme.pageBg,
   },
   scrollContent: {
-    paddingBottom: 24,
+    flexGrow: 1,
     backgroundColor: recurringTheme.pageBg,
   },
   content: {
     paddingHorizontal: 20,
     gap: 12,
+    paddingTop: 24,
     paddingBottom: 8,
   },
   stepLabel: {
@@ -496,7 +585,9 @@ const styles = StyleSheet.create({
     backgroundColor: recurringTheme.surfaceInset,
   },
   textArea: {
-    height: 112,
+    height: 120,
+    minHeight: 120,
+    maxHeight: 120,
     paddingTop: 10,
     lineHeight: 20,
   },
@@ -523,6 +614,13 @@ const styles = StyleSheet.create({
     borderTopColor: recurringTheme.cardBorder,
     paddingTop: 8,
     backgroundColor: recurringTheme.pageBg,
+  },
+  footerDockedAboveKeyboard: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    zIndex: 2,
+    elevation: 4,
   },
   skipButton: {
     alignItems: 'center',

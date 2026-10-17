@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
+import { useLanguage } from '@/i18n/LanguageProvider';
 import { CheckIcon, CrossIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import PremiumProgressRing from '@/pages/recurring-tasks/premium/PremiumProgressRing';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
@@ -79,6 +80,7 @@ export default function HistoryDayCell({
   isToday,
   height,
 }: HistoryDayCellProps) {
+  const { t } = useLanguage();
   const tone = resolveHistoryDayCellTone(entry);
   const showDetails = shouldShowHistoryDayDetails(entry);
 
@@ -100,7 +102,16 @@ export default function HistoryDayCell({
             <Text style={styles.metricText}>{formatHistoryStreakDisplay(entry)}</Text>
           </View>
 
-          <Text style={styles.levelText}>Lv {formatHistoryLevelDisplay(entry)}</Text>
+          <Text
+            style={styles.levelText}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.75}
+          >
+            {t('history.levelShort', {
+              level: formatHistoryLevelDisplay(entry),
+            })}
+          </Text>
         </View>
       ) : (
         <View style={styles.detailsPlaceholder} />

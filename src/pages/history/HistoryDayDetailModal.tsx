@@ -296,20 +296,27 @@ export default function HistoryDayDetailModal({
                   <HistoryDetailStatusBadge entry={entry} />
                 </View>
 
-                <View style={styles.previewMetricsRow}>
-                  <Text style={styles.previewRatio}>{formatHistoryTaskRatioDisplay(entry)}</Text>
-                  <View style={styles.previewStreakRow}>
-                    <FireIcon size={12} color={recurringTheme.goldBright} />
-                    <Text style={styles.previewMetric}>{formatHistoryStreakDisplay(entry)}</Text>
+                <View style={styles.metricsList}>
+                  <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>{t('history.metric.tasks')}</Text>
+                    <Text style={styles.metricValue}>{formatHistoryTaskRatioDisplay(entry)}</Text>
                   </View>
-                  <Text style={styles.previewLevel}>
-                    {t('history.levelShort', {
-                      level: formatHistoryLevelDisplay(entry),
-                    })}
-                  </Text>
+                  <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>{t('history.metric.streak')}</Text>
+                    <View style={styles.metricValueRow}>
+                      <FireIcon size={12} color={recurringTheme.goldBright} />
+                      <Text style={styles.metricValue}>{formatHistoryStreakDisplay(entry)}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>{t('history.metric.level')}</Text>
+                    <Text style={styles.metricValue}>{formatHistoryLevelDisplay(entry)}</Text>
+                  </View>
+                  <View style={styles.metricRow}>
+                    <Text style={styles.metricLabel}>{t('history.metric.status')}</Text>
+                    <Text style={styles.metricValue}>{t(statusKey)}</Text>
+                  </View>
                 </View>
-
-                <Text style={styles.previewStatus}>{t(statusKey)}</Text>
               </View>
 
               <View style={styles.fieldBlock}>
@@ -540,39 +547,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(240, 204, 98, 0.35)',
   },
-  previewMetricsRow: {
+  metricsList: {
+    gap: 6,
+  },
+  metricRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: 12,
   },
-  previewRatio: {
-    color: recurringTheme.textPrimary,
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.4,
+  metricLabel: {
+    color: recurringTheme.textMuted,
+    fontSize: 12,
+    fontWeight: '700',
   },
-  previewStreakRow: {
+  metricValueRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  previewMetric: {
+  metricValue: {
     color: recurringTheme.textPrimary,
     fontSize: 14,
     fontWeight: '800',
-  },
-  previewLevel: {
-    color: recurringTheme.textSecondary,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  previewStatus: {
-    color: recurringTheme.textMuted,
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    textAlign: 'right',
   },
   fieldBlock: {
     gap: 4,

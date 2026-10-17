@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
-import { CrownIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
+import { FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
   formatHistoryLevelDisplay,
@@ -8,7 +8,6 @@ import {
   formatHistoryTaskRatioDisplay,
   resolveHistoryDayCellTone,
   shouldShowHistoryDayDetails,
-  shouldShowHistorySuccessCrown,
   type HistoryDayCellTone,
 } from '@/utils/historyCalendar';
 
@@ -42,7 +41,6 @@ export default function HistoryDayCell({
 }: HistoryDayCellProps) {
   const tone = resolveHistoryDayCellTone(entry);
   const showDetails = shouldShowHistoryDayDetails(entry);
-  const showSuccessCrown = shouldShowHistorySuccessCrown(entry);
 
   return (
     <View style={[toneStyles(tone, isToday), styles.cellFill, { minHeight: height }]}>
@@ -52,18 +50,10 @@ export default function HistoryDayCell({
 
       {showDetails ? (
         <View style={styles.detailsColumn}>
-          <View style={styles.ratioBlock}>
-            {showSuccessCrown ? (
-              <View style={styles.successCrownBadge}>
-                <View style={styles.successCrownFillDeep} />
-                <CrownIcon size={12} color={recurringTheme.goldBright} />
-              </View>
-            ) : null}
-            <Text style={styles.ratio}>{formatHistoryTaskRatioDisplay(entry)}</Text>
-          </View>
+          <Text style={styles.ratio}>{formatHistoryTaskRatioDisplay(entry)}</Text>
 
           <View style={styles.streakRow}>
-            <FireIcon size={9} color={recurringTheme.goldBright} />
+            <FireIcon size={11} color={recurringTheme.goldBright} />
             <Text style={styles.metricText}>{formatHistoryStreakDisplay(entry)}</Text>
           </View>
 
@@ -121,54 +111,34 @@ const styles = StyleSheet.create({
   detailsColumn: {
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
+    gap: 4,
     width: '100%',
-  },
-  ratioBlock: {
-    alignItems: 'center',
-    gap: 2,
-  },
-  successCrownBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: recurringTheme.goldSoft,
-    borderWidth: 1.5,
-    borderColor: 'rgba(240, 204, 98, 0.75)',
-    marginBottom: 1,
-  },
-  successCrownFillDeep: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(72, 52, 14, 0.42)',
   },
   ratio: {
     color: recurringTheme.textPrimary,
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '800',
-    letterSpacing: -0.3,
-    lineHeight: 18,
+    letterSpacing: -0.4,
+    lineHeight: 21,
   },
   streakRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
-    minHeight: 14,
+    gap: 4,
+    minHeight: 16,
   },
   metricText: {
     color: recurringTheme.textPrimary,
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '800',
-    lineHeight: 12,
+    lineHeight: 14,
   },
   levelText: {
     color: recurringTheme.textSecondary,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
-    lineHeight: 12,
+    lineHeight: 13,
   },
   detailsPlaceholder: {
     flex: 1,

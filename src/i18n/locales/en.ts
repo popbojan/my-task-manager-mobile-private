@@ -81,6 +81,7 @@ export const en: Record<TranslationKey, string> = {
   'history.weekday.sat': 'Sat',
   'history.weekday.sun': 'Sun',
   'history.openDay': 'Open day {{day}}',
+  'history.hasNote': 'Has a note',
   'history.levelShort': 'Lv {{level}}',
   'history.metric.tasks': 'Tasks',
   'history.metric.streak': 'Streak',

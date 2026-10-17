@@ -196,6 +196,14 @@ export function shouldShowHistoryInProgressMark(day: HistoryDay | undefined): bo
   return percent !== null && percent < 100;
 }
 
+export function shouldShowHistoryNoteMark(day: HistoryDay | undefined): boolean {
+  if (!day?.note) {
+    return false;
+  }
+
+  return day.note.trim().length > 0;
+}
+
 export function monthKeyFromCalendarDate(date: string): string {
   return date.slice(0, 7);
 }

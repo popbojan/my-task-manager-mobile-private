@@ -230,6 +230,71 @@ export function CheckIcon({
   );
 }
 
+export function NoteIcon({
+  size = 14,
+  color = recurringTheme.textSecondary,
+}: IconProps) {
+  const sheetWidth = size * 0.72;
+  const sheetHeight = size * 0.88;
+  const fold = size * 0.18;
+
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <View
+        style={{
+          width: sheetWidth,
+          height: sheetHeight,
+          borderWidth: 1.5,
+          borderColor: color,
+          borderRadius: 2,
+          paddingTop: size * 0.24,
+          gap: size * 0.1,
+          backgroundColor: 'rgba(255, 255, 255, 0.04)',
+        }}
+      >
+        <View
+          style={{
+            width: sheetWidth * 0.62,
+            height: 1,
+            backgroundColor: color,
+            alignSelf: 'center',
+            borderRadius: 1,
+          }}
+        />
+        <View
+          style={{
+            width: sheetWidth * 0.48,
+            height: 1,
+            backgroundColor: color,
+            alignSelf: 'center',
+            borderRadius: 1,
+          }}
+        />
+      </View>
+      <View
+        style={{
+          position: 'absolute',
+          top: size * 0.08,
+          right: size * 0.12,
+          width: fold,
+          height: fold,
+          borderTopWidth: 1.5,
+          borderRightWidth: 1.5,
+          borderColor: color,
+          backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        }}
+      />
+    </View>
+  );
+}
+
 export function CrossIcon({
   size = 14,
   color = recurringTheme.fireRedBright,

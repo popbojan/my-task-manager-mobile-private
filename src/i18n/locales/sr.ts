@@ -82,6 +82,7 @@ export const sr: Record<TranslationKey, string> = {
   'history.weekday.sat': 'Sub',
   'history.weekday.sun': 'Ned',
   'history.openDay': 'Otvori dan {{day}}',
+  'history.hasNote': 'Ima belešku',
   'history.levelShort': 'Niv. {{level}}',
   'history.metric.tasks': 'Zadaci',
   'history.metric.streak': 'Niz',

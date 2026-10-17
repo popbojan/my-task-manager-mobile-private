@@ -80,6 +80,7 @@ export const de = {
   'history.weekday.sat': 'Sa',
   'history.weekday.sun': 'So',
   'history.openDay': 'Tag {{day}} öffnen',
+  'history.hasNote': 'Notiz vorhanden',
   'history.levelShort': 'Lv {{level}}',
   'history.metric.tasks': 'Aufgaben',
   'history.metric.streak': 'Kette',

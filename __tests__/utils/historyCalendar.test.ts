@@ -10,6 +10,7 @@ import {
   resolveHistoryDayCellTone,
   shouldShowHistoryInProgressMark,
   shouldShowHistoryMissedMark,
+  shouldShowHistoryNoteMark,
   shouldShowHistorySuccessCrown,
   resolveHistoryDayProgressPercent,
 } from '@/utils/historyCalendar';
@@ -107,6 +108,27 @@ describe('historyCalendar', () => {
     expect(shouldShowHistoryInProgressMark(inProgress)).toBe(true);
     expect(resolveHistoryDayProgressPercent(inProgress)).toBe(43);
     expect(shouldShowHistoryMissedMark(inProgress)).toBe(false);
+  });
+
+  it('shows note mark only when trimmed note text exists', () => {
+    const withNote: HistoryDay = {
+      date: new Date('2026-10-12T00:00:00.000Z'),
+      status: HistoryDayStatus.Unknown,
+      completedTasks: null,
+      totalTasks: null,
+      note: '  Gedachte  ',
+      finalizedAt: null,
+      currentStreak: null,
+      currentLevel: null,
+    };
+    const blankNote: HistoryDay = {
+      ...withNote,
+      note: '   ',
+    };
+
+    expect(shouldShowHistoryNoteMark(withNote)).toBe(true);
+    expect(shouldShowHistoryNoteMark(blankNote)).toBe(false);
+    expect(shouldShowHistoryNoteMark(undefined)).toBe(false);
   });
 
   it('shows success crown only for completed success days', () => {

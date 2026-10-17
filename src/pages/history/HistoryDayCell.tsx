@@ -1,7 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import { CheckIcon, CrossIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
+import {
+  CheckIcon,
+  CrossIcon,
+  FireIcon,
+  NoteIcon,
+} from '@/pages/recurring-tasks/premium/PremiumIcons';
 import PremiumProgressRing from '@/pages/recurring-tasks/premium/PremiumProgressRing';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
@@ -13,6 +18,7 @@ import {
   shouldShowHistoryDayDetails,
   shouldShowHistoryInProgressMark,
   shouldShowHistoryMissedMark,
+  shouldShowHistoryNoteMark,
   shouldShowHistorySuccessCrown,
   type HistoryDayCellTone,
 } from '@/utils/historyCalendar';
@@ -43,7 +49,7 @@ function HistoryStatusBadge({ entry }: { entry?: HistoryDay }) {
   if (shouldShowHistorySuccessCrown(entry)) {
     return (
       <View style={[styles.statusBadge, styles.successBadge]}>
-        <CheckIcon size={13} color={recurringTheme.accentBright} />
+        <CheckIcon size={9} color={recurringTheme.accentBright} />
       </View>
     );
   }
@@ -51,7 +57,7 @@ function HistoryStatusBadge({ entry }: { entry?: HistoryDay }) {
   if (shouldShowHistoryMissedMark(entry)) {
     return (
       <View style={[styles.statusBadge, styles.missedBadge]}>
-        <CrossIcon size={13} color={recurringTheme.fireRedBright} />
+        <CrossIcon size={9} color={recurringTheme.fireRedBright} />
       </View>
     );
   }
@@ -63,8 +69,8 @@ function HistoryStatusBadge({ entry }: { entry?: HistoryDay }) {
         <PremiumProgressRing
           compact
           percent={progressPercent}
-          size={16}
-          stroke={2}
+          size={12}
+          stroke={1.5}
           tone="gold"
         />
       </View>
@@ -83,6 +89,7 @@ export default function HistoryDayCell({
   const { t } = useLanguage();
   const tone = resolveHistoryDayCellTone(entry);
   const showDetails = shouldShowHistoryDayDetails(entry);
+  const showNoteMark = shouldShowHistoryNoteMark(entry);
 
   return (
     <View style={[toneStyles(tone, isToday), styles.cellFill, { minHeight: height }]}>
@@ -90,7 +97,18 @@ export default function HistoryDayCell({
         <Text style={[styles.dayNumber, isToday && styles.dayNumberToday]}>
           {dayOfMonth}
         </Text>
-        <HistoryStatusBadge entry={entry} />
+        <View style={styles.topRightMarks}>
+          {showNoteMark ? (
+            <View
+              style={[styles.statusBadge, styles.noteBadge]}
+              accessibilityLabel={t('history.hasNote')}
+              importantForAccessibility="yes"
+            >
+              <NoteIcon size={8} color={recurringTheme.textPrimary} />
+            </View>
+          ) : null}
+          <HistoryStatusBadge entry={entry} />
+        </View>
       </View>
 
       {showDetails ? (
@@ -160,20 +178,31 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 2,
   },
+  topRightMarks: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 1,
+    flexShrink: 0,
+  },
   dayNumber: {
     color: recurringTheme.textSecondary,
     fontSize: 11,
     fontWeight: '700',
   },
-  dayNumberToday: {
-    color: recurringTheme.accentBright,
-  },
   statusBadge: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  noteBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.16)',
+  },
+  dayNumberToday: {
+    color: recurringTheme.accentBright,
   },
   successBadge: {
     backgroundColor: 'rgba(82, 183, 136, 0.22)',

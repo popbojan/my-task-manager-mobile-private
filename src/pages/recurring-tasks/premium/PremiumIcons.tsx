@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 type IconProps = { size?: number; color?: string; active?: boolean };
@@ -205,31 +205,27 @@ export function CheckIcon({
   color = recurringTheme.accentBright,
 }: IconProps) {
   return (
-    <View style={{ width: size, height: size }}>
-      <View
+    <View
+      style={{
+        width: size,
+        height: size,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text
         style={{
-          position: 'absolute',
-          left: size * 0.12,
-          bottom: size * 0.34,
-          width: size * 0.28,
-          height: 2,
-          backgroundColor: color,
-          borderRadius: 1,
-          transform: [{ rotate: '-45deg' }],
+          color,
+          fontSize: Math.round(size * 0.78),
+          lineHeight: size,
+          fontWeight: '800',
+          textAlign: 'center',
+          includeFontPadding: false,
+          marginTop: -1,
         }}
-      />
-      <View
-        style={{
-          position: 'absolute',
-          left: size * 0.28,
-          bottom: size * 0.38,
-          width: size * 0.52,
-          height: 2,
-          backgroundColor: color,
-          borderRadius: 1,
-          transform: [{ rotate: '45deg' }],
-        }}
-      />
+      >
+        ✓
+      </Text>
     </View>
   );
 }

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
-import { FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
+import { CheckIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
   formatHistoryLevelDisplay,
@@ -8,6 +8,7 @@ import {
   formatHistoryTaskRatioDisplay,
   resolveHistoryDayCellTone,
   shouldShowHistoryDayDetails,
+  shouldShowHistorySuccessCrown,
   type HistoryDayCellTone,
 } from '@/utils/historyCalendar';
 
@@ -41,12 +42,20 @@ export default function HistoryDayCell({
 }: HistoryDayCellProps) {
   const tone = resolveHistoryDayCellTone(entry);
   const showDetails = shouldShowHistoryDayDetails(entry);
+  const showSuccessCheck = shouldShowHistorySuccessCrown(entry);
 
   return (
     <View style={[toneStyles(tone, isToday), styles.cellFill, { minHeight: height }]}>
-      <Text style={[styles.dayNumber, isToday && styles.dayNumberToday]}>
-        {dayOfMonth}
-      </Text>
+      <View style={styles.topRow}>
+        <Text style={[styles.dayNumber, isToday && styles.dayNumberToday]}>
+          {dayOfMonth}
+        </Text>
+        {showSuccessCheck ? (
+          <View style={styles.successCheckBadge}>
+            <CheckIcon size={13} color={recurringTheme.accentBright} />
+          </View>
+        ) : null}
+      </View>
 
       {showDetails ? (
         <View style={styles.detailsColumn}>
@@ -99,14 +108,30 @@ const styles = StyleSheet.create({
     borderColor: recurringTheme.accentBright,
     borderWidth: 1.5,
   },
+  topRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 2,
+  },
   dayNumber: {
     color: recurringTheme.textSecondary,
     fontSize: 11,
     fontWeight: '700',
-    alignSelf: 'flex-start',
   },
   dayNumberToday: {
     color: recurringTheme.accentBright,
+  },
+  successCheckBadge: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(82, 183, 136, 0.22)',
+    borderWidth: 1,
+    borderColor: 'rgba(110, 207, 170, 0.45)',
   },
   detailsColumn: {
     alignItems: 'center',

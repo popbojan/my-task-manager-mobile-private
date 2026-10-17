@@ -1,13 +1,17 @@
 import { StyleSheet, Text, View } from 'react-native';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
-import { CheckIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
+import { CheckIcon, CrossIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
+import PremiumProgressRing from '@/pages/recurring-tasks/premium/PremiumProgressRing';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
   formatHistoryLevelDisplay,
   formatHistoryStreakDisplay,
   formatHistoryTaskRatioDisplay,
   resolveHistoryDayCellTone,
+  resolveHistoryDayProgressPercent,
   shouldShowHistoryDayDetails,
+  shouldShowHistoryInProgressMark,
+  shouldShowHistoryMissedMark,
   shouldShowHistorySuccessCrown,
   type HistoryDayCellTone,
 } from '@/utils/historyCalendar';
@@ -34,6 +38,41 @@ function toneStyles(tone: HistoryDayCellTone, isToday: boolean) {
   }
 }
 
+function HistoryStatusBadge({ entry }: { entry?: HistoryDay }) {
+  if (shouldShowHistorySuccessCrown(entry)) {
+    return (
+      <View style={[styles.statusBadge, styles.successBadge]}>
+        <CheckIcon size={13} color={recurringTheme.accentBright} />
+      </View>
+    );
+  }
+
+  if (shouldShowHistoryMissedMark(entry)) {
+    return (
+      <View style={[styles.statusBadge, styles.missedBadge]}>
+        <CrossIcon size={13} color={recurringTheme.fireRedBright} />
+      </View>
+    );
+  }
+
+  const progressPercent = resolveHistoryDayProgressPercent(entry);
+  if (shouldShowHistoryInProgressMark(entry) && progressPercent !== null) {
+    return (
+      <View style={[styles.statusBadge, styles.inProgressBadge]}>
+        <PremiumProgressRing
+          compact
+          percent={progressPercent}
+          size={16}
+          stroke={2}
+          tone="gold"
+        />
+      </View>
+    );
+  }
+
+  return null;
+}
+
 export default function HistoryDayCell({
   dayOfMonth,
   entry,
@@ -42,7 +81,6 @@ export default function HistoryDayCell({
 }: HistoryDayCellProps) {
   const tone = resolveHistoryDayCellTone(entry);
   const showDetails = shouldShowHistoryDayDetails(entry);
-  const showSuccessCheck = shouldShowHistorySuccessCrown(entry);
 
   return (
     <View style={[toneStyles(tone, isToday), styles.cellFill, { minHeight: height }]}>
@@ -50,11 +88,7 @@ export default function HistoryDayCell({
         <Text style={[styles.dayNumber, isToday && styles.dayNumberToday]}>
           {dayOfMonth}
         </Text>
-        {showSuccessCheck ? (
-          <View style={styles.successCheckBadge}>
-            <CheckIcon size={13} color={recurringTheme.accentBright} />
-          </View>
-        ) : null}
+        <HistoryStatusBadge entry={entry} />
       </View>
 
       {showDetails ? (
@@ -123,15 +157,27 @@ const styles = StyleSheet.create({
   dayNumberToday: {
     color: recurringTheme.accentBright,
   },
-  successCheckBadge: {
+  statusBadge: {
     width: 16,
     height: 16,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  successBadge: {
     backgroundColor: 'rgba(82, 183, 136, 0.22)',
     borderWidth: 1,
     borderColor: 'rgba(110, 207, 170, 0.45)',
+  },
+  missedBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(248, 113, 113, 0.42)',
+  },
+  inProgressBadge: {
+    backgroundColor: 'rgba(212, 168, 67, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(240, 204, 98, 0.35)',
   },
   detailsColumn: {
     alignItems: 'center',

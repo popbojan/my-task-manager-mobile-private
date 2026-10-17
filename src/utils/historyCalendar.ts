@@ -175,6 +175,27 @@ export function shouldShowHistorySuccessCrown(day: HistoryDay | undefined): bool
   return day.totalTasks > 0 && day.completedTasks >= day.totalTasks;
 }
 
+export function resolveHistoryDayProgressPercent(day: HistoryDay | undefined): number | null {
+  if (!day || day.completedTasks === null || day.totalTasks === null || day.totalTasks <= 0) {
+    return null;
+  }
+
+  return Math.max(0, Math.min(100, Math.round((day.completedTasks / day.totalTasks) * 100)));
+}
+
+export function shouldShowHistoryMissedMark(day: HistoryDay | undefined): boolean {
+  return day?.status === HistoryDayStatus.Missed;
+}
+
+export function shouldShowHistoryInProgressMark(day: HistoryDay | undefined): boolean {
+  if (!day || day.status !== HistoryDayStatus.InProgress) {
+    return false;
+  }
+
+  const percent = resolveHistoryDayProgressPercent(day);
+  return percent !== null && percent < 100;
+}
+
 export function monthKeyFromCalendarDate(date: string): string {
   return date.slice(0, 7);
 }

@@ -8,7 +8,10 @@ import {
   formatHistoryTaskRatioDisplay,
   indexHistoryDaysByDate,
   resolveHistoryDayCellTone,
+  shouldShowHistoryInProgressMark,
+  shouldShowHistoryMissedMark,
   shouldShowHistorySuccessCrown,
+  resolveHistoryDayProgressPercent,
 } from '@/utils/historyCalendar';
 import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
@@ -76,6 +79,34 @@ describe('historyCalendar', () => {
     expect(formatHistoryStreakDisplay(inProgress)).toBe('12');
     expect(formatHistoryLevelDisplay(inProgress)).toBe('2');
     expect(shouldShowHistorySuccessCrown(inProgress)).toBe(false);
+  });
+
+  it('derives status badge helpers for missed and in-progress days', () => {
+    const missed: HistoryDay = {
+      date: new Date('2026-10-09T00:00:00.000Z'),
+      status: HistoryDayStatus.Missed,
+      completedTasks: 0,
+      totalTasks: 7,
+      note: null,
+      finalizedAt: new Date('2026-10-09T22:05:00Z'),
+      currentStreak: 0,
+      currentLevel: 1,
+    };
+    const inProgress: HistoryDay = {
+      date: new Date('2026-10-11T00:00:00.000Z'),
+      status: HistoryDayStatus.InProgress,
+      completedTasks: 3,
+      totalTasks: 7,
+      note: null,
+      finalizedAt: null,
+      currentStreak: 5,
+      currentLevel: 1,
+    };
+
+    expect(shouldShowHistoryMissedMark(missed)).toBe(true);
+    expect(shouldShowHistoryInProgressMark(inProgress)).toBe(true);
+    expect(resolveHistoryDayProgressPercent(inProgress)).toBe(43);
+    expect(shouldShowHistoryMissedMark(inProgress)).toBe(false);
   });
 
   it('shows success crown only for completed success days', () => {

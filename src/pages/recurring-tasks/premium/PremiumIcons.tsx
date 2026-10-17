@@ -230,6 +230,36 @@ export function CheckIcon({
   );
 }
 
+export function CrossIcon({
+  size = 14,
+  color = recurringTheme.fireRedBright,
+}: IconProps) {
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text
+        style={{
+          color,
+          fontSize: Math.round(size * 0.9),
+          lineHeight: size,
+          fontWeight: '700',
+          textAlign: 'center',
+          includeFontPadding: false,
+          marginTop: -1,
+        }}
+      >
+        ×
+      </Text>
+    </View>
+  );
+}
+
 export function ShieldCrownIcon({ size = 20, color = recurringTheme.goldBright }: IconProps) {
   return (
     <View style={{ width: size, height: size, alignItems: 'center' }}>

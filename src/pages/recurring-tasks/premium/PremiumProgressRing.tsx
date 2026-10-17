@@ -7,7 +7,8 @@ type PremiumProgressRingProps = {
   size?: number;
   stroke?: number;
   tone?: 'green' | 'gold';
-  children: ReactNode;
+  children?: ReactNode;
+  compact?: boolean;
   style?: ViewStyle;
 };
 
@@ -23,7 +24,8 @@ export default function PremiumProgressRing({
   size = 64,
   stroke = 3,
   tone = 'green',
-  children,
+  children = null,
+  compact = false,
   style,
 }: PremiumProgressRingProps) {
   const clamped = Math.max(0, Math.min(100, percent));
@@ -32,7 +34,7 @@ export default function PremiumProgressRing({
 
   return (
     <View style={[styles.wrap, { width: size, height: size }, style]}>
-      {clamped > 0 ? (
+      {!compact && clamped > 0 ? (
         <View
           style={[
             styles.glow,
@@ -60,18 +62,20 @@ export default function PremiumProgressRing({
         ]}
       />
 
-      <View
-        style={[
-          styles.inner,
-          {
-            width: inner,
-            height: inner,
-            borderRadius: inner / 2,
-          },
-        ]}
-      >
-        {children}
-      </View>
+      {compact ? null : (
+        <View
+          style={[
+            styles.inner,
+            {
+              width: inner,
+              height: inner,
+              borderRadius: inner / 2,
+            },
+          ]}
+        >
+          {children}
+        </View>
+      )}
     </View>
   );
 }

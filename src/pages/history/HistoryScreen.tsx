@@ -32,6 +32,7 @@ import { shouldRetryApiQuery } from '@/utils/apiError';
 import {
   addMonths,
   buildMonthCalendarGrid,
+  computeHistoryCalendarCellWidth,
   defaultVisibleMonthKey,
   formatApiCalendarDate,
   indexHistoryDaysByDate,
@@ -71,7 +72,7 @@ export default function HistoryScreen({
   isActive = true,
   onOpenSubscription,
 }: HistoryScreenProps) {
-  const { height: windowHeight } = useWindowDimensions();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { t, language } = useLanguage();
   const { accessToken } = useAuth();
@@ -89,30 +90,11 @@ export default function HistoryScreen({
   const { refreshing, onRefresh } = useAppRefresh();
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
 
-  const previousMonth = useMemo(
-    () => addMonths(visibleMonth, -1),
-    [visibleMonth],
-  );
-  const nextMonth = useMemo(() => addMonths(visibleMonth, 1), [visibleMonth]);
   const historyQueryEnabled = !!accessToken && hasPremiumAccess;
-
-  const previousMonthQuery = useQuery({
-    queryKey: historyMonthQueryKey(accessToken, previousMonth),
-    queryFn: () => authApi.getHistory({ month: previousMonth }),
-    enabled: historyQueryEnabled,
-    retry: shouldRetryApiQuery,
-  });
 
   const historyQuery = useQuery({
     queryKey: historyMonthQueryKey(accessToken, visibleMonth),
     queryFn: () => authApi.getHistory({ month: visibleMonth }),
-    enabled: historyQueryEnabled,
-    retry: shouldRetryApiQuery,
-  });
-
-  const nextMonthQuery = useQuery({
-    queryKey: historyMonthQueryKey(accessToken, nextMonth),
-    queryFn: () => authApi.getHistory({ month: nextMonth }),
     enabled: historyQueryEnabled,
     retry: shouldRetryApiQuery,
   });
@@ -141,17 +123,8 @@ export default function HistoryScreen({
     ? formatApiCalendarDate(historyQuery.data.today)
     : null;
   const daysByDate = useMemo(
-    () =>
-      indexHistoryDaysByDate([
-        ...(previousMonthQuery.data?.days ?? []),
-        ...(historyQuery.data?.days ?? []),
-        ...(nextMonthQuery.data?.days ?? []),
-      ]),
-    [
-      historyQuery.data?.days,
-      nextMonthQuery.data?.days,
-      previousMonthQuery.data?.days,
-    ],
+    () => indexHistoryDaysByDate(historyQuery.data?.days ?? []),
+    [historyQuery.data?.days],
   );
 
   const gridCells = useMemo(
@@ -160,6 +133,10 @@ export default function HistoryScreen({
   );
 
   const rowCount = gridCells.length / 7;
+  const cellWidth = useMemo(
+    () => computeHistoryCalendarCellWidth(windowWidth),
+    [windowWidth],
+  );
   const headerBlockHeight = 96;
   const weekdayRowHeight = 28;
   const tabBarReserve = 72 + Math.max(insets.bottom, 8);
@@ -268,7 +245,7 @@ export default function HistoryScreen({
 
           <View style={styles.weekdayRow}>
             {WEEKDAY_KEYS.map(key => (
-              <Text key={key} style={styles.weekdayLabel}>
+              <Text key={key} style={[styles.weekdayLabel, { width: cellWidth }]}>
                 {t(key)}
               </Text>
             ))}
@@ -277,19 +254,33 @@ export default function HistoryScreen({
           <View style={styles.grid}>
             {Array.from({ length: rowCount }, (_, rowIndex) => (
               <View key={rowIndex} style={styles.gridRow}>
-                {gridCells.slice(rowIndex * 7, rowIndex * 7 + 7).map(cell => {
+                {gridCells.slice(rowIndex * 7, rowIndex * 7 + 7).map((cell, columnIndex) => {
+                  const slotStyle = {
+                    width: cellWidth,
+                    minHeight: rowHeight,
+                  };
+
+                  if (cell.kind === 'blank') {
+                    return (
+                      <View
+                        key={`blank-${rowIndex}-${columnIndex}`}
+                        style={[styles.gridSlot, slotStyle]}
+                      />
+                    );
+                  }
+
                   const entry = daysByDate.get(cell.date);
                   const isToday = today === cell.date;
 
                   return (
-                    <HistoryDayCell
-                      key={cell.date}
-                      dayOfMonth={cell.dayOfMonth}
-                      entry={entry}
-                      isAdjacentMonth={cell.isAdjacentMonth}
-                      isToday={isToday}
-                      height={rowHeight}
-                    />
+                    <View key={cell.date} style={[styles.gridSlot, slotStyle]}>
+                      <HistoryDayCell
+                        dayOfMonth={cell.dayOfMonth}
+                        entry={entry}
+                        isToday={isToday}
+                        height={rowHeight}
+                      />
+                    </View>
                   );
                 })}
               </View>
@@ -405,7 +396,6 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   weekdayLabel: {
-    flex: 1,
     textAlign: 'center',
     color: recurringTheme.textMuted,
     fontSize: 11,
@@ -417,5 +407,9 @@ const styles = StyleSheet.create({
   gridRow: {
     flexDirection: 'row',
     gap: 4,
+  },
+  gridSlot: {
+    flexGrow: 0,
+    flexShrink: 0,
   },
 });

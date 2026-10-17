@@ -53,13 +53,21 @@ export function getDaysInMonth(monthKey: string): number {
   return new Date(year, monthIndex + 1, 0).getDate();
 }
 
-export type MonthCalendarCell = {
-  kind: 'day';
-  date: string;
-  dayOfMonth: number;
-  /** Trailing/leading days from the previous or next month (full weeks only). */
-  isAdjacentMonth: boolean;
-};
+export const HISTORY_CALENDAR_COLUMN_GAP = 4;
+export const HISTORY_CALENDAR_HORIZONTAL_INSET = 12;
+
+export type MonthCalendarCell =
+  | { kind: 'blank' }
+  | { kind: 'day'; date: string; dayOfMonth: number };
+
+export function computeHistoryCalendarCellWidth(windowWidth: number): number {
+  return Math.floor(
+    (windowWidth -
+      HISTORY_CALENDAR_HORIZONTAL_INSET * 2 -
+      HISTORY_CALENDAR_COLUMN_GAP * 6) /
+      7,
+  );
+}
 
 export function buildMonthCalendarGrid(monthKey: string): MonthCalendarCell[] {
   const { year, monthIndex } = parseMonthKey(monthKey);
@@ -67,19 +75,8 @@ export function buildMonthCalendarGrid(monthKey: string): MonthCalendarCell[] {
   const firstWeekday = getMondayBasedWeekday(new Date(year, monthIndex, 1));
   const cells: MonthCalendarCell[] = [];
 
-  const lastDayOfPreviousMonth = new Date(year, monthIndex, 0);
-  const daysInPreviousMonth = lastDayOfPreviousMonth.getDate();
-  const previousMonthStartDay = daysInPreviousMonth - firstWeekday + 1;
-  const previousYear = lastDayOfPreviousMonth.getFullYear();
-  const previousMonthIndex = lastDayOfPreviousMonth.getMonth();
-
-  for (let day = previousMonthStartDay; day <= daysInPreviousMonth; day++) {
-    cells.push({
-      kind: 'day',
-      date: formatCalendarDate(previousYear, previousMonthIndex, day),
-      dayOfMonth: day,
-      isAdjacentMonth: true,
-    });
+  for (let i = 0; i < firstWeekday; i++) {
+    cells.push({ kind: 'blank' });
   }
 
   for (let day = 1; day <= daysInMonth; day++) {
@@ -87,23 +84,11 @@ export function buildMonthCalendarGrid(monthKey: string): MonthCalendarCell[] {
       kind: 'day',
       date: formatCalendarDate(year, monthIndex, day),
       dayOfMonth: day,
-      isAdjacentMonth: false,
     });
   }
 
-  const nextMonthAnchor = new Date(year, monthIndex + 1, 1);
-  const nextYear = nextMonthAnchor.getFullYear();
-  const nextMonthIndex = nextMonthAnchor.getMonth();
-  let nextMonthDay = 1;
-
   while (cells.length % 7 !== 0) {
-    cells.push({
-      kind: 'day',
-      date: formatCalendarDate(nextYear, nextMonthIndex, nextMonthDay),
-      dayOfMonth: nextMonthDay,
-      isAdjacentMonth: true,
-    });
-    nextMonthDay += 1;
+    cells.push({ kind: 'blank' });
   }
 
   return cells;

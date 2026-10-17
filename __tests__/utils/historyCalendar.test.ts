@@ -1,6 +1,7 @@
 import {
   addMonths,
   buildMonthCalendarGrid,
+  computeHistoryCalendarCellWidth,
   formatHistoryLevelDisplay,
   formatHistoryStreakDisplay,
   formatHistoryTaskRatio,
@@ -13,27 +14,28 @@ import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 
 describe('historyCalendar', () => {
-  it('builds a Monday-start grid for October 2026 with adjacent month days', () => {
+  it('builds a Monday-start grid for October 2026 with blank padding cells', () => {
     const cells = buildMonthCalendarGrid('2026-10');
-    const currentMonthCells = cells.filter(cell => !cell.isAdjacentMonth);
-    const adjacentCells = cells.filter(cell => cell.isAdjacentMonth);
+    const dayCells = cells.filter(cell => cell.kind === 'day');
+    const blankCells = cells.filter(cell => cell.kind === 'blank');
 
-    expect(currentMonthCells).toHaveLength(31);
-    expect(adjacentCells.length).toBeGreaterThan(0);
-    expect(cells[0]).toEqual({
-      kind: 'day',
-      date: '2026-09-28',
-      dayOfMonth: 28,
-      isAdjacentMonth: true,
-    });
-    expect(currentMonthCells[0]).toEqual({
+    expect(dayCells).toHaveLength(31);
+    expect(blankCells.length).toBeGreaterThan(0);
+    expect(cells[0]).toEqual({ kind: 'blank' });
+    expect(dayCells[0]).toEqual({
       kind: 'day',
       date: '2026-10-01',
       dayOfMonth: 1,
-      isAdjacentMonth: false,
     });
     expect(cells.length % 7).toBe(0);
-    expect(cells.at(-1)?.isAdjacentMonth).toBe(true);
+    expect(cells.at(-1)).toEqual({ kind: 'blank' });
+  });
+
+  it('computes a fixed cell width for seven weekday columns', () => {
+    const cellWidth = computeHistoryCalendarCellWidth(390);
+
+    expect(cellWidth).toBeGreaterThan(0);
+    expect(cellWidth * 7 + 4 * 6).toBeLessThanOrEqual(390);
   });
 
   it('shifts months with addMonths', () => {

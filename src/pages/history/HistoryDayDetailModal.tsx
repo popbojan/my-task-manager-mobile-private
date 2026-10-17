@@ -1,0 +1,670 @@
+import { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  BackHandler,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  type TextInputInstance,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { HistoryDay } from '@/api/generated/models/HistoryDay';
+import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
+import { authApi } from '@/api/authClient';
+import { useAuth } from '@/auth/AuthContext';
+import { historyMonthQueryKey } from '@/history/historyQueryKeys';
+import { applyHistoryNoteToCache } from '@/history/updateHistoryNoteCache';
+import { useLanguage } from '@/i18n/LanguageProvider';
+import type { AppLanguage } from '@/i18n/types';
+import type { TranslationKey } from '@/i18n/locales/de';
+import { CheckIcon, CrossIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
+import PremiumProgressRing from '@/pages/recurring-tasks/premium/PremiumProgressRing';
+import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import {
+  formatHistoryLevelDisplay,
+  formatHistoryStreakDisplay,
+  formatHistoryTaskRatioDisplay,
+  monthKeyFromCalendarDate,
+  parseCalendarDate,
+  resolveHistoryDayCellTone,
+  resolveHistoryDayProgressPercent,
+  shouldShowHistoryInProgressMark,
+  shouldShowHistoryMissedMark,
+  shouldShowHistorySuccessCrown,
+  type HistoryDayCellTone,
+} from '@/utils/historyCalendar';
+import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
+
+const NOTE_MAX_LENGTH = 2000;
+
+const LOCALE_MAP: Record<AppLanguage, string> = {
+  de: 'de-DE',
+  en: 'en-GB',
+  fr: 'fr-FR',
+  sr: 'sr-RS',
+};
+
+const STATUS_LABEL_KEYS: Record<HistoryDayStatus, TranslationKey> = {
+  [HistoryDayStatus.Success]: 'history.status.success',
+  [HistoryDayStatus.Missed]: 'history.status.missed',
+  [HistoryDayStatus.InProgress]: 'history.status.inProgress',
+  [HistoryDayStatus.NoTasks]: 'history.status.noTasks',
+  [HistoryDayStatus.ServerSkipped]: 'history.status.serverSkipped',
+  [HistoryDayStatus.Unknown]: 'history.status.unknown',
+};
+
+type HistoryDayDetailModalProps = {
+  date: string;
+  dayOfMonth: number;
+  entry?: HistoryDay;
+  isToday: boolean;
+  onClose: () => void;
+};
+
+function previewStyles(tone: HistoryDayCellTone, isToday: boolean) {
+  const base = isToday ? styles.previewToday : null;
+
+  switch (tone) {
+    case 'success':
+      return [styles.previewCard, styles.previewSuccess, base];
+    case 'missed':
+      return [styles.previewCard, styles.previewMissed, base];
+    case 'in_progress':
+      return [styles.previewCard, styles.previewInProgress, base];
+    default:
+      return [styles.previewCard, styles.previewNeutral, base];
+  }
+}
+
+function HistoryDetailStatusBadge({ entry }: { entry?: HistoryDay }) {
+  if (shouldShowHistorySuccessCrown(entry)) {
+    return (
+      <View style={[styles.statusBadge, styles.successBadge]}>
+        <CheckIcon size={12} color={recurringTheme.accentBright} />
+      </View>
+    );
+  }
+
+  if (shouldShowHistoryMissedMark(entry)) {
+    return (
+      <View style={[styles.statusBadge, styles.missedBadge]}>
+        <CrossIcon size={12} color={recurringTheme.fireRedBright} />
+      </View>
+    );
+  }
+
+  const progressPercent = resolveHistoryDayProgressPercent(entry);
+  if (shouldShowHistoryInProgressMark(entry) && progressPercent !== null) {
+    return (
+      <View style={[styles.statusBadge, styles.inProgressBadge]}>
+        <PremiumProgressRing
+          compact
+          percent={progressPercent}
+          size={16}
+          stroke={2}
+          tone="gold"
+        />
+      </View>
+    );
+  }
+
+  return null;
+}
+
+function formatDayTitle(date: string, language: AppLanguage): string {
+  return new Intl.DateTimeFormat(LOCALE_MAP[language], {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(parseCalendarDate(date));
+}
+
+export default function HistoryDayDetailModal({
+  date,
+  dayOfMonth,
+  entry,
+  isToday,
+  onClose,
+}: HistoryDayDetailModalProps) {
+  const { t, language } = useLanguage();
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const panelHeight = Math.min(Math.round(windowHeight * 0.52), 420);
+  const noteInputRef = useRef<TextInputInstance>(null);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const tone = resolveHistoryDayCellTone(entry);
+  const statusKey = entry ? STATUS_LABEL_KEYS[entry.status] : 'history.status.noData';
+  const savedNote = entry?.note ?? '';
+  const noteDirty = noteDraft !== savedNote;
+  const canDeleteNote = savedNote.length > 0;
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      onClose();
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, [onClose]);
+
+  useEffect(() => {
+    setNoteDraft(entry?.note ?? '');
+    setError(null);
+  }, [date, entry?.note]);
+
+  useEffect(() => {
+    focusTextInputSoon(noteInputRef);
+  }, [date]);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const trimmed = noteDraft.trim();
+      if (!trimmed) {
+        throw new Error('empty');
+      }
+
+      if (trimmed.length > NOTE_MAX_LENGTH) {
+        throw new Error('too-long');
+      }
+
+      return authApi.putHistoryNote({
+        date,
+        putHistoryNoteRequest: { note: trimmed },
+      });
+    },
+    onSuccess: response => {
+      if (!accessToken) {
+        onClose();
+        return;
+      }
+
+      const monthKey = monthKeyFromCalendarDate(date);
+      const queryKey = historyMonthQueryKey(accessToken, monthKey);
+
+      queryClient.setQueryData(queryKey, (current: unknown) =>
+        applyHistoryNoteToCache(
+          current as Parameters<typeof applyHistoryNoteToCache>[0],
+          date,
+          response.note,
+        ),
+      );
+
+      onClose();
+    },
+    onError: err => {
+      if (err instanceof Error && err.message === 'empty') {
+        setError(t('history.note.emptyError'));
+        return;
+      }
+
+      if (err instanceof Error && err.message === 'too-long') {
+        setError(t('history.note.tooLongError'));
+        return;
+      }
+
+      setError(t('history.note.saveError'));
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      await authApi.deleteHistoryNote({ date });
+    },
+    onSuccess: () => {
+      if (!accessToken) {
+        onClose();
+        return;
+      }
+
+      const monthKey = monthKeyFromCalendarDate(date);
+      const queryKey = historyMonthQueryKey(accessToken, monthKey);
+
+      queryClient.setQueryData(queryKey, (current: unknown) =>
+        applyHistoryNoteToCache(
+          current as Parameters<typeof applyHistoryNoteToCache>[0],
+          date,
+          null,
+        ),
+      );
+
+      onClose();
+    },
+    onError: () => {
+      setError(t('history.note.deleteError'));
+    },
+  });
+
+  const isBusy = saveMutation.isPending || deleteMutation.isPending;
+
+  function handleSavePress() {
+    if (!noteDraft.trim()) {
+      setError(t('history.note.emptyError'));
+      return;
+    }
+
+    setError(null);
+    saveMutation.mutate();
+  }
+
+  return (
+    <View style={styles.overlay} accessibilityViewIsModal>
+      <Pressable
+        style={styles.backdropTap}
+        accessibilityLabel={t('common.close')}
+        onPress={onClose}
+      />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        enabled={Platform.OS === 'ios'}
+        style={styles.keyboardWrap}
+        keyboardVerticalOffset={insets.top}
+      >
+        <SafeAreaView edges={['top']} style={styles.safeTop}>
+          <View style={[styles.panel, { height: panelHeight }]}>
+            <View style={styles.panelHeader}>
+              <View style={styles.panelHeaderCopy}>
+                <Text style={styles.eyebrow}>{t('history.title')}</Text>
+                <Text style={styles.title}>{formatDayTitle(date, language)}</Text>
+              </View>
+              <Pressable
+                style={styles.closeButton}
+                accessibilityLabel={t('common.close')}
+                onPress={onClose}
+              >
+                <Text style={styles.closeText}>×</Text>
+              </Pressable>
+            </View>
+
+            <View style={styles.formBody}>
+              <View style={previewStyles(tone, isToday)}>
+                <View style={styles.previewTopRow}>
+                  <Text style={[styles.previewDayNumber, isToday && styles.previewDayNumberToday]}>
+                    {dayOfMonth}
+                  </Text>
+                  <HistoryDetailStatusBadge entry={entry} />
+                </View>
+
+                <View style={styles.previewMetricsRow}>
+                  <Text style={styles.previewRatio}>{formatHistoryTaskRatioDisplay(entry)}</Text>
+                  <View style={styles.previewStreakRow}>
+                    <FireIcon size={12} color={recurringTheme.goldBright} />
+                    <Text style={styles.previewMetric}>{formatHistoryStreakDisplay(entry)}</Text>
+                  </View>
+                  <Text style={styles.previewLevel}>
+                    {t('history.levelShort', {
+                      level: formatHistoryLevelDisplay(entry),
+                    })}
+                  </Text>
+                </View>
+
+                <Text style={styles.previewStatus}>{t(statusKey)}</Text>
+              </View>
+
+              <View style={styles.fieldBlock}>
+                <View style={styles.noteLabelRow}>
+                  <Text style={styles.label}>{t('history.note.label')}</Text>
+                  <Text style={styles.noteCounter}>
+                    {t('history.note.counter', {
+                      count: String(noteDraft.length),
+                      max: String(NOTE_MAX_LENGTH),
+                    })}
+                  </Text>
+                </View>
+                <TextInput
+                  ref={noteInputRef}
+                  style={styles.textArea}
+                  value={noteDraft}
+                  onChangeText={setNoteDraft}
+                  placeholder={t('history.note.placeholder')}
+                  placeholderTextColor={recurringTheme.textMuted}
+                  multiline
+                  numberOfLines={4}
+                  maxLength={NOTE_MAX_LENGTH}
+                  textAlignVertical="top"
+                  editable={!isBusy}
+                  autoFocus
+                  showSoftInputOnFocus
+                />
+                {canDeleteNote ? (
+                  <Pressable
+                    style={styles.deleteLink}
+                    disabled={isBusy}
+                    onPress={() => {
+                      setError(null);
+                      deleteMutation.mutate();
+                    }}
+                  >
+                    {deleteMutation.isPending ? (
+                      <ActivityIndicator color={recurringTheme.fireRedBright} size="small" />
+                    ) : (
+                      <Text style={styles.deleteLinkText}>{t('history.note.delete')}</Text>
+                    )}
+                  </Pressable>
+                ) : null}
+              </View>
+
+              <View style={styles.footer}>
+                <View style={styles.errorSlot}>
+                  {error ? (
+                    <View style={styles.errorBox}>
+                      <Text style={styles.error} numberOfLines={2}>
+                        {error}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+
+                <View style={styles.actions}>
+                  <Pressable style={styles.cancelButton} onPress={onClose} disabled={isBusy}>
+                    <Text style={styles.cancelText}>{t('common.cancel')}</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[
+                      styles.saveButton,
+                      (!noteDirty || isBusy) && styles.saveButtonDisabled,
+                    ]}
+                    onPress={handleSavePress}
+                    disabled={!noteDirty || isBusy}
+                  >
+                    {saveMutation.isPending ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.saveText}>{t('common.save')}</Text>
+                    )}
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </View>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 1000,
+    elevation: 1000,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+  },
+  backdropTap: {
+    ...StyleSheet.absoluteFill,
+  },
+  keyboardWrap: {
+    flex: 1,
+    justifyContent: 'flex-start',
+  },
+  safeTop: {
+    justifyContent: 'flex-start',
+  },
+  panel: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    backgroundColor: recurringTheme.surfaceElevated,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorderAccent,
+    overflow: 'hidden',
+    shadowColor: recurringTheme.accent,
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  panelHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: recurringTheme.cardBorder,
+  },
+  panelHeaderCopy: {
+    flex: 1,
+    gap: 2,
+    paddingRight: 8,
+  },
+  eyebrow: {
+    color: recurringTheme.accentBright,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+  },
+  title: {
+    color: recurringTheme.textPrimary,
+    fontSize: 17,
+    fontWeight: '800',
+    textTransform: 'capitalize',
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorder,
+  },
+  closeText: {
+    color: recurringTheme.textPrimary,
+    fontSize: 22,
+    lineHeight: 24,
+    fontWeight: '300',
+    marginTop: -2,
+  },
+  formBody: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 12,
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  previewCard: {
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+    gap: 4,
+  },
+  previewNeutral: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  previewSuccess: {
+    backgroundColor: 'rgba(82, 183, 136, 0.32)',
+    borderColor: 'rgba(82, 183, 136, 0.45)',
+  },
+  previewMissed: {
+    backgroundColor: 'rgba(239, 68, 68, 0.28)',
+    borderColor: 'rgba(248, 113, 113, 0.42)',
+  },
+  previewInProgress: {
+    backgroundColor: 'rgba(212, 168, 67, 0.28)',
+    borderColor: 'rgba(240, 204, 98, 0.42)',
+  },
+  previewToday: {
+    borderColor: recurringTheme.accentBright,
+    borderWidth: 1.5,
+  },
+  previewTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  previewDayNumber: {
+    color: recurringTheme.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  previewDayNumberToday: {
+    color: recurringTheme.accentBright,
+  },
+  statusBadge: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  successBadge: {
+    backgroundColor: 'rgba(82, 183, 136, 0.22)',
+    borderWidth: 1,
+    borderColor: 'rgba(110, 207, 170, 0.45)',
+  },
+  missedBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(248, 113, 113, 0.42)',
+  },
+  inProgressBadge: {
+    backgroundColor: 'rgba(212, 168, 67, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(240, 204, 98, 0.35)',
+  },
+  previewMetricsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  previewRatio: {
+    color: recurringTheme.textPrimary,
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  previewStreakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  previewMetric: {
+    color: recurringTheme.textPrimary,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  previewLevel: {
+    color: recurringTheme.textSecondary,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  previewStatus: {
+    color: recurringTheme.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  fieldBlock: {
+    gap: 4,
+  },
+  noteLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  label: {
+    color: recurringTheme.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  noteCounter: {
+    color: recurringTheme.textMuted,
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  textArea: {
+    height: 96,
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorder,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingVertical: 10,
+    color: recurringTheme.textPrimary,
+    fontSize: 15,
+    lineHeight: 20,
+    backgroundColor: recurringTheme.surfaceInset,
+  },
+  deleteLink: {
+    alignSelf: 'flex-start',
+    paddingVertical: 2,
+  },
+  deleteLinkText: {
+    color: recurringTheme.fireRedBright,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  footer: {
+    gap: 6,
+  },
+  errorSlot: {
+    minHeight: 0,
+  },
+  errorBox: {
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: recurringTheme.fireRedSoft,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.35)',
+  },
+  error: {
+    color: recurringTheme.fireRedBright,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '600',
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorder,
+  },
+  cancelText: {
+    color: recurringTheme.textSecondary,
+    fontWeight: '700',
+  },
+  saveButton: {
+    flex: 1,
+    paddingVertical: 11,
+    borderRadius: 12,
+    alignItems: 'center',
+    backgroundColor: recurringTheme.accentDark,
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorderAccent,
+  },
+  saveButtonDisabled: {
+    opacity: 0.45,
+  },
+  saveText: {
+    color: '#fff',
+    fontWeight: '800',
+  },
+});

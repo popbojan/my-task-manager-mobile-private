@@ -10,7 +10,10 @@ import { AuthProvider, useAuth } from '@/auth/AuthContext';
 import { LanguageProvider } from '@/i18n/LanguageProvider';
 import MainTabBar, { type MainTab } from '@/navigation/MainTabBar';
 import ProfileScreen from '@/pages/profile/ProfileScreen';
-import HistoryScreen from '@/pages/history/HistoryScreen';
+import HistoryDayDetailModal from '@/pages/history/HistoryDayDetailModal';
+import HistoryScreen, {
+  type HistoryDayDetailPayload,
+} from '@/pages/history/HistoryScreen';
 import ProgressScreen from '@/pages/progress/ProgressScreen';
 import LoginScreen from '@/pages/login/LoginScreen';
 import RecurringTaskFormModal from '@/pages/recurring-tasks/RecurringTaskFormModal';
@@ -64,6 +67,11 @@ function MainAppShell() {
     session: number;
   }>({ visible: false, taskId: null, initialPriority: null, session: 0 });
   const [openProfileSubscription, setOpenProfileSubscription] = useState(false);
+  const [historyDayModal, setHistoryDayModal] = useState<{
+    visible: boolean;
+    session: number;
+    payload: HistoryDayDetailPayload | null;
+  }>({ visible: false, session: 0, payload: null });
 
   function openTaskForm(taskId: string | null) {
     const tasksError = queryClient.getQueryState(
@@ -95,6 +103,18 @@ function MainAppShell() {
 
   function closeTaskForm() {
     setTaskForm(prev => ({ ...prev, visible: false, taskId: null }));
+  }
+
+  function openHistoryDayDetail(payload: HistoryDayDetailPayload) {
+    setHistoryDayModal(prev => ({
+      visible: true,
+      session: prev.session + 1,
+      payload,
+    }));
+  }
+
+  function closeHistoryDayDetail() {
+    setHistoryDayModal(prev => ({ ...prev, visible: false, payload: null }));
   }
 
   function openBoardTaskForm(
@@ -175,6 +195,7 @@ function MainAppShell() {
         >
           <HistoryScreen
             isActive={activeTab === 'history'}
+            onOpenDayDetail={openHistoryDayDetail}
             onOpenSubscription={() => {
               setOpenProfileSubscription(true);
               setActiveTab('profile');
@@ -230,6 +251,16 @@ function MainAppShell() {
             queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
             queryClient.invalidateQueries({ queryKey: ['history'] });
           }}
+        />
+      ) : null}
+      {historyDayModal.visible && historyDayModal.payload ? (
+        <HistoryDayDetailModal
+          key={`history-day-${historyDayModal.session}`}
+          date={historyDayModal.payload.date}
+          dayOfMonth={historyDayModal.payload.dayOfMonth}
+          entry={historyDayModal.payload.entry}
+          isToday={historyDayModal.payload.isToday}
+          onClose={closeHistoryDayDetail}
         />
       ) : null}
       {boardTaskForm.visible ? (
@@ -315,6 +346,7 @@ export default function App() {
 const shellStyles = StyleSheet.create({
   root: {
     flex: 1,
+    position: 'relative',
     backgroundColor: recurringTheme.pageBg,
   },
   content: {

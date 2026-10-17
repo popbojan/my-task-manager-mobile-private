@@ -20,6 +20,7 @@ import {
 } from '@/history/historyQueryKeys';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import type { AppLanguage } from '@/i18n/types';
+import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 import HistoryDayCell from '@/pages/history/HistoryDayCell';
 import HistoryMonthPickerModal from '@/pages/history/HistoryMonthPickerModal';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
@@ -38,9 +39,17 @@ import {
   indexHistoryDaysByDate,
   parseMonthKey,
 } from '@/utils/historyCalendar';
+export type HistoryDayDetailPayload = {
+  date: string;
+  dayOfMonth: number;
+  isToday: boolean;
+  entry?: HistoryDay;
+};
+
 type HistoryScreenProps = {
   isActive?: boolean;
   onOpenSubscription?: () => void;
+  onOpenDayDetail?: (payload: HistoryDayDetailPayload) => void;
 };
 
 const LOCALE_MAP: Record<AppLanguage, string> = {
@@ -71,6 +80,7 @@ function formatMonthTitle(monthKey: string, language: AppLanguage): string {
 export default function HistoryScreen({
   isActive = true,
   onOpenSubscription,
+  onOpenDayDetail,
 }: HistoryScreenProps) {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -86,7 +96,6 @@ export default function HistoryScreen({
   const [visibleMonth, setVisibleMonth] = useState(() => defaultVisibleMonthKey());
   const [pickerOpen, setPickerOpen] = useState(false);
   const [isPremiumUpsellOpen, setIsPremiumUpsellOpen] = useState(false);
-
   const { refreshing, onRefresh } = useAppRefresh();
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
 
@@ -172,6 +181,19 @@ export default function HistoryScreen({
     }
 
     setVisibleMonth(current => addMonths(current, delta));
+  }
+
+  function openDayDetail(
+    date: string,
+    dayOfMonth: number,
+    isToday: boolean,
+    entry?: HistoryDay,
+  ) {
+    if (guardPremiumInteraction() || !onOpenDayDetail) {
+      return;
+    }
+
+    onOpenDayDetail({ date, dayOfMonth, isToday, entry });
   }
 
   const isLoading = hasPremiumAccess && historyQuery.isPending && !historyQuery.data;
@@ -273,14 +295,28 @@ export default function HistoryScreen({
                   const isToday = today === cell.date;
 
                   return (
-                    <View key={cell.date} style={[styles.gridSlot, slotStyle]}>
+                    <Pressable
+                      key={cell.date}
+                      style={({ pressed }) => [
+                        styles.gridSlot,
+                        slotStyle,
+                        pressed && styles.gridSlotPressed,
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('history.openDay', {
+                        day: String(cell.dayOfMonth),
+                      })}
+                      onPress={() =>
+                        openDayDetail(cell.date, cell.dayOfMonth, isToday, entry)
+                      }
+                    >
                       <HistoryDayCell
                         dayOfMonth={cell.dayOfMonth}
                         entry={entry}
                         isToday={isToday}
                         height={rowHeight}
                       />
-                    </View>
+                    </Pressable>
                   );
                 })}
               </View>
@@ -411,5 +447,8 @@ const styles = StyleSheet.create({
   gridSlot: {
     flexGrow: 0,
     flexShrink: 0,
+  },
+  gridSlotPressed: {
+    opacity: 0.88,
   },
 });

@@ -26,7 +26,9 @@ import type { TranslationKey } from '@/i18n/locales/de';
 import { CheckIcon, CrossIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import PremiumProgressRing from '@/pages/recurring-tasks/premium/PremiumProgressRing';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import type { HistoryResponse } from '@/api/generated/models/HistoryResponse';
 import {
+  formatApiCalendarDate,
   formatHistoryLevelDisplay,
   formatHistoryStreakDisplay,
   formatHistoryTaskRatioDisplay,
@@ -189,16 +191,17 @@ export default function HistoryDayDetailModal({
         return;
       }
 
-      const monthKey = monthKeyFromCalendarDate(date);
+      const savedDate = formatApiCalendarDate(response.date);
+      const monthKey = monthKeyFromCalendarDate(savedDate);
       const queryKey = historyMonthQueryKey(accessToken, monthKey);
+      const current = queryClient.getQueryData<HistoryResponse>(queryKey);
+      const updated = applyHistoryNoteToCache(current, savedDate, response.note);
 
-      queryClient.setQueryData(queryKey, (current: unknown) =>
-        applyHistoryNoteToCache(
-          current as Parameters<typeof applyHistoryNoteToCache>[0],
-          date,
-          response.note,
-        ),
-      );
+      if (updated) {
+        queryClient.setQueryData(queryKey, updated);
+      } else {
+        void queryClient.invalidateQueries({ queryKey });
+      }
 
       onClose();
     },
@@ -229,14 +232,14 @@ export default function HistoryDayDetailModal({
 
       const monthKey = monthKeyFromCalendarDate(date);
       const queryKey = historyMonthQueryKey(accessToken, monthKey);
+      const current = queryClient.getQueryData<HistoryResponse>(queryKey);
+      const updated = applyHistoryNoteToCache(current, date, null);
 
-      queryClient.setQueryData(queryKey, (current: unknown) =>
-        applyHistoryNoteToCache(
-          current as Parameters<typeof applyHistoryNoteToCache>[0],
-          date,
-          null,
-        ),
-      );
+      if (updated) {
+        queryClient.setQueryData(queryKey, updated);
+      } else {
+        void queryClient.invalidateQueries({ queryKey });
+      }
 
       onClose();
     },

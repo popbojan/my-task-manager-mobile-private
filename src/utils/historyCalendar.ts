@@ -99,7 +99,7 @@ export function formatApiCalendarDate(value: Date | string): string {
     return value.slice(0, 10);
   }
 
-  return value.toISOString().slice(0, 10);
+  return formatCalendarDate(value.getFullYear(), value.getMonth(), value.getDate());
 }
 
 export function indexHistoryDaysByDate(days: HistoryDay[]): Map<string, HistoryDay> {

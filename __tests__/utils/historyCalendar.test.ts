@@ -4,9 +4,11 @@ import {
   computeHistoryCalendarCellWidth,
   formatHistoryLevelDisplay,
   formatHistoryStreakDisplay,
+  formatApiCalendarDate,
   formatHistoryTaskRatio,
   formatHistoryTaskRatioDisplay,
   indexHistoryDaysByDate,
+  parseCalendarDate,
   resolveHistoryDayCellTone,
   shouldShowHistoryInProgressMark,
   shouldShowHistoryMissedMark,
@@ -45,6 +47,25 @@ describe('historyCalendar', () => {
   it('shifts months with addMonths', () => {
     expect(addMonths('2026-12', 1)).toBe('2027-01');
     expect(addMonths('2026-01', -1)).toBe('2025-12');
+  });
+
+  it('formats calendar dates with local date parts', () => {
+    expect(formatApiCalendarDate(parseCalendarDate('2026-10-15'))).toBe('2026-10-15');
+  });
+
+  it('indexes note-only days by the same calendar date key', () => {
+    const day: HistoryDay = {
+      date: parseCalendarDate('2026-10-18'),
+      status: HistoryDayStatus.Unknown,
+      completedTasks: null,
+      totalTasks: null,
+      note: 'Test',
+      finalizedAt: null,
+      currentStreak: null,
+      currentLevel: null,
+    };
+
+    expect(indexHistoryDaysByDate([day]).get('2026-10-18')).toEqual(day);
   });
 
   it('indexes history days by date', () => {

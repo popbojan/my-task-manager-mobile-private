@@ -43,6 +43,14 @@ describe('applyHistoryNoteToCache', () => {
     expect(next?.days[0].note).toBe('Planung');
   });
 
+  it('creates month cache data when saving a note on a blank day', () => {
+    const next = applyHistoryNoteToCache(undefined, '2026-10-18', 'Idee');
+
+    expect(next?.month).toBe('2026-10');
+    expect(next?.days).toHaveLength(1);
+    expect(next?.days[0].note).toBe('Idee');
+  });
+
   it('removes note-only days when the note is deleted', () => {
     const data = createHistoryResponse([
       {

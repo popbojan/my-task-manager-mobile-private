@@ -20,7 +20,16 @@ export function applyHistoryNoteToCache(
   note: string | null,
 ): HistoryResponse | undefined {
   if (!data) {
-    return data;
+    if (note === null) {
+      return data;
+    }
+
+    data = {
+      month: date.slice(0, 7),
+      today: parseCalendarDate(date),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      days: [],
+    };
   }
 
   const days = [...data.days];

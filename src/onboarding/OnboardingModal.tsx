@@ -9,12 +9,16 @@ import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTh
 type OnboardingModalProps = {
   visible: boolean;
   hasPremiumAccess: boolean;
+  showBackToPersonalIntro?: boolean;
+  onBackToPersonalIntro?: () => void;
   onClose: () => void;
   onComplete: () => void;
 };
 
 export default function OnboardingModal({
   visible,
+  showBackToPersonalIntro = false,
+  onBackToPersonalIntro,
   onClose,
   onComplete,
 }: OnboardingModalProps) {
@@ -83,8 +87,8 @@ export default function OnboardingModal({
           <View style={styles.contentHeader}>
             <Text style={styles.stepLabel}>
               {t('onboarding.progress', {
-                current: stepIndex + 1,
-                total: ONBOARDING_SLIDES.length,
+                current: String(stepIndex + 1),
+                total: String(ONBOARDING_SLIDES.length),
               })}
             </Text>
 
@@ -106,6 +110,16 @@ export default function OnboardingModal({
         </ScrollView>
 
         <View style={styles.footer}>
+          {showBackToPersonalIntro && onBackToPersonalIntro ? (
+            <Pressable
+              style={styles.backLinkButton}
+              accessibilityRole="button"
+              onPress={onBackToPersonalIntro}
+            >
+              <Text style={styles.backLinkText}>{t('onboarding.backToPersonalIntro')}</Text>
+            </Pressable>
+          ) : null}
+
           <Pressable
             style={styles.skipButton}
             accessibilityRole="button"
@@ -223,6 +237,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: recurringTheme.cardBorder,
     paddingTop: 8,
+  },
+  backLinkButton: {
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  backLinkText: {
+    color: recurringTheme.accentBright,
+    fontSize: 14,
+    fontWeight: '700',
   },
   skipButton: {
     alignItems: 'center',

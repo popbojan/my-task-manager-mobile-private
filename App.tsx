@@ -39,7 +39,13 @@ import { shouldBlockRecurringPremiumInteraction } from '@/recurring/recurringPre
 import { isApiPremiumRequiredError } from '@/utils/apiError';
 import { ApiEnvironmentProvider } from '@/config/ApiEnvironmentProvider';
 import OnboardingModal from '@/onboarding/OnboardingModal';
+import PersonalIntroModal from '@/onboarding/PersonalIntroModal';
+import {
+  EMPTY_PERSONAL_INTRO_DRAFT,
+  type PersonalIntroDraft,
+} from '@/onboarding/personalIntroDraft';
 import { useOnboardingVisibility } from '@/onboarding/useOnboardingVisibility';
+import { usePersonalIntroVisibility } from '@/onboarding/usePersonalIntroVisibility';
 import { useCurrentUser } from '@/user/useCurrentUser';
 
 function MainAppShell() {
@@ -54,6 +60,55 @@ function MainAppShell() {
     userId: currentUserQuery.data?.id,
     isNewUser: currentUserQuery.data?.isNewUser,
   });
+  const personalIntro = usePersonalIntroVisibility({
+    userId: currentUserQuery.data?.id,
+    isNewUser: currentUserQuery.data?.isNewUser,
+  });
+  const [introPhase, setIntroPhase] = useState<'personal' | 'onboarding'>('personal');
+  const [personalIntroDraft, setPersonalIntroDraft] = useState<PersonalIntroDraft>(
+    EMPTY_PERSONAL_INTRO_DRAFT,
+  );
+  const userId = currentUserQuery.data?.id;
+
+  useEffect(() => {
+    setIntroPhase('personal');
+    setPersonalIntroDraft(EMPTY_PERSONAL_INTRO_DRAFT);
+  }, [userId]);
+
+  const userSessionPending = !currentUserQuery.isFetched;
+  const introStoragePending =
+    currentUserQuery.isSuccess && !onboarding.manualOpen && !personalIntro.isReady;
+  const onboardingStoragePending =
+    currentUserQuery.isSuccess && !onboarding.manualOpen && !onboarding.isReady;
+
+  const showPersonalIntro =
+    personalIntro.isReady &&
+    currentUserQuery.isSuccess &&
+    onboarding.autoVisible &&
+    !onboarding.manualOpen &&
+    personalIntro.autoVisible &&
+    introPhase === 'personal';
+
+  const showOnboarding =
+    onboarding.isReady &&
+    currentUserQuery.isSuccess &&
+    onboarding.visible &&
+    !showPersonalIntro;
+
+  const showBackToPersonalIntro =
+    showOnboarding &&
+    onboarding.autoVisible &&
+    !onboarding.manualOpen &&
+    personalIntro.autoVisible &&
+    introPhase === 'onboarding';
+
+  const hideMainShell =
+    userSessionPending ||
+    introStoragePending ||
+    onboardingStoragePending ||
+    showPersonalIntro ||
+    (showOnboarding && onboarding.autoVisible && !onboarding.manualOpen);
+
   const [activeTab, setActiveTab] = useState<MainTab>('today');
   const [taskForm, setTaskForm] = useState<{
     visible: boolean;
@@ -149,6 +204,15 @@ function MainAppShell() {
     }
 
     await onboarding.dismiss();
+    await personalIntro.dismiss();
+  }
+
+  function continueFromPersonalIntro() {
+    setIntroPhase('onboarding');
+  }
+
+  function backToPersonalIntro() {
+    setIntroPhase('personal');
   }
 
   async function completeOnboarding() {
@@ -158,6 +222,7 @@ function MainAppShell() {
     }
 
     await onboarding.dismiss();
+    await personalIntro.dismiss();
 
     if (hasPremiumAccess) {
       setActiveTab('today');
@@ -171,76 +236,84 @@ function MainAppShell() {
 
   return (
     <View style={shellStyles.root}>
-      <View style={shellStyles.content}>
-        <View
-          style={[
-            shellStyles.tabPane,
-            activeTab !== 'today' ? shellStyles.tabPaneHidden : null,
-          ]}
-        >
-          <RecurringTasksScreen
-            onOpenCreateTask={() => openTaskForm(null)}
-            onOpenEditTask={openTaskForm}
-            onOpenSubscription={() => {
-              setOpenProfileSubscription(true);
-              setActiveTab('profile');
-            }}
-          />
-        </View>
-        <View
-          style={[
-            shellStyles.tabPane,
-            activeTab !== 'history' ? shellStyles.tabPaneHidden : null,
-          ]}
-        >
-          <HistoryScreen
-            isActive={activeTab === 'history'}
-            onOpenDayDetail={openHistoryDayDetail}
-            onOpenSubscription={() => {
-              setOpenProfileSubscription(true);
-              setActiveTab('profile');
-            }}
-          />
-        </View>
-        <View
-          style={[
-            shellStyles.tabPane,
-            activeTab !== 'progress' ? shellStyles.tabPaneHidden : null,
-          ]}
-        >
-          <ProgressScreen
-            onOpenSubscription={() => {
-              setOpenProfileSubscription(true);
-              setActiveTab('profile');
-            }}
-          />
-        </View>
-        <View
-          style={[
-            shellStyles.tabPane,
-            activeTab !== 'tasks' ? shellStyles.tabPaneHidden : null,
-          ]}
-        >
-          <TasksScreen
-            onOpenCreateTask={openBoardTaskCreate}
-            onOpenEditTask={openBoardTaskForm}
-          />
-        </View>
-        <View
-          style={[
-            shellStyles.tabPane,
-            activeTab !== 'profile' ? shellStyles.tabPaneHidden : null,
-          ]}
-        >
-          <ProfileScreen
-            onGoToday={() => setActiveTab('today')}
-            openSubscription={openProfileSubscription}
-            onSubscriptionOpened={() => setOpenProfileSubscription(false)}
-            onOpenIntroduction={onboarding.open}
-          />
-        </View>
-      </View>
-      <MainTabBar activeTab={activeTab} onTabChange={setActiveTab} />
+      {hideMainShell && !showPersonalIntro && !showOnboarding ? (
+        <AppLaunchView />
+      ) : !hideMainShell ? (
+        <>
+          <View style={shellStyles.content}>
+            <View
+              style={[
+                shellStyles.tabPane,
+                activeTab !== 'today' ? shellStyles.tabPaneHidden : null,
+              ]}
+            >
+              <RecurringTasksScreen
+                onOpenCreateTask={() => openTaskForm(null)}
+                onOpenEditTask={openTaskForm}
+                onOpenSubscription={() => {
+                  setOpenProfileSubscription(true);
+                  setActiveTab('profile');
+                }}
+              />
+            </View>
+            <View
+              style={[
+                shellStyles.tabPane,
+                activeTab !== 'history' ? shellStyles.tabPaneHidden : null,
+              ]}
+            >
+              <HistoryScreen
+                isActive={activeTab === 'history'}
+                onOpenDayDetail={openHistoryDayDetail}
+                onOpenSubscription={() => {
+                  setOpenProfileSubscription(true);
+                  setActiveTab('profile');
+                }}
+              />
+            </View>
+            <View
+              style={[
+                shellStyles.tabPane,
+                activeTab !== 'progress' ? shellStyles.tabPaneHidden : null,
+              ]}
+            >
+              <ProgressScreen
+                onOpenSubscription={() => {
+                  setOpenProfileSubscription(true);
+                  setActiveTab('profile');
+                }}
+              />
+            </View>
+            <View
+              style={[
+                shellStyles.tabPane,
+                activeTab !== 'tasks' ? shellStyles.tabPaneHidden : null,
+              ]}
+            >
+              <TasksScreen
+                onOpenCreateTask={openBoardTaskCreate}
+                onOpenEditTask={openBoardTaskForm}
+              />
+            </View>
+            <View
+              style={[
+                shellStyles.tabPane,
+                activeTab !== 'profile' ? shellStyles.tabPaneHidden : null,
+              ]}
+            >
+              <ProfileScreen
+                onGoToday={() => setActiveTab('today')}
+                openSubscription={openProfileSubscription}
+                onSubscriptionOpened={() => setOpenProfileSubscription(false)}
+                onOpenIntroduction={onboarding.open}
+              />
+            </View>
+          </View>
+          <MainTabBar activeTab={activeTab} onTabChange={setActiveTab} />
+        </>
+      ) : (
+        <View style={shellStyles.introBackdrop} />
+      )}
       {taskForm.visible ? (
         <RecurringTaskFormModal
           key={`task-form-${taskForm.session}`}
@@ -274,9 +347,20 @@ function MainAppShell() {
           }}
         />
       ) : null}
-      {onboarding.isReady && currentUserQuery.isSuccess ? (
+      {showPersonalIntro ? (
+        <PersonalIntroModal
+          visible={showPersonalIntro}
+          draft={personalIntroDraft}
+          onDraftChange={setPersonalIntroDraft}
+          onContinueToOnboarding={continueFromPersonalIntro}
+        />
+      ) : null}
+      {showOnboarding ? (
         <OnboardingModal
-          visible={onboarding.visible}
+          visible={showOnboarding}
+          hasPremiumAccess={hasPremiumAccess}
+          showBackToPersonalIntro={showBackToPersonalIntro}
+          onBackToPersonalIntro={backToPersonalIntro}
           onClose={() => {
             void dismissOnboarding();
           }}
@@ -359,5 +443,9 @@ const shellStyles = StyleSheet.create({
   },
   tabPaneHidden: {
     display: 'none',
+  },
+  introBackdrop: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: recurringTheme.pageBg,
   },
 });

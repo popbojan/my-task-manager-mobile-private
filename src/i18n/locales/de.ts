@@ -101,6 +101,30 @@ export const de = {
   'history.note.tooLongError': 'Die Notiz darf höchstens 2000 Zeichen haben.',
   'history.note.saveError': 'Notiz konnte nicht gespeichert werden.',
   'history.note.deleteError': 'Notiz konnte nicht gelöscht werden.',
+  'personalIntro.badge': 'Dein Start',
+  'personalIntro.progress': 'Schritt {{current}} von {{total}}',
+  'personalIntro.skip': 'Persönlichen Einstieg überspringen',
+  'personalIntro.next': 'Weiter',
+  'personalIntro.back': 'Zurück',
+  'personalIntro.page1.title': 'Was möchtest du jeden Tag tun?',
+  'personalIntro.page1.body':
+    'Beginne mit etwas Kleinem, das du mindestens 5 Minuten am Tag machen kannst.',
+  'personalIntro.page1.hint':
+    'Zum Beispiel: Lesen, Dehnen oder Deutsch üben',
+  'personalIntro.page2.title': 'Warum ist dir das wichtig?',
+  'personalIntro.page2.body':
+    'Was möchtest du mit „{{taskName}}“ für dich erreichen? Ein paar Worte reichen.',
+  'personalIntro.page2.hint':
+    'Zum Beispiel: Ich möchte mich stärker fühlen.',
+  'personalIntro.page3.title': 'Dein Weg beginnt mit „{{taskName}}“.',
+  'personalIntro.page3.body':
+    'Nimm dir jeden Tag mindestens 5 Minuten Zeit dafür. Baue deine Kette auf und sieh, wie dein Fortschritt wächst.',
+  'personalIntro.page3.whyLabel': 'Dein Warum: {{why}}',
+  'personalIntro.page4.title': 'Jeder neue Tag ist eine Chance.',
+  'personalIntro.page4.body':
+    'Manche Tage sind schwieriger als andere. Wenn du einen Tag verpasst, komm zurück und beginne wieder. Deine bisherigen Erfolge bleiben in „Mein Weg“ sichtbar.',
+  'personalIntro.page4.cta': 'Zeig mir, wie es geht',
+  'onboarding.backToPersonalIntro': 'Zur persönlichen Einführung',
   'onboarding.badge': 'Willkommen',
   'onboarding.closeAll': 'Onboarding schließen',
   'onboarding.skipStep': 'Schritt überspringen',

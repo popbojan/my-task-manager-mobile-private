@@ -102,6 +102,29 @@ export const fr: Record<TranslationKey, string> = {
   'history.note.tooLongError': 'La note ne peut pas dépasser 2000 caractères.',
   'history.note.saveError': 'Impossible d’enregistrer la note.',
   'history.note.deleteError': 'Impossible de supprimer la note.',
+  'personalIntro.badge': 'Ton départ',
+  'personalIntro.progress': 'Étape {{current}} sur {{total}}',
+  'personalIntro.skip': 'Passer l’introduction personnelle',
+  'personalIntro.next': 'Suivant',
+  'personalIntro.back': 'Retour',
+  'personalIntro.page1.title': 'Que veux-tu faire chaque jour ?',
+  'personalIntro.page1.body':
+    'Commence par quelque chose de petit que tu peux faire au moins 5 minutes par jour.',
+  'personalIntro.page1.hint':
+    'Par exemple : lire, t’étirer ou pratiquer l’allemand',
+  'personalIntro.page2.title': 'Pourquoi est-ce important pour toi ?',
+  'personalIntro.page2.body':
+    'Que veux-tu accomplir pour toi avec « {{taskName}} » ? Quelques mots suffisent.',
+  'personalIntro.page2.hint': 'Par exemple : je veux me sentir plus fort.',
+  'personalIntro.page3.title': 'Ton parcours commence avec « {{taskName}} ».',
+  'personalIntro.page3.body':
+    'Prends au moins 5 minutes chaque jour pour cela. Construis ta série et vois ta progression grandir.',
+  'personalIntro.page3.whyLabel': 'Ton pourquoi : {{why}}',
+  'personalIntro.page4.title': 'Chaque nouveau jour est une chance.',
+  'personalIntro.page4.body':
+    'Certains jours sont plus difficiles que d’autres. Si tu manques un jour, reviens et recommence. Tes réussites passées restent visibles dans « Mon parcours ».',
+  'personalIntro.page4.cta': 'Montre-moi comment ça marche',
+  'onboarding.backToPersonalIntro': 'Retour à l’introduction personnelle',
   'onboarding.badge': 'Bienvenue',
   'onboarding.closeAll': 'Fermer l’introduction',
   'onboarding.skipStep': 'Passer cette étape',

@@ -103,6 +103,29 @@ export const sr: Record<TranslationKey, string> = {
   'history.note.tooLongError': 'Beleška može imati najviše 2000 znakova.',
   'history.note.saveError': 'Beleška nije sačuvana.',
   'history.note.deleteError': 'Beleška nije obrisana.',
+  'personalIntro.badge': 'Tvoj početak',
+  'personalIntro.progress': 'Korak {{current}} od {{total}}',
+  'personalIntro.skip': 'Preskoči lični uvod',
+  'personalIntro.next': 'Dalje',
+  'personalIntro.back': 'Nazad',
+  'personalIntro.page1.title': 'Šta želiš da radiš svaki dan?',
+  'personalIntro.page1.body':
+    'Počni sa nečim malim što možeš da radiš bar 5 minuta dnevno.',
+  'personalIntro.page1.hint':
+    'Na primer: čitanje, istezanje ili vežbanje nemačkog',
+  'personalIntro.page2.title': 'Zašto ti je ovo važno?',
+  'personalIntro.page2.body':
+    'Šta želiš da postigneš za sebe sa „{{taskName}}“? Dovoljno je nekoliko reči.',
+  'personalIntro.page2.hint': 'Na primer: želim da se osećam jače.',
+  'personalIntro.page3.title': 'Tvoj put počinje sa „{{taskName}}“.',
+  'personalIntro.page3.body':
+    'Svaki dan odvoji bar 5 minuta za to. Gradi seriju i gledaj kako tvoj napredak raste.',
+  'personalIntro.page3.whyLabel': 'Tvoj zašto: {{why}}',
+  'personalIntro.page4.title': 'Svaki novi dan je prilika.',
+  'personalIntro.page4.body':
+    'Neki dani su teži od drugih. Ako propustiš dan, vrati se i kreni ponovo. Tvoji dosadašnji uspesi ostaju vidljivi u „Moj put“.',
+  'personalIntro.page4.cta': 'Pokaži mi kako funkcioniše',
+  'onboarding.backToPersonalIntro': 'Nazad na lični uvod',
   'onboarding.badge': 'Dobrodošli',
   'onboarding.closeAll': 'Zatvori uvod',
   'onboarding.skipStep': 'Preskoči korak',

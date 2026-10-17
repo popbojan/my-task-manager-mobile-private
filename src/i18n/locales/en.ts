@@ -102,6 +102,29 @@ export const en: Record<TranslationKey, string> = {
   'history.note.tooLongError': 'Notes can be at most 2000 characters.',
   'history.note.saveError': 'Could not save the note.',
   'history.note.deleteError': 'Could not delete the note.',
+  'personalIntro.badge': 'Your start',
+  'personalIntro.progress': 'Step {{current}} of {{total}}',
+  'personalIntro.skip': 'Skip personal intro',
+  'personalIntro.next': 'Next',
+  'personalIntro.back': 'Back',
+  'personalIntro.page1.title': 'What would you like to do every day?',
+  'personalIntro.page1.body':
+    'Start with something small that you can do for at least 5 minutes a day.',
+  'personalIntro.page1.hint':
+    'For example: reading, stretching, or practicing German',
+  'personalIntro.page2.title': 'Why is this important to you?',
+  'personalIntro.page2.body':
+    'What do you want to achieve for yourself with “{{taskName}}”? A few words are enough.',
+  'personalIntro.page2.hint': 'For example: I want to feel stronger.',
+  'personalIntro.page3.title': 'Your journey begins with “{{taskName}}”.',
+  'personalIntro.page3.body':
+    'Take at least 5 minutes for it every day. Build your streak and watch your progress grow.',
+  'personalIntro.page3.whyLabel': 'Your why: {{why}}',
+  'personalIntro.page4.title': 'Every new day is a chance.',
+  'personalIntro.page4.body':
+    'Some days are harder than others. If you miss a day, come back and start again. Your past successes stay visible in “My Journey”.',
+  'personalIntro.page4.cta': 'Show me how it works',
+  'onboarding.backToPersonalIntro': 'Back to personal intro',
   'onboarding.badge': 'Welcome',
   'onboarding.closeAll': 'Close onboarding',
   'onboarding.skipStep': 'Skip step',

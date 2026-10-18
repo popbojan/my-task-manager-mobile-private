@@ -135,19 +135,21 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.slide1.title': 'Tes tâches quotidiennes',
   'onboarding.slide1.body':
     'Commence petit et concrètement : appuie sur + et crée ta première tâche quotidienne — par exemple « Lire 5 minutes ».',
-  'onboarding.slide2.title': 'Terminer et construire ta série',
+  'onboarding.slide2.title': 'Comment terminer tes tâches',
   'onboarding.slide2.body':
-    'Appuie sur le statut d’une tâche jusqu’à Terminé. Pour un jour réussi, tu dois terminer toutes les tâches quotidiennes comptées.',
-  'onboarding.slide2.callout':
-    'Ce n’est que lorsque toutes les tâches quotidiennes comptées sont terminées que le jour compte comme un succès.',
-  'onboarding.slide3.title': 'Ton parcours reste visible',
+    'Appuie sur le statut d’une tâche et avance étape par étape jusqu’à Terminé.',
+  'onboarding.slide3.title': 'Comment ta série grandit',
   'onboarding.slide3.body':
-    'Dans Mon parcours, tu vois ton calendrier avec les résultats du jour. Même après une pause, tes succès passés restent visibles.',
-  'onboarding.slide4.title': 'Note ce qui te motive',
+    'Quand tu termines toutes les tâches quotidiennes, ta série grandit d’un jour.',
+  'onboarding.slide4.title': 'Ton parcours reste visible',
   'onboarding.slide4.body':
+    'Dans Mon parcours, tu vois ton calendrier avec les résultats du jour. Même après une pause, tes succès passés restent visibles.',
+  'onboarding.slide5.title': 'Note ce qui te motive',
+  'onboarding.slide5.body':
     'Appuie sur un jour et écris une note : Qu’est-ce qui a aidé ? Qu’est-ce qui était difficile ? Que feras-tu différemment demain ?',
   'onboarding.demo.taskTitle': 'Lire 5 minutes',
   'onboarding.demo.secondTaskTitle': 'S’étirer 10 minutes',
+  'onboarding.demo.thirdTaskTitle': 'Boire de l’eau',
   'onboarding.demo.monthTitle': 'Octobre 2026',
   'onboarding.demo.dayTitle': 'Dimanche 12 octobre 2026',
   'onboarding.demo.noteText':

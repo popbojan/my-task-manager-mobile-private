@@ -1,6 +1,7 @@
 export type OnboardingSlideId =
   | 'dailyTasks'
-  | 'completeStreak'
+  | 'completeTasks'
+  | 'streakGrowth'
   | 'journeyVisible'
   | 'captureNotes';
 
@@ -10,12 +11,14 @@ export type OnboardingSlide = {
     | 'onboarding.slide1.title'
     | 'onboarding.slide2.title'
     | 'onboarding.slide3.title'
-    | 'onboarding.slide4.title';
+    | 'onboarding.slide4.title'
+    | 'onboarding.slide5.title';
   bodyKey:
     | 'onboarding.slide1.body'
     | 'onboarding.slide2.body'
     | 'onboarding.slide3.body'
-    | 'onboarding.slide4.body';
+    | 'onboarding.slide4.body'
+    | 'onboarding.slide5.body';
 };
 
 export const ONBOARDING_SLIDES: OnboardingSlide[] = [
@@ -25,18 +28,23 @@ export const ONBOARDING_SLIDES: OnboardingSlide[] = [
     bodyKey: 'onboarding.slide1.body',
   },
   {
-    id: 'completeStreak',
+    id: 'completeTasks',
     titleKey: 'onboarding.slide2.title',
     bodyKey: 'onboarding.slide2.body',
   },
   {
-    id: 'journeyVisible',
+    id: 'streakGrowth',
     titleKey: 'onboarding.slide3.title',
     bodyKey: 'onboarding.slide3.body',
   },
   {
-    id: 'captureNotes',
+    id: 'journeyVisible',
     titleKey: 'onboarding.slide4.title',
     bodyKey: 'onboarding.slide4.body',
+  },
+  {
+    id: 'captureNotes',
+    titleKey: 'onboarding.slide5.title',
+    bodyKey: 'onboarding.slide5.body',
   },
 ];

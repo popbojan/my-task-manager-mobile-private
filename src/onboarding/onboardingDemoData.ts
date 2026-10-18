@@ -2,6 +2,7 @@ import { RecurringTaskStatus } from '@/api/generated';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
 import type { RecurringTask } from '@/api/generated/models/RecurringTask';
+import type { RecurringTaskProgress } from '@/api/generated/models/RecurringTaskProgress';
 
 const demoDate = new Date('2026-10-15T12:00:00Z');
 
@@ -26,17 +27,30 @@ function demoHistoryDay(
 
 export const ONBOARDING_DEMO_TASK_TITLE_KEY = 'onboarding.demo.taskTitle' as const;
 
+export const ONBOARDING_DEMO_PROGRESS: RecurringTaskProgress = {
+  id: 'onboarding-demo-progress',
+  currentStreak: 18,
+  highestStreakReached: 71,
+  currentLevel: 1,
+  highestLevelReached: 3,
+  lastSuccessfulDay: demoDate,
+  lastCheckedAt: demoDate,
+  createdAt: demoDate,
+  updatedAt: demoDate,
+};
+
 export function createOnboardingDemoTask(
   id: string,
   title: string,
   status: RecurringTaskStatus,
+  streakCount = status === RecurringTaskStatus.Done ? 3 : 0,
 ): RecurringTask {
   return {
     id,
     title,
     description: null,
     status,
-    streakCount: status === RecurringTaskStatus.Done ? 3 : 0,
+    streakCount,
     lastCompletedAt: status === RecurringTaskStatus.Done ? demoDate : null,
     lastResetAt: demoDate,
     nextResetAt: demoDate,

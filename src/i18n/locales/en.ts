@@ -135,19 +135,21 @@ export const en: Record<TranslationKey, string> = {
   'onboarding.slide1.title': 'Your daily tasks',
   'onboarding.slide1.body':
     'Start small and concrete: tap + and create your first daily task — for example “Read for 5 minutes”.',
-  'onboarding.slide2.title': 'Complete tasks and build your streak',
+  'onboarding.slide2.title': 'How you complete tasks',
   'onboarding.slide2.body':
-    'Tap a task’s status until it is done. For a successful day, you must complete all counting daily tasks.',
-  'onboarding.slide2.callout':
-    'Only when all counting daily tasks are done does the day count as a success.',
-  'onboarding.slide3.title': 'Your journey stays visible',
+    'Tap a task’s status and move step by step until it is Done.',
+  'onboarding.slide3.title': 'How your streak grows',
   'onboarding.slide3.body':
-    'In My Journey you see your calendar with daily results. Even after a break, your past successes stay visible.',
-  'onboarding.slide4.title': 'Capture what moves you',
+    'When you complete all daily tasks, your streak grows by one day.',
+  'onboarding.slide4.title': 'Your journey stays visible',
   'onboarding.slide4.body':
+    'In My Journey you see your calendar with daily results. Even after a break, your past successes stay visible.',
+  'onboarding.slide5.title': 'Capture what moves you',
+  'onboarding.slide5.body':
     'Tap a day and write a note: What helped? What was difficult? What will you do differently tomorrow?',
   'onboarding.demo.taskTitle': 'Read for 5 minutes',
   'onboarding.demo.secondTaskTitle': 'Stretch for 10 minutes',
+  'onboarding.demo.thirdTaskTitle': 'Drink water',
   'onboarding.demo.monthTitle': 'October 2026',
   'onboarding.demo.dayTitle': 'Sunday, 12 October 2026',
   'onboarding.demo.noteText':

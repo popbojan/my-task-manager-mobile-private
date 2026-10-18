@@ -136,19 +136,21 @@ export const sr: Record<TranslationKey, string> = {
   'onboarding.slide1.title': 'Tvoji dnevni zadaci',
   'onboarding.slide1.body':
     'Počni malo i konkretno: tapni + i napravi prvi dnevni zadatak — na primer „Čitaj 5 minuta“.',
-  'onboarding.slide2.title': 'Završi i gradi svoj niz',
+  'onboarding.slide2.title': 'Kako završavaš zadatke',
   'onboarding.slide2.body':
-    'Tapni status zadatka dok ne bude završen. Za uspešan dan moraš završiti sve dnevne zadatke koji se računaju.',
-  'onboarding.slide2.callout':
-    'Tek kada su svi dnevni zadaci koji se računaju završeni, dan se računa kao uspeh.',
-  'onboarding.slide3.title': 'Tvoj put ostaje vidljiv',
+    'Tapni status zadatka i korak po korak dođi do Završeno.',
+  'onboarding.slide3.title': 'Kako tvoj niz raste',
   'onboarding.slide3.body':
-    'U Moj put vidiš kalendar sa dnevnim rezultatima. Čak i posle pauze, prošli uspesi ostaju vidljivi.',
-  'onboarding.slide4.title': 'Zabeleži šta te pokreće',
+    'Kada završiš sve dnevne zadatke, tvoj niz raste za jedan dan.',
+  'onboarding.slide4.title': 'Tvoj put ostaje vidljiv',
   'onboarding.slide4.body':
+    'U Moj put vidiš kalendar sa dnevnim rezultatima. Čak i posle pauze, prošli uspesi ostaju vidljivi.',
+  'onboarding.slide5.title': 'Zabeleži šta te pokreće',
+  'onboarding.slide5.body':
     'Tapni dan i napiši belešku: Šta je pomoglo? Šta je bilo teško? Šta ćeš sutra uraditi drugačije?',
   'onboarding.demo.taskTitle': 'Čitaj 5 minuta',
   'onboarding.demo.secondTaskTitle': 'Istezanje 10 minuta',
+  'onboarding.demo.thirdTaskTitle': 'Pij vodu',
   'onboarding.demo.monthTitle': 'Oktobar 2026.',
   'onboarding.demo.dayTitle': 'Nedelja, 12. oktobar 2026.',
   'onboarding.demo.noteText':

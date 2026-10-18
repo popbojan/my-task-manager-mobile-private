@@ -6,11 +6,13 @@ import {
   createOnboardingDemoTask,
   ONBOARDING_DEMO_CALENDAR,
   ONBOARDING_DEMO_NOTE_DAY,
+  ONBOARDING_DEMO_PROGRESS,
   ONBOARDING_DEMO_TASK_TITLE_KEY,
 } from '@/onboarding/onboardingDemoData';
 import type { OnboardingSlideId } from '@/onboarding/onboardingSlides';
 import HistoryDayCell from '@/pages/history/HistoryDayCell';
 import { CheckIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
+import { MasteryStatsGrid } from '@/pages/recurring-tasks/MasteryProfileHero';
 import { PlusIcon } from '@/pages/recurring-tasks/premium/TabIcons';
 import RecurringTaskCard from '@/pages/recurring-tasks/RecurringTaskCard';
 import { DAILY_STATUS_COLUMNS } from '@/pages/recurring-tasks/recurringBoardConfig';
@@ -39,7 +41,13 @@ const WEEKDAY_KEYS = [
   'history.weekday.sun',
 ] as const;
 
-function DemoSectionHeader({ highlightAdd = false }: { highlightAdd?: boolean }) {
+function DemoSectionHeader({
+  taskCount = 1,
+  highlightAdd = false,
+}: {
+  taskCount?: number;
+  highlightAdd?: boolean;
+}) {
   const { t } = useLanguage();
 
   return (
@@ -47,7 +55,7 @@ function DemoSectionHeader({ highlightAdd = false }: { highlightAdd?: boolean })
       <Text style={styles.sectionTitle}>{t('recurring.tasks.sectionTitle')}</Text>
       <View style={styles.sectionHeaderRight}>
         <View style={styles.sectionBadge}>
-          <Text style={styles.sectionBadgeText}>1</Text>
+          <Text style={styles.sectionBadgeText}>{taskCount}</Text>
         </View>
         <View style={[styles.addFab, highlightAdd ? styles.addFabHighlight : null]}>
           {highlightAdd ? <View style={styles.addFabRing} /> : null}
@@ -124,57 +132,191 @@ function DailyTasksVisual() {
   );
 }
 
+function statusFlowChipStyle(status: RecurringTaskStatus) {
+  switch (status) {
+    case RecurringTaskStatus.InProgress:
+      return styles.statusFlowChipProgress;
+    case RecurringTaskStatus.Done:
+      return styles.statusFlowChipDone;
+    default:
+      return styles.statusFlowChipTodo;
+  }
+}
+
+function statusFlowTextStyle(status: RecurringTaskStatus) {
+  switch (status) {
+    case RecurringTaskStatus.InProgress:
+      return styles.statusFlowChipTextProgress;
+    case RecurringTaskStatus.Done:
+      return styles.statusFlowChipTextDone;
+    default:
+      return styles.statusFlowChipTextTodo;
+  }
+}
+
 function StatusFlowStrip() {
   const { t } = useLanguage();
 
   return (
-    <View style={styles.statusFlowRow}>
-      {DAILY_STATUS_COLUMNS.map(({ status, labelKey }, index) => (
-        <View key={status} style={styles.statusFlowItem}>
-          <View style={styles.statusFlowChip}>
-            <Text style={styles.statusFlowChipText}>{t(labelKey)}</Text>
-          </View>
-          {index < DAILY_STATUS_COLUMNS.length - 1 ? (
-            <Text style={styles.statusFlowArrow}>→</Text>
-          ) : null}
-        </View>
-      ))}
+    <View style={styles.statusFlowPanel}>
+      <View style={styles.statusFlowRow}>
+        {DAILY_STATUS_COLUMNS.flatMap(({ status, labelKey }, index) => {
+          const chip = (
+            <View
+              key={status}
+              style={[styles.statusFlowChip, statusFlowChipStyle(status)]}
+            >
+              <Text
+                style={[styles.statusFlowChipText, statusFlowTextStyle(status)]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.82}
+              >
+                {t(labelKey)}
+              </Text>
+            </View>
+          );
+
+          if (index === 0) {
+            return [chip];
+          }
+
+          return [
+            <Text key={`arrow-${status}`} style={styles.statusFlowArrow}>
+              →
+            </Text>,
+            chip,
+          ];
+        })}
+      </View>
     </View>
   );
 }
 
-function CompleteStreakVisual() {
+function CompleteTasksVisual() {
   const { t } = useLanguage();
-  const doneTask = createOnboardingDemoTask(
-    'onboarding-done',
-    t(ONBOARDING_DEMO_TASK_TITLE_KEY),
-    RecurringTaskStatus.Done,
-  );
   const openTask = createOnboardingDemoTask(
     'onboarding-todo',
-    t('onboarding.demo.secondTaskTitle'),
+    t(ONBOARDING_DEMO_TASK_TITLE_KEY),
     RecurringTaskStatus.Todo,
+  );
+  const inProgressTask = createOnboardingDemoTask(
+    'onboarding-progress',
+    t('onboarding.demo.secondTaskTitle'),
+    RecurringTaskStatus.InProgress,
+  );
+  const doneTask = createOnboardingDemoTask(
+    'onboarding-done',
+    t('onboarding.demo.thirdTaskTitle'),
+    RecurringTaskStatus.Done,
   );
 
   return (
-    <OnboardingAppPreview activeTab="today">
-      <TodaySummaryCard totalTasks={2} doneTasks={1} allComplete={false} />
-      <DemoSectionHeader />
-      <RecurringTaskCard
-        task={doneTask}
-        onEdit={noop}
-        onDelete={noop}
-        onToggleStatus={noop}
-      />
+    <OnboardingAppPreview activeTab="today" compact>
+      <TodaySummaryCard totalTasks={3} doneTasks={1} allComplete={false} />
+      <DemoSectionHeader taskCount={3} />
       <RecurringTaskCard
         task={openTask}
         onEdit={noop}
         onDelete={noop}
         onToggleStatus={noop}
       />
+      <RecurringTaskCard
+        task={inProgressTask}
+        onEdit={noop}
+        onDelete={noop}
+        onToggleStatus={noop}
+      />
+      <RecurringTaskCard
+        task={doneTask}
+        onEdit={noop}
+        onDelete={noop}
+        onToggleStatus={noop}
+      />
       <StatusFlowStrip />
-      <Text style={styles.callout}>{t('onboarding.slide2.callout')}</Text>
+    </OnboardingAppPreview>
+  );
+}
+
+const STREAK_CHAIN_ROW_SIZE = 9;
+
+function StreakChainPreview() {
+  const { t } = useLanguage();
+  const streakDays = ONBOARDING_DEMO_PROGRESS.currentStreak;
+  const rowCount = Math.ceil(streakDays / STREAK_CHAIN_ROW_SIZE);
+
+  return (
+    <View style={styles.streakCard}>
+      <View style={styles.streakCardTop}>
+        <View style={styles.streakBadge}>
+          <FireIcon size={14} color={recurringTheme.streakOrangeBright} />
+        </View>
+        <View style={styles.streakCopy}>
+          <Text style={styles.streakLabel}>{t('recurring.stats.currentStreak')}</Text>
+          <Text style={styles.streakValue}>
+            {t('recurring.stats.daysValue', {
+              days: String(streakDays),
+            })}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.chainRows}>
+        {Array.from({ length: rowCount }, (_, rowIndex) => {
+          const start = rowIndex * STREAK_CHAIN_ROW_SIZE;
+          const count = Math.min(STREAK_CHAIN_ROW_SIZE, streakDays - start);
+
+          return (
+            <View key={rowIndex} style={styles.chainRow}>
+              {Array.from({ length: count }, (_, index) => (
+                <View key={start + index} style={styles.chainSegment}>
+                  {index > 0 ? <View style={styles.chainLink} /> : null}
+                  <View style={styles.chainDay}>
+                    <CheckIcon size={8} color={recurringTheme.accentBright} />
+                  </View>
+                </View>
+              ))}
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+function StreakGrowthVisual() {
+  const { t } = useLanguage();
+  const doneTaskOne = createOnboardingDemoTask(
+    'onboarding-streak-done-one',
+    t(ONBOARDING_DEMO_TASK_TITLE_KEY),
+    RecurringTaskStatus.Done,
+    ONBOARDING_DEMO_PROGRESS.currentStreak,
+  );
+  const doneTaskTwo = createOnboardingDemoTask(
+    'onboarding-streak-done-two',
+    t('onboarding.demo.secondTaskTitle'),
+    RecurringTaskStatus.Done,
+    ONBOARDING_DEMO_PROGRESS.currentStreak,
+  );
+
+  return (
+    <OnboardingAppPreview activeTab="today" compact>
+      <MasteryStatsGrid progress={ONBOARDING_DEMO_PROGRESS} />
       <TodaySummaryCard totalTasks={2} doneTasks={2} allComplete />
+      <StreakChainPreview />
+      <DemoSectionHeader taskCount={2} />
+      <RecurringTaskCard
+        task={doneTaskOne}
+        onEdit={noop}
+        onDelete={noop}
+        onToggleStatus={noop}
+      />
+      <RecurringTaskCard
+        task={doneTaskTwo}
+        onEdit={noop}
+        onDelete={noop}
+        onToggleStatus={noop}
+      />
     </OnboardingAppPreview>
   );
 }
@@ -289,8 +431,10 @@ export default function OnboardingSlideVisual({ slideId }: OnboardingSlideVisual
   switch (slideId) {
     case 'dailyTasks':
       return <DailyTasksVisual />;
-    case 'completeStreak':
-      return <CompleteStreakVisual />;
+    case 'completeTasks':
+      return <CompleteTasksVisual />;
+    case 'streakGrowth':
+      return <StreakGrowthVisual />;
     case 'journeyVisible':
       return <JourneyVisibleVisual />;
     case 'captureNotes':
@@ -477,44 +621,135 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
   },
+  statusFlowPanel: {
+    marginTop: 2,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorder,
+    backgroundColor: recurringTheme.surfaceInset,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+  },
   statusFlowRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    gap: 4,
-    paddingVertical: 4,
-  },
-  statusFlowItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+    flexWrap: 'nowrap',
+    width: '100%',
   },
   statusFlowChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 999,
-    backgroundColor: recurringTheme.surfaceInset,
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: 6,
+    paddingVertical: 8,
+    borderRadius: 10,
     borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusFlowChipTodo: {
+    backgroundColor: recurringTheme.surfaceElevated,
     borderColor: recurringTheme.cardBorder,
   },
+  statusFlowChipProgress: {
+    backgroundColor: 'rgba(212, 168, 67, 0.14)',
+    borderColor: 'rgba(212, 168, 67, 0.35)',
+  },
+  statusFlowChipDone: {
+    backgroundColor: 'rgba(82, 183, 136, 0.14)',
+    borderColor: recurringTheme.cardBorderAccent,
+  },
   statusFlowChipText: {
-    color: recurringTheme.textSecondary,
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.1,
+    textAlign: 'center',
+  },
+  statusFlowChipTextTodo: {
+    color: recurringTheme.textPrimary,
+  },
+  statusFlowChipTextProgress: {
+    color: recurringTheme.goldBright,
+  },
+  statusFlowChipTextDone: {
+    color: recurringTheme.accentBright,
   },
   statusFlowArrow: {
-    color: recurringTheme.textMuted,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  callout: {
-    color: recurringTheme.accentBright,
-    fontSize: 12,
+    color: recurringTheme.textSecondary,
+    fontSize: 16,
+    fontWeight: '800',
     lineHeight: 18,
-    fontWeight: '600',
+    flexShrink: 0,
+    width: 18,
     textAlign: 'center',
-    paddingHorizontal: 4,
+  },
+  streakCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorderAccent,
+    backgroundColor: 'rgba(249, 115, 22, 0.08)',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  streakCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  streakBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(249, 115, 22, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(249, 115, 22, 0.28)',
+  },
+  streakCopy: {
+    flex: 1,
+    gap: 1,
+  },
+  streakLabel: {
+    color: recurringTheme.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  streakValue: {
+    color: recurringTheme.streakOrangeBright,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  chainRows: {
+    gap: 6,
+    alignItems: 'center',
+  },
+  chainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chainSegment: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  chainLink: {
+    width: 8,
+    height: 2,
+    backgroundColor: recurringTheme.cardBorderAccent,
+    marginHorizontal: 1,
+  },
+  chainDay: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(82, 183, 136, 0.16)',
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorderAccent,
   },
   historyScreenTitle: {
     color: recurringTheme.textPrimary,

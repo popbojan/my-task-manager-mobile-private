@@ -14,6 +14,7 @@ import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTh
 type OnboardingAppPreviewProps = {
   activeTab: MainTab;
   children: ReactNode;
+  compact?: boolean;
 };
 
 const TAB_ITEMS: {
@@ -56,12 +57,13 @@ const TAB_ITEMS: {
 export default function OnboardingAppPreview({
   activeTab,
   children,
+  compact = false,
 }: OnboardingAppPreviewProps) {
   const { t } = useLanguage();
 
   return (
     <View style={styles.shell} pointerEvents="none">
-      <View style={styles.screen}>{children}</View>
+      <View style={[styles.screen, compact ? styles.screenCompact : null]}>{children}</View>
       <View style={styles.tabBar}>
         {TAB_ITEMS.map(tab => {
           const active = tab.id === activeTab;
@@ -96,6 +98,12 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
     gap: 8,
     minHeight: 280,
+  },
+  screenCompact: {
+    gap: 6,
+    minHeight: 0,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   tabBar: {
     flexDirection: 'row',

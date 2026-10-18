@@ -135,19 +135,21 @@ export const de = {
   'onboarding.slide1.title': 'Deine täglichen Aufgaben',
   'onboarding.slide1.body':
     'Klein und konkret beginnen: Tippe auf + und lege deine erste tägliche Aufgabe an — zum Beispiel „5 Minuten lesen“.',
-  'onboarding.slide2.title': 'Erledigen und deine Kette aufbauen',
+  'onboarding.slide2.title': 'So erledigst du deine Aufgaben',
   'onboarding.slide2.body':
-    'Tippe auf den Status einer Aufgabe, bis sie erledigt ist. Für einen erfolgreichen Tag musst du alle zählenden täglichen Aufgaben abschließen.',
-  'onboarding.slide2.callout':
-    'Erst wenn alle zählenden täglichen Aufgaben erledigt sind, zählt der Tag als Erfolg.',
-  'onboarding.slide3.title': 'Dein Weg bleibt sichtbar',
+    'Tippe auf den Status einer Aufgabe und wechsle Schritt für Schritt bis „Erledigt“.',
+  'onboarding.slide3.title': 'So wächst deine Kette',
   'onboarding.slide3.body':
-    'In „Mein Weg“ siehst du deinen Kalender mit Tagesergebnissen. Auch nach einer Unterbrechung bleiben deine bisherigen Erfolge sichtbar.',
-  'onboarding.slide4.title': 'Halte fest, was dich bewegt',
+    'Wenn du alle täglichen Aufgaben erledigst, wächst deine Kette um einen Tag.',
+  'onboarding.slide4.title': 'Dein Weg bleibt sichtbar',
   'onboarding.slide4.body':
+    'In „Mein Weg“ siehst du deinen Kalender mit Tagesergebnissen. Auch nach einer Unterbrechung bleiben deine bisherigen Erfolge sichtbar.',
+  'onboarding.slide5.title': 'Halte fest, was dich bewegt',
+  'onboarding.slide5.body':
     'Tippe auf einen Tag und schreibe eine Notiz: Was hat geholfen? Was war schwierig? Was möchtest du morgen anders machen?',
   'onboarding.demo.taskTitle': '5 Minuten lesen',
   'onboarding.demo.secondTaskTitle': '10 Minuten dehnen',
+  'onboarding.demo.thirdTaskTitle': 'Wasser trinken',
   'onboarding.demo.monthTitle': 'Oktober 2026',
   'onboarding.demo.dayTitle': 'Sonntag, 12. Oktober 2026',
   'onboarding.demo.noteText':

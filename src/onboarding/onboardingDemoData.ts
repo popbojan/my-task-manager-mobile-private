@@ -107,7 +107,7 @@ export function isOnboardingDemoFutureDay(dayOfMonth: number): boolean {
 export const ONBOARDING_DEMO_NOTE_DAY = demoHistoryDay(12, HistoryDayStatus.Success, {
   completedTasks: 2,
   totalTasks: 2,
-  currentStreak: 1,
+  currentStreak: 45,
   currentLevel: 2,
   note: 'demo',
 });

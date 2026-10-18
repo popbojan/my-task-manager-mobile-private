@@ -1,13 +1,17 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { RecurringTaskStatus } from '@/api/generated';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import OnboardingAppPreview from '@/onboarding/OnboardingAppPreview';
 import {
   createOnboardingDemoTask,
-  ONBOARDING_DEMO_CALENDAR,
+  getOnboardingDemoDaysByDate,
+  isOnboardingDemoFutureDay,
+  ONBOARDING_DEMO_MONTH_KEY,
   ONBOARDING_DEMO_NOTE_DAY,
   ONBOARDING_DEMO_PROGRESS,
   ONBOARDING_DEMO_TASK_TITLE_KEY,
+  ONBOARDING_DEMO_TODAY_DATE,
 } from '@/onboarding/onboardingDemoData';
 import type { OnboardingSlideId } from '@/onboarding/onboardingSlides';
 import HistoryDayCell from '@/pages/history/HistoryDayCell';
@@ -20,6 +24,7 @@ import { DAILY_STATUS_COLUMNS } from '@/pages/recurring-tasks/recurringBoardConf
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import TodaySummaryCard from '@/pages/recurring-tasks/TodaySummaryCard';
 import {
+  buildMonthCalendarGrid,
   formatHistoryLevelDisplay,
   formatHistoryStreakDisplay,
   formatHistoryTaskRatioDisplay,
@@ -353,10 +358,16 @@ function OnboardingFutureDayCell({
 }
 
 const ONBOARDING_CALENDAR_COLUMN_GAP = 4;
-const ONBOARDING_CALENDAR_CELL_HEIGHT = 66;
+const ONBOARDING_CALENDAR_CELL_HEIGHT = 54;
 
 function JourneyVisibleVisual() {
   const { t } = useLanguage();
+  const gridCells = useMemo(
+    () => buildMonthCalendarGrid(ONBOARDING_DEMO_MONTH_KEY),
+    [],
+  );
+  const daysByDate = useMemo(() => getOnboardingDemoDaysByDate(), []);
+  const rowCount = gridCells.length / 7;
 
   return (
     <OnboardingAppPreview activeTab="history" compact>
@@ -373,29 +384,44 @@ function JourneyVisibleVisual() {
         </View>
 
         <View style={styles.calendarGrid}>
-          {Array.from({ length: Math.ceil(ONBOARDING_DEMO_CALENDAR.length / 7) }, (_, rowIndex) => (
+          {Array.from({ length: rowCount }, (_, rowIndex) => (
             <View key={rowIndex} style={styles.calendarRow}>
-              {ONBOARDING_DEMO_CALENDAR.slice(rowIndex * 7, rowIndex * 7 + 7).map(cell => (
-                <View
-                  key={cell.dayOfMonth}
-                  style={[styles.calendarSlot, { minHeight: ONBOARDING_CALENDAR_CELL_HEIGHT }]}
-                >
-                  {cell.isFutureEmpty || !cell.entry ? (
-                    <OnboardingFutureDayCell
-                      dayOfMonth={cell.dayOfMonth}
-                      height={ONBOARDING_CALENDAR_CELL_HEIGHT}
+              {gridCells.slice(rowIndex * 7, rowIndex * 7 + 7).map((cell, columnIndex) => {
+                if (cell.kind === 'blank') {
+                  return (
+                    <View
+                      key={`blank-${rowIndex}-${columnIndex}`}
+                      style={[styles.calendarBlankSlot, { minHeight: ONBOARDING_CALENDAR_CELL_HEIGHT }]}
                     />
-                  ) : (
-                    <HistoryDayCell
-                      dayOfMonth={cell.dayOfMonth}
-                      entry={cell.entry}
-                      isToday={cell.isToday ?? false}
-                      height={ONBOARDING_CALENDAR_CELL_HEIGHT}
-                      variant="onboarding"
-                    />
-                  )}
-                </View>
-              ))}
+                  );
+                }
+
+                const entry = daysByDate.get(cell.date);
+                const isToday = cell.date === ONBOARDING_DEMO_TODAY_DATE;
+                const isFuture = isOnboardingDemoFutureDay(cell.dayOfMonth);
+
+                return (
+                  <View
+                    key={cell.date}
+                    style={[styles.calendarSlot, { minHeight: ONBOARDING_CALENDAR_CELL_HEIGHT }]}
+                  >
+                    {isFuture ? (
+                      <OnboardingFutureDayCell
+                        dayOfMonth={cell.dayOfMonth}
+                        height={ONBOARDING_CALENDAR_CELL_HEIGHT}
+                      />
+                    ) : (
+                      <HistoryDayCell
+                        dayOfMonth={cell.dayOfMonth}
+                        entry={entry}
+                        isToday={isToday}
+                        height={ONBOARDING_CALENDAR_CELL_HEIGHT}
+                        variant="onboarding"
+                      />
+                    )}
+                  </View>
+                );
+              })}
             </View>
           ))}
         </View>
@@ -834,6 +860,10 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     alignItems: 'stretch',
+  },
+  calendarBlankSlot: {
+    flex: 1,
+    minWidth: 0,
   },
   futureDayCell: {
     width: '100%',

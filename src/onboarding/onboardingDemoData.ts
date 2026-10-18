@@ -3,6 +3,7 @@ import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
 import type { RecurringTask } from '@/api/generated/models/RecurringTask';
 import type { RecurringTaskProgress } from '@/api/generated/models/RecurringTaskProgress';
+import { indexHistoryDaysByDate } from '@/utils/historyCalendar';
 
 const demoDate = new Date('2026-10-15T12:00:00Z');
 
@@ -59,45 +60,49 @@ export function createOnboardingDemoTask(
   };
 }
 
-/** Three-week slice for onboarding calendar preview (Oct 2026, days 6–26). */
-export const ONBOARDING_DEMO_CALENDAR: {
-  dayOfMonth: number;
-  entry?: HistoryDay;
-  isToday?: boolean;
-  isFutureEmpty?: boolean;
-}[] = [
-  { dayOfMonth: 6, entry: demoHistoryDay(6, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 13, currentLevel: 2 }) },
-  { dayOfMonth: 7, entry: demoHistoryDay(7, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 14, currentLevel: 2 }) },
-  { dayOfMonth: 8, entry: demoHistoryDay(8, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 15, currentLevel: 2 }) },
-  { dayOfMonth: 9, entry: demoHistoryDay(9, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 16, currentLevel: 2 }) },
-  { dayOfMonth: 10, entry: demoHistoryDay(10, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 17, currentLevel: 2 }) },
-  { dayOfMonth: 11, entry: demoHistoryDay(11, HistoryDayStatus.Missed, { completedTasks: 1, totalTasks: 2, currentStreak: 0, currentLevel: 2 }) },
-  { dayOfMonth: 12, entry: demoHistoryDay(12, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 1, currentLevel: 2, note: 'demo' }) },
-  { dayOfMonth: 13, entry: demoHistoryDay(13, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 2, currentLevel: 2 }) },
-  { dayOfMonth: 14, entry: demoHistoryDay(14, HistoryDayStatus.Missed, { completedTasks: 1, totalTasks: 2, currentStreak: 0, currentLevel: 2 }) },
-  { dayOfMonth: 15, entry: demoHistoryDay(15, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 1, currentLevel: 2 }) },
-  { dayOfMonth: 16, entry: demoHistoryDay(16, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 2, currentLevel: 2 }) },
-  { dayOfMonth: 17, entry: demoHistoryDay(17, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 3, currentLevel: 2 }) },
-  { dayOfMonth: 18, entry: demoHistoryDay(18, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 4, currentLevel: 2 }) },
-  { dayOfMonth: 19, entry: demoHistoryDay(19, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 5, currentLevel: 2 }) },
-  { dayOfMonth: 20, entry: demoHistoryDay(20, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 6, currentLevel: 2 }) },
-  { dayOfMonth: 21, entry: demoHistoryDay(21, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 7, currentLevel: 2 }) },
-  { dayOfMonth: 22, entry: demoHistoryDay(22, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 8, currentLevel: 2 }) },
-  {
-    dayOfMonth: 23,
-    entry: demoHistoryDay(23, HistoryDayStatus.InProgress, {
-      completedTasks: 1,
-      totalTasks: 2,
-      finalizedAt: null,
-      currentStreak: 8,
-      currentLevel: 2,
-    }),
-    isToday: true,
-  },
-  { dayOfMonth: 24, isFutureEmpty: true },
-  { dayOfMonth: 25, isFutureEmpty: true },
-  { dayOfMonth: 26, isFutureEmpty: true },
+export const ONBOARDING_DEMO_MONTH_KEY = '2026-10';
+export const ONBOARDING_DEMO_TODAY_DATE = '2026-10-23';
+
+/** Full October 2026 demo days keyed by calendar date (Mon-start grid like Mein Weg). */
+const ONBOARDING_DEMO_DAYS: HistoryDay[] = [
+  demoHistoryDay(1, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 8, currentLevel: 2 }),
+  demoHistoryDay(2, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 9, currentLevel: 2 }),
+  demoHistoryDay(3, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 10, currentLevel: 2 }),
+  demoHistoryDay(4, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 11, currentLevel: 2 }),
+  demoHistoryDay(5, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 12, currentLevel: 2 }),
+  demoHistoryDay(6, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 13, currentLevel: 2 }),
+  demoHistoryDay(7, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 14, currentLevel: 2 }),
+  demoHistoryDay(8, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 15, currentLevel: 2 }),
+  demoHistoryDay(9, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 16, currentLevel: 2 }),
+  demoHistoryDay(10, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 17, currentLevel: 2 }),
+  demoHistoryDay(11, HistoryDayStatus.Missed, { completedTasks: 1, totalTasks: 2, currentStreak: 0, currentLevel: 2 }),
+  demoHistoryDay(12, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 1, currentLevel: 2, note: 'demo' }),
+  demoHistoryDay(13, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 2, currentLevel: 2 }),
+  demoHistoryDay(14, HistoryDayStatus.Missed, { completedTasks: 1, totalTasks: 2, currentStreak: 0, currentLevel: 2 }),
+  demoHistoryDay(15, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 1, currentLevel: 2 }),
+  demoHistoryDay(16, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 2, currentLevel: 2 }),
+  demoHistoryDay(17, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 3, currentLevel: 2 }),
+  demoHistoryDay(18, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 4, currentLevel: 2 }),
+  demoHistoryDay(19, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 5, currentLevel: 2 }),
+  demoHistoryDay(20, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 6, currentLevel: 2 }),
+  demoHistoryDay(21, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 7, currentLevel: 2 }),
+  demoHistoryDay(22, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 8, currentLevel: 2 }),
+  demoHistoryDay(23, HistoryDayStatus.InProgress, {
+    completedTasks: 1,
+    totalTasks: 2,
+    finalizedAt: null,
+    currentStreak: 8,
+    currentLevel: 2,
+  }),
 ];
+
+export function getOnboardingDemoDaysByDate(): Map<string, HistoryDay> {
+  return indexHistoryDaysByDate(ONBOARDING_DEMO_DAYS);
+}
+
+export function isOnboardingDemoFutureDay(dayOfMonth: number): boolean {
+  return dayOfMonth > Number(ONBOARDING_DEMO_TODAY_DATE.slice(-2));
+}
 
 export const ONBOARDING_DEMO_NOTE_DAY = demoHistoryDay(12, HistoryDayStatus.Success, {
   completedTasks: 2,

@@ -151,7 +151,7 @@ export const de = {
   'onboarding.demo.secondTaskTitle': '10 Minuten dehnen',
   'onboarding.demo.thirdTaskTitle': 'Wasser trinken',
   'onboarding.demo.monthTitle': 'Oktober 2026',
-  'onboarding.demo.dayTitle': 'Sonntag, 12. Oktober 2026',
+  'onboarding.demo.dayTitle': 'Montag, 12. Oktober 2026',
   'onboarding.demo.noteText':
     'Heute hat die kurze Leseroutine geholfen. Morgen starte ich direkt nach dem Frühstück — ohne Handy.',
   'onboarding.empty.overline': 'Erster Schritt',

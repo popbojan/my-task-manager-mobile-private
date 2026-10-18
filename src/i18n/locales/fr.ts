@@ -151,7 +151,7 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.demo.secondTaskTitle': 'S’étirer 10 minutes',
   'onboarding.demo.thirdTaskTitle': 'Boire de l’eau',
   'onboarding.demo.monthTitle': 'Octobre 2026',
-  'onboarding.demo.dayTitle': 'Dimanche 12 octobre 2026',
+  'onboarding.demo.dayTitle': 'Lundi 12 octobre 2026',
   'onboarding.demo.noteText':
     'Aujourd’hui, la courte routine de lecture a aidé. Demain, je commence juste après le petit-déjeuner — sans téléphone.',
   'onboarding.empty.overline': 'Premier pas',

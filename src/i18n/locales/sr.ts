@@ -152,7 +152,7 @@ export const sr: Record<TranslationKey, string> = {
   'onboarding.demo.secondTaskTitle': 'Istezanje 10 minuta',
   'onboarding.demo.thirdTaskTitle': 'Pij vodu',
   'onboarding.demo.monthTitle': 'Oktobar 2026.',
-  'onboarding.demo.dayTitle': 'Nedelja, 12. oktobar 2026.',
+  'onboarding.demo.dayTitle': 'Ponedeljak, 12. oktobar 2026.',
   'onboarding.demo.noteText':
     'Danas je kratka rutina čitanja pomogla. Sutra krećem odmah posle doručka — bez telefona.',
   'onboarding.empty.overline': 'Prvi korak',

@@ -51,19 +51,28 @@ function toneStyles(
   }
 }
 
-function HistoryStatusBadge({ entry }: { entry?: HistoryDay }) {
+function HistoryStatusBadge({
+  entry,
+  variant = 'default',
+}: {
+  entry?: HistoryDay;
+  variant?: 'default' | 'onboarding';
+}) {
+  const isOnboarding = variant === 'onboarding';
+  const badgeStyle = isOnboarding ? styles.statusBadgeOnboarding : styles.statusBadge;
+
   if (shouldShowHistorySuccessCrown(entry)) {
     return (
-      <View style={[styles.statusBadge, styles.successBadge]}>
-        <CheckIcon size={9} color={recurringTheme.accentBright} />
+      <View style={[badgeStyle, styles.successBadge]}>
+        <CheckIcon size={isOnboarding ? 7 : 9} color={recurringTheme.accentBright} />
       </View>
     );
   }
 
   if (shouldShowHistoryMissedMark(entry)) {
     return (
-      <View style={[styles.statusBadge, styles.missedBadge]}>
-        <CrossIcon size={9} color={recurringTheme.fireRedBright} />
+      <View style={[badgeStyle, styles.missedBadge]}>
+        <CrossIcon size={isOnboarding ? 7 : 9} color={recurringTheme.fireRedBright} />
       </View>
     );
   }
@@ -71,11 +80,11 @@ function HistoryStatusBadge({ entry }: { entry?: HistoryDay }) {
   const progressPercent = resolveHistoryDayProgressPercent(entry);
   if (shouldShowHistoryInProgressMark(entry) && progressPercent !== null) {
     return (
-      <View style={[styles.statusBadge, styles.inProgressBadge]}>
+      <View style={[badgeStyle, styles.inProgressBadge]}>
         <PremiumProgressRing
           compact
           percent={progressPercent}
-          size={12}
+          size={isOnboarding ? 10 : 12}
           stroke={1.5}
           tone="gold"
         />
@@ -101,7 +110,7 @@ export default function HistoryDayCell({
 
   return (
     <View style={[toneStyles(tone, isToday, variant), styles.cellFill, { minHeight: height }]}>
-      <View style={styles.topRow}>
+      <View style={[styles.topRow, isOnboarding ? styles.topRowOnboarding : null]}>
         <Text
           style={[
             isOnboarding ? styles.dayNumberOnboarding : styles.dayNumber,
@@ -110,17 +119,20 @@ export default function HistoryDayCell({
         >
           {dayOfMonth}
         </Text>
-        <View style={styles.topRightMarks}>
+        <View style={[styles.topRightMarks, isOnboarding ? styles.topRightMarksOnboarding : null]}>
           {showNoteMark ? (
             <View
-              style={[styles.statusBadge, styles.noteBadge]}
+              style={[
+                isOnboarding ? styles.statusBadgeOnboarding : styles.statusBadge,
+                styles.noteBadge,
+              ]}
               accessibilityLabel={t('history.hasNote')}
               importantForAccessibility="yes"
             >
-              <NoteIcon size={8} color={recurringTheme.textPrimary} />
+              <NoteIcon size={isOnboarding ? 7 : 8} color={recurringTheme.textPrimary} />
             </View>
           ) : null}
-          <HistoryStatusBadge entry={entry} />
+          <HistoryStatusBadge entry={entry} variant={variant} />
         </View>
       </View>
 
@@ -167,12 +179,13 @@ const styles = StyleSheet.create({
   },
   cellOnboarding: {
     borderRadius: 10,
-    paddingHorizontal: 5,
+    paddingHorizontal: 4,
     paddingVertical: 7,
     borderWidth: 1.5,
     borderColor: 'rgba(255, 255, 255, 0.08)',
     alignItems: 'center',
     justifyContent: 'space-between',
+    overflow: 'hidden',
   },
   cellFill: {
     width: '100%',
@@ -204,11 +217,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 2,
   },
+  topRowOnboarding: {
+    gap: 1,
+  },
   topRightMarks: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 1,
     flexShrink: 0,
+  },
+  topRightMarksOnboarding: {
+    gap: 0,
+    maxWidth: 22,
+  },
+  statusBadgeOnboarding: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dayNumber: {
     color: recurringTheme.textSecondary,
@@ -217,8 +244,10 @@ const styles = StyleSheet.create({
   },
   dayNumberOnboarding: {
     color: recurringTheme.textSecondary,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
+    flexShrink: 1,
+    minWidth: 0,
   },
   statusBadge: {
     width: 12,

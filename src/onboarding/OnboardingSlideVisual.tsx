@@ -11,7 +11,8 @@ import {
 } from '@/onboarding/onboardingDemoData';
 import type { OnboardingSlideId } from '@/onboarding/onboardingSlides';
 import HistoryDayCell from '@/pages/history/HistoryDayCell';
-import { CheckIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
+import { CheckIcon, FireIcon, IconBadge } from '@/pages/recurring-tasks/premium/PremiumIcons';
+import PremiumSurface from '@/pages/recurring-tasks/premium/PremiumSurface';
 import { MasteryStatsGrid } from '@/pages/recurring-tasks/MasteryProfileHero';
 import { PlusIcon } from '@/pages/recurring-tasks/premium/TabIcons';
 import RecurringTaskCard from '@/pages/recurring-tasks/RecurringTaskCard';
@@ -246,11 +247,11 @@ function StreakChainPreview() {
   const rowCount = Math.ceil(streakDays / STREAK_CHAIN_ROW_SIZE);
 
   return (
-    <View style={styles.streakCard}>
+    <PremiumSurface accent="green" compact padding={10} radius={14}>
       <View style={styles.streakCardTop}>
-        <View style={styles.streakBadge}>
-          <FireIcon size={14} color={recurringTheme.streakOrangeBright} />
-        </View>
+        <IconBadge tone="red" size={38}>
+          <FireIcon size={18} />
+        </IconBadge>
         <View style={styles.streakCopy}>
           <Text style={styles.streakLabel}>{t('recurring.stats.currentStreak')}</Text>
           <Text style={styles.streakValue}>
@@ -261,26 +262,42 @@ function StreakChainPreview() {
         </View>
       </View>
 
-      <View style={styles.chainRows}>
-        {Array.from({ length: rowCount }, (_, rowIndex) => {
-          const start = rowIndex * STREAK_CHAIN_ROW_SIZE;
-          const count = Math.min(STREAK_CHAIN_ROW_SIZE, streakDays - start);
+      <View style={styles.chainTrack}>
+        <View style={styles.chainRows}>
+          {Array.from({ length: rowCount }, (_, rowIndex) => {
+            const start = rowIndex * STREAK_CHAIN_ROW_SIZE;
+            const count = Math.min(STREAK_CHAIN_ROW_SIZE, streakDays - start);
 
-          return (
-            <View key={rowIndex} style={styles.chainRow}>
-              {Array.from({ length: count }, (_, index) => (
-                <View key={start + index} style={styles.chainSegment}>
-                  {index > 0 ? <View style={styles.chainLink} /> : null}
-                  <View style={styles.chainDay}>
-                    <CheckIcon size={8} color={recurringTheme.accentBright} />
-                  </View>
-                </View>
-              ))}
-            </View>
-          );
-        })}
+            return (
+              <View key={rowIndex} style={styles.chainRow}>
+                {Array.from({ length: count }, (_, index) => {
+                  const dayIndex = start + index;
+                  const isLatest = dayIndex === streakDays - 1;
+
+                  return (
+                    <View key={dayIndex} style={styles.chainSegment}>
+                      {index > 0 ? <View style={styles.chainLink} /> : null}
+                      <View
+                        style={[
+                          styles.chainDay,
+                          isLatest ? styles.chainDayLatest : null,
+                        ]}
+                      >
+                        {isLatest ? (
+                          <FireIcon size={9} color={recurringTheme.goldBright} />
+                        ) : (
+                          <CheckIcon size={9} color={recurringTheme.accentBright} />
+                        )}
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            );
+          })}
+        </View>
       </View>
-    </View>
+    </PremiumSurface>
   );
 }
 
@@ -682,48 +699,37 @@ const styles = StyleSheet.create({
     width: 18,
     textAlign: 'center',
   },
-  streakCard: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: recurringTheme.cardBorderAccent,
-    backgroundColor: 'rgba(249, 115, 22, 0.08)',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    gap: 8,
-  },
   streakCardTop: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  streakBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(249, 115, 22, 0.14)',
-    borderWidth: 1,
-    borderColor: 'rgba(249, 115, 22, 0.28)',
+    gap: 10,
+    marginBottom: 10,
   },
   streakCopy: {
     flex: 1,
-    gap: 1,
+    gap: 2,
   },
   streakLabel: {
+    ...premiumType.overline,
     color: recurringTheme.textMuted,
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    fontSize: 9,
   },
   streakValue: {
-    color: recurringTheme.streakOrangeBright,
-    fontSize: 16,
+    color: recurringTheme.textPrimary,
+    fontSize: 18,
     fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  chainTrack: {
+    borderRadius: 10,
+    backgroundColor: recurringTheme.surfaceInset,
+    borderWidth: 1,
+    borderColor: recurringTheme.cardBorder,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
   },
   chainRows: {
-    gap: 6,
+    gap: 8,
     alignItems: 'center',
   },
   chainRow: {
@@ -736,20 +742,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chainLink: {
-    width: 8,
-    height: 2,
-    backgroundColor: recurringTheme.cardBorderAccent,
-    marginHorizontal: 1,
+    width: 10,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(82, 183, 136, 0.42)',
+    marginHorizontal: 2,
   },
   chainDay: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(82, 183, 136, 0.16)',
+    backgroundColor: 'rgba(82, 183, 136, 0.18)',
     borderWidth: 1,
     borderColor: recurringTheme.cardBorderAccent,
+  },
+  chainDayLatest: {
+    backgroundColor: 'rgba(212, 168, 67, 0.16)',
+    borderColor: 'rgba(212, 168, 67, 0.45)',
+    shadowColor: recurringTheme.goldBright,
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 2,
   },
   historyScreenTitle: {
     color: recurringTheme.textPrimary,

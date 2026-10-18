@@ -212,6 +212,7 @@ function MainAppShell() {
   }
 
   function backToPersonalIntro() {
+    setPersonalIntroDraft(current => ({ ...current, stepIndex: 0 }));
     setIntroPhase('personal');
   }
 

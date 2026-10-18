@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  BackHandler,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import OnboardingSlideVisual from '@/onboarding/OnboardingSlideVisual';
 import { ONBOARDING_SLIDES } from '@/onboarding/onboardingSlides';
+import LanguagePicker from '@/pages/login/LanguagePicker';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 type OnboardingModalProps = {
@@ -26,6 +35,7 @@ export default function OnboardingModal({
   const [stepIndex, setStepIndex] = useState(0);
   const slide = ONBOARDING_SLIDES[stepIndex];
   const isLastStep = stepIndex >= ONBOARDING_SLIDES.length - 1;
+  const canGoBack = stepIndex > 0;
 
   useEffect(() => {
     if (!visible) {
@@ -33,18 +43,40 @@ export default function OnboardingModal({
     }
   }, [visible]);
 
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (stepIndex > 0) {
+        setStepIndex(current => current - 1);
+        return true;
+      }
+
+      handleClose();
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, [visible, stepIndex]);
+
   function handleClose() {
     setStepIndex(0);
     onClose();
   }
 
-  function handleSkipStep() {
-    if (isLastStep) {
-      handleClose();
+  function handleBack() {
+    setStepIndex(current => Math.max(0, current - 1));
+  }
+
+  function handleRequestClose() {
+    if (stepIndex > 0) {
+      handleBack();
       return;
     }
 
-    setStepIndex(current => current + 1);
+    handleClose();
   }
 
   function handlePrimary() {
@@ -62,21 +94,25 @@ export default function OnboardingModal({
       visible={visible}
       animationType="slide"
       presentationStyle="fullScreen"
-      onRequestClose={handleClose}
+      onRequestClose={handleRequestClose}
     >
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{t('onboarding.badge')}</Text>
           </View>
-          <Pressable
-            style={styles.closeButton}
-            accessibilityRole="button"
-            accessibilityLabel={t('onboarding.closeAll')}
-            onPress={handleClose}
-          >
-            <Text style={styles.closeButtonText}>×</Text>
-          </Pressable>
+          <View style={styles.headerRight}>
+            {canGoBack ? (
+              <Pressable
+                style={styles.headerBackButton}
+                accessibilityRole="button"
+                onPress={handleBack}
+              >
+                <Text style={styles.headerBackText}>← {t('personalIntro.back')}</Text>
+              </Pressable>
+            ) : null}
+            <LanguagePicker variant="ghost" />
+          </View>
         </View>
 
         <ScrollView
@@ -121,16 +157,6 @@ export default function OnboardingModal({
           ) : null}
 
           <Pressable
-            style={styles.skipButton}
-            accessibilityRole="button"
-            onPress={handleSkipStep}
-          >
-            <Text style={styles.skipButtonText}>
-              {isLastStep ? t('onboarding.closeAll') : t('onboarding.skipStep')}
-            </Text>
-          </Pressable>
-
-          <Pressable
             style={styles.primaryButton}
             accessibilityRole="button"
             onPress={handlePrimary}
@@ -158,6 +184,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: recurringTheme.cardBorder,
+    backgroundColor: recurringTheme.pageBg,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerBackButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 2,
+  },
+  headerBackText: {
+    color: recurringTheme.textSecondary,
+    fontSize: 14,
+    fontWeight: '700',
   },
   badge: {
     paddingHorizontal: 10,
@@ -173,21 +214,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.4,
     textTransform: 'uppercase',
-  },
-  closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: recurringTheme.cardBorder,
-  },
-  closeButtonText: {
-    color: recurringTheme.textPrimary,
-    fontSize: 24,
-    lineHeight: 28,
-    fontWeight: '300',
   },
   scroll: {
     flex: 1,
@@ -246,15 +272,6 @@ const styles = StyleSheet.create({
     color: recurringTheme.accentBright,
     fontSize: 14,
     fontWeight: '700',
-  },
-  skipButton: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  skipButtonText: {
-    color: recurringTheme.textMuted,
-    fontSize: 14,
-    fontWeight: '600',
   },
   primaryButton: {
     backgroundColor: recurringTheme.accentDark,

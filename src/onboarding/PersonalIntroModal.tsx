@@ -238,7 +238,7 @@ export default function PersonalIntroModal({
                   <View
                     style={[
                       styles.inputStepContent,
-                      keyboardOpen ? styles.inputStepContentCompact : null,
+                      keyboardOpen && stepIndex === 1 ? styles.inputStepContentCompact : null,
                     ]}
                   >
                     {progressHeader}
@@ -248,7 +248,7 @@ export default function PersonalIntroModal({
                         <Text style={styles.inputHint}>{t('personalIntro.page1.hint')}</Text>
                         <TextInput
                           {...introInputProps}
-                          style={styles.input}
+                          style={[styles.input, styles.inputSingleLine]}
                           value={taskName}
                           onChangeText={value => updateDraft({ taskName: value })}
                           returnKeyType="next"
@@ -405,8 +405,8 @@ const styles = StyleSheet.create({
     minHeight: 0,
   },
   inputStepBody: {
-    flex: 1,
-    minHeight: 0,
+    flexGrow: 1,
+    flexShrink: 0,
   },
   inputStepContent: {
     paddingHorizontal: 20,
@@ -490,6 +490,7 @@ const styles = StyleSheet.create({
   },
   inputBlock: {
     gap: 6,
+    flexShrink: 0,
   },
   inputHint: {
     color: recurringTheme.textMuted,
@@ -505,6 +506,11 @@ const styles = StyleSheet.create({
     color: recurringTheme.textPrimary,
     fontSize: 15,
     backgroundColor: recurringTheme.surfaceInset,
+  },
+  inputSingleLine: {
+    height: 44,
+    minHeight: 44,
+    flexShrink: 0,
   },
   textArea: {
     height: 112,

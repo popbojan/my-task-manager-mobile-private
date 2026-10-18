@@ -129,40 +129,30 @@ export const sr: Record<TranslationKey, string> = {
   'onboarding.badge': 'Dobrodošli',
   'onboarding.closeAll': 'Zatvori uvod',
   'onboarding.skipStep': 'Preskoči korak',
+  'onboarding.skip': 'Preskoči uvod',
   'onboarding.next': 'Dalje',
   'onboarding.finish': 'Kreni',
   'onboarding.progress': 'Korak {{current}} od {{total}}',
-  'onboarding.slide1.title': 'Dve vrste zadataka',
-  'onboarding.slide1.today.sectionTitle': 'Danas – tvoje dnevne navike',
-  'onboarding.slide1.today.body':
-    'Ovde su tvoji dnevni, ponavljajući zadaci. Odvoji bar pet minuta za svaki zadatak, pa ga označi kao završen. Kada završiš sve dnevne zadatke, tvoj niz raste za jedan dan. Korak po korak gradiš navike i dostigneš nove nivoe.',
-  'onboarding.slide1.tasks.sectionTitle': 'Zadaci – tvoji to-do-i',
-  'onboarding.slide1.tasks.body':
-    'Ovde organizuješ pojedinačne zadatke i projekte sa rokom i prioritetom.',
-  'onboarding.slide1.habitExample': '10 minuta čitanja',
-  'onboarding.slide1.boardExample': 'Prepravka sajta',
-  'onboarding.slide1.boardDeadline': '14.11., 18:00',
-  'onboarding.slide2.title': 'Kako da kreneš',
-  'onboarding.slide2.step1.title': 'Izaberi oblast',
-  'onboarding.slide2.step1.body':
-    'Otvori Zadaci za jedan to-do ili Danas za dnevnu naviku.',
-  'onboarding.slide2.step2.title': 'Napravi zadatak',
-  'onboarding.slide2.step2.body': 'Tapni + i daj zadatku ime.',
-  'onboarding.slide2.step3.title': 'Označi kao završeno',
-  'onboarding.slide2.step3.body':
-    'Kada završiš, postavi status na Završeno.',
-  'onboarding.slide2.premiumNote':
-    'Zadaci na tabli su besplatni. Za dnevne navike i funkcije napretka potreban je Premium.',
-  'onboarding.slide3.title': 'Tvoj napredak na jednom mestu',
-  'onboarding.slide3.intro':
-    'U Napretku vidiš trenutni razvoj i lične rekorde.',
-  'onboarding.slide3.stat.currentLevel.hint': 'Tvoj trenutni nivo',
-  'onboarding.slide3.stat.highestLevel.hint': 'Tvoj dosadašnji rekord nivoa',
-  'onboarding.slide3.stat.currentStreak.hint': 'Uzastopni uspešni dani',
-  'onboarding.slide3.stat.highestStreak.hint': 'Tvoja dosadašnja najduža serija',
-  'onboarding.slide3.streakFootnote':
-    'Svaki dan završi sve dnevne zadatke da tvoj trenutni niz raste.',
-  'onboarding.slide3.weekTitle': 'Tvojih poslednjih 7 dana',
+  'onboarding.slide1.title': 'Tvoji dnevni zadaci',
+  'onboarding.slide1.body':
+    'Počni malo i konkretno: tapni + i napravi prvi dnevni zadatak — na primer „Čitaj 5 minuta“.',
+  'onboarding.slide2.title': 'Završi i gradi svoj niz',
+  'onboarding.slide2.body':
+    'Tapni status zadatka dok ne bude završen. Za uspešan dan moraš završiti sve dnevne zadatke koji se računaju.',
+  'onboarding.slide2.callout':
+    'Tek kada su svi dnevni zadaci koji se računaju završeni, dan se računa kao uspeh.',
+  'onboarding.slide3.title': 'Tvoj put ostaje vidljiv',
+  'onboarding.slide3.body':
+    'U Moj put vidiš kalendar sa dnevnim rezultatima. Čak i posle pauze, prošli uspesi ostaju vidljivi.',
+  'onboarding.slide4.title': 'Zabeleži šta te pokreće',
+  'onboarding.slide4.body':
+    'Tapni dan i napiši belešku: Šta je pomoglo? Šta je bilo teško? Šta ćeš sutra uraditi drugačije?',
+  'onboarding.demo.taskTitle': 'Čitaj 5 minuta',
+  'onboarding.demo.secondTaskTitle': 'Istezanje 10 minuta',
+  'onboarding.demo.monthTitle': 'Oktobar 2026.',
+  'onboarding.demo.dayTitle': 'Nedelja, 12. oktobar 2026.',
+  'onboarding.demo.noteText':
+    'Danas je kratka rutina čitanja pomogla. Sutra krećem odmah posle doručka — bez telefona.',
   'onboarding.empty.overline': 'Prvi korak',
   'onboarding.empty.tasks.title': 'Još nema zadataka',
   'onboarding.empty.tasks.body':

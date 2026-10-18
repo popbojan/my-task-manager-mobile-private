@@ -128,40 +128,30 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.badge': 'Bienvenue',
   'onboarding.closeAll': 'Fermer l’introduction',
   'onboarding.skipStep': 'Passer cette étape',
+  'onboarding.skip': 'Passer l’onboarding',
   'onboarding.next': 'Suivant',
   'onboarding.finish': 'C’est parti',
   'onboarding.progress': 'Étape {{current}} sur {{total}}',
-  'onboarding.slide1.title': 'Deux types de tâches',
-  'onboarding.slide1.today.sectionTitle': 'Aujourd’hui – tes habitudes quotidiennes',
-  'onboarding.slide1.today.body':
-    'Ici tu trouves tes tâches quotidiennes récurrentes. Consacre au moins cinq minutes à chaque tâche, puis marque-la comme terminée. Quand tu termines toutes les tâches du jour, ta série grandit d’un jour. Pas à pas, tu construis des habitudes et atteins de nouveaux niveaux.',
-  'onboarding.slide1.tasks.sectionTitle': 'Tâches – tes to-dos',
-  'onboarding.slide1.tasks.body':
-    'Organise ici des tâches et projets individuels avec échéance et priorité.',
-  'onboarding.slide1.habitExample': 'Lire 10 minutes',
-  'onboarding.slide1.boardExample': 'Refonte du site web',
-  'onboarding.slide1.boardDeadline': '14 nov., 18:00',
-  'onboarding.slide2.title': 'Comment commencer',
-  'onboarding.slide2.step1.title': 'Choisir une zone',
-  'onboarding.slide2.step1.body':
-    'Ouvre Tâches pour un to-do ou Aujourd’hui pour une habitude quotidienne.',
-  'onboarding.slide2.step2.title': 'Créer une tâche',
-  'onboarding.slide2.step2.body': 'Appuie sur + et donne un nom à ta tâche.',
-  'onboarding.slide2.step3.title': 'Marquer comme terminé',
-  'onboarding.slide2.step3.body':
-    'Quand tu as fini, passe le statut sur Terminé.',
-  'onboarding.slide2.premiumNote':
-    'Les tâches du board sont gratuites. Les habitudes quotidiennes et les fonctions de progression nécessitent Premium.',
-  'onboarding.slide3.title': 'Ta progression en un coup d’œil',
-  'onboarding.slide3.intro':
-    'Dans Progrès, tu vois ton évolution actuelle et tes records personnels.',
-  'onboarding.slide3.stat.currentLevel.hint': 'Ton niveau actuel',
-  'onboarding.slide3.stat.highestLevel.hint': 'Ton record de niveau',
-  'onboarding.slide3.stat.currentStreak.hint': 'Jours réussis consécutifs',
-  'onboarding.slide3.stat.highestStreak.hint': 'Ta plus longue série',
-  'onboarding.slide3.streakFootnote':
-    'Termine chaque jour toutes tes tâches quotidiennes pour faire grandir ta série actuelle.',
-  'onboarding.slide3.weekTitle': 'Tes 7 derniers jours',
+  'onboarding.slide1.title': 'Tes tâches quotidiennes',
+  'onboarding.slide1.body':
+    'Commence petit et concrètement : appuie sur + et crée ta première tâche quotidienne — par exemple « Lire 5 minutes ».',
+  'onboarding.slide2.title': 'Terminer et construire ta série',
+  'onboarding.slide2.body':
+    'Appuie sur le statut d’une tâche jusqu’à Terminé. Pour un jour réussi, tu dois terminer toutes les tâches quotidiennes comptées.',
+  'onboarding.slide2.callout':
+    'Ce n’est que lorsque toutes les tâches quotidiennes comptées sont terminées que le jour compte comme un succès.',
+  'onboarding.slide3.title': 'Ton parcours reste visible',
+  'onboarding.slide3.body':
+    'Dans Mon parcours, tu vois ton calendrier avec les résultats du jour. Même après une pause, tes succès passés restent visibles.',
+  'onboarding.slide4.title': 'Note ce qui te motive',
+  'onboarding.slide4.body':
+    'Appuie sur un jour et écris une note : Qu’est-ce qui a aidé ? Qu’est-ce qui était difficile ? Que feras-tu différemment demain ?',
+  'onboarding.demo.taskTitle': 'Lire 5 minutes',
+  'onboarding.demo.secondTaskTitle': 'S’étirer 10 minutes',
+  'onboarding.demo.monthTitle': 'Octobre 2026',
+  'onboarding.demo.dayTitle': 'Dimanche 12 octobre 2026',
+  'onboarding.demo.noteText':
+    'Aujourd’hui, la courte routine de lecture a aidé. Demain, je commence juste après le petit-déjeuner — sans téléphone.',
   'onboarding.empty.overline': 'Premier pas',
   'onboarding.empty.tasks.title': 'Aucune tâche pour l’instant',
   'onboarding.empty.tasks.body':

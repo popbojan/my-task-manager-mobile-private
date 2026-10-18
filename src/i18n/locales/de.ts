@@ -128,41 +128,30 @@ export const de = {
   'onboarding.badge': 'Willkommen',
   'onboarding.closeAll': 'Onboarding schließen',
   'onboarding.skipStep': 'Schritt überspringen',
+  'onboarding.skip': 'Onboarding überspringen',
   'onboarding.next': 'Weiter',
   'onboarding.finish': 'Los geht\'s',
   'onboarding.progress': 'Schritt {{current}} von {{total}}',
-  'onboarding.slide1.title': 'Zwei Arten von Aufgaben',
-  'onboarding.slide1.today.sectionTitle': 'Heute – deine täglichen Gewohnheiten',
-  'onboarding.slide1.today.body':
-    'Hier findest du deine täglichen, wiederkehrenden Aufgaben. Nimm dir für jede Aufgabe mindestens fünf Minuten Zeit und markiere sie anschließend als erledigt. Wenn du alle Aufgaben des Tages abschließt, wächst deine Kette um einen Tag. So baust du Schritt für Schritt Gewohnheiten auf und erreichst neue Level.',
-  'onboarding.slide1.tasks.sectionTitle': 'Aufgaben – deine To-dos',
-  'onboarding.slide1.tasks.body':
-    'Hier organisierst du einzelne Aufgaben und Projekte mit Fälligkeit und Priorität.',
-  'onboarding.slide1.habitExample': '10 Minuten lesen',
-  'onboarding.slide1.boardExample': 'Website überarbeiten',
-  'onboarding.slide1.boardDeadline': '14.11., 18:00',
-  'onboarding.slide2.title': 'So legst du los',
-  'onboarding.slide2.step1.title': 'Bereich wählen',
-  'onboarding.slide2.step1.body':
-    'Öffne Aufgaben für ein einzelnes To-do oder Heute für eine tägliche Gewohnheit.',
-  'onboarding.slide2.step2.title': 'Aufgabe erstellen',
-  'onboarding.slide2.step2.body':
-    'Tippe auf + und gib deiner Aufgabe einen Namen.',
-  'onboarding.slide2.step3.title': 'Als erledigt markieren',
-  'onboarding.slide2.step3.body':
-    'Wenn du fertig bist, setze den Status auf Erledigt.',
-  'onboarding.slide2.premiumNote':
-    'Aufgaben kannst du kostenlos nutzen. Für tägliche Gewohnheiten und die Fortschrittsfunktionen brauchst du Premium.',
-  'onboarding.slide3.title': 'Dein Fortschritt auf einen Blick',
-  'onboarding.slide3.intro':
-    'Im Bereich Fortschritt siehst du deine aktuelle Entwicklung und deine persönlichen Rekorde.',
-  'onboarding.slide3.stat.currentLevel.hint': 'Dein derzeitiges Level',
-  'onboarding.slide3.stat.highestLevel.hint': 'Dein bisheriger Levelrekord',
-  'onboarding.slide3.stat.currentStreak.hint': 'Aufeinanderfolgende erfolgreiche Tage',
-  'onboarding.slide3.stat.highestStreak.hint': 'Deine bisher längste Serie',
-  'onboarding.slide3.streakFootnote':
-    'Erledige jeden Tag alle deine täglichen Aufgaben, damit deine aktuelle Kette wächst.',
-  'onboarding.slide3.weekTitle': 'Deine letzten 7 Tage',
+  'onboarding.slide1.title': 'Deine täglichen Aufgaben',
+  'onboarding.slide1.body':
+    'Klein und konkret beginnen: Tippe auf + und lege deine erste tägliche Aufgabe an — zum Beispiel „5 Minuten lesen“.',
+  'onboarding.slide2.title': 'Erledigen und deine Kette aufbauen',
+  'onboarding.slide2.body':
+    'Tippe auf den Status einer Aufgabe, bis sie erledigt ist. Für einen erfolgreichen Tag musst du alle zählenden täglichen Aufgaben abschließen.',
+  'onboarding.slide2.callout':
+    'Erst wenn alle zählenden täglichen Aufgaben erledigt sind, zählt der Tag als Erfolg.',
+  'onboarding.slide3.title': 'Dein Weg bleibt sichtbar',
+  'onboarding.slide3.body':
+    'In „Mein Weg“ siehst du deinen Kalender mit Tagesergebnissen. Auch nach einer Unterbrechung bleiben deine bisherigen Erfolge sichtbar.',
+  'onboarding.slide4.title': 'Halte fest, was dich bewegt',
+  'onboarding.slide4.body':
+    'Tippe auf einen Tag und schreibe eine Notiz: Was hat geholfen? Was war schwierig? Was möchtest du morgen anders machen?',
+  'onboarding.demo.taskTitle': '5 Minuten lesen',
+  'onboarding.demo.secondTaskTitle': '10 Minuten dehnen',
+  'onboarding.demo.monthTitle': 'Oktober 2026',
+  'onboarding.demo.dayTitle': 'Sonntag, 12. Oktober 2026',
+  'onboarding.demo.noteText':
+    'Heute hat die kurze Leseroutine geholfen. Morgen starte ich direkt nach dem Frühstück — ohne Handy.',
   'onboarding.empty.overline': 'Erster Schritt',
   'onboarding.empty.tasks.title': 'Noch keine Aufgaben',
   'onboarding.empty.tasks.body':

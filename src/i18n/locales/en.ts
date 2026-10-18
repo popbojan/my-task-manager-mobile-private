@@ -128,39 +128,30 @@ export const en: Record<TranslationKey, string> = {
   'onboarding.badge': 'Welcome',
   'onboarding.closeAll': 'Close onboarding',
   'onboarding.skipStep': 'Skip step',
+  'onboarding.skip': 'Skip onboarding',
   'onboarding.next': 'Next',
   'onboarding.finish': 'Get started',
   'onboarding.progress': 'Step {{current}} of {{total}}',
-  'onboarding.slide1.title': 'Two kinds of tasks',
-  'onboarding.slide1.today.sectionTitle': 'Today – your daily habits',
-  'onboarding.slide1.today.body':
-    'Here you find your daily recurring tasks. Spend at least five minutes on each task, then mark it done. When you complete every task for the day, your streak grows by one day. Step by step you build habits and reach new levels.',
-  'onboarding.slide1.tasks.sectionTitle': 'Tasks – your to-dos',
-  'onboarding.slide1.tasks.body':
-    'Organise individual tasks and projects with deadlines and priority.',
-  'onboarding.slide1.habitExample': 'Read for 10 minutes',
-  'onboarding.slide1.boardExample': 'Revise website',
-  'onboarding.slide1.boardDeadline': '14 Nov, 18:00',
-  'onboarding.slide2.title': 'How to get started',
-  'onboarding.slide2.step1.title': 'Choose an area',
-  'onboarding.slide2.step1.body':
-    'Open Tasks for a single to-do or Today for a daily habit.',
-  'onboarding.slide2.step2.title': 'Create a task',
-  'onboarding.slide2.step2.body': 'Tap + and give your task a name.',
-  'onboarding.slide2.step3.title': 'Mark as done',
-  'onboarding.slide2.step3.body': 'When you are finished, set the status to Done.',
-  'onboarding.slide2.premiumNote':
-    'Tasks are free to use. Daily habits and progress features require Premium.',
-  'onboarding.slide3.title': 'Your progress at a glance',
-  'onboarding.slide3.intro':
-    'In Progress you see your current development and personal records.',
-  'onboarding.slide3.stat.currentLevel.hint': 'Your current level',
-  'onboarding.slide3.stat.highestLevel.hint': 'Your highest level so far',
-  'onboarding.slide3.stat.currentStreak.hint': 'Consecutive successful days',
-  'onboarding.slide3.stat.highestStreak.hint': 'Your longest streak so far',
-  'onboarding.slide3.streakFootnote':
-    'Complete all your daily tasks every day so your current streak keeps growing.',
-  'onboarding.slide3.weekTitle': 'Your last 7 days',
+  'onboarding.slide1.title': 'Your daily tasks',
+  'onboarding.slide1.body':
+    'Start small and concrete: tap + and create your first daily task — for example “Read for 5 minutes”.',
+  'onboarding.slide2.title': 'Complete tasks and build your streak',
+  'onboarding.slide2.body':
+    'Tap a task’s status until it is done. For a successful day, you must complete all counting daily tasks.',
+  'onboarding.slide2.callout':
+    'Only when all counting daily tasks are done does the day count as a success.',
+  'onboarding.slide3.title': 'Your journey stays visible',
+  'onboarding.slide3.body':
+    'In My Journey you see your calendar with daily results. Even after a break, your past successes stay visible.',
+  'onboarding.slide4.title': 'Capture what moves you',
+  'onboarding.slide4.body':
+    'Tap a day and write a note: What helped? What was difficult? What will you do differently tomorrow?',
+  'onboarding.demo.taskTitle': 'Read for 5 minutes',
+  'onboarding.demo.secondTaskTitle': 'Stretch for 10 minutes',
+  'onboarding.demo.monthTitle': 'October 2026',
+  'onboarding.demo.dayTitle': 'Sunday, 12 October 2026',
+  'onboarding.demo.noteText':
+    'Today the short reading routine helped. Tomorrow I will start right after breakfast — without my phone.',
   'onboarding.empty.overline': 'First step',
   'onboarding.empty.tasks.title': 'No tasks yet',
   'onboarding.empty.tasks.body':

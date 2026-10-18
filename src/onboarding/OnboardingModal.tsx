@@ -91,6 +91,11 @@ export default function OnboardingModal({
     handleBackToPersonalIntroOrClose();
   }
 
+  function handleSkipOnboarding() {
+    setStepIndex(0);
+    onComplete();
+  }
+
   function handlePrimary() {
     if (isLastStep) {
       setStepIndex(0);
@@ -129,6 +134,7 @@ export default function OnboardingModal({
           </View>
 
           <Text style={styles.title}>{t(pageSlide.titleKey)}</Text>
+          <Text style={styles.body}>{t(pageSlide.bodyKey)}</Text>
         </View>
 
         <View style={styles.visualWrap}>
@@ -185,6 +191,16 @@ export default function OnboardingModal({
               onPress={onBackToPersonalIntro}
             >
               <Text style={styles.backLinkText}>{t('onboarding.backToPersonalIntro')}</Text>
+            </Pressable>
+          ) : null}
+
+          {!isLastStep ? (
+            <Pressable
+              style={styles.skipButton}
+              accessibilityRole="button"
+              onPress={handleSkipOnboarding}
+            >
+              <Text style={styles.skipButtonText}>{t('onboarding.skip')}</Text>
             </Pressable>
           ) : null}
 
@@ -288,6 +304,11 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
     lineHeight: 30,
   },
+  body: {
+    color: recurringTheme.textSecondary,
+    fontSize: 15,
+    lineHeight: 22,
+  },
   footer: {
     paddingHorizontal: 16,
     paddingBottom: 8,
@@ -304,6 +325,15 @@ const styles = StyleSheet.create({
     color: recurringTheme.accentBright,
     fontSize: 14,
     fontWeight: '700',
+  },
+  skipButton: {
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  skipButtonText: {
+    color: recurringTheme.textMuted,
+    fontSize: 14,
+    fontWeight: '600',
   },
   primaryButton: {
     backgroundColor: recurringTheme.accentDark,

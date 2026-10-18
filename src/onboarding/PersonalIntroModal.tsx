@@ -1,10 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   BackHandler,
-  Dimensions,
   Image,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
@@ -12,8 +10,8 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
-  type ScrollView as ScrollViewType,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '@/i18n/LanguageProvider';
@@ -23,28 +21,8 @@ import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTh
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 const PERSONAL_INTRO_STEPS = 4;
-const FOOTER_HEIGHT_LAST_STEP = 74;
-const FOOTER_HEIGHT_WITH_SKIP = 124;
-
-type KeyboardLayoutEvent = {
-  endCoordinates: {
-    height: number;
-    screenY: number;
-  };
-};
-
-function resolveKeyboardInset(event: KeyboardLayoutEvent): number {
-  const windowHeight = Dimensions.get('window').height;
-  const { height, screenY } = event.endCoordinates;
-  const insetFromScreenY =
-    screenY > 0 ? Math.max(0, windowHeight - screenY) : height;
-
-  if (Platform.OS === 'android') {
-    return Math.max(height, insetFromScreenY);
-  }
-
-  return height;
-}
+const HERO_HEIGHT = 160;
+const HERO_TOP_MARGIN = 16;
 
 const introInputProps = {
   autoCorrect: false,
@@ -73,108 +51,46 @@ export default function PersonalIntroModal({
 }: PersonalIntroModalProps) {
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
-  const scrollRef = useRef<ScrollViewType>(null);
-  const blurResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scrollRetryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const stepIndexRef = useRef(draft.stepIndex);
-  const [inputFocused, setInputFocused] = useState(false);
+  const { height: windowHeight } = useWindowDimensions();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [footerHeight, setFooterHeight] = useState(0);
   const { stepIndex, taskName, whyText } = draft;
-  stepIndexRef.current = stepIndex;
   const trimmedTaskName = taskName.trim();
   const trimmedWhyText = whyText.trim();
   const isLastStep = stepIndex >= PERSONAL_INTRO_STEPS - 1;
   const canGoBack = stepIndex > 0;
-  const hasInputStep = stepIndex === 0 || stepIndex === 1;
-  const hideHeroImage = hasInputStep && (inputFocused || keyboardHeight > 0);
+  const isInputStep = stepIndex === 0 || stepIndex === 1;
+  const keyboardOpen = keyboardHeight > 0;
+  const hideHeroImage = isInputStep && keyboardOpen;
 
   function updateDraft(partial: Partial<PersonalIntroDraft>) {
     onDraftChange({ ...draft, ...partial });
   }
 
-  function clearBlurReset() {
-    if (blurResetRef.current) {
-      clearTimeout(blurResetRef.current);
-      blurResetRef.current = null;
-    }
-  }
-
-  function clearScrollRetry() {
-    if (scrollRetryRef.current) {
-      clearTimeout(scrollRetryRef.current);
-      scrollRetryRef.current = null;
-    }
-  }
-
-  function resetScrollToTop() {
-    requestAnimationFrame(() => {
-      scrollRef.current?.scrollTo({ y: 0, animated: false });
-    });
-  }
-
-  function scrollInputIntoView() {
-    requestAnimationFrame(() => {
-      scrollRef.current?.scrollToEnd({ animated: Platform.OS === 'ios' });
-    });
-  }
-
-  function scheduleScrollInputIntoView() {
-    clearScrollRetry();
-    scrollInputIntoView();
-    scrollRetryRef.current = setTimeout(scrollInputIntoView, 120);
-  }
-
-  function handleKeyboardShow(height: number) {
-    if (stepIndexRef.current > 1) {
-      return;
-    }
-
-    setKeyboardHeight(height);
-    scheduleScrollInputIntoView();
-  }
-
-  function handleKeyboardHide() {
-    setKeyboardHeight(0);
-    setInputFocused(false);
-    clearBlurReset();
-    clearScrollRetry();
-    resetScrollToTop();
-  }
-
   useEffect(() => {
     if (!visible) {
-      setInputFocused(false);
       setKeyboardHeight(0);
-      clearBlurReset();
-      clearScrollRetry();
       return;
     }
 
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hideEvent = 'keyboardDidHide';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
-    const showSubscription = Keyboard.addListener(showEvent, event => {
-      handleKeyboardShow(resolveKeyboardInset(event));
+    const showSub = Keyboard.addListener(showEvent, event => {
+      const { screenY, height } = event.endCoordinates;
+      const insetFromScreenY = screenY > 0 ? windowHeight - screenY : height;
+      const androidBuffer = Platform.OS === 'android' ? 8 : 0;
+      setKeyboardHeight(insetFromScreenY + androidBuffer);
     });
-    const hideSubscription = Keyboard.addListener(hideEvent, handleKeyboardHide);
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
 
     return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
-      clearBlurReset();
-      clearScrollRetry();
+      showSub.remove();
+      hideSub.remove();
     };
-  }, [visible]);
-
-  useEffect(() => {
-    if (!visible) {
-      return;
-    }
-
-    setInputFocused(false);
-    setKeyboardHeight(0);
-    resetScrollToTop();
-  }, [visible, stepIndex]);
+  }, [visible, windowHeight]);
 
   useEffect(() => {
     if (!visible) {
@@ -215,22 +131,6 @@ export default function PersonalIntroModal({
     updateDraft({ stepIndex: stepIndex + 1 });
   }
 
-  function handleInputFocus() {
-    clearBlurReset();
-    setInputFocused(true);
-    scheduleScrollInputIntoView();
-  }
-
-  function handleInputBlur() {
-    clearBlurReset();
-    blurResetRef.current = setTimeout(() => {
-      setInputFocused(false);
-      if (keyboardHeight === 0) {
-        resetScrollToTop();
-      }
-    }, 150);
-  }
-
   const primaryDisabled =
     (stepIndex === 0 && !trimmedTaskName) || (stepIndex === 1 && !trimmedWhyText);
 
@@ -261,13 +161,6 @@ export default function PersonalIntroModal({
   })();
 
   const primaryLabel = isLastStep ? t('personalIntro.page4.cta') : t('personalIntro.next');
-
-  const keyboardOpen = keyboardHeight > 0;
-  const dockFooterAboveKeyboard = keyboardOpen && Platform.OS === 'android';
-  const footerReservedHeight = isLastStep
-    ? FOOTER_HEIGHT_LAST_STEP
-    : FOOTER_HEIGHT_WITH_SKIP;
-  const scrollBottomPadding = keyboardOpen ? footerReservedHeight + 12 : 16;
 
   const heroBlock = (
     <View style={styles.heroSlot}>
@@ -305,138 +198,152 @@ export default function PersonalIntroModal({
     return null;
   }
 
+  const footerBottom = keyboardOpen
+    ? keyboardHeight
+    : Math.max(insets.bottom, 8);
+
   return (
     <View style={styles.overlay} accessibilityViewIsModal>
       <StatusBar barStyle="light-content" backgroundColor={recurringTheme.pageBg} />
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        enabled={Platform.OS === 'ios'}
-        keyboardVerticalOffset={insets.top}
-      >
-        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-          <View style={styles.shell}>
-          <View style={styles.header}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{t('personalIntro.badge')}</Text>
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.shell}>
+            <View style={styles.header}>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{t('personalIntro.badge')}</Text>
+              </View>
+              <View style={styles.headerRight}>
+                {canGoBack ? (
+                  <Pressable
+                    style={styles.headerBackButton}
+                    accessibilityRole="button"
+                    onPress={handleBack}
+                  >
+                    <Text style={styles.headerBackText}>← {t('personalIntro.back')}</Text>
+                  </Pressable>
+                ) : null}
+                <LanguagePicker variant="ghost" />
+              </View>
             </View>
-            <View style={styles.headerRight}>
-              {canGoBack ? (
-                <Pressable
-                  style={styles.headerBackButton}
-                  accessibilityRole="button"
-                  onPress={handleBack}
+
+            <View
+              style={[
+                styles.main,
+                footerHeight > 0 ? { paddingBottom: footerHeight + footerBottom } : null,
+              ]}
+            >
+              {isInputStep ? (
+                <View style={styles.inputStepBody}>
+                  {!hideHeroImage ? heroBlock : null}
+
+                  <View
+                    style={[
+                      styles.inputStepContent,
+                      keyboardOpen ? styles.inputStepContentCompact : null,
+                    ]}
+                  >
+                    {progressHeader}
+
+                    {stepIndex === 0 ? (
+                      <View style={styles.inputBlock}>
+                        <Text style={styles.inputHint}>{t('personalIntro.page1.hint')}</Text>
+                        <TextInput
+                          {...introInputProps}
+                          style={styles.input}
+                          value={taskName}
+                          onChangeText={value => updateDraft({ taskName: value })}
+                          returnKeyType="next"
+                          onSubmitEditing={() => {
+                            if (trimmedTaskName) {
+                              handlePrimary();
+                            }
+                          }}
+                        />
+                      </View>
+                    ) : (
+                      <View style={styles.inputBlock}>
+                        <Text style={styles.inputHint}>{t('personalIntro.page2.hint')}</Text>
+                        <TextInput
+                          {...introInputProps}
+                          style={[
+                            styles.input,
+                            styles.textArea,
+                            keyboardOpen ? styles.textAreaCompact : null,
+                          ]}
+                          value={whyText}
+                          onChangeText={value => updateDraft({ whyText: value })}
+                          multiline
+                          submitBehavior="newline"
+                          textAlignVertical="top"
+                        />
+                      </View>
+                    )}
+                  </View>
+                </View>
+              ) : (
+                <ScrollView
+                  style={styles.scroll}
+                  contentContainerStyle={styles.scrollContent}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  bounces={false}
                 >
-                  <Text style={styles.headerBackText}>← {t('personalIntro.back')}</Text>
+                  {heroBlock}
+                  <View style={styles.content}>
+                    {progressHeader}
+
+                    {stepIndex === 2 ? (
+                      <View style={styles.whyCard}>
+                        <Text style={styles.whyLabel}>
+                          {t('personalIntro.page3.whyLabel', { why: trimmedWhyText })}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                </ScrollView>
+              )}
+            </View>
+
+            <View
+              onLayout={event => {
+                const nextHeight = event.nativeEvent.layout.height;
+                if (nextHeight !== footerHeight) {
+                  setFooterHeight(nextHeight);
+                }
+              }}
+              style={[
+                styles.footer,
+                styles.footerDocked,
+                keyboardOpen ? styles.footerCompact : null,
+                { bottom: footerBottom },
+              ]}
+            >
+              {!isLastStep ? (
+                <Pressable
+                  style={styles.skipButton}
+                  accessibilityRole="button"
+                  onPress={handleSkipPersonalIntro}
+                >
+                  <Text style={styles.skipButtonText}>{t('personalIntro.skip')}</Text>
                 </Pressable>
               ) : null}
-              <LanguagePicker variant="ghost" />
-            </View>
-          </View>
 
-          <ScrollView
-            ref={scrollRef}
-            style={styles.scroll}
-            contentContainerStyle={[
-              styles.scrollContent,
-              { paddingBottom: scrollBottomPadding },
-            ]}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-          >
-            {!hideHeroImage ? heroBlock : null}
-
-            <View style={styles.content}>
-              {progressHeader}
-
-              {stepIndex === 0 ? (
-                <View style={styles.inputBlock}>
-                  <Text style={styles.inputHint}>{t('personalIntro.page1.hint')}</Text>
-                  <TextInput
-                    {...introInputProps}
-                    style={styles.input}
-                    value={taskName}
-                    onChangeText={value => updateDraft({ taskName: value })}
-                    returnKeyType="next"
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                    onSubmitEditing={() => {
-                      if (trimmedTaskName) {
-                        handlePrimary();
-                      }
-                    }}
-                  />
-                </View>
-              ) : null}
-
-              {stepIndex === 1 ? (
-                <View style={styles.inputBlock}>
-                  <Text style={styles.inputHint}>{t('personalIntro.page2.hint')}</Text>
-                  <TextInput
-                    {...introInputProps}
-                    style={[styles.input, styles.textArea]}
-                    value={whyText}
-                    onChangeText={value => updateDraft({ whyText: value })}
-                    multiline
-                    submitBehavior="newline"
-                    textAlignVertical="top"
-                    scrollEnabled
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                  />
-                </View>
-              ) : null}
-
-              {stepIndex === 2 ? (
-                <View style={styles.whyCard}>
-                  <Text style={styles.whyLabel}>
-                    {t('personalIntro.page3.whyLabel', { why: trimmedWhyText })}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
-          </ScrollView>
-
-          <View
-            style={[
-              styles.footer,
-              dockFooterAboveKeyboard ? styles.footerDockedAboveKeyboard : null,
-              dockFooterAboveKeyboard ? { bottom: keyboardHeight } : null,
-            ]}
-          >
-            {!isLastStep ? (
               <Pressable
-                style={styles.skipButton}
+                style={[
+                  styles.primaryButton,
+                  primaryDisabled ? styles.primaryButtonDisabled : null,
+                ]}
                 accessibilityRole="button"
-                onPress={handleSkipPersonalIntro}
+                disabled={primaryDisabled}
+                onPress={handlePrimary}
               >
-                <Text style={styles.skipButtonText}>{t('personalIntro.skip')}</Text>
+                <Text style={styles.primaryButtonText}>{primaryLabel}</Text>
               </Pressable>
-            ) : null}
-
-            <Pressable
-              style={[
-                styles.primaryButton,
-                primaryDisabled ? styles.primaryButtonDisabled : null,
-              ]}
-              accessibilityRole="button"
-              disabled={primaryDisabled}
-              onPress={handlePrimary}
-            >
-              <Text style={styles.primaryButtonText}>{primaryLabel}</Text>
-            </Pressable>
-          </View>
+            </View>
           </View>
         </SafeAreaView>
-      </KeyboardAvoidingView>
     </View>
   );
 }
-
-const HERO_HEIGHT = 160;
-const HERO_TOP_MARGIN = 16;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -451,11 +358,8 @@ const styles = StyleSheet.create({
   },
   shell: {
     flex: 1,
+    minHeight: 0,
     position: 'relative',
-  },
-  flex: {
-    flex: 1,
-    backgroundColor: recurringTheme.pageBg,
   },
   header: {
     flexDirection: 'row',
@@ -496,6 +400,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
+  main: {
+    flex: 1,
+    minHeight: 0,
+  },
+  inputStepBody: {
+    flex: 1,
+    minHeight: 0,
+  },
+  inputStepContent: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 8,
+    gap: 20,
+  },
+  inputStepContentCompact: {
+    paddingTop: 12,
+    gap: 12,
+  },
   heroSlot: {
     overflow: 'hidden',
     backgroundColor: recurringTheme.pageBg,
@@ -526,6 +448,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 16,
     backgroundColor: recurringTheme.pageBg,
   },
   content: {
@@ -567,7 +490,6 @@ const styles = StyleSheet.create({
   },
   inputBlock: {
     gap: 6,
-    marginTop: 4,
   },
   inputHint: {
     color: recurringTheme.textMuted,
@@ -585,11 +507,12 @@ const styles = StyleSheet.create({
     backgroundColor: recurringTheme.surfaceInset,
   },
   textArea: {
-    height: 120,
-    minHeight: 120,
-    maxHeight: 120,
+    height: 112,
     paddingTop: 10,
     lineHeight: 20,
+  },
+  textAreaCompact: {
+    height: 72,
   },
   whyCard: {
     marginTop: 4,
@@ -615,16 +538,19 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     backgroundColor: recurringTheme.pageBg,
   },
-  footerDockedAboveKeyboard: {
+  footerDocked: {
     position: 'absolute',
     left: 0,
     right: 0,
-    zIndex: 2,
-    elevation: 4,
+  },
+  footerCompact: {
+    gap: 6,
+    paddingTop: 6,
+    paddingBottom: 6,
   },
   skipButton: {
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 6,
   },
   skipButtonText: {
     color: recurringTheme.textMuted,

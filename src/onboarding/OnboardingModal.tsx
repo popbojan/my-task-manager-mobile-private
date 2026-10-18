@@ -3,17 +3,19 @@ import {
   BackHandler,
   Modal,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import IntroStepPager from '@/onboarding/IntroStepPager';
 import OnboardingSlideVisual from '@/onboarding/OnboardingSlideVisual';
 import { ONBOARDING_SLIDES } from '@/onboarding/onboardingSlides';
 import LanguagePicker from '@/pages/login/LanguagePicker';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import { useAppRefresh } from '@/refresh/useAppRefresh';
+import { useRefreshControl } from '@/refresh/useRefreshControl';
 
 type OnboardingModalProps = {
   visible: boolean;
@@ -32,8 +34,9 @@ export default function OnboardingModal({
   onComplete,
 }: OnboardingModalProps) {
   const { t } = useLanguage();
+  const { refreshing, onRefresh } = useAppRefresh();
+  const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const [stepIndex, setStepIndex] = useState(0);
-  const slide = ONBOARDING_SLIDES[stepIndex];
   const isLastStep = stepIndex >= ONBOARDING_SLIDES.length - 1;
   const canGoBack = stepIndex > 0;
 
@@ -42,24 +45,6 @@ export default function OnboardingModal({
       setStepIndex(0);
     }
   }, [visible]);
-
-  useEffect(() => {
-    if (!visible) {
-      return;
-    }
-
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (stepIndex > 0) {
-        setStepIndex(current => current - 1);
-        return true;
-      }
-
-      handleClose();
-      return true;
-    });
-
-    return () => subscription.remove();
-  }, [visible, stepIndex]);
 
   function handleClose() {
     setStepIndex(0);
@@ -70,13 +55,40 @@ export default function OnboardingModal({
     setStepIndex(current => Math.max(0, current - 1));
   }
 
+  function handleBackToPersonalIntroOrClose() {
+    if (showBackToPersonalIntro && onBackToPersonalIntro) {
+      onBackToPersonalIntro();
+      return;
+    }
+
+    handleClose();
+  }
+
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (stepIndex > 0) {
+        handleBack();
+        return true;
+      }
+
+      handleBackToPersonalIntroOrClose();
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, [visible, stepIndex, showBackToPersonalIntro, onBackToPersonalIntro]);
+
   function handleRequestClose() {
     if (stepIndex > 0) {
       handleBack();
       return;
     }
 
-    handleClose();
+    handleBackToPersonalIntroOrClose();
   }
 
   function handlePrimary() {
@@ -87,6 +99,43 @@ export default function OnboardingModal({
     }
 
     setStepIndex(current => current + 1);
+  }
+
+  function handleSwipeAfterLast() {
+    setStepIndex(0);
+    onComplete();
+  }
+
+  function renderStep(pageIndex: number) {
+    const pageSlide = ONBOARDING_SLIDES[pageIndex];
+
+    return (
+      <>
+        <View style={styles.contentHeader}>
+          <Text style={styles.stepLabel}>
+            {t('onboarding.progress', {
+              current: String(pageIndex + 1),
+              total: String(ONBOARDING_SLIDES.length),
+            })}
+          </Text>
+
+          <View style={styles.dotsRow}>
+            {ONBOARDING_SLIDES.map((item, index) => (
+              <View
+                key={item.id}
+                style={[styles.dot, index === pageIndex ? styles.dotActive : null]}
+              />
+            ))}
+          </View>
+
+          <Text style={styles.title}>{t(pageSlide.titleKey)}</Text>
+        </View>
+
+        <View style={styles.visualWrap}>
+          <OnboardingSlideVisual slideId={pageSlide.id} />
+        </View>
+      </>
+    );
   }
 
   return (
@@ -115,35 +164,18 @@ export default function OnboardingModal({
           </View>
         </View>
 
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.contentHeader}>
-            <Text style={styles.stepLabel}>
-              {t('onboarding.progress', {
-                current: String(stepIndex + 1),
-                total: String(ONBOARDING_SLIDES.length),
-              })}
-            </Text>
-
-            <View style={styles.dotsRow}>
-              {ONBOARDING_SLIDES.map((item, index) => (
-                <View
-                  key={item.id}
-                  style={[styles.dot, index === stepIndex ? styles.dotActive : null]}
-                />
-              ))}
-            </View>
-
-            <Text style={styles.title}>{t(slide.titleKey)}</Text>
-          </View>
-
-          <View style={styles.visualWrap}>
-            <OnboardingSlideVisual slideId={slide.id} />
-          </View>
-        </ScrollView>
+        <IntroStepPager
+          stepIndex={stepIndex}
+          stepCount={ONBOARDING_SLIDES.length}
+          onStepIndexChange={setStepIndex}
+          canNavigateToStep={() => true}
+          onSwipeBeforeFirst={handleBackToPersonalIntroOrClose}
+          onSwipeAfterLast={handleSwipeAfterLast}
+          refreshControl={refreshControl}
+          pagerStyle={styles.scroll}
+          pageScrollContentStyle={styles.scrollContent}
+          renderStep={renderStep}
+        />
 
         <View style={styles.footer}>
           {showBackToPersonalIntro && onBackToPersonalIntro ? (

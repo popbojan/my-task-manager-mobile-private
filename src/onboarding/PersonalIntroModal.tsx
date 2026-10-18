@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   BackHandler,
   Image,
   Keyboard,
   Platform,
   Pressable,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -15,9 +14,12 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import IntroStepPager from '@/onboarding/IntroStepPager';
 import type { PersonalIntroDraft } from '@/onboarding/personalIntroDraft';
 import LanguagePicker from '@/pages/login/LanguagePicker';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import { useAppRefresh } from '@/refresh/useAppRefresh';
+import { useRefreshControl } from '@/refresh/useRefreshControl';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 const PERSONAL_INTRO_STEPS = 4;
@@ -52,6 +54,8 @@ export default function PersonalIntroModal({
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
+  const { refreshing, onRefresh } = useAppRefresh();
+  const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [footerHeight, setFooterHeight] = useState(0);
   const { stepIndex, taskName, whyText } = draft;
@@ -59,9 +63,7 @@ export default function PersonalIntroModal({
   const trimmedWhyText = whyText.trim();
   const isLastStep = stepIndex >= PERSONAL_INTRO_STEPS - 1;
   const canGoBack = stepIndex > 0;
-  const isInputStep = stepIndex === 0 || stepIndex === 1;
   const keyboardOpen = keyboardHeight > 0;
-  const hideHeroImage = isInputStep && keyboardOpen;
 
   function updateDraft(partial: Partial<PersonalIntroDraft>) {
     onDraftChange({ ...draft, ...partial });
@@ -134,8 +136,10 @@ export default function PersonalIntroModal({
   const primaryDisabled =
     (stepIndex === 0 && !trimmedTaskName) || (stepIndex === 1 && !trimmedWhyText);
 
-  const title = (() => {
-    switch (stepIndex) {
+  const primaryLabel = isLastStep ? t('personalIntro.page4.cta') : t('personalIntro.next');
+
+  function getTitle(pageIndex: number) {
+    switch (pageIndex) {
       case 0:
         return t('personalIntro.page1.title');
       case 1:
@@ -145,10 +149,10 @@ export default function PersonalIntroModal({
       default:
         return t('personalIntro.page4.title');
     }
-  })();
+  }
 
-  const body = (() => {
-    switch (stepIndex) {
+  function getBody(pageIndex: number) {
+    switch (pageIndex) {
       case 0:
         return t('personalIntro.page1.body');
       case 1:
@@ -158,41 +162,141 @@ export default function PersonalIntroModal({
       default:
         return t('personalIntro.page4.body');
     }
-  })();
+  }
 
-  const primaryLabel = isLastStep ? t('personalIntro.page4.cta') : t('personalIntro.next');
+  function handleStepIndexChange(index: number) {
+    Keyboard.dismiss();
+    updateDraft({ stepIndex: index });
+  }
 
-  const heroBlock = (
-    <View style={styles.heroSlot}>
-      <View style={styles.heroWrap}>
-        <Image source={heroSource} style={styles.heroImage} resizeMode="cover" />
-        <View style={styles.heroOverlay} />
-      </View>
-    </View>
+  const canNavigateToStep = useCallback(
+    (targetIndex: number) => {
+      if (targetIndex <= stepIndex) {
+        return true;
+      }
+
+      if (targetIndex > stepIndex + 1) {
+        return false;
+      }
+
+      if (stepIndex === 0 && !trimmedTaskName) {
+        return false;
+      }
+
+      if (stepIndex === 1 && !trimmedWhyText) {
+        return false;
+      }
+
+      return true;
+    },
+    [stepIndex, trimmedTaskName, trimmedWhyText],
   );
 
-  const progressHeader = (
-    <View style={styles.questionBlock}>
-      <Text style={styles.stepLabel}>
-        {t('personalIntro.progress', {
-          current: String(stepIndex + 1),
-          total: String(PERSONAL_INTRO_STEPS),
-        })}
-      </Text>
+  function handleSwipeToOnboarding() {
+    if (primaryDisabled) {
+      return;
+    }
 
-      <View style={styles.dotsRow}>
-        {Array.from({ length: PERSONAL_INTRO_STEPS }, (_, index) => (
-          <View
-            key={index}
-            style={[styles.dot, index === stepIndex ? styles.dotActive : null]}
-          />
-        ))}
+    Keyboard.dismiss();
+    onContinueToOnboarding();
+  }
+
+  function renderProgressHeader(pageIndex: number) {
+    return (
+      <View style={styles.questionBlock}>
+        <Text style={styles.stepLabel}>
+          {t('personalIntro.progress', {
+            current: String(pageIndex + 1),
+            total: String(PERSONAL_INTRO_STEPS),
+          })}
+        </Text>
+
+        <View style={styles.dotsRow}>
+          {Array.from({ length: PERSONAL_INTRO_STEPS }, (_, index) => (
+            <View
+              key={index}
+              style={[styles.dot, index === pageIndex ? styles.dotActive : null]}
+            />
+          ))}
+        </View>
+
+        <Text style={styles.title}>{getTitle(pageIndex)}</Text>
+        <Text style={styles.body}>{getBody(pageIndex)}</Text>
       </View>
+    );
+  }
 
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.body}>{body}</Text>
-    </View>
-  );
+  function renderStep(pageIndex: number) {
+    const isInputPage = pageIndex === 0 || pageIndex === 1;
+    const hideHeroImage = isInputPage && keyboardOpen && pageIndex === stepIndex;
+
+    return (
+      <>
+        {hideHeroImage ? null : (
+          <View style={styles.heroSlot}>
+            <View style={styles.heroWrap}>
+              <Image source={heroSource} style={styles.heroImage} resizeMode="cover" />
+              <View style={styles.heroOverlay} />
+            </View>
+          </View>
+        )}
+
+        <View
+          style={[
+            isInputPage ? styles.inputStepContent : styles.content,
+            keyboardOpen && pageIndex === 1 ? styles.inputStepContentCompact : null,
+          ]}
+        >
+          {renderProgressHeader(pageIndex)}
+
+          {pageIndex === 0 ? (
+            <View style={styles.inputBlock}>
+              <Text style={styles.inputHint}>{t('personalIntro.page1.hint')}</Text>
+              <TextInput
+                {...introInputProps}
+                style={[styles.input, styles.inputSingleLine]}
+                value={taskName}
+                onChangeText={value => updateDraft({ taskName: value })}
+                returnKeyType="next"
+                onSubmitEditing={() => {
+                  if (trimmedTaskName) {
+                    handlePrimary();
+                  }
+                }}
+              />
+            </View>
+          ) : null}
+
+          {pageIndex === 1 ? (
+            <View style={styles.inputBlock}>
+              <Text style={styles.inputHint}>{t('personalIntro.page2.hint')}</Text>
+              <TextInput
+                {...introInputProps}
+                style={[
+                  styles.input,
+                  styles.textArea,
+                  keyboardOpen && pageIndex === stepIndex ? styles.textAreaCompact : null,
+                ]}
+                value={whyText}
+                onChangeText={value => updateDraft({ whyText: value })}
+                multiline
+                submitBehavior="newline"
+                textAlignVertical="top"
+              />
+            </View>
+          ) : null}
+
+          {pageIndex === 2 ? (
+            <View style={styles.whyCard}>
+              <Text style={styles.whyLabel}>
+                {t('personalIntro.page3.whyLabel', { why: trimmedWhyText })}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+      </>
+    );
+  }
 
   if (!visible) {
     return null;
@@ -225,83 +329,20 @@ export default function PersonalIntroModal({
               </View>
             </View>
 
-            <View
-              style={[
+            <IntroStepPager
+              stepIndex={stepIndex}
+              stepCount={PERSONAL_INTRO_STEPS}
+              onStepIndexChange={handleStepIndexChange}
+              canNavigateToStep={canNavigateToStep}
+              onSwipeAfterLast={handleSwipeToOnboarding}
+              refreshControl={refreshControl}
+              pagerStyle={[
                 styles.main,
                 footerHeight > 0 ? { paddingBottom: footerHeight + footerBottom } : null,
               ]}
-            >
-              {isInputStep ? (
-                <View style={styles.inputStepBody}>
-                  {!hideHeroImage ? heroBlock : null}
-
-                  <View
-                    style={[
-                      styles.inputStepContent,
-                      keyboardOpen && stepIndex === 1 ? styles.inputStepContentCompact : null,
-                    ]}
-                  >
-                    {progressHeader}
-
-                    {stepIndex === 0 ? (
-                      <View style={styles.inputBlock}>
-                        <Text style={styles.inputHint}>{t('personalIntro.page1.hint')}</Text>
-                        <TextInput
-                          {...introInputProps}
-                          style={[styles.input, styles.inputSingleLine]}
-                          value={taskName}
-                          onChangeText={value => updateDraft({ taskName: value })}
-                          returnKeyType="next"
-                          onSubmitEditing={() => {
-                            if (trimmedTaskName) {
-                              handlePrimary();
-                            }
-                          }}
-                        />
-                      </View>
-                    ) : (
-                      <View style={styles.inputBlock}>
-                        <Text style={styles.inputHint}>{t('personalIntro.page2.hint')}</Text>
-                        <TextInput
-                          {...introInputProps}
-                          style={[
-                            styles.input,
-                            styles.textArea,
-                            keyboardOpen ? styles.textAreaCompact : null,
-                          ]}
-                          value={whyText}
-                          onChangeText={value => updateDraft({ whyText: value })}
-                          multiline
-                          submitBehavior="newline"
-                          textAlignVertical="top"
-                        />
-                      </View>
-                    )}
-                  </View>
-                </View>
-              ) : (
-                <ScrollView
-                  style={styles.scroll}
-                  contentContainerStyle={styles.scrollContent}
-                  keyboardShouldPersistTaps="handled"
-                  showsVerticalScrollIndicator={false}
-                  bounces={false}
-                >
-                  {heroBlock}
-                  <View style={styles.content}>
-                    {progressHeader}
-
-                    {stepIndex === 2 ? (
-                      <View style={styles.whyCard}>
-                        <Text style={styles.whyLabel}>
-                          {t('personalIntro.page3.whyLabel', { why: trimmedWhyText })}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
-                </ScrollView>
-              )}
-            </View>
+              pageScrollContentStyle={styles.scrollContent}
+              renderStep={renderStep}
+            />
 
             <View
               onLayout={event => {
@@ -403,10 +444,6 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     minHeight: 0,
-  },
-  inputStepBody: {
-    flexGrow: 1,
-    flexShrink: 0,
   },
   inputStepContent: {
     paddingHorizontal: 20,

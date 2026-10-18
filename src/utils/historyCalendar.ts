@@ -124,6 +124,8 @@ export function resolveHistoryDayCellTone(
       return 'missed';
     case HistoryDayStatus.InProgress:
       return 'in_progress';
+    case HistoryDayStatus.NoTasks:
+      return 'neutral';
     default:
       return 'neutral';
   }
@@ -160,7 +162,15 @@ export function formatHistoryLevelDisplay(day: HistoryDay | undefined): string {
 }
 
 export function shouldShowHistoryDayDetails(day: HistoryDay | undefined): boolean {
-  return day !== undefined;
+  if (!day) {
+    return false;
+  }
+
+  if (day.status === HistoryDayStatus.NoTasks) {
+    return false;
+  }
+
+  return true;
 }
 
 export function shouldShowHistorySuccessCrown(day: HistoryDay | undefined): boolean {

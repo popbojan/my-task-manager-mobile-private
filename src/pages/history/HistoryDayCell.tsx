@@ -28,20 +28,26 @@ type HistoryDayCellProps = {
   entry?: HistoryDay;
   isToday: boolean;
   height: number;
+  variant?: 'default' | 'onboarding';
 };
 
-function toneStyles(tone: HistoryDayCellTone, isToday: boolean) {
+function toneStyles(
+  tone: HistoryDayCellTone,
+  isToday: boolean,
+  variant: 'default' | 'onboarding',
+) {
   const base = isToday ? styles.todayOutline : null;
+  const shell = variant === 'onboarding' ? styles.cellOnboarding : styles.cell;
 
   switch (tone) {
     case 'success':
-      return [styles.cell, styles.cellSuccess, base];
+      return [shell, styles.cellSuccess, base];
     case 'missed':
-      return [styles.cell, styles.cellMissed, base];
+      return [shell, styles.cellMissed, base];
     case 'in_progress':
-      return [styles.cell, styles.cellInProgress, base];
+      return [shell, styles.cellInProgress, base];
     default:
-      return [styles.cell, styles.cellNeutral, base];
+      return [shell, styles.cellNeutral, base];
   }
 }
 
@@ -85,16 +91,23 @@ export default function HistoryDayCell({
   entry,
   isToday,
   height,
+  variant = 'default',
 }: HistoryDayCellProps) {
   const { t } = useLanguage();
   const tone = resolveHistoryDayCellTone(entry);
   const showDetails = shouldShowHistoryDayDetails(entry);
   const showNoteMark = shouldShowHistoryNoteMark(entry);
+  const isOnboarding = variant === 'onboarding';
 
   return (
-    <View style={[toneStyles(tone, isToday), styles.cellFill, { minHeight: height }]}>
+    <View style={[toneStyles(tone, isToday, variant), styles.cellFill, { minHeight: height }]}>
       <View style={styles.topRow}>
-        <Text style={[styles.dayNumber, isToday && styles.dayNumberToday]}>
+        <Text
+          style={[
+            isOnboarding ? styles.dayNumberOnboarding : styles.dayNumber,
+            isToday && styles.dayNumberToday,
+          ]}
+        >
           {dayOfMonth}
         </Text>
         <View style={styles.topRightMarks}>
@@ -112,16 +125,20 @@ export default function HistoryDayCell({
       </View>
 
       {showDetails ? (
-        <View style={styles.detailsColumn}>
-          <Text style={styles.ratio}>{formatHistoryTaskRatioDisplay(entry)}</Text>
+        <View style={[styles.detailsColumn, isOnboarding ? styles.detailsColumnOnboarding : null]}>
+          <Text style={isOnboarding ? styles.ratioOnboarding : styles.ratio}>
+            {formatHistoryTaskRatioDisplay(entry)}
+          </Text>
 
           <View style={styles.streakRow}>
-            <FireIcon size={11} color={recurringTheme.goldBright} />
-            <Text style={styles.metricText}>{formatHistoryStreakDisplay(entry)}</Text>
+            <FireIcon size={isOnboarding ? 10 : 11} color={recurringTheme.goldBright} />
+            <Text style={isOnboarding ? styles.metricTextOnboarding : styles.metricText}>
+              {formatHistoryStreakDisplay(entry)}
+            </Text>
           </View>
 
           <Text
-            style={styles.levelText}
+            style={isOnboarding ? styles.levelTextOnboarding : styles.levelText}
             numberOfLines={1}
             adjustsFontSizeToFit
             minimumFontScale={0.75}
@@ -145,6 +162,15 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cellOnboarding: {
+    borderRadius: 10,
+    paddingHorizontal: 5,
+    paddingVertical: 7,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
@@ -189,6 +215,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
   },
+  dayNumberOnboarding: {
+    color: recurringTheme.textSecondary,
+    fontSize: 12,
+    fontWeight: '800',
+  },
   statusBadge: {
     width: 12,
     height: 12,
@@ -225,12 +256,22 @@ const styles = StyleSheet.create({
     gap: 4,
     width: '100%',
   },
+  detailsColumnOnboarding: {
+    gap: 3,
+  },
   ratio: {
     color: recurringTheme.textPrimary,
     fontSize: 18,
     fontWeight: '800',
     letterSpacing: -0.4,
     lineHeight: 21,
+  },
+  ratioOnboarding: {
+    color: recurringTheme.textPrimary,
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+    lineHeight: 17,
   },
   streakRow: {
     flexDirection: 'row',
@@ -245,11 +286,23 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     lineHeight: 14,
   },
+  metricTextOnboarding: {
+    color: recurringTheme.textPrimary,
+    fontSize: 11,
+    fontWeight: '800',
+    lineHeight: 13,
+  },
   levelText: {
     color: recurringTheme.textSecondary,
     fontSize: 11,
     fontWeight: '700',
     lineHeight: 13,
+  },
+  levelTextOnboarding: {
+    color: recurringTheme.textSecondary,
+    fontSize: 10,
+    fontWeight: '700',
+    lineHeight: 12,
   },
   detailsPlaceholder: {
     flex: 1,

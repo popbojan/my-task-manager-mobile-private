@@ -338,39 +338,67 @@ function StreakGrowthVisual() {
   );
 }
 
+function OnboardingFutureDayCell({
+  dayOfMonth,
+  height,
+}: {
+  dayOfMonth: number;
+  height: number;
+}) {
+  return (
+    <View style={[styles.futureDayCell, { minHeight: height }]}>
+      <Text style={styles.futureDayNumber}>{dayOfMonth}</Text>
+    </View>
+  );
+}
+
+const ONBOARDING_CALENDAR_COLUMN_GAP = 4;
+const ONBOARDING_CALENDAR_CELL_HEIGHT = 66;
+
 function JourneyVisibleVisual() {
   const { t } = useLanguage();
-  const cellHeight = 52;
-  const cellWidth = 38;
 
   return (
-    <OnboardingAppPreview activeTab="history">
-      <Text style={styles.historyScreenTitle}>{t('history.title')}</Text>
-      <Text style={styles.historyMonthTitle}>{t('onboarding.demo.monthTitle')}</Text>
+    <OnboardingAppPreview activeTab="history" compact>
+      <View style={styles.journeyCalendarPreview}>
+        <Text style={styles.historyScreenTitle}>{t('history.title')}</Text>
+        <Text style={styles.historyMonthTitle}>{t('onboarding.demo.monthTitle')}</Text>
 
-      <View style={styles.weekdayRow}>
-        {WEEKDAY_KEYS.map(key => (
-          <Text key={key} style={[styles.weekdayLabel, { width: cellWidth }]}>
-            {t(key)}
-          </Text>
-        ))}
-      </View>
+        <View style={styles.weekdayRow}>
+          {WEEKDAY_KEYS.map(key => (
+            <Text key={key} style={styles.weekdayLabel}>
+              {t(key)}
+            </Text>
+          ))}
+        </View>
 
-      <View style={styles.calendarGrid}>
-        {Array.from({ length: Math.ceil(ONBOARDING_DEMO_CALENDAR.length / 7) }, (_, rowIndex) => (
-          <View key={rowIndex} style={styles.calendarRow}>
-            {ONBOARDING_DEMO_CALENDAR.slice(rowIndex * 7, rowIndex * 7 + 7).map(cell => (
-              <View key={cell.dayOfMonth} style={[styles.calendarSlot, { width: cellWidth, minHeight: cellHeight }]}>
-                <HistoryDayCell
-                  dayOfMonth={cell.dayOfMonth}
-                  entry={cell.entry}
-                  isToday={cell.isToday ?? false}
-                  height={cellHeight - 4}
-                />
-              </View>
-            ))}
-          </View>
-        ))}
+        <View style={styles.calendarGrid}>
+          {Array.from({ length: Math.ceil(ONBOARDING_DEMO_CALENDAR.length / 7) }, (_, rowIndex) => (
+            <View key={rowIndex} style={styles.calendarRow}>
+              {ONBOARDING_DEMO_CALENDAR.slice(rowIndex * 7, rowIndex * 7 + 7).map(cell => (
+                <View
+                  key={cell.dayOfMonth}
+                  style={[styles.calendarSlot, { minHeight: ONBOARDING_CALENDAR_CELL_HEIGHT }]}
+                >
+                  {cell.isFutureEmpty || !cell.entry ? (
+                    <OnboardingFutureDayCell
+                      dayOfMonth={cell.dayOfMonth}
+                      height={ONBOARDING_CALENDAR_CELL_HEIGHT}
+                    />
+                  ) : (
+                    <HistoryDayCell
+                      dayOfMonth={cell.dayOfMonth}
+                      entry={cell.entry}
+                      isToday={cell.isToday ?? false}
+                      height={ONBOARDING_CALENDAR_CELL_HEIGHT}
+                      variant="onboarding"
+                    />
+                  )}
+                </View>
+              ))}
+            </View>
+          ))}
+        </View>
       </View>
     </OnboardingAppPreview>
   );
@@ -767,21 +795,27 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     elevation: 2,
   },
+  journeyCalendarPreview: {
+    gap: 6,
+    marginHorizontal: -4,
+  },
   historyScreenTitle: {
     color: recurringTheme.textPrimary,
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
   },
   historyMonthTitle: {
     color: recurringTheme.textSecondary,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
   weekdayRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: ONBOARDING_CALENDAR_COLUMN_GAP,
+    width: '100%',
   },
   weekdayLabel: {
+    flex: 1,
     textAlign: 'center',
     color: recurringTheme.textMuted,
     fontSize: 9,
@@ -789,14 +823,33 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   calendarGrid: {
-    gap: 4,
+    gap: ONBOARDING_CALENDAR_COLUMN_GAP,
   },
   calendarRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: ONBOARDING_CALENDAR_COLUMN_GAP,
+    width: '100%',
   },
   calendarSlot: {
+    flex: 1,
+    minWidth: 0,
     alignItems: 'stretch',
+  },
+  futureDayCell: {
+    width: '100%',
+    flex: 1,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: 'rgba(0, 0, 0, 0.28)',
+    alignItems: 'center',
+    paddingTop: 8,
+  },
+  futureDayNumber: {
+    color: recurringTheme.textMuted,
+    opacity: 0.32,
+    fontSize: 12,
+    fontWeight: '800',
   },
   detailPanel: {
     backgroundColor: recurringTheme.surfaceElevated,

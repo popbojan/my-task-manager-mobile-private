@@ -20,7 +20,13 @@ export function usePersonalIntroVisibility({
 
   useEffect(() => {
     setAutoDismissed(false);
-  }, [user?.id]);
+  }, [user?.id, accessToken]);
+
+  useEffect(() => {
+    if (user?.personalIntroSeenAt == null) {
+      setAutoDismissed(false);
+    }
+  }, [user?.personalIntroSeenAt]);
 
   const autoVisible = useMemo(() => {
     if (autoDismissed || !user || !userLoaded) {

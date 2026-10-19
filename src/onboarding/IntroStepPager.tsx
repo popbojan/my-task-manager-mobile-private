@@ -29,6 +29,9 @@ type IntroStepPagerProps = {
   renderStep: (index: number) => React.ReactNode;
   pagerStyle?: StyleProp<ViewStyle>;
   pageScrollContentStyle?: StyleProp<ViewStyle>;
+  /** Re-sync the horizontal offset after layout changes (e.g. keyboard). */
+  layoutSyncKey?: string | number;
+  onHorizontalScrollBegin?: () => void;
 };
 
 export default function IntroStepPager({
@@ -43,6 +46,8 @@ export default function IntroStepPager({
   renderStep,
   pagerStyle,
   pageScrollContentStyle,
+  layoutSyncKey,
+  onHorizontalScrollBegin,
 }: IntroStepPagerProps) {
   const { width } = useWindowDimensions();
   const listRef = useRef<FlatList<number>>(null);
@@ -88,6 +93,14 @@ export default function IntroStepPager({
     scrollToStep(stepIndex, !widthChanged);
   }, [stepIndex, width]);
 
+  useEffect(() => {
+    if (layoutSyncKey === undefined) {
+      return;
+    }
+
+    scrollToStep(stepIndexRef.current, false);
+  }, [layoutSyncKey, width]);
+
   function settleStep(rawIndex: number) {
     const index = Math.max(0, Math.min(stepCount - 1, rawIndex));
 
@@ -128,6 +141,7 @@ export default function IntroStepPager({
   function handleScrollBeginDrag(event: NativeSyntheticEvent<NativeScrollEvent>) {
     isProgrammaticScrollRef.current = false;
     dragStartOffsetRef.current = event.nativeEvent.contentOffset.x;
+    onHorizontalScrollBegin?.();
   }
 
   function handleScrollEndDrag(event: NativeSyntheticEvent<NativeScrollEvent>) {
@@ -213,6 +227,8 @@ export default function IntroStepPager({
       scrollEnabled={scrollEnabled}
       showsHorizontalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      removeClippedSubviews
       keyExtractor={item => String(item)}
       getItemLayout={(_item, index) => ({
         length: width,

@@ -125,6 +125,8 @@ export default function PersonalIntroModal({
   }
 
   function handlePrimary() {
+    Keyboard.dismiss();
+
     if (isLastStep) {
       onContinueToOnboarding();
       return;
@@ -228,11 +230,14 @@ export default function PersonalIntroModal({
 
   function renderStep(pageIndex: number) {
     const isInputPage = pageIndex === 0 || pageIndex === 1;
-    const hideHeroImage = isInputPage && keyboardOpen && pageIndex === stepIndex;
+    const isActiveStep = pageIndex === stepIndex;
+    const hideHeroImage = keyboardOpen && isInputPage;
 
     return (
       <>
-        {hideHeroImage ? null : (
+        {hideHeroImage ? (
+          <View style={styles.heroSlotCollapsed} />
+        ) : (
           <View style={styles.heroSlot}>
             <View style={styles.heroWrap}>
               <Image source={heroSource} style={styles.heroImage} resizeMode="cover" />
@@ -244,18 +249,19 @@ export default function PersonalIntroModal({
         <View
           style={[
             isInputPage ? styles.inputStepContent : styles.content,
-            keyboardOpen && pageIndex === 1 ? styles.inputStepContentCompact : null,
+            keyboardOpen && isInputPage ? styles.inputStepContentCompact : null,
           ]}
         >
           {renderProgressHeader(pageIndex)}
 
           {pageIndex === 0 ? (
-            <View style={styles.inputBlock}>
+            <View style={styles.inputBlock} pointerEvents={isActiveStep ? 'auto' : 'none'}>
               <Text style={styles.inputHint}>{t('personalIntro.page1.hint')}</Text>
               <TextInput
                 {...introInputProps}
                 style={[styles.input, styles.inputSingleLine]}
                 value={taskName}
+                editable={isActiveStep}
                 onChangeText={value => updateDraft({ taskName: value })}
                 returnKeyType="next"
                 onSubmitEditing={() => {
@@ -268,16 +274,17 @@ export default function PersonalIntroModal({
           ) : null}
 
           {pageIndex === 1 ? (
-            <View style={styles.inputBlock}>
+            <View style={styles.inputBlock} pointerEvents={isActiveStep ? 'auto' : 'none'}>
               <Text style={styles.inputHint}>{t('personalIntro.page2.hint')}</Text>
               <TextInput
                 {...introInputProps}
                 style={[
                   styles.input,
                   styles.textArea,
-                  keyboardOpen && pageIndex === stepIndex ? styles.textAreaCompact : null,
+                  keyboardOpen ? styles.textAreaCompact : null,
                 ]}
                 value={whyText}
+                editable={isActiveStep}
                 onChangeText={value => updateDraft({ whyText: value })}
                 multiline
                 submitBehavior="newline"
@@ -332,9 +339,12 @@ export default function PersonalIntroModal({
             <IntroStepPager
               stepIndex={stepIndex}
               stepCount={PERSONAL_INTRO_STEPS}
+              scrollEnabled={!keyboardOpen}
               onStepIndexChange={handleStepIndexChange}
               canNavigateToStep={canNavigateToStep}
               onSwipeAfterLast={handleSwipeToOnboarding}
+              onHorizontalScrollBegin={Keyboard.dismiss}
+              layoutSyncKey={`${keyboardOpen}-${footerBottom}-${footerHeight}`}
               refreshControl={refreshControl}
               pagerStyle={[
                 styles.main,
@@ -458,6 +468,10 @@ const styles = StyleSheet.create({
   heroSlot: {
     overflow: 'hidden',
     backgroundColor: recurringTheme.pageBg,
+  },
+  heroSlotCollapsed: {
+    height: 0,
+    overflow: 'hidden',
   },
   heroWrap: {
     height: HERO_HEIGHT,

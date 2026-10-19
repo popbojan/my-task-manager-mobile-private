@@ -84,7 +84,6 @@ function MainAppShell() {
   const showPersonalIntro =
     personalIntro.isReady &&
     currentUserQuery.isSuccess &&
-    onboarding.autoVisible &&
     !onboarding.manualOpen &&
     personalIntro.autoVisible &&
     introPhase === 'personal';

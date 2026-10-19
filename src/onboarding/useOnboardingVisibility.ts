@@ -21,7 +21,13 @@ export function useOnboardingVisibility({
 
   useEffect(() => {
     setAutoDismissed(false);
-  }, [user?.id]);
+  }, [user?.id, accessToken]);
+
+  useEffect(() => {
+    if (user?.mobileOnboardingSeenAt == null) {
+      setAutoDismissed(false);
+    }
+  }, [user?.mobileOnboardingSeenAt]);
 
   const autoVisible = useMemo(() => {
     if (autoDismissed || !user || !userLoaded) {

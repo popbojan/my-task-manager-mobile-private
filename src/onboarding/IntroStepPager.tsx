@@ -48,6 +48,9 @@ export default function IntroStepPager({
   const listRef = useRef<FlatList<number>>(null);
   const stepIndexRef = useRef(stepIndex);
   const dragStartOffsetRef = useRef(0);
+  const isProgrammaticScrollRef = useRef(false);
+  const skipNextStepSyncRef = useRef(false);
+  const prevWidthRef = useRef(width);
   const onSwipeBeforeFirstRef = useRef(onSwipeBeforeFirst);
   const onSwipeAfterLastRef = useRef(onSwipeAfterLast);
 
@@ -60,29 +63,57 @@ export default function IntroStepPager({
 
   stepIndexRef.current = stepIndex;
 
+  function scrollToStep(index: number, animated: boolean) {
+    isProgrammaticScrollRef.current = true;
+    listRef.current?.scrollToOffset({
+      offset: index * width,
+      animated,
+    });
+
+    if (!animated) {
+      isProgrammaticScrollRef.current = false;
+    }
+  }
+
   useEffect(() => {
-    listRef.current?.scrollToIndex({ index: stepIndex, animated: true });
+    const widthChanged = prevWidthRef.current !== width;
+    prevWidthRef.current = width;
+
+    if (skipNextStepSyncRef.current && !widthChanged) {
+      skipNextStepSyncRef.current = false;
+      return;
+    }
+
+    skipNextStepSyncRef.current = false;
+    scrollToStep(stepIndex, !widthChanged);
   }, [stepIndex, width]);
 
   function settleStep(rawIndex: number) {
     const index = Math.max(0, Math.min(stepCount - 1, rawIndex));
 
     if (!canNavigateToStep(index)) {
-      listRef.current?.scrollToIndex({ index: stepIndexRef.current, animated: true });
+      scrollToStep(stepIndexRef.current, true);
       return;
     }
 
     if (index !== stepIndexRef.current) {
+      skipNextStepSyncRef.current = true;
       onStepIndexChange(index);
     }
   }
 
   function handleMomentumScrollEnd(event: NativeSyntheticEvent<NativeScrollEvent>) {
+    if (isProgrammaticScrollRef.current) {
+      isProgrammaticScrollRef.current = false;
+      return;
+    }
+
     const index = Math.round(event.nativeEvent.contentOffset.x / width);
     settleStep(index);
   }
 
   function handleScrollBeginDrag(event: NativeSyntheticEvent<NativeScrollEvent>) {
+    isProgrammaticScrollRef.current = false;
     dragStartOffsetRef.current = event.nativeEvent.contentOffset.x;
   }
 
@@ -102,6 +133,13 @@ export default function IntroStepPager({
 
     if (stepIndexRef.current === stepCount - 1 && contentOffset.x >= maxOffset - 1 && swipeLeft) {
       onSwipeAfterLastRef.current?.();
+      return;
+    }
+
+    const velocityX = velocity?.x ?? 0;
+    if (Math.abs(velocityX) < 0.05 && !isProgrammaticScrollRef.current) {
+      const index = Math.round(contentOffset.x / width);
+      settleStep(index);
     }
   }
 
@@ -166,7 +204,7 @@ export default function IntroStepPager({
       onScrollEndDrag={handleScrollEndDrag}
       onScrollToIndexFailed={info => {
         requestAnimationFrame(() => {
-          listRef.current?.scrollToIndex({ index: info.index, animated: false });
+          scrollToStep(info.index, false);
         });
       }}
       renderItem={({ item }) => (
@@ -178,6 +216,7 @@ export default function IntroStepPager({
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
             nestedScrollEnabled
+            directionalLockEnabled={Platform.OS === 'ios'}
             refreshControl={refreshControl}
           >
             {renderStep(item)}

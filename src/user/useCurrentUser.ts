@@ -12,7 +12,7 @@ export function useCurrentUser() {
 
   return useQuery({
     queryKey: currentUserQueryKey(accessToken),
-    queryFn: () => loadCurrentUserWithTimezoneSync(queryClient),
+    queryFn: () => loadCurrentUserWithTimezoneSync(queryClient, accessToken),
     enabled: !!accessToken,
     ...currentUserQueryOptions,
   });

@@ -1,18 +1,5 @@
 export function shouldShowOnboarding(input: {
-  isNewUser: boolean;
-  dismissed: boolean;
+  mobileOnboardingSeenAt: Date | null | undefined;
 }): boolean {
-  if (input.dismissed) {
-    return false;
-  }
-
-  if (input.isNewUser) {
-    return true;
-  }
-
-  if (__DEV__) {
-    return true;
-  }
-
-  return false;
+  return input.mobileOnboardingSeenAt == null;
 }

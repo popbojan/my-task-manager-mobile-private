@@ -91,15 +91,17 @@ export default function OnboardingModal({
     handleBackToPersonalIntroOrClose();
   }
 
-  function handleSkipOnboarding() {
-    setStepIndex(0);
+  function finishOnboarding() {
     onComplete();
+  }
+
+  function handleSkipOnboarding() {
+    finishOnboarding();
   }
 
   function handlePrimary() {
     if (isLastStep) {
-      setStepIndex(0);
-      onComplete();
+      finishOnboarding();
       return;
     }
 
@@ -107,8 +109,7 @@ export default function OnboardingModal({
   }
 
   function handleSwipeAfterLast() {
-    setStepIndex(0);
-    onComplete();
+    finishOnboarding();
   }
 
   function renderStep(pageIndex: number) {

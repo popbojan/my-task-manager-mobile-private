@@ -108,7 +108,20 @@ export default function IntroStepPager({
       return;
     }
 
-    const index = Math.round(event.nativeEvent.contentOffset.x / width);
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const maxOffset = width * Math.max(0, stepCount - 1);
+    const velocityX = event.nativeEvent.velocity?.x ?? 0;
+
+    if (
+      stepIndexRef.current === stepCount - 1 &&
+      offsetX >= maxOffset - 1 &&
+      velocityX < -SWIPE_EDGE_VELOCITY
+    ) {
+      onSwipeAfterLastRef.current?.();
+      return;
+    }
+
+    const index = Math.round(offsetX / width);
     settleStep(index);
   }
 
@@ -131,7 +144,14 @@ export default function IntroStepPager({
       return;
     }
 
-    if (stepIndexRef.current === stepCount - 1 && contentOffset.x >= maxOffset - 1 && swipeLeft) {
+    const onLastStep = stepIndexRef.current === stepCount - 1;
+    const atLastOffset = contentOffset.x >= maxOffset - 1;
+    const forwardIntentOnLastStep =
+      onLastStep &&
+      atLastOffset &&
+      ((velocity?.x ?? 0) < 0 || dragDelta < 0);
+
+    if (onLastStep && atLastOffset && (swipeLeft || forwardIntentOnLastStep)) {
       onSwipeAfterLastRef.current?.();
       return;
     }

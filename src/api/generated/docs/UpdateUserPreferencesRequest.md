@@ -1,7 +1,7 @@
 
 # UpdateUserPreferencesRequest
 
-Provide at least one of language or timezone.
+Provide at least one of language, timezone, personalIntroSeenAt, mobileOnboardingSeenAt, webOnboardingSeenAt, or mobileAppVersion. 
 
 ## Properties
 
@@ -9,6 +9,10 @@ Name | Type
 ------------ | -------------
 `language` | [Language](Language.md)
 `timezone` | string
+`personalIntroSeenAt` | Date
+`mobileOnboardingSeenAt` | Date
+`webOnboardingSeenAt` | Date
+`mobileAppVersion` | string
 
 ## Example
 
@@ -19,6 +23,10 @@ import type { UpdateUserPreferencesRequest } from ''
 const example = {
   "language": null,
   "timezone": Europe/Berlin,
+  "personalIntroSeenAt": null,
+  "mobileOnboardingSeenAt": null,
+  "webOnboardingSeenAt": null,
+  "mobileAppVersion": null,
 } satisfies UpdateUserPreferencesRequest
 
 console.log(example)

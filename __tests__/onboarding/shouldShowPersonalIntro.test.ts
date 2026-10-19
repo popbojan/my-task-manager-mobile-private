@@ -1,35 +1,19 @@
 import { shouldShowPersonalIntro } from '@/onboarding/shouldShowPersonalIntro';
 
 describe('shouldShowPersonalIntro', () => {
-  it('returns false when personal intro was dismissed locally', () => {
+  it('returns false when personal intro was already seen', () => {
     expect(
       shouldShowPersonalIntro({
-        isNewUser: true,
-        dismissed: true,
+        personalIntroSeenAt: new Date('2026-10-19T08:30:00.000Z'),
       }),
     ).toBe(false);
   });
 
-  it('returns true for new users who have not dismissed personal intro', () => {
+  it('returns true when personal intro was not seen yet', () => {
     expect(
       shouldShowPersonalIntro({
-        isNewUser: true,
-        dismissed: false,
+        personalIntroSeenAt: null,
       }),
     ).toBe(true);
-  });
-
-  it('returns false for returning users in production', () => {
-    const originalDev = (global as { __DEV__?: boolean }).__DEV__;
-    (global as { __DEV__?: boolean }).__DEV__ = false;
-
-    expect(
-      shouldShowPersonalIntro({
-        isNewUser: false,
-        dismissed: false,
-      }),
-    ).toBe(false);
-
-    (global as { __DEV__?: boolean }).__DEV__ = originalDev;
   });
 });

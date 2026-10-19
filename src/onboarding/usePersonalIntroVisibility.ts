@@ -1,63 +1,52 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  isPersonalIntroDismissed,
-  markPersonalIntroDismissed,
-} from '@/onboarding/personalIntroStorage';
+import { useQueryClient } from '@tanstack/react-query';
+import type { User } from '@/api/generated';
+import { useAuth } from '@/auth/AuthContext';
 import { shouldShowPersonalIntro } from '@/onboarding/shouldShowPersonalIntro';
+import { markPersonalIntroSeen } from '@/user/userPreferences';
 
 type UsePersonalIntroVisibilityInput = {
-  userId: string | undefined;
-  isNewUser: boolean | undefined;
+  user: User | undefined;
+  userLoaded: boolean;
 };
 
 export function usePersonalIntroVisibility({
-  userId,
-  isNewUser,
+  user,
+  userLoaded,
 }: UsePersonalIntroVisibilityInput) {
-  const [dismissed, setDismissed] = useState<boolean | null>(null);
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+  const [autoDismissed, setAutoDismissed] = useState(false);
 
   useEffect(() => {
-    if (!userId) {
-      setDismissed(null);
-      return;
-    }
-
-    let cancelled = false;
-
-    void isPersonalIntroDismissed(userId).then(storedDismissed => {
-      if (cancelled) {
-        return;
-      }
-
-      setDismissed(storedDismissed);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
+    setAutoDismissed(false);
+  }, [user?.id]);
 
   const autoVisible = useMemo(() => {
-    if (!userId || isNewUser === undefined || dismissed === null) {
+    if (autoDismissed || !user || !userLoaded) {
       return false;
     }
 
     return shouldShowPersonalIntro({
-      isNewUser,
-      dismissed,
+      personalIntroSeenAt: user.personalIntroSeenAt,
     });
-  }, [dismissed, isNewUser, userId]);
+  }, [autoDismissed, user, userLoaded]);
 
   const dismiss = useCallback(async () => {
-    if (!userId) {
+    setAutoDismissed(true);
+
+    if (!user || user.personalIntroSeenAt != null) {
       return;
     }
 
-    await markPersonalIntroDismissed(userId);
-    setDismissed(true);
-  }, [userId]);
+    try {
+      await markPersonalIntroSeen(queryClient, accessToken);
+    } catch {
+      // Keep the intro closed even if persistence fails temporarily.
+    }
+  }, [accessToken, queryClient, user]);
 
-  const isReady = !userId || (isNewUser !== undefined && dismissed !== null);
+  const isReady = !user?.id || userLoaded;
 
   return {
     autoVisible,

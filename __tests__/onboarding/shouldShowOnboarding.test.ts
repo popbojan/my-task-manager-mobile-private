@@ -1,35 +1,19 @@
 import { shouldShowOnboarding } from '@/onboarding/shouldShowOnboarding';
 
 describe('shouldShowOnboarding', () => {
-  it('returns false when onboarding was dismissed locally', () => {
+  it('returns false when onboarding was already seen', () => {
     expect(
       shouldShowOnboarding({
-        isNewUser: true,
-        dismissed: true,
+        mobileOnboardingSeenAt: new Date('2026-10-19T09:15:00.000Z'),
       }),
     ).toBe(false);
   });
 
-  it('returns true for new users when not dismissed', () => {
+  it('returns true when onboarding was not seen yet', () => {
     expect(
       shouldShowOnboarding({
-        isNewUser: true,
-        dismissed: false,
+        mobileOnboardingSeenAt: null,
       }),
     ).toBe(true);
-  });
-
-  it('returns false for existing users in production builds', () => {
-    const originalDev = (global as { __DEV__?: boolean }).__DEV__;
-    (global as { __DEV__?: boolean }).__DEV__ = false;
-
-    expect(
-      shouldShowOnboarding({
-        isNewUser: false,
-        dismissed: false,
-      }),
-    ).toBe(false);
-
-    (global as { __DEV__?: boolean }).__DEV__ = originalDev;
   });
 });

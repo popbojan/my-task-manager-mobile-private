@@ -57,12 +57,12 @@ function MainAppShell() {
   const subscriptionReady =
     !subscriptionQuery.isLoading && subscriptionQuery.isFetched;
   const onboarding = useOnboardingVisibility({
-    userId: currentUserQuery.data?.id,
-    isNewUser: currentUserQuery.data?.isNewUser,
+    user: currentUserQuery.data,
+    userLoaded: currentUserQuery.isSuccess,
   });
   const personalIntro = usePersonalIntroVisibility({
-    userId: currentUserQuery.data?.id,
-    isNewUser: currentUserQuery.data?.isNewUser,
+    user: currentUserQuery.data,
+    userLoaded: currentUserQuery.isSuccess,
   });
   const [introPhase, setIntroPhase] = useState<'personal' | 'onboarding'>('personal');
   const [personalIntroDraft, setPersonalIntroDraft] = useState<PersonalIntroDraft>(
@@ -205,9 +205,12 @@ function MainAppShell() {
 
     await onboarding.dismiss();
     await personalIntro.dismiss();
+    setIntroPhase('personal');
+    setActiveTab('today');
   }
 
-  function continueFromPersonalIntro() {
+  async function continueFromPersonalIntro() {
+    await personalIntro.dismiss();
     setIntroPhase('onboarding');
   }
 
@@ -219,20 +222,14 @@ function MainAppShell() {
   async function completeOnboarding() {
     if (onboarding.manualOpen) {
       onboarding.close();
+      setActiveTab('today');
       return;
     }
 
     await onboarding.dismiss();
     await personalIntro.dismiss();
-
-    if (hasPremiumAccess) {
-      setActiveTab('today');
-      openTaskForm(null);
-      return;
-    }
-
-    setActiveTab('tasks');
-    openBoardTaskCreate('all');
+    setIntroPhase('personal');
+    setActiveTab('today');
   }
 
   return (

@@ -8,6 +8,9 @@ Name | Type
 ------------ | -------------
 `language` | [Language](Language.md)
 `timezone` | string
+`personalIntroSeenAt` | Date
+`mobileOnboardingSeenAt` | Date
+`webOnboardingSeenAt` | Date
 
 ## Example
 
@@ -18,6 +21,9 @@ import type { UserPreferencesResponse } from ''
 const example = {
   "language": null,
   "timezone": Europe/Berlin,
+  "personalIntroSeenAt": null,
+  "mobileOnboardingSeenAt": null,
+  "webOnboardingSeenAt": null,
 } satisfies UserPreferencesResponse
 
 console.log(example)

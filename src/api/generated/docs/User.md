@@ -10,7 +10,9 @@ Name | Type
 `email` | string
 `language` | [Language](Language.md)
 `timezone` | string
-`isNewUser` | boolean
+`personalIntroSeenAt` | Date
+`mobileOnboardingSeenAt` | Date
+`webOnboardingSeenAt` | Date
 
 ## Example
 
@@ -23,7 +25,9 @@ const example = {
   "email": null,
   "language": null,
   "timezone": Europe/Berlin,
-  "isNewUser": true,
+  "personalIntroSeenAt": 2026-10-19T08:30Z,
+  "mobileOnboardingSeenAt": null,
+  "webOnboardingSeenAt": 2026-10-19T09:15Z,
 } satisfies User
 
 console.log(example)

@@ -1,54 +1,37 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  isOnboardingDismissed,
-  markOnboardingDismissed,
-} from '@/onboarding/onboardingStorage';
+import { useQueryClient } from '@tanstack/react-query';
+import type { User } from '@/api/generated';
+import { useAuth } from '@/auth/AuthContext';
 import { shouldShowOnboarding } from '@/onboarding/shouldShowOnboarding';
+import { markMobileOnboardingSeen } from '@/user/userPreferences';
 
 type UseOnboardingVisibilityInput = {
-  userId: string | undefined;
-  isNewUser: boolean | undefined;
+  user: User | undefined;
+  userLoaded: boolean;
 };
 
 export function useOnboardingVisibility({
-  userId,
-  isNewUser,
+  user,
+  userLoaded,
 }: UseOnboardingVisibilityInput) {
-  const [dismissed, setDismissed] = useState<boolean | null>(null);
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
   const [manualOpen, setManualOpen] = useState(false);
+  const [autoDismissed, setAutoDismissed] = useState(false);
 
   useEffect(() => {
-    if (!userId) {
-      setDismissed(null);
-      setManualOpen(false);
-      return;
-    }
-
-    let cancelled = false;
-
-    void isOnboardingDismissed(userId).then(storedDismissed => {
-      if (cancelled) {
-        return;
-      }
-
-      setDismissed(storedDismissed);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
+    setAutoDismissed(false);
+  }, [user?.id]);
 
   const autoVisible = useMemo(() => {
-    if (!userId || isNewUser === undefined || dismissed === null) {
+    if (autoDismissed || !user || !userLoaded) {
       return false;
     }
 
     return shouldShowOnboarding({
-      isNewUser,
-      dismissed,
+      mobileOnboardingSeenAt: user.mobileOnboardingSeenAt,
     });
-  }, [dismissed, isNewUser, userId]);
+  }, [autoDismissed, user, userLoaded]);
 
   const visible = manualOpen || autoVisible;
 
@@ -62,17 +45,20 @@ export function useOnboardingVisibility({
 
   const dismiss = useCallback(async () => {
     setManualOpen(false);
+    setAutoDismissed(true);
 
-    if (!userId) {
+    if (!user || user.mobileOnboardingSeenAt != null) {
       return;
     }
 
-    await markOnboardingDismissed(userId);
-    setDismissed(true);
-  }, [userId]);
+    try {
+      await markMobileOnboardingSeen(queryClient, accessToken);
+    } catch {
+      // Keep the onboarding closed even if persistence fails temporarily.
+    }
+  }, [accessToken, queryClient, user]);
 
-  const isReady =
-    !userId || (isNewUser !== undefined && dismissed !== null);
+  const isReady = !user?.id || userLoaded;
 
   return {
     visible,

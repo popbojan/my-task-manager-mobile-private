@@ -1,18 +1,5 @@
 export function shouldShowPersonalIntro(input: {
-  isNewUser: boolean;
-  dismissed: boolean;
+  personalIntroSeenAt: Date | null | undefined;
 }): boolean {
-  if (input.dismissed) {
-    return false;
-  }
-
-  if (input.isNewUser) {
-    return true;
-  }
-
-  if (__DEV__) {
-    return true;
-  }
-
-  return false;
+  return input.personalIntroSeenAt == null;
 }

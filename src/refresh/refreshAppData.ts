@@ -28,7 +28,7 @@ export async function refreshAppData(
   await Promise.allSettled([
     queryClient.fetchQuery({
       queryKey: currentUserQueryKey(accessToken),
-      queryFn: () => loadCurrentUserWithTimezoneSync(queryClient),
+      queryFn: () => loadCurrentUserWithTimezoneSync(queryClient, accessToken),
       staleTime: 0,
     }),
     refreshSubscriptionFromBackend(queryClient),

@@ -147,7 +147,19 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.slide5.title': 'Note ce qui te motive',
   'onboarding.slide5.body':
     'Appuie sur un jour et écris une note : Qu’est-ce qui a aidé ? Qu’est-ce qui était difficile ? Que feras-tu différemment demain ?',
+  'onboarding.slide6.title': 'Tu as le choix',
+  'onboarding.slide6.body':
+    'Les tâches quotidiennes, les séries et Mon parcours nécessitent Premium.\n\nLes tâches avec priorités et échéances fixes restent gratuites sans abonnement.',
+  'onboarding.slide6.premiumIntro':
+    'Pour les tâches quotidiennes, les séries et Mon parcours',
+  'onboarding.slide6.premiumEmphasis': 'tu as besoin de Premium.',
+  'onboarding.slide6.freeIntro':
+    'Les tâches avec priorités et échéances fixes, tu peux aussi les utiliser',
+  'onboarding.slide6.freeEmphasis': 'gratuitement sans abonnement.',
+  'onboarding.slide6.visualCaption': 'Exemple : Tâches (gratuit)',
   'onboarding.demo.taskTitle': 'Lire 5 minutes',
+  'onboarding.demo.boardTaskOneTitle': 'Envoyer les documents fiscaux',
+  'onboarding.demo.boardTaskTwoTitle': 'Prendre rendez-vous chez le dentiste',
   'onboarding.demo.secondTaskTitle': 'S’étirer 10 minutes',
   'onboarding.demo.thirdTaskTitle': 'Boire de l’eau',
   'onboarding.demo.monthTitle': 'Octobre 2026',
@@ -442,7 +454,7 @@ export const fr: Record<TranslationKey, string> = {
   'profile.helpMenu.title': 'Aide',
   'profile.helpMenu.viewIntroduction': 'Comment ça marche',
   'profile.helpMenu.viewIntroductionHint':
-    'Découvre l’app en cinq étapes rapides.',
+    'Découvre l’app en six étapes rapides.',
   'profile.legalMenu.title': 'Mentions légales',
   'profile.legalMenu.privacy': 'Confidentialité',
   'profile.legalMenu.impressum': 'Mentions légales / Contact',

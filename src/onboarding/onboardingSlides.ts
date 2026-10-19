@@ -3,7 +3,8 @@ export type OnboardingSlideId =
   | 'completeTasks'
   | 'streakGrowth'
   | 'journeyVisible'
-  | 'captureNotes';
+  | 'captureNotes'
+  | 'yourChoice';
 
 export type OnboardingSlide = {
   id: OnboardingSlideId;
@@ -12,13 +13,15 @@ export type OnboardingSlide = {
     | 'onboarding.slide2.title'
     | 'onboarding.slide3.title'
     | 'onboarding.slide4.title'
-    | 'onboarding.slide5.title';
+    | 'onboarding.slide5.title'
+    | 'onboarding.slide6.title';
   bodyKey:
     | 'onboarding.slide1.body'
     | 'onboarding.slide2.body'
     | 'onboarding.slide3.body'
     | 'onboarding.slide4.body'
-    | 'onboarding.slide5.body';
+    | 'onboarding.slide5.body'
+    | 'onboarding.slide6.body';
 };
 
 export const ONBOARDING_SLIDES: OnboardingSlide[] = [
@@ -46,5 +49,10 @@ export const ONBOARDING_SLIDES: OnboardingSlide[] = [
     id: 'captureNotes',
     titleKey: 'onboarding.slide5.title',
     bodyKey: 'onboarding.slide5.body',
+  },
+  {
+    id: 'yourChoice',
+    titleKey: 'onboarding.slide6.title',
+    bodyKey: 'onboarding.slide6.body',
   },
 ];

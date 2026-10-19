@@ -147,7 +147,19 @@ export const de = {
   'onboarding.slide5.title': 'Halte fest, was dich bewegt',
   'onboarding.slide5.body':
     'Tippe auf einen Tag und schreibe eine Notiz: Was hat geholfen? Was war schwierig? Was möchtest du morgen anders machen?',
+  'onboarding.slide6.title': 'Du hast die Wahl',
+  'onboarding.slide6.body':
+    'Für tägliche Aufgaben, Ketten und ‚Mein Weg‘ brauchst du Premium.\n\nAufgaben mit Prioritäten und festen Fälligkeitsterminen kannst du auch ohne Abo kostenlos nutzen.',
+  'onboarding.slide6.premiumIntro':
+    'Für tägliche Aufgaben, Ketten und ‚Mein Weg‘',
+  'onboarding.slide6.premiumEmphasis': 'benötigst du Premium.',
+  'onboarding.slide6.freeIntro':
+    'Aufgaben mit Prioritäten und festen Fälligkeitsterminen kannst du auch',
+  'onboarding.slide6.freeEmphasis': 'ohne Abonnement kostenlos nutzen.',
+  'onboarding.slide6.visualCaption': 'Beispiel: Aufgaben (kostenlos)',
   'onboarding.demo.taskTitle': '5 Minuten lesen',
+  'onboarding.demo.boardTaskOneTitle': 'Steuerunterlagen einreichen',
+  'onboarding.demo.boardTaskTwoTitle': 'Zahnarzttermin buchen',
   'onboarding.demo.secondTaskTitle': '10 Minuten dehnen',
   'onboarding.demo.thirdTaskTitle': 'Wasser trinken',
   'onboarding.demo.monthTitle': 'Oktober 2026',
@@ -442,7 +454,7 @@ export const de = {
   'profile.helpMenu.title': 'Hilfe',
   'profile.helpMenu.viewIntroduction': 'So funktioniert\'s',
   'profile.helpMenu.viewIntroductionHint':
-    'Die App in fünf kurzen Schritten kennenlernen.',
+    'Die App in sechs kurzen Schritten kennenlernen.',
   'profile.legalMenu.title': 'Rechtliches',
   'profile.legalMenu.privacy': 'Datenschutz',
   'profile.legalMenu.impressum': 'Impressum / Kontakt',

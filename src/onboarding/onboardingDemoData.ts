@@ -1,4 +1,5 @@
-import { RecurringTaskStatus } from '@/api/generated';
+import { RecurringTaskStatus, TaskPriority, TaskStatus } from '@/api/generated';
+import type { Task } from '@/api/generated/models/Task';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
 import type { RecurringTask } from '@/api/generated/models/RecurringTask';
@@ -27,6 +28,8 @@ function demoHistoryDay(
 }
 
 export const ONBOARDING_DEMO_TASK_TITLE_KEY = 'onboarding.demo.taskTitle' as const;
+export const ONBOARDING_DEMO_BOARD_TASK_ONE_KEY = 'onboarding.demo.boardTaskOneTitle' as const;
+export const ONBOARDING_DEMO_BOARD_TASK_TWO_KEY = 'onboarding.demo.boardTaskTwoTitle' as const;
 
 export const ONBOARDING_DEMO_PROGRESS: RecurringTaskProgress = {
   id: 'onboarding-demo-progress',
@@ -39,6 +42,25 @@ export const ONBOARDING_DEMO_PROGRESS: RecurringTaskProgress = {
   createdAt: demoDate,
   updatedAt: demoDate,
 };
+
+export function createOnboardingDemoBoardTask(
+  id: string,
+  title: string,
+  priority: TaskPriority,
+  status: TaskStatus,
+  deadline: Date,
+): Task {
+  return {
+    id,
+    title,
+    description: null,
+    status,
+    priority,
+    deadline,
+    createdAt: demoDate,
+    updatedAt: demoDate,
+  };
+}
 
 export function createOnboardingDemoTask(
   id: string,

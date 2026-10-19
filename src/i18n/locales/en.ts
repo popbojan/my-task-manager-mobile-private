@@ -147,7 +147,19 @@ export const en: Record<TranslationKey, string> = {
   'onboarding.slide5.title': 'Capture what moves you',
   'onboarding.slide5.body':
     'Tap a day and write a note: What helped? What was difficult? What will you do differently tomorrow?',
+  'onboarding.slide6.title': 'You have a choice',
+  'onboarding.slide6.body':
+    'Daily tasks, streaks, and My Journey require Premium.\n\nTasks with priorities and fixed due dates are free to use without a subscription.',
+  'onboarding.slide6.premiumIntro':
+    'For daily tasks, streaks, and My Journey',
+  'onboarding.slide6.premiumEmphasis': 'you need Premium.',
+  'onboarding.slide6.freeIntro':
+    'Tasks with priorities and fixed due dates can also be used',
+  'onboarding.slide6.freeEmphasis': 'free without a subscription.',
+  'onboarding.slide6.visualCaption': 'Example: Tasks (free)',
   'onboarding.demo.taskTitle': 'Read for 5 minutes',
+  'onboarding.demo.boardTaskOneTitle': 'Submit tax documents',
+  'onboarding.demo.boardTaskTwoTitle': 'Book dentist appointment',
   'onboarding.demo.secondTaskTitle': 'Stretch for 10 minutes',
   'onboarding.demo.thirdTaskTitle': 'Drink water',
   'onboarding.demo.monthTitle': 'October 2026',
@@ -437,7 +449,7 @@ export const en: Record<TranslationKey, string> = {
   'profile.helpMenu.title': 'Help',
   'profile.helpMenu.viewIntroduction': 'How it works',
   'profile.helpMenu.viewIntroductionHint':
-    'Get to know the app in five quick steps.',
+    'Get to know the app in six quick steps.',
   'profile.legalMenu.title': 'Legal',
   'profile.legalMenu.privacy': 'Privacy policy',
   'profile.legalMenu.impressum': 'Legal notice / Contact',

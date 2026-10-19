@@ -15,6 +15,7 @@ type OnboardingAppPreviewProps = {
   activeTab: MainTab;
   children: ReactNode;
   compact?: boolean;
+  minimal?: boolean;
 };
 
 const TAB_ITEMS: {
@@ -58,12 +59,21 @@ export default function OnboardingAppPreview({
   activeTab,
   children,
   compact = false,
+  minimal = false,
 }: OnboardingAppPreviewProps) {
   const { t } = useLanguage();
 
   return (
     <View style={styles.shell} pointerEvents="none">
-      <View style={[styles.screen, compact ? styles.screenCompact : null]}>{children}</View>
+      <View
+        style={[
+          styles.screen,
+          compact ? styles.screenCompact : null,
+          minimal ? styles.screenMinimal : null,
+        ]}
+      >
+        {children}
+      </View>
       <View style={styles.tabBar}>
         {TAB_ITEMS.map(tab => {
           const active = tab.id === activeTab;
@@ -104,6 +114,12 @@ const styles = StyleSheet.create({
     minHeight: 0,
     paddingTop: 8,
     paddingBottom: 4,
+  },
+  screenMinimal: {
+    gap: 4,
+    minHeight: 0,
+    paddingTop: 6,
+    paddingBottom: 2,
   },
   tabBar: {
     flexDirection: 'row',

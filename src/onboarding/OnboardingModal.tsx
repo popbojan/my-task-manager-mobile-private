@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import IntroStepPager from '@/onboarding/IntroStepPager';
 import OnboardingSlideVisual from '@/onboarding/OnboardingSlideVisual';
+import OnboardingYourChoiceSummary from '@/onboarding/OnboardingYourChoiceSummary';
 import { ONBOARDING_SLIDES } from '@/onboarding/onboardingSlides';
 import LanguagePicker from '@/pages/login/LanguagePicker';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
@@ -135,10 +136,22 @@ export default function OnboardingModal({
           </View>
 
           <Text style={styles.title}>{t(pageSlide.titleKey)}</Text>
-          <Text style={styles.body}>{t(pageSlide.bodyKey)}</Text>
+          {pageSlide.id === 'yourChoice' ? (
+            <OnboardingYourChoiceSummary />
+          ) : (
+            <Text style={styles.body}>{t(pageSlide.bodyKey)}</Text>
+          )}
         </View>
 
-        <View style={styles.visualWrap}>
+        <View
+          style={[
+            styles.visualWrap,
+            pageSlide.id === 'yourChoice' ? styles.visualWrapCompact : null,
+          ]}
+        >
+          {pageSlide.id === 'yourChoice' ? (
+            <Text style={styles.visualCaption}>{t('onboarding.slide6.visualCaption')}</Text>
+          ) : null}
           <OnboardingSlideVisual slideId={pageSlide.id} />
         </View>
       </>
@@ -279,6 +292,16 @@ const styles = StyleSheet.create({
   visualWrap: {
     paddingHorizontal: 16,
     paddingTop: 12,
+  },
+  visualWrapCompact: {
+    paddingTop: 8,
+  },
+  visualCaption: {
+    ...premiumType.overline,
+    color: recurringTheme.textMuted,
+    fontSize: 10,
+    marginBottom: 6,
+    paddingHorizontal: 4,
   },
   stepLabel: {
     ...premiumType.overline,

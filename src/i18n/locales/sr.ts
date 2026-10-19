@@ -148,7 +148,19 @@ export const sr: Record<TranslationKey, string> = {
   'onboarding.slide5.title': 'Zabeleži šta te pokreće',
   'onboarding.slide5.body':
     'Tapni dan i napiši belešku: Šta je pomoglo? Šta je bilo teško? Šta ćeš sutra uraditi drugačije?',
+  'onboarding.slide6.title': 'Imaš izbor',
+  'onboarding.slide6.body':
+    'Za dnevne zadatke, nizove i Moj put potreban je Premium.\n\nZadatke sa prioritetima i fiksnim rokovima možeš besplatno koristiti i bez pretplate.',
+  'onboarding.slide6.premiumIntro':
+    'Za dnevne zadatke, nizove i Moj put',
+  'onboarding.slide6.premiumEmphasis': 'potreban ti je Premium.',
+  'onboarding.slide6.freeIntro':
+    'Zadatke sa prioritetima i fiksnim rokovima možeš takođe',
+  'onboarding.slide6.freeEmphasis': 'besplatno koristiti bez pretplate.',
+  'onboarding.slide6.visualCaption': 'Primer: Zadaci (besplatno)',
   'onboarding.demo.taskTitle': 'Čitaj 5 minuta',
+  'onboarding.demo.boardTaskOneTitle': 'Predati poreske dokumente',
+  'onboarding.demo.boardTaskTwoTitle': 'Zakazati termin kod zubara',
   'onboarding.demo.secondTaskTitle': 'Istezanje 10 minuta',
   'onboarding.demo.thirdTaskTitle': 'Pij vodu',
   'onboarding.demo.monthTitle': 'Oktobar 2026.',
@@ -439,7 +451,7 @@ export const sr: Record<TranslationKey, string> = {
   'profile.helpMenu.title': 'Pomoć',
   'profile.helpMenu.viewIntroduction': 'Kako funkcioniše',
   'profile.helpMenu.viewIntroductionHint':
-    'Upoznaj aplikaciju u pet kratkih koraka.',
+    'Upoznaj aplikaciju u šest kratkih koraka.',
   'profile.legalMenu.title': 'Pravno',
   'profile.legalMenu.privacy': 'Politika privatnosti',
   'profile.legalMenu.impressum': 'Impresum / Kontakt',

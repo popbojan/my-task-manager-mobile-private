@@ -115,6 +115,7 @@ export default function OnboardingModal({
 
   function renderStep(pageIndex: number) {
     const pageSlide = ONBOARDING_SLIDES[pageIndex];
+    const isYourChoice = pageSlide.id === 'yourChoice';
 
     return (
       <>
@@ -136,24 +137,18 @@ export default function OnboardingModal({
           </View>
 
           <Text style={styles.title}>{t(pageSlide.titleKey)}</Text>
-          {pageSlide.id === 'yourChoice' ? (
+          {isYourChoice ? (
             <OnboardingYourChoiceSummary />
           ) : (
             <Text style={styles.body}>{t(pageSlide.bodyKey)}</Text>
           )}
         </View>
 
-        <View
-          style={[
-            styles.visualWrap,
-            pageSlide.id === 'yourChoice' ? styles.visualWrapCompact : null,
-          ]}
-        >
-          {pageSlide.id === 'yourChoice' ? (
-            <Text style={styles.visualCaption}>{t('onboarding.slide6.visualCaption')}</Text>
-          ) : null}
-          <OnboardingSlideVisual slideId={pageSlide.id} />
-        </View>
+        {!isYourChoice ? (
+          <View style={styles.visualWrap}>
+            <OnboardingSlideVisual slideId={pageSlide.id} />
+          </View>
+        ) : null}
       </>
     );
   }
@@ -292,16 +287,6 @@ const styles = StyleSheet.create({
   visualWrap: {
     paddingHorizontal: 16,
     paddingTop: 12,
-  },
-  visualWrapCompact: {
-    paddingTop: 8,
-  },
-  visualCaption: {
-    ...premiumType.overline,
-    color: recurringTheme.textMuted,
-    fontSize: 10,
-    marginBottom: 6,
-    paddingHorizontal: 4,
   },
   stepLabel: {
     ...premiumType.overline,

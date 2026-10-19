@@ -150,13 +150,14 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.slide6.title': 'Tu as le choix',
   'onboarding.slide6.body':
     'Les tâches quotidiennes, les séries et Mon parcours nécessitent Premium.\n\nLes tâches avec priorités et échéances fixes restent gratuites sans abonnement.',
-  'onboarding.slide6.premiumIntro':
-    'Pour les tâches quotidiennes, les séries et Mon parcours',
-  'onboarding.slide6.premiumEmphasis': 'tu as besoin de Premium.',
-  'onboarding.slide6.freeIntro':
-    'Les tâches avec priorités et échéances fixes, tu peux aussi les utiliser',
-  'onboarding.slide6.freeEmphasis': 'gratuitement sans abonnement.',
-  'onboarding.slide6.visualCaption': 'Exemple : Tâches (gratuit)',
+  'onboarding.slide6.premiumLabel': 'PREMIUM',
+  'onboarding.slide6.premiumHeadline': 'Construire ta routine quotidienne',
+  'onboarding.slide6.premiumBody':
+    'Tâches quotidiennes, séries et ton calendrier personnel « Mon parcours ».',
+  'onboarding.slide6.freeLabel': 'Gratuit',
+  'onboarding.slide6.freeHeadline': 'Organiser le quotidien',
+  'onboarding.slide6.freeBody':
+    'Tâches avec priorités et échéances fixes — sans abonnement.',
   'onboarding.demo.taskTitle': 'Lire 5 minutes',
   'onboarding.demo.boardTaskOneTitle': 'Envoyer les documents fiscaux',
   'onboarding.demo.boardTaskTwoTitle': 'Prendre rendez-vous chez le dentiste',

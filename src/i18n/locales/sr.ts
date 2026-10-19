@@ -151,13 +151,14 @@ export const sr: Record<TranslationKey, string> = {
   'onboarding.slide6.title': 'Imaš izbor',
   'onboarding.slide6.body':
     'Za dnevne zadatke, nizove i Moj put potreban je Premium.\n\nZadatke sa prioritetima i fiksnim rokovima možeš besplatno koristiti i bez pretplate.',
-  'onboarding.slide6.premiumIntro':
-    'Za dnevne zadatke, nizove i Moj put',
-  'onboarding.slide6.premiumEmphasis': 'potreban ti je Premium.',
-  'onboarding.slide6.freeIntro':
-    'Zadatke sa prioritetima i fiksnim rokovima možeš takođe',
-  'onboarding.slide6.freeEmphasis': 'besplatno koristiti bez pretplate.',
-  'onboarding.slide6.visualCaption': 'Primer: Zadaci (besplatno)',
+  'onboarding.slide6.premiumLabel': 'PREMIUM',
+  'onboarding.slide6.premiumHeadline': 'Izgradi dnevnu rutinu',
+  'onboarding.slide6.premiumBody':
+    'Dnevni zadaci, nizovi i tvoj lični kalendar „Moj put“.',
+  'onboarding.slide6.freeLabel': 'Besplatno',
+  'onboarding.slide6.freeHeadline': 'Organizuj svakodnevicu',
+  'onboarding.slide6.freeBody':
+    'Zadaci sa prioritetima i fiksnim rokovima — bez pretplate.',
   'onboarding.demo.taskTitle': 'Čitaj 5 minuta',
   'onboarding.demo.boardTaskOneTitle': 'Predati poreske dokumente',
   'onboarding.demo.boardTaskTwoTitle': 'Zakazati termin kod zubara',

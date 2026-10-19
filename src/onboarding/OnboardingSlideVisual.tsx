@@ -1,15 +1,12 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { RecurringTaskStatus, TaskPriority, TaskStatus } from '@/api/generated';
+import { RecurringTaskStatus } from '@/api/generated';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import OnboardingAppPreview from '@/onboarding/OnboardingAppPreview';
 import {
-  createOnboardingDemoBoardTask,
   createOnboardingDemoTask,
   getOnboardingDemoDaysByDate,
   isOnboardingDemoFutureDay,
-  ONBOARDING_DEMO_BOARD_TASK_ONE_KEY,
-  ONBOARDING_DEMO_BOARD_TASK_TWO_KEY,
   ONBOARDING_DEMO_MONTH_KEY,
   ONBOARDING_DEMO_NOTE_DAY,
   ONBOARDING_DEMO_PROGRESS,
@@ -26,9 +23,6 @@ import RecurringTaskCard from '@/pages/recurring-tasks/RecurringTaskCard';
 import { DAILY_STATUS_COLUMNS } from '@/pages/recurring-tasks/recurringBoardConfig';
 import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import TodaySummaryCard from '@/pages/recurring-tasks/TodaySummaryCard';
-import TaskCard from '@/pages/tasks/TaskCard';
-import TaskPrioritySectionHeader from '@/pages/tasks/TaskPrioritySectionHeader';
-import { TASK_FILTERS, type TaskFilterId } from '@/pages/tasks/taskBoardConfig';
 import {
   buildMonthCalendarGrid,
   formatHistoryLevelDisplay,
@@ -49,26 +43,6 @@ function OnboardingPremiumBadge() {
   return (
     <View style={styles.premiumBadge}>
       <Text style={styles.premiumBadgeText}>{t('premium.badge')}</Text>
-    </View>
-  );
-}
-
-function DemoTaskFilterRow({ activeFilter }: { activeFilter: TaskFilterId }) {
-  const { t } = useLanguage();
-
-  return (
-    <View style={styles.taskFilterRow}>
-      {TASK_FILTERS.map(filter => {
-        const active = filter.id === activeFilter;
-
-        return (
-          <View key={filter.id} style={[styles.taskFilterChip, active && styles.taskFilterChipActive]}>
-            <Text style={[styles.taskFilterChipText, active && styles.taskFilterChipTextActive]}>
-              {t(filter.labelKey)}
-            </Text>
-          </View>
-        );
-      })}
     </View>
   );
 }
@@ -539,34 +513,6 @@ function CaptureNotesVisual() {
   );
 }
 
-function YourChoiceVisual() {
-  const { t } = useLanguage();
-  const urgentTask = createOnboardingDemoBoardTask(
-    'onboarding-board-urgent',
-    t(ONBOARDING_DEMO_BOARD_TASK_ONE_KEY),
-    TaskPriority.ImportantUrgent,
-    TaskStatus.Todo,
-    new Date('2026-10-25T17:00:00'),
-  );
-  const importantTask = createOnboardingDemoBoardTask(
-    'onboarding-board-important',
-    t(ONBOARDING_DEMO_BOARD_TASK_TWO_KEY),
-    TaskPriority.Important,
-    TaskStatus.InProgress,
-    new Date('2026-10-28T10:00:00'),
-  );
-
-  return (
-    <OnboardingAppPreview activeTab="tasks" compact>
-      <DemoTaskFilterRow activeFilter="all" />
-      <TaskPrioritySectionHeader priority={TaskPriority.ImportantUrgent} isFirst />
-      <TaskCard task={urgentTask} onEdit={noop} onDelete={noop} onToggleStatus={noop} />
-      <TaskPrioritySectionHeader priority={TaskPriority.Important} />
-      <TaskCard task={importantTask} onEdit={noop} onDelete={noop} onToggleStatus={noop} />
-    </OnboardingAppPreview>
-  );
-}
-
 export default function OnboardingSlideVisual({ slideId }: OnboardingSlideVisualProps) {
   switch (slideId) {
     case 'dailyTasks':
@@ -579,8 +525,6 @@ export default function OnboardingSlideVisual({ slideId }: OnboardingSlideVisual
       return <JourneyVisibleVisual />;
     case 'captureNotes':
       return <CaptureNotesVisual />;
-    case 'yourChoice':
-      return <YourChoiceVisual />;
     default:
       return null;
   }
@@ -602,31 +546,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.4,
     textTransform: 'uppercase',
-  },
-  taskFilterRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  taskFilterChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: recurringTheme.cardBorder,
-    backgroundColor: recurringTheme.surfaceInset,
-  },
-  taskFilterChipActive: {
-    borderColor: recurringTheme.cardBorderAccent,
-    backgroundColor: recurringTheme.accentGlow,
-  },
-  taskFilterChipText: {
-    color: recurringTheme.textMuted,
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  taskFilterChipTextActive: {
-    color: recurringTheme.accentBright,
   },
   sectionHeader: {
     flexDirection: 'row',

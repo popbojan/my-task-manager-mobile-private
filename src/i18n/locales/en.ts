@@ -150,13 +150,14 @@ export const en: Record<TranslationKey, string> = {
   'onboarding.slide6.title': 'You have a choice',
   'onboarding.slide6.body':
     'Daily tasks, streaks, and My Journey require Premium.\n\nTasks with priorities and fixed due dates are free to use without a subscription.',
-  'onboarding.slide6.premiumIntro':
-    'For daily tasks, streaks, and My Journey',
-  'onboarding.slide6.premiumEmphasis': 'you need Premium.',
-  'onboarding.slide6.freeIntro':
-    'Tasks with priorities and fixed due dates can also be used',
-  'onboarding.slide6.freeEmphasis': 'free without a subscription.',
-  'onboarding.slide6.visualCaption': 'Example: Tasks (free)',
+  'onboarding.slide6.premiumLabel': 'PREMIUM',
+  'onboarding.slide6.premiumHeadline': 'Build your daily routine',
+  'onboarding.slide6.premiumBody':
+    'Daily tasks, streaks, and your personal calendar “My Journey”.',
+  'onboarding.slide6.freeLabel': 'FREE',
+  'onboarding.slide6.freeHeadline': 'Organize your everyday life',
+  'onboarding.slide6.freeBody':
+    'Tasks with priorities and fixed due dates — without a subscription.',
   'onboarding.demo.taskTitle': 'Read for 5 minutes',
   'onboarding.demo.boardTaskOneTitle': 'Submit tax documents',
   'onboarding.demo.boardTaskTwoTitle': 'Book dentist appointment',

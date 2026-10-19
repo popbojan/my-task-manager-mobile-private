@@ -150,13 +150,14 @@ export const de = {
   'onboarding.slide6.title': 'Du hast die Wahl',
   'onboarding.slide6.body':
     'Für tägliche Aufgaben, Ketten und ‚Mein Weg‘ brauchst du Premium.\n\nAufgaben mit Prioritäten und festen Fälligkeitsterminen kannst du auch ohne Abo kostenlos nutzen.',
-  'onboarding.slide6.premiumIntro':
-    'Für tägliche Aufgaben, Ketten und ‚Mein Weg‘',
-  'onboarding.slide6.premiumEmphasis': 'benötigst du Premium.',
-  'onboarding.slide6.freeIntro':
-    'Aufgaben mit Prioritäten und festen Fälligkeitsterminen kannst du auch',
-  'onboarding.slide6.freeEmphasis': 'ohne Abonnement kostenlos nutzen.',
-  'onboarding.slide6.visualCaption': 'Beispiel: Aufgaben (kostenlos)',
+  'onboarding.slide6.premiumLabel': 'PREMIUM',
+  'onboarding.slide6.premiumHeadline': 'Deine tägliche Routine aufbauen',
+  'onboarding.slide6.premiumBody':
+    'Tägliche Aufgaben, Ketten und dein persönlicher Kalender „Mein Weg“.',
+  'onboarding.slide6.freeLabel': 'KOSTENLOS',
+  'onboarding.slide6.freeHeadline': 'Deinen Alltag organisieren',
+  'onboarding.slide6.freeBody':
+    'Aufgaben mit Prioritäten und festen Fälligkeitsterminen — ohne Abonnement.',
   'onboarding.demo.taskTitle': '5 Minuten lesen',
   'onboarding.demo.boardTaskOneTitle': 'Steuerunterlagen einreichen',
   'onboarding.demo.boardTaskTwoTitle': 'Zahnarzttermin buchen',

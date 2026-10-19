@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 export default function OnboardingYourChoiceSummary() {
   const { t } = useLanguage();
@@ -8,16 +8,15 @@ export default function OnboardingYourChoiceSummary() {
   return (
     <View style={styles.wrap}>
       <View style={styles.premiumCard}>
-        <View style={styles.premiumBadge}>
-          <Text style={styles.premiumBadgeText}>{t('premium.badge')}</Text>
-        </View>
-        <Text style={styles.premiumIntro}>{t('onboarding.slide6.premiumIntro')}</Text>
-        <Text style={styles.premiumEmphasis}>{t('onboarding.slide6.premiumEmphasis')}</Text>
+        <Text style={styles.premiumLabel}>{t('onboarding.slide6.premiumLabel')}</Text>
+        <Text style={styles.headline}>{t('onboarding.slide6.premiumHeadline')}</Text>
+        <Text style={styles.body}>{t('onboarding.slide6.premiumBody')}</Text>
       </View>
 
       <View style={styles.freeCard}>
-        <Text style={styles.freeIntro}>{t('onboarding.slide6.freeIntro')}</Text>
-        <Text style={styles.freeEmphasis}>{t('onboarding.slide6.freeEmphasis')}</Text>
+        <Text style={styles.freeLabel}>{t('onboarding.slide6.freeLabel')}</Text>
+        <Text style={styles.headline}>{t('onboarding.slide6.freeHeadline')}</Text>
+        <Text style={styles.body}>{t('onboarding.slide6.freeBody')}</Text>
       </View>
     </View>
   );
@@ -25,64 +24,50 @@ export default function OnboardingYourChoiceSummary() {
 
 const styles = StyleSheet.create({
   wrap: {
-    gap: 10,
+    gap: 16,
   },
   premiumCard: {
-    gap: 8,
+    gap: 6,
     paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderRadius: 14,
     borderWidth: 1,
     borderColor: recurringTheme.cardBorderAccent,
     backgroundColor: recurringTheme.accentGlow,
   },
-  premiumBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    backgroundColor: recurringTheme.accentDark,
+  freeCard: {
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: recurringTheme.cardBorderAccent,
+    borderColor: recurringTheme.cardBorder,
+    backgroundColor: recurringTheme.surfaceElevated,
   },
-  premiumBadgeText: {
+  premiumLabel: {
+    ...premiumType.overline,
     color: recurringTheme.accentBright,
     fontSize: 11,
     fontWeight: '800',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    letterSpacing: 0.6,
   },
-  premiumIntro: {
+  freeLabel: {
+    ...premiumType.overline,
+    color: recurringTheme.textMuted,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+  },
+  headline: {
     color: recurringTheme.textPrimary,
-    fontSize: 15,
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: -0.2,
     lineHeight: 22,
   },
-  premiumEmphasis: {
-    color: recurringTheme.textPrimary,
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.3,
-    lineHeight: 26,
-  },
-  freeCard: {
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: recurringTheme.cardBorderAccent,
-    backgroundColor: recurringTheme.surfaceElevated,
-  },
-  freeIntro: {
+  body: {
     color: recurringTheme.textSecondary,
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  freeEmphasis: {
-    color: recurringTheme.textPrimary,
-    fontSize: 20,
-    fontWeight: '800',
-    letterSpacing: -0.3,
-    lineHeight: 26,
+    fontSize: 14,
+    lineHeight: 20,
   },
 });

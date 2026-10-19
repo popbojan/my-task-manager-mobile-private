@@ -440,9 +440,9 @@ export const fr: Record<TranslationKey, string> = {
   'profile.accountMenu.subscription': 'Abonnement & facturation',
   'profile.accountMenu.subscriptionHint': 'Statut Premium, achat et restauration',
   'profile.helpMenu.title': 'Aide',
-  'profile.helpMenu.viewIntroduction': 'Voir l’introduction',
+  'profile.helpMenu.viewIntroduction': 'Comment ça marche',
   'profile.helpMenu.viewIntroductionHint':
-    'Rouvrir les trois écrans de bienvenue.',
+    'Découvre l’app en cinq étapes rapides.',
   'profile.legalMenu.title': 'Mentions légales',
   'profile.legalMenu.privacy': 'Confidentialité',
   'profile.legalMenu.impressum': 'Mentions légales / Contact',

@@ -65,16 +65,16 @@ export const ONBOARDING_DEMO_TODAY_DATE = '2026-10-23';
 
 /** Full October 2026 demo days keyed by calendar date (Mon-start grid like Mein Weg). */
 const ONBOARDING_DEMO_DAYS: HistoryDay[] = [
-  demoHistoryDay(1, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 8, currentLevel: 2 }),
-  demoHistoryDay(2, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 9, currentLevel: 2 }),
-  demoHistoryDay(3, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 10, currentLevel: 2 }),
-  demoHistoryDay(4, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 11, currentLevel: 2 }),
-  demoHistoryDay(5, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 12, currentLevel: 2 }),
-  demoHistoryDay(6, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 13, currentLevel: 2 }),
-  demoHistoryDay(7, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 14, currentLevel: 2 }),
-  demoHistoryDay(8, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 15, currentLevel: 2 }),
-  demoHistoryDay(9, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 16, currentLevel: 2 }),
-  demoHistoryDay(10, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 17, currentLevel: 2 }),
+  demoHistoryDay(1, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 9, currentLevel: 2 }),
+  demoHistoryDay(2, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 10, currentLevel: 2 }),
+  demoHistoryDay(3, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 11, currentLevel: 2 }),
+  demoHistoryDay(4, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 12, currentLevel: 2 }),
+  demoHistoryDay(5, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 13, currentLevel: 2 }),
+  demoHistoryDay(6, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 14, currentLevel: 2 }),
+  demoHistoryDay(7, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 15, currentLevel: 2 }),
+  demoHistoryDay(8, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 16, currentLevel: 2 }),
+  demoHistoryDay(9, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 17, currentLevel: 2 }),
+  demoHistoryDay(10, HistoryDayStatus.Success, { completedTasks: 2, totalTasks: 2, currentStreak: 18, currentLevel: 2 }),
   demoHistoryDay(11, HistoryDayStatus.Missed, {
     completedTasks: 1,
     totalTasks: 2,
@@ -113,7 +113,7 @@ export function isOnboardingDemoFutureDay(dayOfMonth: number): boolean {
 export const ONBOARDING_DEMO_NOTE_DAY = demoHistoryDay(12, HistoryDayStatus.Success, {
   completedTasks: 2,
   totalTasks: 2,
-  currentStreak: 45,
-  currentLevel: 2,
+  currentStreak: 1,
+  currentLevel: 1,
   note: 'demo',
 });

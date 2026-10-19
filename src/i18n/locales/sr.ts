@@ -437,9 +437,9 @@ export const sr: Record<TranslationKey, string> = {
   'profile.accountMenu.subscription': 'Pretplata i naplata',
   'profile.accountMenu.subscriptionHint': 'Premium status, kupovina i vraćanje',
   'profile.helpMenu.title': 'Pomoć',
-  'profile.helpMenu.viewIntroduction': 'Prikaži uvod',
+  'profile.helpMenu.viewIntroduction': 'Kako funkcioniše',
   'profile.helpMenu.viewIntroductionHint':
-    'Ponovo otvori tri ekrana dobrodošlice.',
+    'Upoznaj aplikaciju u pet kratkih koraka.',
   'profile.legalMenu.title': 'Pravno',
   'profile.legalMenu.privacy': 'Politika privatnosti',
   'profile.legalMenu.impressum': 'Impresum / Kontakt',

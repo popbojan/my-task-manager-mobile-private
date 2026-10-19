@@ -440,9 +440,9 @@ export const de = {
   'profile.accountMenu.subscription': 'Abo & Abrechnung',
   'profile.accountMenu.subscriptionHint': 'Premium-Status, Kauf und Wiederherstellung',
   'profile.helpMenu.title': 'Hilfe',
-  'profile.helpMenu.viewIntroduction': 'Einführung anzeigen',
+  'profile.helpMenu.viewIntroduction': 'So funktioniert\'s',
   'profile.helpMenu.viewIntroductionHint':
-    'Die drei Willkommens-Screens erneut öffnen.',
+    'Die App in fünf kurzen Schritten kennenlernen.',
   'profile.legalMenu.title': 'Rechtliches',
   'profile.legalMenu.privacy': 'Datenschutz',
   'profile.legalMenu.impressum': 'Impressum / Kontakt',

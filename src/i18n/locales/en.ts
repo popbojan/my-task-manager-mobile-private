@@ -435,9 +435,9 @@ export const en: Record<TranslationKey, string> = {
   'profile.accountMenu.subscription': 'Subscription & billing',
   'profile.accountMenu.subscriptionHint': 'Premium status, purchase and restore',
   'profile.helpMenu.title': 'Help',
-  'profile.helpMenu.viewIntroduction': 'View introduction',
+  'profile.helpMenu.viewIntroduction': 'How it works',
   'profile.helpMenu.viewIntroductionHint':
-    'Open the three welcome screens again.',
+    'Get to know the app in five quick steps.',
   'profile.legalMenu.title': 'Legal',
   'profile.legalMenu.privacy': 'Privacy policy',
   'profile.legalMenu.impressum': 'Legal notice / Contact',

@@ -61,6 +61,7 @@ import {
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
 import OnboardingEmptyState from '@/onboarding/OnboardingEmptyState';
+import { useCurrentUser } from '@/user/useCurrentUser';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
@@ -86,6 +87,7 @@ export default function RecurringTasksScreen({
   );
   const { t } = useLanguage();
   const { accessToken } = useAuth();
+  const currentUserQuery = useCurrentUser();
   const queryClient = useQueryClient();
   const { refreshing, onRefresh } = useAppRefresh();
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
@@ -207,9 +209,18 @@ export default function RecurringTasksScreen({
   const displayTasks = useMemo(
     () =>
       isPremiumPreview
-        ? createPremiumPreviewTasks(t, getDeviceTimezone())
+        ? createPremiumPreviewTasks(
+            t,
+            getDeviceTimezone(),
+            currentUserQuery.data?.personalFocusTaskName,
+          )
         : (tasksQuery.data ?? []),
-    [isPremiumPreview, t, tasksQuery.data],
+    [
+      currentUserQuery.data?.personalFocusTaskName,
+      isPremiumPreview,
+      t,
+      tasksQuery.data,
+    ],
   );
   const sortedTasks = useMemo(
     () => sortTasksForList(displayTasks),

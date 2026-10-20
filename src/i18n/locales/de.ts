@@ -193,6 +193,8 @@ export const de = {
   'recurring.levelsError': 'Level konnten nicht geladen werden.',
   'recurring.premiumRequired': 'Premium erforderlich für tägliche Aufgaben.',
   'recurring.preview.subscribeTaskTitle': 'Abonniere, um Disziplin zu üben',
+  'recurring.preview.subscribeTaskTitlePersonal':
+    'Abonniere, um {{taskName}} zu üben',
   'recurring.noTasks': 'Noch keine täglichen Aufgaben.',
   'recurring.addTaskDaily': 'Neue tägliche Aufgabe',
   'recurring.status.toggle': 'Status ändern',

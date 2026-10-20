@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { User } from '@/api/generated';
 import { useAuth } from '@/auth/AuthContext';
+import type { PersonalIntroFocusInput } from '@/onboarding/personalIntroPreferences';
 import { shouldShowPersonalIntro } from '@/onboarding/shouldShowPersonalIntro';
 import { markPersonalIntroSeen } from '@/user/userPreferences';
 
@@ -38,7 +39,7 @@ export function usePersonalIntroVisibility({
     });
   }, [autoDismissed, user, userLoaded]);
 
-  const dismiss = useCallback(async () => {
+  const dismiss = useCallback(async (focus?: PersonalIntroFocusInput) => {
     setAutoDismissed(true);
 
     if (!user || user.personalIntroSeenAt != null) {
@@ -46,7 +47,7 @@ export function usePersonalIntroVisibility({
     }
 
     try {
-      await markPersonalIntroSeen(queryClient, accessToken);
+      await markPersonalIntroSeen(queryClient, accessToken, focus);
     } catch {
       // Keep the intro closed even if persistence fails temporarily.
     }

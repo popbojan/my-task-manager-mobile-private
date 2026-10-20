@@ -194,6 +194,8 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.levelsError': 'Nivoi nisu učitani.',
   'recurring.premiumRequired': 'Premium potreban za dnevne zadatke.',
   'recurring.preview.subscribeTaskTitle': 'Pretplati se da vežbaš disciplinu',
+  'recurring.preview.subscribeTaskTitlePersonal':
+    'Pretplati se da vežbaš {{taskName}}',
   'recurring.noTasks': 'Još nema dnevnih zadataka.',
   'recurring.addTaskDaily': 'Novi dnevni zadatak',
   'recurring.status.toggle': 'Promeni status',

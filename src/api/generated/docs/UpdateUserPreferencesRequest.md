@@ -1,7 +1,7 @@
 
 # UpdateUserPreferencesRequest
 
-Provide at least one of language, timezone, personalIntroSeenAt, mobileOnboardingSeenAt, webOnboardingSeenAt, or mobileAppVersion. 
+Provide at least one of language, timezone, personalIntroSeenAt, mobileOnboardingSeenAt, webOnboardingSeenAt, mobileAppVersion, personalFocusTaskName, or personalFocusMotivation. 
 
 ## Properties
 
@@ -13,6 +13,8 @@ Name | Type
 `mobileOnboardingSeenAt` | Date
 `webOnboardingSeenAt` | Date
 `mobileAppVersion` | string
+`personalFocusTaskName` | string
+`personalFocusMotivation` | string
 
 ## Example
 
@@ -27,6 +29,8 @@ const example = {
   "mobileOnboardingSeenAt": null,
   "webOnboardingSeenAt": null,
   "mobileAppVersion": null,
+  "personalFocusTaskName": null,
+  "personalFocusMotivation": null,
 } satisfies UpdateUserPreferencesRequest
 
 console.log(example)

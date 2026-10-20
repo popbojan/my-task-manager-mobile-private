@@ -11,6 +11,8 @@ Name | Type
 `personalIntroSeenAt` | Date
 `mobileOnboardingSeenAt` | Date
 `webOnboardingSeenAt` | Date
+`personalFocusTaskName` | string
+`personalFocusMotivation` | string
 
 ## Example
 
@@ -24,6 +26,8 @@ const example = {
   "personalIntroSeenAt": null,
   "mobileOnboardingSeenAt": null,
   "webOnboardingSeenAt": null,
+  "personalFocusTaskName": null,
+  "personalFocusMotivation": null,
 } satisfies UserPreferencesResponse
 
 console.log(example)

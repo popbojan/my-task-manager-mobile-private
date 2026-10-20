@@ -209,7 +209,10 @@ function MainAppShell() {
   }
 
   async function continueFromPersonalIntro() {
-    await personalIntro.dismiss();
+    await personalIntro.dismiss({
+      taskName: personalIntroDraft.taskName,
+      motivation: personalIntroDraft.whyText,
+    });
     setIntroPhase('onboarding');
   }
 

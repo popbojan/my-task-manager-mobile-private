@@ -5,6 +5,10 @@ import type {
   UserPreferencesResponse,
 } from '@/api/generated';
 import { authApi } from '@/api/authClient';
+import {
+  buildPersonalIntroPreferencesPatch,
+  type PersonalIntroFocusInput,
+} from '@/onboarding/personalIntroPreferences';
 import { getMobileAppVersion } from '@/user/mobileAppVersion';
 import { currentUserQueryKey } from '@/user/currentUserQuery';
 
@@ -28,6 +32,8 @@ export function applyPreferencesToCurrentUser(
     personalIntroSeenAt: preferences.personalIntroSeenAt,
     mobileOnboardingSeenAt: preferences.mobileOnboardingSeenAt,
     webOnboardingSeenAt: preferences.webOnboardingSeenAt,
+    personalFocusTaskName: preferences.personalFocusTaskName,
+    personalFocusMotivation: preferences.personalFocusMotivation,
   };
 }
 
@@ -59,10 +65,13 @@ export async function patchUserPreferences(
 export async function markPersonalIntroSeen(
   queryClient: QueryClient,
   accessToken: string | null,
+  focus?: PersonalIntroFocusInput,
 ): Promise<void> {
-  await patchUserPreferences(queryClient, accessToken, {
-    personalIntroSeenAt: new Date(),
-  });
+  await patchUserPreferences(
+    queryClient,
+    accessToken,
+    buildPersonalIntroPreferencesPatch(focus),
+  );
 }
 
 export async function markMobileOnboardingSeen(

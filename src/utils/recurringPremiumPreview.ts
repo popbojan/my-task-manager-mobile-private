@@ -7,6 +7,20 @@ import { getDeviceTimezone } from '@/user/deviceTimezone';
 
 export const PREVIEW_SUBSCRIBE_TASK_ID = 'preview-subscribe';
 
+export function getPremiumPreviewSubscribeTaskTitle(
+  translate: (key: TranslationKey, params?: Record<string, string>) => string,
+  personalIntroTaskName?: string | null,
+): string {
+  const trimmed = personalIntroTaskName?.trim();
+  if (trimmed) {
+    return translate('recurring.preview.subscribeTaskTitlePersonal', {
+      taskName: trimmed,
+    });
+  }
+
+  return translate('recurring.preview.subscribeTaskTitle');
+}
+
 function getNextDailyResetAt(from = new Date(), timezone: string): Date {
   const startMs = from.getTime();
   const resolvedTimezone = timezone.trim() || 'UTC';
@@ -32,15 +46,16 @@ function getNextDailyResetAt(from = new Date(), timezone: string): Date {
 }
 
 export function createPremiumPreviewTasks(
-  translate: (key: TranslationKey) => string,
+  translate: (key: TranslationKey, params?: Record<string, string>) => string,
   timezone: string = getDeviceTimezone(),
+  personalIntroTaskName?: string | null,
 ): RecurringTask[] {
   const now = new Date();
 
   return [
     {
       id: PREVIEW_SUBSCRIBE_TASK_ID,
-      title: translate('recurring.preview.subscribeTaskTitle'),
+      title: getPremiumPreviewSubscribeTaskTitle(translate, personalIntroTaskName),
       status: RecurringTaskStatus.Todo,
       streakCount: 0,
       nextResetAt: getNextDailyResetAt(now, timezone),

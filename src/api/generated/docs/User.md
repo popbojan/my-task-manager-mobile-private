@@ -13,6 +13,8 @@ Name | Type
 `personalIntroSeenAt` | Date
 `mobileOnboardingSeenAt` | Date
 `webOnboardingSeenAt` | Date
+`personalFocusTaskName` | string
+`personalFocusMotivation` | string
 
 ## Example
 
@@ -28,6 +30,8 @@ const example = {
   "personalIntroSeenAt": 2026-10-19T08:30Z,
   "mobileOnboardingSeenAt": null,
   "webOnboardingSeenAt": 2026-10-19T09:15Z,
+  "personalFocusTaskName": 30 Minuten Deutsch lernen,
+  "personalFocusMotivation": Ich möchte fließend sprechen können.,
 } satisfies User
 
 console.log(example)

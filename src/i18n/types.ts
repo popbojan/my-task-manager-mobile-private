@@ -14,9 +14,9 @@ export const APP_LANGUAGES: {
   { code: 'en', apiLanguage: Language.En, flag: '🇬🇧', labelKey: 'language.en' },
 ];
 
-export const DEFAULT_APP_LANGUAGE: AppLanguage = 'de';
+export const DEFAULT_APP_LANGUAGE: AppLanguage = 'en';
 
 export function apiLanguageFromApp(language: AppLanguage): Language {
   const match = APP_LANGUAGES.find(item => item.code === language);
-  return match?.apiLanguage ?? Language.De;
+  return match?.apiLanguage ?? Language.En;
 }

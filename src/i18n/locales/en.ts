@@ -253,6 +253,17 @@ export const en: Record<TranslationKey, string> = {
     'Please enter a title — a task without a name cannot be saved.',
   'recurring.form.save': 'Save',
   'recurring.form.error': 'Could not save.',
+  'recurring.form.notificationLabel': 'Daily reminder',
+  'recurring.form.notificationHint':
+    'Push notification at a fixed time (your timezone).',
+  'recurring.form.notificationTimeLabel': 'Time',
+  'recurring.form.notificationTimeA11y': 'Choose reminder time',
+  'recurring.form.notificationPermissionRequired':
+    'Allow notifications in system settings to enable reminders.',
+  'recurring.notification.channelName': 'Daily tasks',
+  'recurring.notification.channelDescription':
+    'Reminders for your recurring tasks',
+  'recurring.notification.body': 'Time for “{{title}}”.',
   'tasks.sectionTitle': 'TASKS',
   'tasks.loading': 'Loading tasks…',
   'tasks.loadingTask': 'Loading task…',

@@ -15,6 +15,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@notifee/react-native": "^9.1.8",
     "@popbojan/task-manager-contract": "file:../my-task-manager-spec-private",
     "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-native-community/datetimepicker": "^8.6.0",

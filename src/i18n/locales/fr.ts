@@ -256,6 +256,17 @@ export const fr: Record<TranslationKey, string> = {
     'Saisis un titre — une tâche sans nom ne peut pas être enregistrée.',
   'recurring.form.save': 'Enregistrer',
   'recurring.form.error': 'Enregistrement impossible.',
+  'recurring.form.notificationLabel': 'Rappel quotidien',
+  'recurring.form.notificationHint':
+    'Notification push à une heure fixe (votre fuseau horaire).',
+  'recurring.form.notificationTimeLabel': 'Heure',
+  'recurring.form.notificationTimeA11y': 'Choisir l’heure du rappel',
+  'recurring.form.notificationPermissionRequired':
+    'Autorisez les notifications dans les réglages système pour activer les rappels.',
+  'recurring.notification.channelName': 'Tâches quotidiennes',
+  'recurring.notification.channelDescription':
+    'Rappels pour vos tâches récurrentes',
+  'recurring.notification.body': 'C’est l’heure de « {{title}} ».',
   'tasks.sectionTitle': 'TÂCHES',
   'tasks.loading': 'Chargement des tâches…',
   'tasks.loadingTask': 'Chargement de la tâche…',

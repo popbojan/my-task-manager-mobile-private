@@ -253,6 +253,17 @@ export const de = {
   'recurring.form.titleRequired': 'Bitte gib einen Titel ein — ohne Namen kann die Aufgabe nicht gespeichert werden.',
   'recurring.form.save': 'Speichern',
   'recurring.form.error': 'Speichern fehlgeschlagen.',
+  'recurring.form.notificationLabel': 'Tägliche Erinnerung',
+  'recurring.form.notificationHint':
+    'Push-Benachrichtigung zu einer festen Uhrzeit (deine Zeitzone).',
+  'recurring.form.notificationTimeLabel': 'Uhrzeit',
+  'recurring.form.notificationTimeA11y': 'Erinnerungszeit wählen',
+  'recurring.form.notificationPermissionRequired':
+    'Bitte erlaube Benachrichtigungen in den Systemeinstellungen, um Erinnerungen zu aktivieren.',
+  'recurring.notification.channelName': 'Tägliche Aufgaben',
+  'recurring.notification.channelDescription':
+    'Erinnerungen für deine wiederkehrenden Aufgaben',
+  'recurring.notification.body': 'Zeit für „{{title}}“.',
   'tasks.sectionTitle': 'AUFGABEN',
   'tasks.loading': 'Lade Aufgaben…',
   'tasks.loadingTask': 'Lade Aufgabe…',

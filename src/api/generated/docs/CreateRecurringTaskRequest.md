@@ -8,6 +8,8 @@ Name | Type
 ------------ | -------------
 `title` | string
 `description` | string
+`notificationEnabled` | boolean
+`notificationTime` | string
 
 ## Example
 
@@ -18,6 +20,8 @@ import type { CreateRecurringTaskRequest } from ''
 const example = {
   "title": Learning German,
   "description": Reading or writing for 30 minutes,
+  "notificationEnabled": null,
+  "notificationTime": null,
 } satisfies CreateRecurringTaskRequest
 
 console.log(example)

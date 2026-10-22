@@ -62,6 +62,7 @@ import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
 import OnboardingEmptyState from '@/onboarding/OnboardingEmptyState';
 import { useCurrentUser } from '@/user/useCurrentUser';
+import { cancelRecurringTaskNotification } from '@/notifications/recurringTaskNotifications';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
@@ -176,7 +177,8 @@ export default function RecurringTasksScreen({
   const deleteTaskMutation = useMutation({
     mutationFn: (recurringTaskId: string) =>
       authApi.deleteRecurringTask({ recurringTaskId }),
-    onSuccess: () => {
+    onSuccess: (_data, recurringTaskId) => {
+      void cancelRecurringTaskNotification(recurringTaskId);
       queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
       closeDeleteModal();

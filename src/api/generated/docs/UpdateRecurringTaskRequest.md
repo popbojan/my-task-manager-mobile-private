@@ -9,6 +9,8 @@ Name | Type
 `title` | string
 `description` | string
 `status` | [RecurringTaskStatus](RecurringTaskStatus.md)
+`notificationEnabled` | boolean
+`notificationTime` | string
 
 ## Example
 
@@ -20,6 +22,8 @@ const example = {
   "title": Learning German,
   "description": null,
   "status": null,
+  "notificationEnabled": null,
+  "notificationTime": null,
 } satisfies UpdateRecurringTaskRequest
 
 console.log(example)

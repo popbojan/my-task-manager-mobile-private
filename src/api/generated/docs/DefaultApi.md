@@ -1523,7 +1523,7 @@ No authorization required
 
 Update a recurring task
 
-Updates title, description or status of a recurring task.
+Updates title, description, status, or notification settings of a recurring task. 
 
 ### Example
 

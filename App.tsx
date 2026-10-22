@@ -47,6 +47,7 @@ import {
 import { useOnboardingVisibility } from '@/onboarding/useOnboardingVisibility';
 import { usePersonalIntroVisibility } from '@/onboarding/usePersonalIntroVisibility';
 import { useCurrentUser } from '@/user/useCurrentUser';
+import RecurringTaskNotificationsSync from '@/notifications/RecurringTaskNotificationsSync';
 
 function MainAppShell() {
   const queryClient = useQueryClient();
@@ -236,6 +237,7 @@ function MainAppShell() {
 
   return (
     <View style={shellStyles.root}>
+      {accessToken ? <RecurringTaskNotificationsSync /> : null}
       {hideMainShell && !showPersonalIntro && !showOnboarding ? (
         <AppLaunchView />
       ) : !hideMainShell ? (

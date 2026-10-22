@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -21,7 +22,13 @@ import {
 import { authApi } from '@/api/authClient';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { DAILY_STATUS_COLUMNS } from '@/pages/recurring-tasks/recurringBoardConfig';
-import { recurringTaskToFormState } from '@/pages/recurring-tasks/recurringTaskFormUtils';
+import RecurringTaskNotificationField from '@/pages/recurring-tasks/RecurringTaskNotificationField';
+import {
+  buildRecurringTaskNotificationFields,
+  recurringTaskToFormState,
+  type RecurringTaskFormState,
+} from '@/pages/recurring-tasks/recurringTaskFormUtils';
+import { requestRecurringNotificationPermission } from '@/notifications/recurringTaskNotifications';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
   isApiPremiumRequiredError,
@@ -35,16 +42,12 @@ type RecurringTaskFormModalProps = {
   onSaved: () => void;
 };
 
-type FormState = {
-  title: string;
-  description: string;
-  status: RecurringTaskStatusType;
-};
-
-const INITIAL_FORM: FormState = {
+const INITIAL_FORM: RecurringTaskFormState = {
   title: '',
   description: '',
   status: RecurringTaskStatus.Todo,
+  notificationEnabled: false,
+  notificationTime: null,
 };
 
 export default function RecurringTaskFormModal({
@@ -56,7 +59,7 @@ export default function RecurringTaskFormModal({
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isEdit = taskId !== null;
-  const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [form, setForm] = useState<RecurringTaskFormState>(INITIAL_FORM);
   const [error, setError] = useState<string | null>(null);
   const titleInputRef = useRef<TextInputInstance>(null);
 
@@ -106,9 +109,18 @@ export default function RecurringTaskFormModal({
         throw new Error('empty');
       }
 
+      if (form.notificationEnabled) {
+        const permissionGranted = await requestRecurringNotificationPermission();
+        if (!permissionGranted) {
+          throw new Error('notification-permission');
+        }
+      }
+
+      const notificationFields = buildRecurringTaskNotificationFields(form);
       const payload = {
         title: trimmedTitle,
         description: form.description.trim() || null,
+        ...notificationFields,
       };
 
       if (isEdit && taskId) {
@@ -144,6 +156,11 @@ export default function RecurringTaskFormModal({
         return;
       }
 
+      if (err instanceof Error && err.message === 'notification-permission') {
+        setError(t('recurring.form.notificationPermissionRequired'));
+        return;
+      }
+
       if (isApiPremiumRequiredError(err)) {
         setError(t('recurring.premiumRequired'));
         onClose();
@@ -164,7 +181,7 @@ export default function RecurringTaskFormModal({
     saveMutation.mutate();
   }
 
-  const panelHeight = Math.min(Math.round(windowHeight * 0.52), 420);
+  const panelHeight = Math.min(Math.round(windowHeight * 0.62), 520);
 
   return (
     <View style={styles.overlay} accessibilityViewIsModal>
@@ -205,75 +222,93 @@ export default function RecurringTaskFormModal({
               </View>
             ) : (
               <View style={styles.formBody}>
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>
-                    {t('recurring.form.titleLabel')} *{' '}
-                    <Text style={styles.fieldHintInline}>
-                      ({t('recurring.form.titleRequiredHint')})
+                <ScrollView
+                  style={styles.formScroll}
+                  contentContainerStyle={styles.formScrollContent}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                >
+                  <View style={styles.fieldBlock}>
+                    <Text style={styles.label}>
+                      {t('recurring.form.titleLabel')} *{' '}
+                      <Text style={styles.fieldHintInline}>
+                        ({t('recurring.form.titleRequiredHint')})
+                      </Text>
                     </Text>
-                  </Text>
-                  <TextInput
-                    ref={titleInputRef}
-                    style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
-                    value={form.title}
-                    onChangeText={title => {
-                      setForm(current => ({ ...current, title }));
-                      if (error && title.trim()) {
-                        setError(null);
-                      }
-                    }}
-                    placeholder={t('recurring.form.titlePlaceholder')}
-                    placeholderTextColor={recurringTheme.textMuted}
-                    autoFocus
-                    showSoftInputOnFocus
-                    returnKeyType="next"
-                  />
-                </View>
-
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>{t('recurring.form.descriptionLabel')}</Text>
-                  <TextInput
-                    style={[styles.input, styles.textArea]}
-                    value={form.description}
-                    onChangeText={description =>
-                      setForm(current => ({ ...current, description }))
-                    }
-                    placeholder={t('recurring.form.descriptionPlaceholder')}
-                    placeholderTextColor={recurringTheme.textMuted}
-                    multiline
-                    numberOfLines={4}
-                    textAlignVertical="top"
-                  />
-                </View>
-
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>{t('recurring.form.statusLabel')}</Text>
-                  <View style={styles.statusRow}>
-                    {DAILY_STATUS_COLUMNS.map(({ status, labelKey }) => {
-                      const active = form.status === status;
-
-                      return (
-                        <Pressable
-                          key={status}
-                          style={[styles.statusChip, active && styles.statusChipActive]}
-                          onPress={() => setForm(current => ({ ...current, status }))}
-                        >
-                          <Text
-                            style={[
-                              styles.statusChipText,
-                              active && styles.statusChipTextActive,
-                            ]}
-                            numberOfLines={1}
-                            adjustsFontSizeToFit
-                            minimumFontScale={0.8}
-                          >
-                            {t(labelKey)}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
+                    <TextInput
+                      ref={titleInputRef}
+                      style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
+                      value={form.title}
+                      onChangeText={title => {
+                        setForm(current => ({ ...current, title }));
+                        if (error && title.trim()) {
+                          setError(null);
+                        }
+                      }}
+                      placeholder={t('recurring.form.titlePlaceholder')}
+                      placeholderTextColor={recurringTheme.textMuted}
+                      autoFocus
+                      showSoftInputOnFocus
+                      returnKeyType="next"
+                    />
                   </View>
-                </View>
+
+                  <View style={styles.fieldBlock}>
+                    <Text style={styles.label}>{t('recurring.form.descriptionLabel')}</Text>
+                    <TextInput
+                      style={[styles.input, styles.textArea]}
+                      value={form.description}
+                      onChangeText={description =>
+                        setForm(current => ({ ...current, description }))
+                      }
+                      placeholder={t('recurring.form.descriptionPlaceholder')}
+                      placeholderTextColor={recurringTheme.textMuted}
+                      multiline
+                      numberOfLines={4}
+                      textAlignVertical="top"
+                    />
+                  </View>
+
+                  <RecurringTaskNotificationField
+                    enabled={form.notificationEnabled}
+                    notificationTime={form.notificationTime}
+                    onEnabledChange={notificationEnabled =>
+                      setForm(current => ({ ...current, notificationEnabled }))
+                    }
+                    onNotificationTimeChange={notificationTime =>
+                      setForm(current => ({ ...current, notificationTime }))
+                    }
+                  />
+
+                  <View style={styles.fieldBlock}>
+                    <Text style={styles.label}>{t('recurring.form.statusLabel')}</Text>
+                    <View style={styles.statusRow}>
+                      {DAILY_STATUS_COLUMNS.map(({ status, labelKey }) => {
+                        const active = form.status === status;
+
+                        return (
+                          <Pressable
+                            key={status}
+                            style={[styles.statusChip, active && styles.statusChipActive]}
+                            onPress={() => setForm(current => ({ ...current, status }))}
+                          >
+                            <Text
+                              style={[
+                                styles.statusChipText,
+                                active && styles.statusChipTextActive,
+                              ]}
+                              numberOfLines={1}
+                              adjustsFontSizeToFit
+                              minimumFontScale={0.8}
+                            >
+                              {t(labelKey)}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
+                </ScrollView>
 
                 <View style={styles.footer}>
                   <View style={styles.errorSlot}>
@@ -402,7 +437,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 12,
-    justifyContent: 'space-between',
+    gap: 8,
+  },
+  formScroll: {
+    flex: 1,
+  },
+  formScrollContent: {
+    gap: 12,
+    paddingBottom: 4,
   },
   fieldBlock: {
     gap: 4,

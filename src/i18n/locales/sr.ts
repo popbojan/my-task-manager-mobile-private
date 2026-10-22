@@ -255,6 +255,17 @@ export const sr: Record<TranslationKey, string> = {
     'Unesi naslov — zadatak bez imena ne može biti sačuvan.',
   'recurring.form.save': 'Sačuvaj',
   'recurring.form.error': 'Čuvanje nije uspelo.',
+  'recurring.form.notificationLabel': 'Dnevni podsetnik',
+  'recurring.form.notificationHint':
+    'Push obaveštenje u fiksno vreme (tvoja vremenska zona).',
+  'recurring.form.notificationTimeLabel': 'Vreme',
+  'recurring.form.notificationTimeA11y': 'Izaberi vreme podsetnika',
+  'recurring.form.notificationPermissionRequired':
+    'Dozvoli obaveštenja u sistemskim podešavanjima da bi uključio podsetnike.',
+  'recurring.notification.channelName': 'Dnevni zadaci',
+  'recurring.notification.channelDescription':
+    'Podsetnici za tvoje ponavljajuće zadatke',
+  'recurring.notification.body': 'Vreme je za „{{title}}“.',
   'tasks.sectionTitle': 'ZADACI',
   'tasks.loading': 'Učitavanje zadataka…',
   'tasks.loadingTask': 'Učitavanje zadatka…',

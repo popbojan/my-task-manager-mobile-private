@@ -43,7 +43,7 @@ export async function configureAppMonitoringCollection(): Promise<void> {
 }
 
 export function installJavaScriptCrashHandler(): void {
-  const errorUtils = (global as typeof globalThis & {
+  const errorUtils = (globalThis as typeof globalThis & {
     ErrorUtils?: {
       getGlobalHandler: () => (error: Error, isFatal?: boolean) => void;
       setGlobalHandler: (handler: (error: Error, isFatal?: boolean) => void) => void;

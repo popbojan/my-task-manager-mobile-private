@@ -256,8 +256,6 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.form.save': 'Sačuvaj',
   'recurring.form.error': 'Čuvanje nije uspelo.',
   'recurring.form.notificationLabel': 'Dnevni podsetnik',
-  'recurring.form.notificationHint':
-    'Push obaveštenje u fiksno vreme (tvoja vremenska zona).',
   'recurring.form.notificationTimeLabel': 'Vreme',
   'recurring.form.notificationTimeA11y': 'Izaberi vreme podsetnika',
   'recurring.form.notificationPermissionRequired':

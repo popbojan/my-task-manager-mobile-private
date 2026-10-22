@@ -254,8 +254,6 @@ export const de = {
   'recurring.form.save': 'Speichern',
   'recurring.form.error': 'Speichern fehlgeschlagen.',
   'recurring.form.notificationLabel': 'Tägliche Erinnerung',
-  'recurring.form.notificationHint':
-    'Push-Benachrichtigung zu einer festen Uhrzeit (deine Zeitzone).',
   'recurring.form.notificationTimeLabel': 'Uhrzeit',
   'recurring.form.notificationTimeA11y': 'Erinnerungszeit wählen',
   'recurring.form.notificationPermissionRequired':

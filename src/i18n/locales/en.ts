@@ -254,8 +254,6 @@ export const en: Record<TranslationKey, string> = {
   'recurring.form.save': 'Save',
   'recurring.form.error': 'Could not save.',
   'recurring.form.notificationLabel': 'Daily reminder',
-  'recurring.form.notificationHint':
-    'Push notification at a fixed time (your timezone).',
   'recurring.form.notificationTimeLabel': 'Time',
   'recurring.form.notificationTimeA11y': 'Choose reminder time',
   'recurring.form.notificationPermissionRequired':

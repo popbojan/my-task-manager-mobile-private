@@ -55,6 +55,10 @@ export default function RecurringTaskNotificationField({
           : 'en-GB';
 
   function openTimePicker() {
+    if (!notificationTime) {
+      onNotificationTimeChange(DEFAULT_RECURRING_NOTIFICATION_TIME);
+    }
+
     const initial = resolvePickerDate(notificationTime);
     if (Platform.OS === 'android') {
       openAndroidTimePicker(initial, date => {
@@ -87,13 +91,27 @@ export default function RecurringTaskNotificationField({
     setShowIosPicker(false);
   }
 
+  const timeLabel = formatNotificationTimeLabel(displayTime, locale);
+
   return (
     <View style={styles.wrap}>
-      <View style={styles.toggleRow}>
-        <View style={styles.toggleCopy}>
-          <Text style={styles.label}>{t('recurring.form.notificationLabel')}</Text>
-          <Text style={styles.hint}>{t('recurring.form.notificationHint')}</Text>
-        </View>
+      <View style={styles.row}>
+        <Text style={styles.label} numberOfLines={2}>
+          {t('recurring.form.notificationLabel')}
+        </Text>
+        <Pressable
+          style={[styles.timeChip, !enabled && styles.timeChipMuted]}
+          accessibilityRole="button"
+          accessibilityLabel={`${t('recurring.form.notificationTimeA11y')}: ${timeLabel}`}
+          onPress={openTimePicker}
+        >
+          <Text
+            style={[styles.timeChipText, !enabled && styles.timeChipTextMuted]}
+            numberOfLines={1}
+          >
+            {timeLabel}
+          </Text>
+        </Pressable>
         <Switch
           value={enabled}
           onValueChange={handleToggle}
@@ -104,22 +122,6 @@ export default function RecurringTaskNotificationField({
           thumbColor={enabled ? recurringTheme.accentBright : '#f4f4f5'}
         />
       </View>
-
-      {enabled ? (
-        <Pressable
-          style={styles.timeButton}
-          accessibilityRole="button"
-          accessibilityLabel={t('recurring.form.notificationTimeA11y')}
-          onPress={openTimePicker}
-        >
-          <Text style={styles.timeButtonLabel}>
-            {t('recurring.form.notificationTimeLabel')}
-          </Text>
-          <Text style={styles.timeButtonValue}>
-            {formatNotificationTimeLabel(displayTime, locale)}
-          </Text>
-        </Pressable>
-      ) : null}
 
       {showIosPicker && Platform.OS === 'ios' ? (
         <View style={styles.iosPickerSheet}>
@@ -145,49 +147,41 @@ export default function RecurringTaskNotificationField({
 
 const styles = StyleSheet.create({
   wrap: {
-    gap: 8,
+    gap: 6,
   },
-  toggleRow: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  toggleCopy: {
-    flex: 1,
-    gap: 2,
+    gap: 8,
   },
   label: {
+    flex: 1,
+    minWidth: 0,
     color: recurringTheme.textSecondary,
     fontSize: 12,
     fontWeight: '700',
   },
-  hint: {
-    color: recurringTheme.textMuted,
-    fontSize: 11,
-    lineHeight: 15,
-  },
-  timeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  timeChip: {
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    minWidth: 72,
+    alignItems: 'center',
     backgroundColor: recurringTheme.surfaceInset,
   },
-  timeButtonLabel: {
-    color: recurringTheme.textSecondary,
-    fontSize: 13,
-    fontWeight: '600',
+  timeChipMuted: {
+    opacity: 0.92,
   },
-  timeButtonValue: {
+  timeChipText: {
     color: recurringTheme.accentBright,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
+  },
+  timeChipTextMuted: {
+    color: recurringTheme.textSecondary,
   },
   iosPickerSheet: {
     borderRadius: 12,

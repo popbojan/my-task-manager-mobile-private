@@ -257,8 +257,6 @@ export const fr: Record<TranslationKey, string> = {
   'recurring.form.save': 'Enregistrer',
   'recurring.form.error': 'Enregistrement impossible.',
   'recurring.form.notificationLabel': 'Rappel quotidien',
-  'recurring.form.notificationHint':
-    'Notification push à une heure fixe (votre fuseau horaire).',
   'recurring.form.notificationTimeLabel': 'Heure',
   'recurring.form.notificationTimeA11y': 'Choisir l’heure du rappel',
   'recurring.form.notificationPermissionRequired':

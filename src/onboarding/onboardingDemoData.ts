@@ -77,6 +77,8 @@ export function createOnboardingDemoTask(
     lastCompletedAt: status === RecurringTaskStatus.Done ? demoDate : null,
     lastResetAt: demoDate,
     nextResetAt: demoDate,
+    notificationEnabled: false,
+    notificationTime: null,
     createdAt: demoDate,
     updatedAt: demoDate,
   };

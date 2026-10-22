@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   BackHandler,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
@@ -10,10 +9,10 @@ import {
   Text,
   TextInput,
   type TextInputInstance,
-  useWindowDimensions,
   View,
+  type LayoutChangeEvent,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   RecurringTaskStatus,
@@ -56,11 +55,10 @@ export default function RecurringTaskFormModal({
   onSaved,
 }: RecurringTaskFormModalProps) {
   const { t } = useLanguage();
-  const { height: windowHeight } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   const isEdit = taskId !== null;
   const [form, setForm] = useState<RecurringTaskFormState>(INITIAL_FORM);
   const [error, setError] = useState<string | null>(null);
+  const [lockedPanelHeight, setLockedPanelHeight] = useState<number | null>(null);
   const titleInputRef = useRef<TextInputInstance>(null);
 
   const taskQuery = useQuery({
@@ -101,6 +99,10 @@ export default function RecurringTaskFormModal({
 
     focusTextInputSoon(titleInputRef);
   }, [canFocusTitle]);
+
+  useEffect(() => {
+    setLockedPanelHeight(null);
+  }, [taskId]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -181,7 +183,21 @@ export default function RecurringTaskFormModal({
     saveMutation.mutate();
   }
 
-  const panelHeight = Math.min(Math.round(windowHeight * 0.62), 520);
+  function handlePanelLayout(event: LayoutChangeEvent) {
+    if (isLoadingTask || lockedPanelHeight !== null) {
+      return;
+    }
+
+    const measuredHeight = Math.ceil(event.nativeEvent.layout.height);
+    if (measuredHeight >= 160) {
+      setLockedPanelHeight(measuredHeight);
+    }
+  }
+
+  const panelSizeStyle =
+    lockedPanelHeight !== null
+      ? { height: lockedPanelHeight, maxHeight: lockedPanelHeight }
+      : null;
 
   return (
     <View style={styles.overlay} accessibilityViewIsModal>
@@ -191,14 +207,9 @@ export default function RecurringTaskFormModal({
         onPress={onClose}
       />
 
-      <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          enabled={Platform.OS === 'ios'}
-          style={styles.keyboardWrap}
-          keyboardVerticalOffset={insets.top}
-        >
+      <View style={styles.modalShell}>
         <SafeAreaView edges={['top']} style={styles.safeTop}>
-          <View style={[styles.panel, { height: panelHeight }]}>
+          <View style={[styles.panel, panelSizeStyle]} onLayout={handlePanelLayout}>
             <View style={styles.panelHeader}>
               <View style={styles.panelHeaderCopy}>
                 <Text style={styles.eyebrow}>{t('recurring.stats.dailyHint')}</Text>
@@ -221,13 +232,14 @@ export default function RecurringTaskFormModal({
                 <Text style={styles.loadingText}>{t('recurring.loadingTask')}</Text>
               </View>
             ) : (
-              <View style={styles.formBody}>
-                <ScrollView
-                  style={styles.formScroll}
-                  contentContainerStyle={styles.formScrollContent}
-                  keyboardShouldPersistTaps="handled"
-                  showsVerticalScrollIndicator={false}
-                >
+              <ScrollView
+                style={lockedPanelHeight !== null ? styles.formScrollLocked : styles.formScroll}
+                contentContainerStyle={styles.formScrollContent}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+                showsVerticalScrollIndicator
+                bounces={false}
+              >
                   <View style={styles.fieldBlock}>
                     <Text style={styles.label}>
                       {t('recurring.form.titleLabel')} *{' '}
@@ -280,8 +292,10 @@ export default function RecurringTaskFormModal({
                     }
                   />
 
-                  <View style={styles.fieldBlock}>
-                    <Text style={styles.label}>{t('recurring.form.statusLabel')}</Text>
+                  <View style={styles.statusFieldRow}>
+                    <Text style={styles.statusLabelInline}>
+                      {t('recurring.form.statusLabel')}
+                    </Text>
                     <View style={styles.statusRow}>
                       {DAILY_STATUS_COLUMNS.map(({ status, labelKey }) => {
                         const active = form.status === status;
@@ -308,18 +322,15 @@ export default function RecurringTaskFormModal({
                       })}
                     </View>
                   </View>
-                </ScrollView>
 
                 <View style={styles.footer}>
-                  <View style={styles.errorSlot}>
-                    {error ? (
-                      <View style={styles.errorBox}>
-                        <Text style={styles.error} numberOfLines={2}>
-                          {error}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
+                  {error ? (
+                    <View style={styles.errorBox}>
+                      <Text style={styles.error} numberOfLines={2}>
+                        {error}
+                      </Text>
+                    </View>
+                  ) : null}
 
                   <View style={styles.actions}>
                     <Pressable style={styles.cancelButton} onPress={onClose}>
@@ -338,11 +349,11 @@ export default function RecurringTaskFormModal({
                     </Pressable>
                   </View>
                 </View>
-              </View>
+              </ScrollView>
             )}
           </View>
         </SafeAreaView>
-      </KeyboardAvoidingView>
+      </View>
     </View>
   );
 }
@@ -357,16 +368,25 @@ const styles = StyleSheet.create({
   backdropTap: {
     ...StyleSheet.absoluteFill,
   },
-  keyboardWrap: {
+  modalShell: {
     flex: 1,
     justifyContent: 'flex-start',
   },
   safeTop: {
     justifyContent: 'flex-start',
   },
+  formScroll: {
+    flexGrow: 0,
+    flexShrink: 1,
+  },
+  formScrollLocked: {
+    flex: 1,
+    minHeight: 0,
+  },
   panel: {
     marginHorizontal: 12,
     marginTop: 8,
+    flexDirection: 'column',
     backgroundColor: recurringTheme.surfaceElevated,
     borderRadius: 20,
     borderWidth: 1,
@@ -432,19 +452,12 @@ const styles = StyleSheet.create({
     color: recurringTheme.textSecondary,
     fontSize: 13,
   },
-  formBody: {
-    flex: 1,
+  formScrollContent: {
+    flexGrow: 0,
+    gap: 10,
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 12,
-    gap: 8,
-  },
-  formScroll: {
-    flex: 1,
-  },
-  formScrollContent: {
-    gap: 12,
-    paddingBottom: 4,
   },
   fieldBlock: {
     gap: 4,
@@ -477,13 +490,26 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     lineHeight: 20,
   },
+  statusFieldRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statusLabelInline: {
+    color: recurringTheme.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+    flexShrink: 0,
+  },
   statusRow: {
+    flex: 1,
     flexDirection: 'row',
     gap: 6,
+    minWidth: 0,
   },
   statusChip: {
     flex: 1,
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
     paddingVertical: 8,
     borderRadius: 10,
     borderWidth: 1,
@@ -505,10 +531,8 @@ const styles = StyleSheet.create({
     color: recurringTheme.accentBright,
   },
   footer: {
-    gap: 6,
-  },
-  errorSlot: {
-    minHeight: 0,
+    gap: 8,
+    marginTop: 2,
   },
   errorBox: {
     borderRadius: 10,

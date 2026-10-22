@@ -1,11 +1,9 @@
-import notifee, {
-  AndroidImportance,
-  AuthorizationStatus,
-  RepeatFrequency,
-  TriggerType,
-  type TimestampTrigger,
-} from '@notifee/react-native';
+import type { TimestampTrigger } from '@notifee/react-native';
 import type { RecurringTask } from '@/api/generated';
+import {
+  loadNotifeePackage,
+  warnNotifeeUnavailable,
+} from '@/notifications/notifeeBridge';
 import {
   nextDailyNotificationTimestamp,
   parseNotificationTime,
@@ -31,6 +29,14 @@ function isManagedRecurringNotificationId(id: string): boolean {
 export async function ensureRecurringNotificationChannel(
   copy: RecurringNotificationCopy,
 ): Promise<void> {
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    warnNotifeeUnavailable('ensureRecurringNotificationChannel');
+    return;
+  }
+
+  const { default: notifee, AndroidImportance } = notifeePkg;
+
   await notifee.createChannel({
     id: ANDROID_CHANNEL_ID,
     name: copy.channelName,
@@ -39,28 +45,54 @@ export async function ensureRecurringNotificationChannel(
   });
 }
 
-function isNotificationAuthorized(status: AuthorizationStatus): boolean {
+export async function hasRecurringNotificationPermission(): Promise<boolean> {
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    warnNotifeeUnavailable('hasRecurringNotificationPermission');
+    return false;
+  }
+
+  const { default: notifee, AuthorizationStatus } = notifeePkg;
+  const settings = await notifee.getNotificationSettings();
+
   return (
-    status === AuthorizationStatus.AUTHORIZED ||
-    status === AuthorizationStatus.PROVISIONAL
+    settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+    settings.authorizationStatus === AuthorizationStatus.PROVISIONAL
   );
 }
 
-export async function hasRecurringNotificationPermission(): Promise<boolean> {
-  const settings = await notifee.getNotificationSettings();
-  return isNotificationAuthorized(settings.authorizationStatus);
-}
-
 export async function requestRecurringNotificationPermission(): Promise<boolean> {
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    warnNotifeeUnavailable('requestRecurringNotificationPermission');
+    return false;
+  }
+
+  const { default: notifee, AuthorizationStatus } = notifeePkg;
   const settings = await notifee.requestPermission();
-  return isNotificationAuthorized(settings.authorizationStatus);
+
+  return (
+    settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+    settings.authorizationStatus === AuthorizationStatus.PROVISIONAL
+  );
 }
 
 export async function cancelRecurringTaskNotification(taskId: string): Promise<void> {
-  await notifee.cancelTriggerNotification(notificationIdForTask(taskId));
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    return;
+  }
+
+  await notifeePkg.default.cancelTriggerNotification(notificationIdForTask(taskId));
 }
 
 export async function cancelAllRecurringTaskNotifications(): Promise<void> {
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    return;
+  }
+
+  const notifee = notifeePkg.default;
   const triggerIds = await notifee.getTriggerNotificationIds();
   const managedIds = triggerIds.filter(isManagedRecurringNotificationId);
 
@@ -71,6 +103,14 @@ export async function syncRecurringTaskNotifications(
   tasks: RecurringTask[],
   copy: RecurringNotificationCopy,
 ): Promise<void> {
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    warnNotifeeUnavailable('syncRecurringTaskNotifications');
+    return;
+  }
+
+  const { default: notifee, RepeatFrequency, TriggerType } = notifeePkg;
+
   await ensureRecurringNotificationChannel(copy);
 
   const permissionGranted = await hasRecurringNotificationPermission();
@@ -121,7 +161,7 @@ export async function syncRecurringTaskNotifications(
   }
 
   const triggerIds = await notifee.getTriggerNotificationIds();
-  const staleIds = triggerIds.filter(id => {
+  const staleIds = triggerIds.filter((id: string) => {
     if (!isManagedRecurringNotificationId(id)) {
       return false;
     }
@@ -130,5 +170,5 @@ export async function syncRecurringTaskNotifications(
     return !enabledTaskIds.has(taskId);
   });
 
-  await Promise.all(staleIds.map(id => notifee.cancelTriggerNotification(id)));
+  await Promise.all(staleIds.map((id: string) => notifee.cancelTriggerNotification(id)));
 }

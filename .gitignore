@@ -91,3 +91,7 @@ yarn-error.log
 .DS_Store
 /android/gradle/gradle-daemon-jvm.properties
 /android/app/release/app-release.aab
+
+# Firebase (copy from *.example after Firebase Console setup)
+/android/app/google-services.json
+/ios/MyTaskManagerMobile/GoogleService-Info.plist

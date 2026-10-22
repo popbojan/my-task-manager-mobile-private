@@ -9,6 +9,7 @@ import {
   TabListIcon,
   TabProfileIcon,
 } from '@/pages/recurring-tasks/premium/TabIcons';
+import { logMonitoringScreen } from '@/monitoring/appMonitoring';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
 export type MainTab = 'today' | 'history' | 'progress' | 'tasks' | 'profile';
@@ -72,7 +73,10 @@ export default function MainTabBar({ activeTab, onTabChange }: MainTabBarProps) 
               style={[styles.tab, active && styles.tabActive]}
               accessibilityRole="button"
               accessibilityState={{ selected: active }}
-              onPress={() => onTabChange(tab.id)}
+              onPress={() => {
+                onTabChange(tab.id);
+                void logMonitoringScreen(`tab_${tab.id}`);
+              }}
             >
               {active ? <View style={styles.activeIndicator} /> : null}
               {tab.renderIcon(active)}

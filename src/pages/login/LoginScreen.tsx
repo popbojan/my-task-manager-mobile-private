@@ -30,6 +30,7 @@ import { loginTheme } from '@/pages/login/loginTheme';
 import { clearSubscriptionSessionQueries } from '@/subscription/clearSubscriptionSession';
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 import type { MasteryLevel } from '@/api/generated/models/MasteryLevel';
+import { logMonitoringEvent, logMonitoringScreen } from '@/monitoring/appMonitoring';
 
 const loginBgSource = require('@/assets/images/login-bg.jpg');
 
@@ -86,6 +87,10 @@ export default function LoginScreen() {
     };
   }, []);
 
+  useEffect(() => {
+    void logMonitoringScreen('login');
+  }, []);
+
   const handleSendOtp = useCallback(async () => {
     if (!email.trim() || isSendingOtp) {
       return;
@@ -136,6 +141,7 @@ export default function LoginScreen() {
         clearRecurringSessionQueries(queryClient);
         clearSubscriptionSessionQueries(queryClient);
         setAccessToken(data.accessToken);
+        void logMonitoringEvent('login', { method: 'otp' });
       }
     } catch {
       setLoginError(t('login.errorLogin'));

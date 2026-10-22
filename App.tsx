@@ -47,6 +47,8 @@ import {
 import { useOnboardingVisibility } from '@/onboarding/useOnboardingVisibility';
 import { usePersonalIntroVisibility } from '@/onboarding/usePersonalIntroVisibility';
 import { useCurrentUser } from '@/user/useCurrentUser';
+import AppMonitoringBootstrap from '@/monitoring/AppMonitoringBootstrap';
+import { logMonitoringScreen } from '@/monitoring/appMonitoring';
 
 function MainAppShell() {
   const queryClient = useQueryClient();
@@ -109,6 +111,14 @@ function MainAppShell() {
     (showOnboarding && onboarding.autoVisible && !onboarding.manualOpen);
 
   const [activeTab, setActiveTab] = useState<MainTab>('today');
+
+  useEffect(() => {
+    if (hideMainShell) {
+      return;
+    }
+
+    void logMonitoringScreen(`tab_${activeTab}`);
+  }, [activeTab, hideMainShell]);
   const [taskForm, setTaskForm] = useState<{
     visible: boolean;
     taskId: string | null;
@@ -396,17 +406,22 @@ function AppContent() {
     return <AppLaunchView />;
   }
 
-  return accessToken ? (
-    <SubscriptionSessionProvider>
-      <RevenueCatBootstrap />
-      <CurrentUserBootstrap />
-      <SubscriptionBootstrap />
-      <MainAppShell />
-    </SubscriptionSessionProvider>
-  ) : (
+  return (
     <>
-      <RevenueCatBootstrap />
-      <LoginScreen />
+      <AppMonitoringBootstrap />
+      {accessToken ? (
+        <SubscriptionSessionProvider>
+          <RevenueCatBootstrap />
+          <CurrentUserBootstrap />
+          <SubscriptionBootstrap />
+          <MainAppShell />
+        </SubscriptionSessionProvider>
+      ) : (
+        <>
+          <RevenueCatBootstrap />
+          <LoginScreen />
+        </>
+      )}
     </>
   );
 }

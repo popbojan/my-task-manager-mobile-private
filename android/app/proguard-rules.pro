@@ -24,3 +24,10 @@
 # OkHttp / Okio (transitive)
 -dontwarn okhttp3.**
 -dontwarn okio.**
+
+# Firebase / Google Play Services (Crashlytics + Analytics)
+-keepattributes SourceFile,LineNumberTable
+-keep public class com.google.firebase.** { *; }
+-keep public class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**

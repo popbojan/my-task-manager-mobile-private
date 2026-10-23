@@ -103,6 +103,13 @@ export const sr: Record<TranslationKey, string> = {
   'history.note.tooLongError': 'Beleška može imati najviše 2000 znakova.',
   'history.note.saveError': 'Beleška nije sačuvana.',
   'history.note.deleteError': 'Beleška nije obrisana.',
+  'history.repair.action': 'Popravi dan',
+  'history.repair.confirmTitle': 'Popraviti juče?',
+  'history.repair.confirmBody':
+    'Koristi ovo samo ako si stvarno završio sve zadatke, a zaboravio da ih označiš kao urađene u aplikaciji. Inače tvoj niz neće biti realan — veštački ga produžavaš.',
+  'history.repair.error': 'Dan nije mogao biti popravljen.',
+  'history.repair.notRepairable':
+    'Samo jučerašnji propušteni dan može da se popravi (finalizovan, sa zadacima).',
   'personalIntro.badge': 'Tvoj početak',
   'personalIntro.progress': 'Korak {{current}} od {{total}}',
   'personalIntro.skip': 'Preskoči lični uvod',

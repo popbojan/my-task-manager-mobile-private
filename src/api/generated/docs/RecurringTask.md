@@ -14,6 +14,8 @@ Name | Type
 `lastCompletedAt` | Date
 `lastResetAt` | Date
 `nextResetAt` | Date
+`notificationEnabled` | boolean
+`notificationTime` | string
 `createdAt` | Date
 `updatedAt` | Date
 
@@ -32,6 +34,8 @@ const example = {
   "lastCompletedAt": 2026-06-06T18:30Z,
   "lastResetAt": 2026-06-06T22:08Z,
   "nextResetAt": 2026-06-07T22:05Z,
+  "notificationEnabled": true,
+  "notificationTime": 09:30,
   "createdAt": null,
   "updatedAt": null,
 } satisfies RecurringTask

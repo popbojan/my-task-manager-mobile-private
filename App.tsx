@@ -344,6 +344,8 @@ function MainAppShell() {
           dayOfMonth={historyDayModal.payload.dayOfMonth}
           entry={historyDayModal.payload.entry}
           isToday={historyDayModal.payload.isToday}
+          todayCalendarDate={historyDayModal.payload.todayCalendarDate}
+          visibleMonth={historyDayModal.payload.visibleMonth}
           onClose={closeHistoryDayDetail}
         />
       ) : null}

@@ -25,6 +25,7 @@ All URIs are relative to *http://localhost*
 | [**logout**](DefaultApi.md#logout) | **POST** /auth/logout | Logout user and invalidate refresh token |
 | [**putHistoryNote**](DefaultApi.md#puthistorynoteoperation) | **PUT** /history/{date}/note | Create or replace a daily history note |
 | [**refreshAccessToken**](DefaultApi.md#refreshaccesstoken) | **POST** /auth/refresh | Refresh access token using refresh token cookie |
+| [**repairHistoryDay**](DefaultApi.md#repairhistoryday) | **POST** /history/yesterday/repair | Repair yesterday\&#39;s finalized missed history day |
 | [**requestOtp**](DefaultApi.md#requestotp) | **POST** /auth/request-otp | Request a one-time password via email |
 | [**updateRecurringTask**](DefaultApi.md#updaterecurringtaskoperation) | **PATCH** /recurring-tasks/{recurringTaskId} | Update a recurring task |
 | [**updateTask**](DefaultApi.md#updatetaskoperation) | **PATCH** /tasks/{taskId} | Update a task |
@@ -724,7 +725,7 @@ This endpoint does not need any parameter.
 
 Get monthly daily history for the authenticated user
 
-Returns the authenticated user\&#39;s recurring-task history and notes for the requested month. Ordinary board tasks are excluded. Entries are ordered by date ascending and unique per user and date. Every completed day with recurring tasks must have a recorded result, even if the user did not open the app. If at least one counted task was not completed by the daily cutoff, the day is marked as missed, including days with zero completed tasks. Dates before history tracking began may have no recorded data. Future dates are included when a note exists. Note-only entries have status unknown and null task counts. Current-day results are provisional and may change until finalized. Success is visible immediately when all counted tasks are completed. Finalized results remain unchanged; notes remain editable. Each finalized day stores a snapshot of the global recurring-task currentStreak and currentLevel after that day\&#39;s evaluation. Historical dates retain their original local date after timezone changes. No subscription requirement is added by this contract. 
+Returns the authenticated user\&#39;s recurring-task history and notes for the requested month. Ordinary board tasks are excluded. Entries are ordered by date ascending and unique per user and date. Every completed day with recurring tasks must have a recorded result, even if the user did not open the app. If at least one counted task was not completed by the daily cutoff, the day is marked as missed, including days with zero completed tasks. Dates before history tracking began may have no recorded data. Future dates are included when a note exists. Note-only entries have status unknown and null task counts. Current-day results are provisional and may change until finalized. Success is visible immediately when all counted tasks are completed. Finalized results remain unchanged; notes remain editable. Each finalized day stores a snapshot of the global recurring-task currentStreak and currentLevel after that day\&#39;s evaluation. Historical dates retain their original local date after timezone changes. Finalized missed days with counted tasks may be repaired only for the previous calendar day in the user\&#39;s timezone via POST /history/yesterday/repair. No subscription requirement is added by this contract. 
 
 ### Example
 
@@ -1450,6 +1451,72 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
+## repairHistoryDay
+
+> HistoryDay repairHistoryDay()
+
+Repair yesterday\&#39;s finalized missed history day
+
+Repairs the calendar day immediately before today in the user\&#39;s IANA timezone (same notion of today as GET /history). The client does not send a date; the backend selects that previous day. For example, when today is 2026-10-23, this operation applies to 2026-10-22 only. Retroactively treats that day as successful when the user forgot to mark all counted recurring tasks done before the daily cutoff (e.g. 6/7 and status missed). Sets success with completedTasks equal to totalTasks, records repairedAt, and recomputes global recurring-task progress and affected history streak snapshots from that date forward. Does not change today\&#39;s live recurring-task board statuses. Idempotent when that day is already success. Only applies when that day is finalized with status missed and totalTasks &gt; 0. 
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { RepairHistoryDayRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  try {
+    const data = await api.repairHistoryDay();
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+This endpoint does not need any parameter.
+
+### Return type
+
+[**HistoryDay**](HistoryDay.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Yesterday repaired (or already success); returns the updated history day. Global progress is recomputed server-side; clients load it via GET /recurring-task-progress (e.g. on the Heute screen).  |  -  |
+| **401** | Missing or invalid bearer authentication. |  -  |
+| **409** | Yesterday cannot be repaired; code HISTORY_DAY_NOT_REPAIRABLE (e.g. not missed, not finalized, no counted tasks, no recorded yesterday, or before history tracking).  |  -  |
+| **500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
 ## requestOtp
 
 > RequestOtp200Response requestOtp(oTPRequest)
@@ -1523,7 +1590,7 @@ No authorization required
 
 Update a recurring task
 
-Updates title, description or status of a recurring task.
+Updates title, description, status, or notification settings of a recurring task. 
 
 ### Example
 

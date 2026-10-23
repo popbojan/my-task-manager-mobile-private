@@ -102,6 +102,13 @@ export const fr: Record<TranslationKey, string> = {
   'history.note.tooLongError': 'La note ne peut pas dépasser 2000 caractères.',
   'history.note.saveError': 'Impossible d’enregistrer la note.',
   'history.note.deleteError': 'Impossible de supprimer la note.',
+  'history.repair.action': 'Réparer la journée',
+  'history.repair.confirmTitle': 'Réparer hier ?',
+  'history.repair.confirmBody':
+    'Utilise cette option seulement si tu as vraiment terminé toutes les tâches et oublié de les marquer comme faites dans l’app. Sinon, ta série ne sera pas réaliste — tu la prolonges artificiellement.',
+  'history.repair.error': 'Impossible de réparer ce jour.',
+  'history.repair.notRepairable':
+    'Seule la journée manquée d\'hier peut être réparée (finalisée, avec des tâches).',
   'personalIntro.badge': 'Ton départ',
   'personalIntro.progress': 'Étape {{current}} sur {{total}}',
   'personalIntro.skip': 'Passer l’introduction personnelle',

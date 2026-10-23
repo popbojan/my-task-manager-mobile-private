@@ -44,6 +44,8 @@ export type HistoryDayDetailPayload = {
   dayOfMonth: number;
   isToday: boolean;
   entry?: HistoryDay;
+  todayCalendarDate: string | null;
+  visibleMonth: string;
 };
 
 type HistoryScreenProps = {
@@ -193,7 +195,14 @@ export default function HistoryScreen({
       return;
     }
 
-    onOpenDayDetail({ date, dayOfMonth, isToday, entry });
+    onOpenDayDetail({
+      date,
+      dayOfMonth,
+      isToday,
+      entry,
+      todayCalendarDate: today,
+      visibleMonth,
+    });
   }
 
   const isLoading = hasPremiumAccess && historyQuery.isPending && !historyQuery.data;

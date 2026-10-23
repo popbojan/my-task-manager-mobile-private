@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   BackHandler,
-  KeyboardAvoidingView,
+  Keyboard,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -19,7 +20,10 @@ import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
 import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import { historyMonthQueryKey } from '@/history/historyQueryKeys';
+import { refetchHistoryMonths } from '@/history/refetchHistoryMonths';
+import { applyHistoryDayToCache } from '@/history/updateHistoryDayCache';
 import { applyHistoryNoteToCache } from '@/history/updateHistoryNoteCache';
+import { recurringTaskProgressQueryKey } from '@/recurring/recurringQueryKeys';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import type { AppLanguage } from '@/i18n/types';
 import type { TranslationKey } from '@/i18n/locales/de';
@@ -36,12 +40,16 @@ import {
   parseCalendarDate,
   resolveHistoryDayCellTone,
   resolveHistoryDayProgressPercent,
+  historyMonthsToRefreshAfterRepair,
+  isRepairableMissedHistoryDay,
   shouldShowHistoryInProgressMark,
   shouldShowHistoryMissedMark,
   shouldShowHistorySuccessCrown,
   type HistoryDayCellTone,
 } from '@/utils/historyCalendar';
 import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
+import { getApiErrorMessage, parseApiErrorBody } from '@/utils/apiError';
+import HistoryRepairConfirmModal from '@/pages/history/HistoryRepairConfirmModal';
 
 const NOTE_MAX_LENGTH = 2000;
 
@@ -66,6 +74,8 @@ type HistoryDayDetailModalProps = {
   dayOfMonth: number;
   entry?: HistoryDay;
   isToday: boolean;
+  todayCalendarDate: string | null;
+  visibleMonth: string;
   onClose: () => void;
 };
 
@@ -133,6 +143,8 @@ export default function HistoryDayDetailModal({
   dayOfMonth,
   entry,
   isToday,
+  todayCalendarDate,
+  visibleMonth,
   onClose,
 }: HistoryDayDetailModalProps) {
   const { t, language } = useLanguage();
@@ -140,34 +152,66 @@ export default function HistoryDayDetailModal({
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
-  const panelHeight = Math.min(Math.round(windowHeight * 0.52), 420);
+  const panelHeight = Math.min(Math.round(windowHeight * 0.55), 460);
   const noteInputRef = useRef<TextInputInstance>(null);
+  const [displayEntry, setDisplayEntry] = useState(entry);
   const [noteDraft, setNoteDraft] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [repairConfirmVisible, setRepairConfirmVisible] = useState(false);
+  const [keyboardInset, setKeyboardInset] = useState(0);
 
-  const tone = resolveHistoryDayCellTone(entry);
-  const statusKey = entry ? STATUS_LABEL_KEYS[entry.status] : 'history.status.noData';
-  const savedNote = entry?.note ?? '';
+  const tone = resolveHistoryDayCellTone(displayEntry);
+  const statusKey = displayEntry
+    ? STATUS_LABEL_KEYS[displayEntry.status]
+    : 'history.status.noData';
+  const canRepair = isRepairableMissedHistoryDay(displayEntry, date, todayCalendarDate);
+  const savedNote = displayEntry?.note ?? '';
   const noteDirty = noteDraft !== savedNote;
   const canDeleteNote = savedNote.length > 0;
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (keyboardInset > 0) {
+        Keyboard.dismiss();
+        return true;
+      }
+
       onClose();
       return true;
     });
 
     return () => subscription.remove();
-  }, [onClose]);
+  }, [keyboardInset, onClose]);
 
   useEffect(() => {
+    setDisplayEntry(entry);
     setNoteDraft(entry?.note ?? '');
     setError(null);
-  }, [date, entry?.note]);
+  }, [date, entry]);
 
   useEffect(() => {
     focusTextInputSoon(noteInputRef);
   }, [date]);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, event => {
+      const { screenY, height: keyboardHeight } = event.endCoordinates;
+      const insetFromScreenY = screenY > 0 ? windowHeight - screenY : keyboardHeight;
+      const androidBuffer = Platform.OS === 'android' ? 8 : 0;
+      setKeyboardInset(insetFromScreenY + androidBuffer);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardInset(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [windowHeight]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -220,6 +264,61 @@ export default function HistoryDayDetailModal({
     },
   });
 
+  const repairMutation = useMutation({
+    mutationFn: () => authApi.repairHistoryDay(),
+    onSuccess: async repairedDay => {
+      if (!accessToken) {
+        return;
+      }
+
+      const repairedDate = formatApiCalendarDate(repairedDay.date);
+      const monthKey = monthKeyFromCalendarDate(repairedDate);
+      const queryKey = historyMonthQueryKey(accessToken, monthKey);
+      const current = queryClient.getQueryData<HistoryResponse>(queryKey);
+      const patched = applyHistoryDayToCache(current, repairedDay);
+
+      if (patched) {
+        queryClient.setQueryData(queryKey, patched);
+      }
+
+      setDisplayEntry(repairedDay);
+      setError(null);
+
+      const monthsToRefetch = historyMonthsToRefreshAfterRepair({
+        repairedCalendarDate: repairedDate,
+        todayCalendarDate,
+        visibleMonth,
+      });
+
+      await refetchHistoryMonths(queryClient, accessToken, monthsToRefetch);
+
+      const refreshed = queryClient.getQueryData<HistoryResponse>(queryKey);
+      const entryFromMonth = refreshed?.days.find(
+        day => formatApiCalendarDate(day.date) === repairedDate,
+      );
+      if (entryFromMonth) {
+        setDisplayEntry(entryFromMonth);
+      }
+
+      void queryClient.invalidateQueries({
+        queryKey: recurringTaskProgressQueryKey(accessToken),
+      });
+
+      setRepairConfirmVisible(false);
+    },
+    onError: async err => {
+      setRepairConfirmVisible(false);
+      const body = await parseApiErrorBody(err);
+      if (body?.code === 'HISTORY_DAY_NOT_REPAIRABLE') {
+        setError(t('history.repair.notRepairable'));
+        return;
+      }
+
+      const apiMessage = await getApiErrorMessage(err);
+      setError(apiMessage ?? t('history.repair.error'));
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async () => {
       await authApi.deleteHistoryNote({ date });
@@ -248,7 +347,8 @@ export default function HistoryDayDetailModal({
     },
   });
 
-  const isBusy = saveMutation.isPending || deleteMutation.isPending;
+  const isBusy =
+    saveMutation.isPending || deleteMutation.isPending || repairMutation.isPending;
 
   function handleSavePress() {
     if (!noteDraft.trim()) {
@@ -260,22 +360,142 @@ export default function HistoryDayDetailModal({
     saveMutation.mutate();
   }
 
+  const formContent = (
+    <>
+      <View style={previewStyles(tone, isToday)}>
+        <View style={styles.previewTopRow}>
+          <Text style={[styles.previewDayNumber, isToday && styles.previewDayNumberToday]}>
+            {dayOfMonth}
+          </Text>
+          <HistoryDetailStatusBadge entry={displayEntry} />
+        </View>
+
+        <View style={styles.metricsList}>
+          <View style={styles.metricRow}>
+            <Text style={styles.metricLabel}>{t('history.metric.tasks')}</Text>
+            <Text style={styles.metricValue}>{formatHistoryTaskRatioDisplay(displayEntry)}</Text>
+          </View>
+          <View style={styles.metricRow}>
+            <Text style={styles.metricLabel}>{t('history.metric.streak')}</Text>
+            <View style={styles.metricValueRow}>
+              <FireIcon size={12} color={recurringTheme.goldBright} />
+              <Text style={styles.metricValue}>{formatHistoryStreakDisplay(displayEntry)}</Text>
+            </View>
+          </View>
+          <View style={styles.metricRow}>
+            <Text style={styles.metricLabel}>{t('history.metric.level')}</Text>
+            <Text style={styles.metricValue}>{formatHistoryLevelDisplay(displayEntry)}</Text>
+          </View>
+          <View style={styles.metricRow}>
+            <Text style={styles.metricLabel}>{t('history.metric.status')}</Text>
+            <Text style={styles.metricValue}>{t(statusKey)}</Text>
+          </View>
+        </View>
+      </View>
+
+      {canRepair ? (
+        <Pressable
+          style={[styles.repairButton, isBusy && styles.repairButtonDisabled]}
+          disabled={isBusy}
+          accessibilityRole="button"
+          onPress={() => {
+            setError(null);
+            Keyboard.dismiss();
+            setRepairConfirmVisible(true);
+          }}
+        >
+          <Text style={styles.repairButtonText}>{t('history.repair.action')}</Text>
+        </Pressable>
+      ) : null}
+
+      <View style={styles.fieldBlock}>
+        <View style={styles.noteLabelRow}>
+          <Text style={styles.label}>{t('history.note.label')}</Text>
+          <Text style={styles.noteCounter}>
+            {t('history.note.counter', {
+              count: String(noteDraft.length),
+              max: String(NOTE_MAX_LENGTH),
+            })}
+          </Text>
+        </View>
+        <TextInput
+          ref={noteInputRef}
+          style={[styles.textArea, styles.textAreaCompact]}
+          value={noteDraft}
+          onChangeText={setNoteDraft}
+          placeholder={t('history.note.placeholder')}
+          placeholderTextColor={recurringTheme.textMuted}
+          multiline
+          numberOfLines={3}
+          maxLength={NOTE_MAX_LENGTH}
+          textAlignVertical="top"
+          editable={!isBusy}
+          autoFocus
+          showSoftInputOnFocus
+        />
+        {canDeleteNote ? (
+          <Pressable
+            style={styles.deleteLink}
+            disabled={isBusy}
+            onPress={() => {
+              setError(null);
+              deleteMutation.mutate();
+            }}
+          >
+            {deleteMutation.isPending ? (
+              <ActivityIndicator color={recurringTheme.fireRedBright} size="small" />
+            ) : (
+              <Text style={styles.deleteLinkText}>{t('history.note.delete')}</Text>
+            )}
+          </Pressable>
+        ) : null}
+      </View>
+
+      {error ? (
+        <View style={styles.errorBox}>
+          <Text style={styles.error} numberOfLines={2}>
+            {error}
+          </Text>
+        </View>
+      ) : null}
+
+      <View style={styles.actions}>
+        <Pressable style={styles.cancelButton} onPress={onClose} disabled={isBusy}>
+          <Text style={styles.cancelText}>{t('common.cancel')}</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.saveButton, (!noteDirty || isBusy) && styles.saveButtonDisabled]}
+          onPress={handleSavePress}
+          disabled={!noteDirty || isBusy}
+        >
+          {saveMutation.isPending ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveText}>{t('common.save')}</Text>
+          )}
+        </Pressable>
+      </View>
+    </>
+  );
+
   return (
     <View style={styles.overlay} accessibilityViewIsModal>
       <Pressable
         style={styles.backdropTap}
         accessibilityLabel={t('common.close')}
-        onPress={onClose}
+        onPress={() => {
+          if (keyboardInset > 0) {
+            Keyboard.dismiss();
+            return;
+          }
+
+          onClose();
+        }}
       />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        enabled={Platform.OS === 'ios'}
-        style={styles.keyboardWrap}
-        keyboardVerticalOffset={insets.top}
-      >
+      <View style={[styles.keyboardWrap, { paddingBottom: keyboardInset }]}>
         <SafeAreaView edges={['top']} style={styles.safeTop}>
-          <View style={[styles.panel, { height: panelHeight }]}>
+          <View style={[styles.panel, { maxHeight: panelHeight }]}>
             <View style={styles.panelHeader}>
               <View style={styles.panelHeaderCopy}>
                 <Text style={styles.eyebrow}>{t('history.title')}</Text>
@@ -290,116 +510,32 @@ export default function HistoryDayDetailModal({
               </Pressable>
             </View>
 
-            <View style={styles.formBody}>
-              <View style={previewStyles(tone, isToday)}>
-                <View style={styles.previewTopRow}>
-                  <Text style={[styles.previewDayNumber, isToday && styles.previewDayNumberToday]}>
-                    {dayOfMonth}
-                  </Text>
-                  <HistoryDetailStatusBadge entry={entry} />
-                </View>
-
-                <View style={styles.metricsList}>
-                  <View style={styles.metricRow}>
-                    <Text style={styles.metricLabel}>{t('history.metric.tasks')}</Text>
-                    <Text style={styles.metricValue}>{formatHistoryTaskRatioDisplay(entry)}</Text>
-                  </View>
-                  <View style={styles.metricRow}>
-                    <Text style={styles.metricLabel}>{t('history.metric.streak')}</Text>
-                    <View style={styles.metricValueRow}>
-                      <FireIcon size={12} color={recurringTheme.goldBright} />
-                      <Text style={styles.metricValue}>{formatHistoryStreakDisplay(entry)}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.metricRow}>
-                    <Text style={styles.metricLabel}>{t('history.metric.level')}</Text>
-                    <Text style={styles.metricValue}>{formatHistoryLevelDisplay(entry)}</Text>
-                  </View>
-                  <View style={styles.metricRow}>
-                    <Text style={styles.metricLabel}>{t('history.metric.status')}</Text>
-                    <Text style={styles.metricValue}>{t(statusKey)}</Text>
-                  </View>
-                </View>
-              </View>
-
-              <View style={styles.fieldBlock}>
-                <View style={styles.noteLabelRow}>
-                  <Text style={styles.label}>{t('history.note.label')}</Text>
-                  <Text style={styles.noteCounter}>
-                    {t('history.note.counter', {
-                      count: String(noteDraft.length),
-                      max: String(NOTE_MAX_LENGTH),
-                    })}
-                  </Text>
-                </View>
-                <TextInput
-                  ref={noteInputRef}
-                  style={styles.textArea}
-                  value={noteDraft}
-                  onChangeText={setNoteDraft}
-                  placeholder={t('history.note.placeholder')}
-                  placeholderTextColor={recurringTheme.textMuted}
-                  multiline
-                  numberOfLines={4}
-                  maxLength={NOTE_MAX_LENGTH}
-                  textAlignVertical="top"
-                  editable={!isBusy}
-                  autoFocus
-                  showSoftInputOnFocus
-                />
-                {canDeleteNote ? (
-                  <Pressable
-                    style={styles.deleteLink}
-                    disabled={isBusy}
-                    onPress={() => {
-                      setError(null);
-                      deleteMutation.mutate();
-                    }}
-                  >
-                    {deleteMutation.isPending ? (
-                      <ActivityIndicator color={recurringTheme.fireRedBright} size="small" />
-                    ) : (
-                      <Text style={styles.deleteLinkText}>{t('history.note.delete')}</Text>
-                    )}
-                  </Pressable>
-                ) : null}
-              </View>
-
-              <View style={styles.footer}>
-                <View style={styles.errorSlot}>
-                  {error ? (
-                    <View style={styles.errorBox}>
-                      <Text style={styles.error} numberOfLines={2}>
-                        {error}
-                      </Text>
-                    </View>
-                  ) : null}
-                </View>
-
-                <View style={styles.actions}>
-                  <Pressable style={styles.cancelButton} onPress={onClose} disabled={isBusy}>
-                    <Text style={styles.cancelText}>{t('common.cancel')}</Text>
-                  </Pressable>
-                  <Pressable
-                    style={[
-                      styles.saveButton,
-                      (!noteDirty || isBusy) && styles.saveButtonDisabled,
-                    ]}
-                    onPress={handleSavePress}
-                    disabled={!noteDirty || isBusy}
-                  >
-                    {saveMutation.isPending ? (
-                      <ActivityIndicator color="#fff" />
-                    ) : (
-                      <Text style={styles.saveText}>{t('common.save')}</Text>
-                    )}
-                  </Pressable>
-                </View>
-              </View>
-            </View>
+            <ScrollView
+              style={styles.formScroll}
+              contentContainerStyle={styles.formBody}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              showsVerticalScrollIndicator={false}
+            >
+              {formContent}
+            </ScrollView>
           </View>
         </SafeAreaView>
-      </KeyboardAvoidingView>
+      </View>
+
+      <HistoryRepairConfirmModal
+        visible={repairConfirmVisible}
+        isPending={repairMutation.isPending}
+        onClose={() => {
+          if (!repairMutation.isPending) {
+            setRepairConfirmVisible(false);
+          }
+        }}
+        onConfirm={() => {
+          setError(null);
+          repairMutation.mutate();
+        }}
+      />
     </View>
   );
 }
@@ -424,6 +560,7 @@ const styles = StyleSheet.create({
   panel: {
     marginHorizontal: 12,
     marginTop: 8,
+    flexDirection: 'column',
     backgroundColor: recurringTheme.surfaceElevated,
     borderRadius: 20,
     borderWidth: 1,
@@ -440,8 +577,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: 10,
+    paddingBottom: 6,
     borderBottomWidth: 1,
     borderBottomColor: recurringTheme.cardBorder,
   },
@@ -480,18 +617,20 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     marginTop: -2,
   },
+  formScroll: {
+    flexGrow: 0,
+    flexShrink: 1,
+  },
   formBody: {
-    flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 12,
-    justifyContent: 'space-between',
-    gap: 8,
+    paddingTop: 8,
+    paddingBottom: 10,
+    gap: 6,
   },
   previewCard: {
     borderRadius: 12,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',
     gap: 4,
@@ -551,7 +690,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(240, 204, 98, 0.35)',
   },
   metricsList: {
-    gap: 6,
+    gap: 4,
   },
   metricRow: {
     flexDirection: 'row',
@@ -575,8 +714,25 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     textAlign: 'right',
   },
+  repairButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: recurringTheme.accent,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    alignItems: 'center',
+  },
+  repairButtonDisabled: {
+    opacity: 0.6,
+  },
+  repairButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '800',
+  },
   fieldBlock: {
-    gap: 4,
+    gap: 6,
+    marginTop: 2,
   },
   noteLabelRow: {
     flexDirection: 'row',
@@ -595,7 +751,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   textArea: {
-    height: 96,
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
     borderRadius: 12,
@@ -607,6 +762,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     backgroundColor: recurringTheme.surfaceInset,
   },
+  textAreaCompact: {
+    height: 72,
+  },
   deleteLink: {
     alignSelf: 'flex-start',
     paddingVertical: 2,
@@ -615,12 +773,6 @@ const styles = StyleSheet.create({
     color: recurringTheme.fireRedBright,
     fontSize: 12,
     fontWeight: '700',
-  },
-  footer: {
-    gap: 6,
-  },
-  errorSlot: {
-    minHeight: 0,
   },
   errorBox: {
     borderRadius: 10,
@@ -638,11 +790,12 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
+    marginTop: 4,
   },
   cancelButton: {
     flex: 1,
-    paddingVertical: 11,
+    paddingVertical: 10,
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
@@ -654,7 +807,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-    paddingVertical: 11,
+    paddingVertical: 10,
     borderRadius: 12,
     alignItems: 'center',
     backgroundColor: recurringTheme.accentDark,

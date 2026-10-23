@@ -102,6 +102,13 @@ export const en: Record<TranslationKey, string> = {
   'history.note.tooLongError': 'Notes can be at most 2000 characters.',
   'history.note.saveError': 'Could not save the note.',
   'history.note.deleteError': 'Could not delete the note.',
+  'history.repair.action': 'Repair the day',
+  'history.repair.confirmTitle': 'Repair yesterday?',
+  'history.repair.confirmBody':
+    'Only use this if you completed all tasks in real life but forgot to mark them done in the app. Otherwise your streak won\'t be realistic—you\'re extending it artificially.',
+  'history.repair.error': 'Could not repair this day.',
+  'history.repair.notRepairable':
+    'Only yesterday\'s missed day can be repaired (finalized, with tasks).',
   'personalIntro.badge': 'Your start',
   'personalIntro.progress': 'Step {{current}} of {{total}}',
   'personalIntro.skip': 'Skip personal intro',

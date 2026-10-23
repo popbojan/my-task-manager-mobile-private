@@ -101,6 +101,13 @@ export const de = {
   'history.note.tooLongError': 'Die Notiz darf höchstens 2000 Zeichen haben.',
   'history.note.saveError': 'Notiz konnte nicht gespeichert werden.',
   'history.note.deleteError': 'Notiz konnte nicht gelöscht werden.',
+  'history.repair.action': 'Tag reparieren',
+  'history.repair.confirmTitle': 'Gestern reparieren?',
+  'history.repair.confirmBody':
+    'Nutze das nur, wenn du alle Aufgaben wirklich erledigt hast und vergessen hast, sie in der App als erledigt zu markieren. Sonst ist deine Kette nicht realistisch – du verlängerst sie künstlich.',
+  'history.repair.error': 'Der Tag konnte nicht repariert werden.',
+  'history.repair.notRepairable':
+    'Nur der gestern verpasste Tag kann repariert werden (finalisiert, mit Aufgaben).',
   'personalIntro.badge': 'Dein Start',
   'personalIntro.progress': 'Schritt {{current}} von {{total}}',
   'personalIntro.skip': 'Persönlichen Einstieg überspringen',

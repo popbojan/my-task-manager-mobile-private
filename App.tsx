@@ -49,6 +49,7 @@ import { usePersonalIntroVisibility } from '@/onboarding/usePersonalIntroVisibil
 import { useCurrentUser } from '@/user/useCurrentUser';
 import AppMonitoringBootstrap from '@/monitoring/AppMonitoringBootstrap';
 import { logMonitoringScreen } from '@/monitoring/appMonitoring';
+import RecurringTaskResetPolling from '@/recurring/RecurringTaskResetPolling';
 
 function MainAppShell() {
   const queryClient = useQueryClient();
@@ -414,6 +415,7 @@ function AppContent() {
           <RevenueCatBootstrap />
           <CurrentUserBootstrap />
           <SubscriptionBootstrap />
+          <RecurringTaskResetPolling />
           <MainAppShell />
         </SubscriptionSessionProvider>
       ) : (

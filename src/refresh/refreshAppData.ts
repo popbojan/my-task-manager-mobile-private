@@ -1,9 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/authClient';
-import {
-  recurringTaskProgressQueryKey,
-  recurringTasksQueryKey,
-} from '@/recurring/recurringQueryKeys';
+import { refetchRecurringBoardData } from '@/recurring/refetchRecurringBoardData';
 import { revenueCatOfferingsQueryKey } from '@/revenuecat/useRevenueCatOfferings';
 import { refreshSubscriptionFromBackend } from '@/subscription/subscriptionQuery';
 import {
@@ -32,16 +29,7 @@ export async function refreshAppData(
       staleTime: 0,
     }),
     refreshSubscriptionFromBackend(queryClient),
-    queryClient.fetchQuery({
-      queryKey: recurringTasksQueryKey(accessToken),
-      queryFn: () => authApi.getRecurringTasks(),
-      staleTime: 0,
-    }),
-    queryClient.fetchQuery({
-      queryKey: recurringTaskProgressQueryKey(accessToken),
-      queryFn: () => authApi.getRecurringTaskProgress(),
-      staleTime: 0,
-    }),
+    refetchRecurringBoardData(queryClient, accessToken),
     queryClient.fetchQuery({
       queryKey: tasksQueryKey(accessToken),
       queryFn: () => authApi.getTasks(),

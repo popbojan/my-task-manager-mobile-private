@@ -259,6 +259,7 @@ function MainAppShell() {
               ]}
             >
               <RecurringTasksScreen
+                isActive={activeTab === 'today'}
                 onOpenCreateTask={() => openTaskForm(null)}
                 onOpenEditTask={openTaskForm}
                 onOpenSubscription={() => {

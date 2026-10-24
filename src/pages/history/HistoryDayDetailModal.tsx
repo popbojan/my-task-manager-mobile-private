@@ -23,7 +23,7 @@ import { historyMonthQueryKey } from '@/history/historyQueryKeys';
 import { refetchHistoryMonths } from '@/history/refetchHistoryMonths';
 import { applyHistoryDayToCache } from '@/history/updateHistoryDayCache';
 import { applyHistoryNoteToCache } from '@/history/updateHistoryNoteCache';
-import { recurringTaskProgressQueryKey } from '@/recurring/recurringQueryKeys';
+import { refetchRecurringBoardData } from '@/recurring/refetchRecurringBoardData';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import type { AppLanguage } from '@/i18n/types';
 import type { TranslationKey } from '@/i18n/locales/de';
@@ -300,9 +300,7 @@ export default function HistoryDayDetailModal({
         setDisplayEntry(entryFromMonth);
       }
 
-      void queryClient.invalidateQueries({
-        queryKey: recurringTaskProgressQueryKey(accessToken),
-      });
+      await refetchRecurringBoardData(queryClient, accessToken);
 
       setRepairConfirmVisible(false);
     },

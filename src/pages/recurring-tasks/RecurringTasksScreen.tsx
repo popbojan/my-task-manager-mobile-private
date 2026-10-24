@@ -58,6 +58,7 @@ import {
   recurringTasksQueryKey,
   invalidateRecurringQueries,
 } from '@/recurring/recurringQueryKeys';
+import { useRefetchRecurringOnTabFocus } from '@/recurring/useRefetchRecurringOnTabFocus';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
 import OnboardingEmptyState from '@/onboarding/OnboardingEmptyState';
@@ -70,12 +71,14 @@ function sortTasksForList(tasks: RecurringTask[]): RecurringTask[] {
 }
 
 type RecurringTasksScreenProps = {
+  isActive?: boolean;
   onOpenCreateTask: () => void;
   onOpenEditTask: (taskId: string) => void;
   onOpenSubscription?: () => void;
 };
 
 export default function RecurringTasksScreen({
+  isActive = true,
   onOpenCreateTask,
   onOpenEditTask,
   onOpenSubscription,
@@ -95,6 +98,8 @@ export default function RecurringTasksScreen({
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
   const subscriptionReady =
     !subscriptionQuery.isLoading && subscriptionQuery.isFetched;
+
+  useRefetchRecurringOnTabFocus(isActive, accessToken);
 
   const [deleteModal, setDeleteModal] = useState<{
     visible: boolean;

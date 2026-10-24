@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -10,14 +10,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import AppBrandHeader from '@/components/AppBrandHeader';
-import {
-  historyMonthQueryKey,
-  historyQueryKeyPrefix,
-} from '@/history/historyQueryKeys';
+import { historyMonthQueryKey } from '@/history/historyQueryKeys';
+import { useRefetchHistoryOnTabFocus } from '@/history/useRefetchHistoryOnTabFocus';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import type { AppLanguage } from '@/i18n/types';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
@@ -88,8 +86,6 @@ export default function HistoryScreen({
   const insets = useSafeAreaInsets();
   const { t, language } = useLanguage();
   const { accessToken } = useAuth();
-  const queryClient = useQueryClient();
-  const wasActiveRef = useRef(false);
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
   const subscriptionReady =
@@ -110,25 +106,17 @@ export default function HistoryScreen({
     retry: shouldRetryApiQuery,
   });
 
-  useEffect(() => {
-    if (!isActive || wasActiveRef.current) {
-      wasActiveRef.current = isActive;
-      return;
-    }
-
-    wasActiveRef.current = isActive;
-    const currentMonth = defaultVisibleMonthKey();
-    setVisibleMonth(currentMonth);
+  const handleReturnedToHistoryTab = useCallback(() => {
+    setVisibleMonth(defaultVisibleMonthKey());
     setPickerOpen(false);
+  }, []);
 
-    if (!accessToken || !hasPremiumAccess) {
-      return;
-    }
-
-    void queryClient.invalidateQueries({
-      queryKey: historyQueryKeyPrefix(accessToken),
-    });
-  }, [accessToken, hasPremiumAccess, isActive, queryClient]);
+  useRefetchHistoryOnTabFocus(
+    isActive,
+    accessToken,
+    hasPremiumAccess,
+    handleReturnedToHistoryTab,
+  );
 
   const today = historyQuery.data?.today
     ? formatApiCalendarDate(historyQuery.data.today)

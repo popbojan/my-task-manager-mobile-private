@@ -190,6 +190,32 @@ export default function HistoryDayDetailModal({
   }, [date, entry]);
 
   useEffect(() => {
+    if (!accessToken || !todayCalendarDate || date >= todayCalendarDate) {
+      return;
+    }
+
+    if (entry?.status !== HistoryDayStatus.InProgress) {
+      return;
+    }
+
+    const monthKey = monthKeyFromCalendarDate(date);
+    void queryClient
+      .fetchQuery({
+        queryKey: historyMonthQueryKey(accessToken, monthKey),
+        queryFn: () => authApi.getHistory({ month: monthKey }),
+        staleTime: 0,
+      })
+      .then(data => {
+        const fresh = data.days.find(
+          day => formatApiCalendarDate(day.date) === date,
+        );
+        if (fresh) {
+          setDisplayEntry(fresh);
+        }
+      });
+  }, [accessToken, date, entry?.status, queryClient, todayCalendarDate]);
+
+  useEffect(() => {
     focusTextInputSoon(noteInputRef);
   }, [date]);
 

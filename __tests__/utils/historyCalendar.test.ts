@@ -50,8 +50,9 @@ describe('historyCalendar', () => {
     expect(addMonths('2026-01', -1)).toBe('2025-12');
   });
 
-  it('formats calendar dates with local date parts', () => {
+  it('formats API calendar dates with UTC date parts', () => {
     expect(formatApiCalendarDate(parseCalendarDate('2026-10-15'))).toBe('2026-10-15');
+    expect(formatApiCalendarDate(new Date('2026-10-23T00:00:00.000Z'))).toBe('2026-10-23');
   });
 
   it('indexes note-only days by the same calendar date key', () => {

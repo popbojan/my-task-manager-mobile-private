@@ -32,9 +32,10 @@ export function formatCalendarDate(year: number, monthIndex: number, day: number
   return `${year}-${month}-${dayPart}`;
 }
 
+/** Calendar date YYYY-MM-DD as UTC midnight (matches OpenAPI `date` JSON parsing). */
 export function parseCalendarDate(date: string): Date {
   const [yearPart, monthPart, dayPart] = date.split('-');
-  return new Date(Number(yearPart), Number(monthPart) - 1, Number(dayPart));
+  return new Date(Date.UTC(Number(yearPart), Number(monthPart) - 1, Number(dayPart)));
 }
 
 export function getMondayBasedWeekday(date: Date): number {
@@ -99,7 +100,11 @@ export function formatApiCalendarDate(value: Date | string): string {
     return value.slice(0, 10);
   }
 
-  return formatCalendarDate(value.getFullYear(), value.getMonth(), value.getDate());
+  return formatCalendarDate(
+    value.getUTCFullYear(),
+    value.getUTCMonth(),
+    value.getUTCDate(),
+  );
 }
 
 /** Calendar date YYYY-MM-DD shifted by whole days (UTC-safe for API calendar dates). */

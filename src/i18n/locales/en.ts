@@ -306,7 +306,7 @@ export const en: Record<TranslationKey, string> = {
   'tasks.form.save': 'Save',
   'tasks.form.error': 'Could not save.',
   'progress.sectionTitle': 'PROGRESS',
-  'progress.last7Days': 'LAST 7 DAYS',
+  'progress.last7Days': 'YOUR WEEK',
   'progress.remainingToday': '{{count}} tasks left today',
   'progress.remainingTodayOne': '1 task left today',
   'progress.allDoneToday': 'All done today!',

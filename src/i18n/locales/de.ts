@@ -21,7 +21,7 @@ export const de = {
   'login.titleOtp': 'Prüfe deinen Posteingang',
   'login.subtitle': 'Melde dich an und bleib fokussiert.',
   'login.brand.tagline': 'MASTER YOURSELF',
-  'login.hero.title': 'Disziplin schlägt Motivation.',
+  'login.hero.title': 'Disziplin schlägt Prokrastination.',
   'login.hero.subtitle': 'Wachse jeden Tag.',
   'login.otpHint': 'Wir senden dir einen einmaligen Login-Code.',
   'login.security': 'Deine Daten sind sicher und geschützt.',

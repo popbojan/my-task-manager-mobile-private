@@ -23,7 +23,7 @@ export const en: Record<TranslationKey, string> = {
   'login.titleOtp': 'Check your email',
   'login.subtitle': 'Sign in and stay focused.',
   'login.brand.tagline': 'MASTER YOURSELF',
-  'login.hero.title': 'Discipline beats motivation.',
+  'login.hero.title': 'Discipline beats Prokrastination.',
   'login.hero.subtitle': 'Grow every day.',
   'login.otpHint': 'We will send you a one-time login code.',
   'login.security': 'Your data is safe and protected.',
@@ -105,10 +105,10 @@ export const en: Record<TranslationKey, string> = {
   'history.repair.action': 'Repair the day',
   'history.repair.confirmTitle': 'Repair yesterday?',
   'history.repair.confirmBody':
-    'Only use this if you completed all tasks in real life but forgot to mark them done in the app. Otherwise your streak won\'t be realistic—you\'re extending it artificially.',
+    "Only use this if you completed all tasks in real life but forgot to mark them done in the app. Otherwise your streak won't be realistic—you're extending it artificially.",
   'history.repair.error': 'Could not repair this day.',
   'history.repair.notRepairable':
-    'Only yesterday\'s missed day can be repaired (finalized, with tasks).',
+    "Only yesterday's missed day can be repaired (finalized, with tasks).",
   'personalIntro.badge': 'Your start',
   'personalIntro.progress': 'Step {{current}} of {{total}}',
   'personalIntro.skip': 'Skip personal intro',
@@ -186,8 +186,7 @@ export const en: Record<TranslationKey, string> = {
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
     'Local — same data as web at localhost:5173 (test accounts with premium).',
-  'dev.api.hintProduction':
-    'Production — live Railway data (prod accounts).',
+  'dev.api.hintProduction': 'Production — live Railway data (prod accounts).',
   'dev.api.switchToProduction': 'Switch to production',
   'dev.api.switchToLocal': 'Switch to local',
   'dev.api.devHostLabel': 'Mac IP (LAN)',
@@ -231,7 +230,8 @@ export const en: Record<TranslationKey, string> = {
   'recurring.profile.title': 'Mastery profile',
   'recurring.profile.levelLabel': 'LEVEL {{level}}',
   'recurring.profile.unknownLevel': 'Unknown level',
-  'recurring.profile.daysToNext': '{{current}} / {{total}} days to level {{next}}',
+  'recurring.profile.daysToNext':
+    '{{current}} / {{total}} days to level {{next}}',
   'recurring.profile.maxLevel': 'Maximum level reached',
   'recurring.today.label': 'TODAY',
   'recurring.today.remaining': '{{count}} tasks left',
@@ -241,7 +241,8 @@ export const en: Record<TranslationKey, string> = {
   'recurring.today.doneLabel': 'done',
   'recurring.tasks.sectionTitle': 'Daily tasks',
   'recurring.focus.title': 'Keep your focus.',
-  'recurring.banner.successLine': 'Great! Your streak stays intact until reset.',
+  'recurring.banner.successLine':
+    'Great! Your streak stays intact until reset.',
   'recurring.banner.warningLine':
     'Complete all tasks before the daily reset to keep your streak & level.',
   'recurring.celebration.title': 'Knockout! All done!',
@@ -270,8 +271,7 @@ export const en: Record<TranslationKey, string> = {
   'tasks.edit': 'Edit',
   'tasks.delete': 'Delete',
   'tasks.deleteTitle': 'Delete task',
-  'tasks.deleteConfirm':
-    'Delete “{{title}}”? This action cannot be undone.',
+  'tasks.deleteConfirm': 'Delete “{{title}}”? This action cannot be undone.',
   'tasks.deleteError': 'Could not delete task.',
   'tasks.status.todo': 'Open',
   'tasks.status.inProgress': 'In progress',
@@ -334,16 +334,15 @@ export const en: Record<TranslationKey, string> = {
   'premium.feature.access.title': 'Access to web and mobile app',
   'premium.feature.access.description':
     'Use Today everywhere — on desktop and on your phone.',
-  'premium.guaranteeMonthly':
-    'Cancel monthly anytime. No hidden fees.',
-  'premium.guaranteeLifetime':
-    'Lifetime: pay once, use forever.',
+  'premium.guaranteeMonthly': 'Cancel monthly anytime. No hidden fees.',
+  'premium.guaranteeLifetime': 'Lifetime: pay once, use forever.',
   'premium.footer': 'Regular tasks stay free for you.',
   'premium.cta': 'Unlock Premium',
   'recurring.premiumUnlockCta': 'Unlock Premium',
   'subscription.checkStatus.cta': 'Check status again',
   'subscription.settings.title': 'Your Premium subscription',
-  'subscription.settings.subtitle': 'Manage your plan and view your Premium status.',
+  'subscription.settings.subtitle':
+    'Manage your plan and view your Premium status.',
   'subscription.settings.loading': 'Loading subscription status…',
   'subscription.settings.error': 'Could not load subscription status.',
   'subscription.settings.statusLabel': 'Status',
@@ -380,9 +379,12 @@ export const en: Record<TranslationKey, string> = {
     'Could not open subscription management. Please try again.',
   'subscription.settings.manageErrorTestStore':
     'Test Store purchases only exist in the RevenueCat sandbox — there is no real Google Play subscription page. Use a Play Store or release build to manage a real subscription.',
-  'subscription.mobile.provider.stripe': 'Premium is active through your web subscription (Stripe).',
-  'subscription.mobile.provider.apple': 'Premium is active through the Apple App Store.',
-  'subscription.mobile.provider.googlePlay': 'Premium is active through Google Play.',
+  'subscription.mobile.provider.stripe':
+    'Premium is active through your web subscription (Stripe).',
+  'subscription.mobile.provider.apple':
+    'Premium is active through the Apple App Store.',
+  'subscription.mobile.provider.googlePlay':
+    'Premium is active through Google Play.',
   'subscription.mobile.stripeActive':
     'You already have Premium through your web subscription. No additional in-app purchase is needed.',
   'subscription.mobile.alreadyPremium':
@@ -396,7 +398,8 @@ export const en: Record<TranslationKey, string> = {
   'subscription.mobile.offeringsUnavailableAppStore':
     'Subscriptions through the App Store are not available right now. Get Premium via the web app (Stripe). Once purchased, your subscription works in both the web and mobile app as long as you sign in with the same email.',
   'subscription.mobile.webSubscriptionLinkCta': 'Subscribe on the web app',
-  'subscription.mobile.webSubscriptionLinkA11y': 'Open web app for Premium: {{url}}',
+  'subscription.mobile.webSubscriptionLinkA11y':
+    'Open web app for Premium: {{url}}',
   'subscription.mobile.revenueCatUnavailable':
     'In-app purchases are not configured on this device yet. The app remains usable.',
   'subscription.mobile.panelUnavailable':
@@ -409,7 +412,8 @@ export const en: Record<TranslationKey, string> = {
   'subscription.mobile.purchaseInFlight': 'A purchase is already in progress.',
   'subscription.mobile.identityMismatch':
     'Your account is still being prepared for purchases. Wait a moment, sign in again, then retry.',
-  'subscription.mobile.processing.title': 'Purchase successful – activation is processing',
+  'subscription.mobile.processing.title':
+    'Purchase successful – activation is processing',
   'subscription.mobile.processing.message':
     'Your purchase was successful. Premium will activate once the server confirms it.',
   'subscription.mobile.processing.hint':
@@ -422,7 +426,8 @@ export const en: Record<TranslationKey, string> = {
   'profile.emailUnavailable': 'Email unavailable',
   'profile.deleteAccount.menuItem': 'Delete account',
   'profile.deleteAccount.title': 'Delete account',
-  'profile.deleteAccount.confirmQuestion': 'Are you sure you want to delete your account?',
+  'profile.deleteAccount.confirmQuestion':
+    'Are you sure you want to delete your account?',
   'profile.deleteAccount.newAccountNote':
     'If you sign in again with the same email address, a new account will be created.',
   'profile.deleteAccount.dataLoss':
@@ -431,12 +436,14 @@ export const en: Record<TranslationKey, string> = {
     'Your personal data such as email, username, settings, and similar profile information will also be deleted.',
   'profile.deleteAccount.subscriptionHintPrefix':
     'If you are sure you want to delete your account, ',
-  'profile.deleteAccount.subscriptionHintBold': 'cancel any active subscription first.',
+  'profile.deleteAccount.subscriptionHintBold':
+    'cancel any active subscription first.',
   'profile.deleteAccount.subscriptionHintSuffix':
     ' Otherwise deletion will fail because subscriptions are managed in external systems such as Google Play, Stripe, or Apple.',
   'profile.deleteAccount.continueToVerify': 'Continue to verification',
   'profile.deleteAccount.backToInfo': 'Back',
-  'profile.deleteAccount.errorGeneric': 'Account deletion failed. Please try again.',
+  'profile.deleteAccount.errorGeneric':
+    'Account deletion failed. Please try again.',
   'profile.deleteAccount.errorBlockedBySubscription':
     'A running subscription must first be canceled.',
   'profile.deleteAccount.errorReauthenticationRequired':
@@ -455,7 +462,8 @@ export const en: Record<TranslationKey, string> = {
   'profile.deleteAccount.reauthConfirmButton': 'Verify and delete account',
   'profile.accountMenu.title': 'Account',
   'profile.accountMenu.subscription': 'Subscription & billing',
-  'profile.accountMenu.subscriptionHint': 'Premium status, purchase and restore',
+  'profile.accountMenu.subscriptionHint':
+    'Premium status, purchase and restore',
   'profile.helpMenu.title': 'Help',
   'profile.helpMenu.viewIntroduction': 'How it works',
   'profile.helpMenu.viewIntroductionHint':

@@ -23,7 +23,7 @@ export const sr: Record<TranslationKey, string> = {
   'login.titleOtp': 'Proveri svoj e-mail',
   'login.subtitle': 'Prijavite se i ostanite fokusirani.',
   'login.brand.tagline': 'MASTER YOURSELF',
-  'login.hero.title': 'Disciplina je jača od odugovlačenja.',
+  'login.hero.title': 'Disciplina je jača od motivacije.',
   'login.hero.subtitle': 'Rasti svaki dan.',
   'login.otpHint': 'Poslaćemo vam jednokratni kod za prijavu.',
   'login.security': 'Vaši podaci su bezbedni i zaštićeni.',

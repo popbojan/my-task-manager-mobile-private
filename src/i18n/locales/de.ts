@@ -21,7 +21,7 @@ export const de = {
   'login.titleOtp': 'Prüfe deinen Posteingang',
   'login.subtitle': 'Melde dich an und bleib fokussiert.',
   'login.brand.tagline': 'MASTER YOURSELF',
-  'login.hero.title': 'Disziplin schlägt Prokrastination.',
+  'login.hero.title': 'Disziplin schlägt Motivation.',
   'login.hero.subtitle': 'Wachse jeden Tag.',
   'login.otpHint': 'Wir senden dir einen einmaligen Login-Code.',
   'login.security': 'Deine Daten sind sicher und geschützt.',
@@ -135,7 +135,7 @@ export const de = {
   'onboarding.skipStep': 'Schritt überspringen',
   'onboarding.skip': 'Onboarding überspringen',
   'onboarding.next': 'Weiter',
-  'onboarding.finish': 'Los geht\'s',
+  'onboarding.finish': "Los geht's",
   'onboarding.progress': 'Schritt {{current}} von {{total}}',
   'onboarding.slide1.title': 'Deine täglichen Aufgaben',
   'onboarding.slide1.body':
@@ -184,8 +184,7 @@ export const de = {
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
     'Lokal — gleiche Daten wie Web auf localhost:5173 (Test-Accounts mit Premium).',
-  'dev.api.hintProduction':
-    'Production — live Railway-Daten (Prod-Accounts).',
+  'dev.api.hintProduction': 'Production — live Railway-Daten (Prod-Accounts).',
   'dev.api.switchToProduction': 'Zu Production wechseln',
   'dev.api.switchToLocal': 'Zu Lokal wechseln',
   'dev.api.devHostLabel': 'Mac-IP (LAN)',
@@ -203,7 +202,8 @@ export const de = {
   'recurring.noTasks': 'Noch keine täglichen Aufgaben.',
   'recurring.addTaskDaily': 'Neue tägliche Aufgabe',
   'recurring.status.toggle': 'Status ändern',
-  'recurring.status.toggleHint': 'Tippe auf den Namen oder die Checkbox, um den Status zu wechseln',
+  'recurring.status.toggleHint':
+    'Tippe auf den Namen oder die Checkbox, um den Status zu wechseln',
   'recurring.edit': 'Bearbeiten',
   'recurring.delete': 'Löschen',
   'recurring.deleteTitle': 'Aufgabe löschen',
@@ -229,7 +229,8 @@ export const de = {
   'recurring.profile.title': 'Mastery-Profil',
   'recurring.profile.levelLabel': 'LEVEL {{level}}',
   'recurring.profile.unknownLevel': 'Unbekanntes Level',
-  'recurring.profile.daysToNext': '{{current}} / {{total}} Tage bis Level {{next}}',
+  'recurring.profile.daysToNext':
+    '{{current}} / {{total}} Tage bis Level {{next}}',
   'recurring.profile.maxLevel': 'Maximales Level erreicht',
   'recurring.today.label': 'HEUTE',
   'recurring.today.remaining': 'Noch {{count}} Aufgaben',
@@ -471,7 +472,7 @@ export const de = {
   'profile.accountMenu.subscriptionHint':
     'Premium-Status, Kauf und Wiederherstellung',
   'profile.helpMenu.title': 'Hilfe',
-  'profile.helpMenu.viewIntroduction': 'So funktioniert\'s',
+  'profile.helpMenu.viewIntroduction': "So funktioniert's",
   'profile.helpMenu.viewIntroductionHint':
     'Die App in sechs kurzen Schritten kennenlernen.',
   'profile.legalMenu.title': 'Rechtliches',

@@ -23,7 +23,7 @@ export const en: Record<TranslationKey, string> = {
   'login.titleOtp': 'Check your email',
   'login.subtitle': 'Sign in and stay focused.',
   'login.brand.tagline': 'MASTER YOURSELF',
-  'login.hero.title': 'Discipline beats Prokrastination.',
+  'login.hero.title': 'Discipline beats motivation.',
   'login.hero.subtitle': 'Grow every day.',
   'login.otpHint': 'We will send you a one-time login code.',
   'login.security': 'Your data is safe and protected.',

@@ -2,6 +2,8 @@ import type { QueryClient } from '@tanstack/react-query';
 import type { User } from '@/api/generated';
 import { authApi } from '@/api/authClient';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
+import { getMobileAppVersion } from '@/user/mobileAppVersion';
+import { shouldSyncMobileAppVersion } from '@/user/shouldSyncMobileAppVersion';
 import { shouldUpdateDeviceTimezone } from '@/user/shouldUpdateDeviceTimezone';
 import {
   applyPreferencesToCurrentUser,
@@ -25,17 +27,36 @@ export async function loadCurrentUserWithTimezoneSync(
 ): Promise<User> {
   const user = await authApi.getCurrentUser();
   const deviceTimezone = getDeviceTimezone();
+  const installedVersion = getMobileAppVersion();
+  const needsTimezoneSync = shouldUpdateDeviceTimezone(
+    user.timezone,
+    deviceTimezone,
+  );
+  const needsVersionSync = shouldSyncMobileAppVersion(
+    user.mobileAppVersion,
+    installedVersion,
+  );
 
-  if (!shouldUpdateDeviceTimezone(user.timezone, deviceTimezone)) {
+  if (!needsTimezoneSync && !needsVersionSync) {
     return user;
   }
 
-  const preferences = await patchUserPreferences(queryClient, accessToken, {
-    timezone: deviceTimezone,
-  });
+  const preferences = await patchUserPreferences(
+    queryClient,
+    accessToken,
+    needsTimezoneSync ? { timezone: deviceTimezone } : {},
+  );
 
-  void queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
-  void queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
+  if (needsTimezoneSync) {
+    void queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
+    void queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
+  }
 
-  return applyPreferencesToCurrentUser(user, preferences);
+  const updatedUser = applyPreferencesToCurrentUser(user, preferences);
+
+  if (needsVersionSync) {
+    return { ...updatedUser, mobileAppVersion: installedVersion };
+  }
+
+  return updatedUser;
 }

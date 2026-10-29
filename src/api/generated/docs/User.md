@@ -15,6 +15,7 @@ Name | Type
 `webOnboardingSeenAt` | Date
 `personalFocusTaskName` | string
 `personalFocusMotivation` | string
+`mobileAppVersion` | string
 
 ## Example
 
@@ -32,6 +33,7 @@ const example = {
   "webOnboardingSeenAt": 2026-10-19T09:15Z,
   "personalFocusTaskName": 30 Minuten Deutsch lernen,
   "personalFocusMotivation": Ich möchte fließend sprechen können.,
+  "mobileAppVersion": 1.2.3,
 } satisfies User
 
 console.log(example)

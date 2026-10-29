@@ -24,12 +24,12 @@ export const sr: Record<TranslationKey, string> = {
   'login.subtitle': 'Prijavite se i ostanite fokusirani.',
   'login.brand.tagline': 'MASTER YOURSELF',
   'login.hero.title': 'Disciplina je jača od motivacije.',
-  'login.hero.subtitle': 'Rasti svaki dan.',
-  'login.otpHint': 'Poslaćemo vam jednokratni kod za prijavu.',
-  'login.security': 'Vaši podaci su bezbedni i zaštićeni.',
+  'login.hero.subtitle': 'Napreduj svaki dan.',
+  'login.otpHint': 'Poslaćemo ti jednokratni kod za prijavu.',
+  'login.security': 'Tvoji podaci su sigurni i zaštićeni.',
   'login.levels.compactTitle': '24 nivoa. 24 meseca.',
-  'login.levels.compactSubtitle': 'Jača verzija vas samih.',
-  'login.levels.swipeHint': 'Prevucite da otkrijete sve nivoe',
+  'login.levels.compactSubtitle': 'Svakog dana sve jači.',
+  'login.levels.swipeHint': 'Prevuci i otkrij sve nivoe.',
   'login.subtitleOtp': 'Poslali smo kod na {{email}}.',
   'login.email': 'E-mail adresa',
   'login.emailPlaceholder': 'ime@domen.com',
@@ -50,9 +50,8 @@ export const sr: Record<TranslationKey, string> = {
   'login.help.trigger': 'Prikaži uputstvo za prijavu',
   'login.help.title': 'Kako funkcioniše prijava',
   'login.help.step1':
-    'Unesite e-mail adresu i dodirnite „Pošalji kod“ da biste dobili jednokratni kod za prijavu.',
-  'login.help.step2':
-    'Proverite e-poštu i unesite kod na sledećem ekranu.',
+    'Unesite e-mail adresu i pritisnite „Pošalji kod“ da biste dobili jednokratni kod za prijavu.',
+  'login.help.step2': 'Proverite e-poštu i unesite kod na sledećem ekranu.',
   'login.help.step3':
     'Pomoću tog koda se prijavljujete i odmah možete koristiti aplikaciju.',
   'login.help.note':
@@ -187,8 +186,7 @@ export const sr: Record<TranslationKey, string> = {
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
     'Lokalno — isti podaci kao web na localhost:5173 (test nalozi sa premiumom).',
-  'dev.api.hintProduction':
-    'Production — live Railway podaci (prod nalozi).',
+  'dev.api.hintProduction': 'Production — live Railway podaci (prod nalozi).',
   'dev.api.switchToProduction': 'Prebaci na production',
   'dev.api.switchToLocal': 'Prebaci na lokalno',
   'dev.api.devHostLabel': 'Mac IP (LAN)',
@@ -232,7 +230,8 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.profile.title': 'Mastery profil',
   'recurring.profile.levelLabel': 'NIVO {{level}}',
   'recurring.profile.unknownLevel': 'Nepoznat nivo',
-  'recurring.profile.daysToNext': '{{current}} / {{total}} dana do nivoa {{next}}',
+  'recurring.profile.daysToNext':
+    '{{current}} / {{total}} dana do nivoa {{next}}',
   'recurring.profile.maxLevel': 'Maksimalni nivo dostignut',
   'recurring.today.label': 'DANAS',
   'recurring.today.remaining': 'Još {{count}} zadataka',
@@ -329,8 +328,7 @@ export const sr: Record<TranslationKey, string> = {
   'premium.feature.streaks.description':
     'Budi dosledan, produži niz i nikada ne gubi napredak.',
   'premium.feature.levels.title': 'Dostigni nivo 24.',
-  'premium.feature.levels.description':
-    'Pretvori male navike u novi život.',
+  'premium.feature.levels.description': 'Pretvori male navike u novi život.',
   'premium.feature.secure.title': 'Tvoj napredak je siguran',
   'premium.feature.secure.description':
     'Tvoji podaci, nizovi i uspesi se trajno čuvaju.',
@@ -339,14 +337,14 @@ export const sr: Record<TranslationKey, string> = {
     'Koristi Today svuda — na računaru i na telefonu.',
   'premium.guaranteeMonthly':
     'Mesečna pretplata: otkaži bilo kada. Bez skrivenih troškova.',
-  'premium.guaranteeLifetime':
-    'Lifetime: jednom plati, trajno koristi.',
+  'premium.guaranteeLifetime': 'Lifetime: jednom plati, trajno koristi.',
   'premium.footer': 'Obični zadaci ostaju besplatni.',
   'premium.cta': 'Otključaj Premium',
   'recurring.premiumUnlockCta': 'Otključaj Premium',
   'subscription.checkStatus.cta': 'Proveri status ponovo',
   'subscription.settings.title': 'Tvoja Premium pretplata',
-  'subscription.settings.subtitle': 'Upravljaj pretplatom i vidi Premium status.',
+  'subscription.settings.subtitle':
+    'Upravljaj pretplatom i vidi Premium status.',
   'subscription.settings.loading': 'Učitavanje statusa pretplate…',
   'subscription.settings.error': 'Status pretplate nije učitan.',
   'subscription.settings.statusLabel': 'Status',
@@ -383,9 +381,12 @@ export const sr: Record<TranslationKey, string> = {
     'Upravljanje pretplatom nije moglo da se otvori. Pokušaj ponovo.',
   'subscription.settings.manageErrorTestStore':
     'Test Store kupovine postoje samo u RevenueCat sandboxu — nema prave Google Play stranice. Za pravo upravljanje koristi Play Store ili release build.',
-  'subscription.mobile.provider.stripe': 'Premium je aktivan preko web pretplate (Stripe).',
-  'subscription.mobile.provider.apple': 'Premium je aktivan preko Apple App Store-a.',
-  'subscription.mobile.provider.googlePlay': 'Premium je aktivan preko Google Play-a.',
+  'subscription.mobile.provider.stripe':
+    'Premium je aktivan preko web pretplate (Stripe).',
+  'subscription.mobile.provider.apple':
+    'Premium je aktivan preko Apple App Store-a.',
+  'subscription.mobile.provider.googlePlay':
+    'Premium je aktivan preko Google Play-a.',
   'subscription.mobile.stripeActive':
     'Već imaš Premium preko web pretplate. Dodatna kupovina u aplikaciji nije potrebna.',
   'subscription.mobile.alreadyPremium':
@@ -398,21 +399,24 @@ export const sr: Record<TranslationKey, string> = {
     'Trenutno nije moguće uzeti pretplatu preko Google Play-a. Nabavi Premium preko web aplikacije (Stripe). Jednom kupljena pretplata važi i u web- i u mobilnoj aplikaciji, dok god koristiš isti e-mail za prijavu.',
   'subscription.mobile.offeringsUnavailableAppStore':
     'Trenutno nije moguće uzeti pretplatu preko App Store-a. Nabavi Premium preko web aplikacije (Stripe). Jednom kupljena pretplata važi i u web- i u mobilnoj aplikaciji, dok god koristiš isti e-mail za prijavu.',
-  'subscription.mobile.webSubscriptionLinkCta': 'Nabavi Premium na web aplikaciji',
-  'subscription.mobile.webSubscriptionLinkA11y': 'Otvori web aplikaciju za Premium: {{url}}',
+  'subscription.mobile.webSubscriptionLinkCta':
+    'Nabavi Premium na web aplikaciji',
+  'subscription.mobile.webSubscriptionLinkA11y':
+    'Otvori web aplikaciju za Premium: {{url}}',
   'subscription.mobile.revenueCatUnavailable':
     'Kupovine u aplikaciji još nisu podešene na ovom uređaju. Aplikacija ostaje upotrebljiva.',
   'subscription.mobile.panelUnavailable':
     'Odeljak za pretplatu trenutno nije mogao da se učita. Osvežite ili pokušajte kasnije.',
   'subscription.mobile.purchaseError':
     'Kupovina nije završena. Pokušaj ponovo.',
-  'subscription.mobile.restoreError':
-    'Kupovine nisu vraćene. Pokušaj ponovo.',
-  'subscription.mobile.restoreNothing': 'Nije pronađena nijedna kupovina za vraćanje.',
+  'subscription.mobile.restoreError': 'Kupovine nisu vraćene. Pokušaj ponovo.',
+  'subscription.mobile.restoreNothing':
+    'Nije pronađena nijedna kupovina za vraćanje.',
   'subscription.mobile.purchaseInFlight': 'Kupovina je već u toku.',
   'subscription.mobile.identityMismatch':
     'Nalog se još priprema za kupovine. Sačekaj, prijavi se ponovo i pokušaj opet.',
-  'subscription.mobile.processing.title': 'Kupovina uspešna – aktivacija se obrađuje',
+  'subscription.mobile.processing.title':
+    'Kupovina uspešna – aktivacija se obrađuje',
   'subscription.mobile.processing.message':
     'Kupovina je uspešna. Premium će biti aktivan čim server potvrdi kupovinu.',
   'subscription.mobile.processing.hint':
@@ -425,20 +429,24 @@ export const sr: Record<TranslationKey, string> = {
   'profile.emailUnavailable': 'E-pošta nije dostupna',
   'profile.deleteAccount.menuItem': 'Obriši nalog',
   'profile.deleteAccount.title': 'Obriši nalog',
-  'profile.deleteAccount.confirmQuestion': 'Da li ste sigurni da želite da obrišete nalog?',
+  'profile.deleteAccount.confirmQuestion':
+    'Da li ste sigurni da želite da obrišete nalog?',
   'profile.deleteAccount.newAccountNote':
     'Ako se ponovo prijavite istom e-mail adresom, biće kreiran novi nalog.',
   'profile.deleteAccount.dataLoss':
     'Brisanjem naloga trajno se uklanjaju svi zadaci i povezani podaci poput napretka i istorije, bez mogućnosti vraćanja.',
   'profile.deleteAccount.personalData':
     'Biće obrisani i svi lični podaci poput e-mail adrese, korisničkog imena, podešavanja i slično.',
-  'profile.deleteAccount.subscriptionHintPrefix': 'Ako zaista želite da obrišete nalog, ',
-  'profile.deleteAccount.subscriptionHintBold': 'prvo otkažite pretplatu ako je imate.',
+  'profile.deleteAccount.subscriptionHintPrefix':
+    'Ako zaista želite da obrišete nalog, ',
+  'profile.deleteAccount.subscriptionHintBold':
+    'prvo otkažite pretplatu ako je imate.',
   'profile.deleteAccount.subscriptionHintSuffix':
     ' Inače brisanje neće uspeti jer se pretplate vode u spoljnim sistemima kao što su Google Play, Stripe ili Apple.',
   'profile.deleteAccount.continueToVerify': 'Nastavi na potvrdu',
   'profile.deleteAccount.backToInfo': 'Nazad',
-  'profile.deleteAccount.errorGeneric': 'Brisanje naloga nije uspelo. Pokušajte ponovo.',
+  'profile.deleteAccount.errorGeneric':
+    'Brisanje naloga nije uspelo. Pokušajte ponovo.',
   'profile.deleteAccount.errorBlockedBySubscription':
     'Aktivna pretplata mora prvo biti otkazana.',
   'profile.deleteAccount.errorReauthenticationRequired':

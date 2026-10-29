@@ -81,6 +81,28 @@ export const fr: Record<TranslationKey, string> = {
   'history.weekday.fri': 'Ven',
   'history.weekday.sat': 'Sam',
   'history.weekday.sun': 'Dim',
+  'history.month.jan': 'janvier',
+  'history.month.feb': 'février',
+  'history.month.mar': 'mars',
+  'history.month.apr': 'avril',
+  'history.month.may': 'mai',
+  'history.month.jun': 'juin',
+  'history.month.jul': 'juillet',
+  'history.month.aug': 'août',
+  'history.month.sep': 'septembre',
+  'history.month.oct': 'octobre',
+  'history.month.nov': 'novembre',
+  'history.month.dec': 'décembre',
+  'history.weekdayLong.mon': 'lundi',
+  'history.weekdayLong.tue': 'mardi',
+  'history.weekdayLong.wed': 'mercredi',
+  'history.weekdayLong.thu': 'jeudi',
+  'history.weekdayLong.fri': 'vendredi',
+  'history.weekdayLong.sat': 'samedi',
+  'history.weekdayLong.sun': 'dimanche',
+  'history.monthYearTitle': '{{month}} {{year}}',
+  'history.dayDetailDate': '{{weekday}} {{day}} {{month}} {{year}}',
+  'history.dateLong': '{{day}} {{month}} {{year}}',
   'history.openDay': 'Ouvrir le jour {{day}}',
   'history.hasNote': 'Note présente',
   'history.levelShort': 'Niv. {{level}}',
@@ -106,7 +128,7 @@ export const fr: Record<TranslationKey, string> = {
   'history.repair.action': 'Réparer la journée',
   'history.repair.confirmTitle': 'Réparer hier ?',
   'history.repair.confirmBody':
-    'Utilise cette option seulement si tu as vraiment terminé toutes les tâches et oublié de les marquer comme faites dans l’app. Sinon, ta série ne sera pas réaliste — tu la prolonges artificiellement.',
+    'Utilise cette option uniquement si tu as terminé toutes tes tâches, mais oublié de les marquer comme terminées dans l’application. Sinon, tu prolonges artificiellement ta série et elle ne reflète plus tes progrès réels.',
   'history.repair.error': 'Impossible de réparer ce jour.',
   'history.repair.notRepairable':
     "Seule la journée manquée d'hier peut être réparée (finalisée, avec des tâches).",
@@ -142,7 +164,7 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.progress': 'Étape {{current}} sur {{total}}',
   'onboarding.slide1.title': 'Tes tâches quotidiennes',
   'onboarding.slide1.body':
-    'Commence petit et concrètement : appuie sur + et crée ta première tâche quotidienne — par exemple « Lire 5 minutes ».',
+    'Commence petit et concrètement : appuie sur + et crée ta première tâche quotidienne. Par exemple « Lire 5 minutes ».',
   'onboarding.slide2.title': 'Comment terminer tes tâches',
   'onboarding.slide2.body':
     'Appuie sur le statut d’une tâche et avance étape par étape jusqu’à Terminé.',
@@ -165,7 +187,7 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.slide6.freeLabel': 'Gratuit',
   'onboarding.slide6.freeHeadline': 'Organiser le quotidien',
   'onboarding.slide6.freeBody':
-    'Tâches avec priorités et échéances fixes — sans abonnement.',
+    'Tâches avec priorités et échéances fixes. Sans abonnement.',
   'onboarding.demo.taskTitle': 'Lire 5 minutes',
   'onboarding.demo.boardTaskOneTitle': 'Envoyer les documents fiscaux',
   'onboarding.demo.boardTaskTwoTitle': 'Prendre rendez-vous chez le dentiste',
@@ -174,15 +196,15 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.demo.monthTitle': 'Octobre 2026',
   'onboarding.demo.dayTitle': 'Lundi 12 octobre 2026',
   'onboarding.demo.noteText':
-    'Aujourd’hui, la courte routine de lecture a aidé. Demain, je commence juste après le petit-déjeuner — sans téléphone.',
+    'Aujourd’hui, la courte routine de lecture a aidé. Demain, je commence juste après le petit-déjeuner. Sans téléphone.',
   'onboarding.empty.overline': 'Premier pas',
   'onboarding.empty.tasks.title': 'Aucune tâche pour l’instant',
   'onboarding.empty.tasks.body':
-    'Ajoute des projets avec échéance et priorité — ton board pour tout ce qui n’est pas une habitude quotidienne.',
+    'Ajoute des projets avec échéance et priorité. Ton board pour tout ce qui n’est pas une habitude quotidienne.',
   'onboarding.empty.tasks.cta': 'Créer la première tâche',
   'onboarding.empty.recurring.title': 'Aucune tâche quotidienne',
   'onboarding.empty.recurring.body':
-    'Que veux-tu accomplir chaque jour ? Commence petit — une à trois habitudes suffisent.',
+    'Que veux-tu accomplir chaque jour ? Commence petit. Une à trois habitudes suffisent.',
   'onboarding.empty.recurring.cta': 'Créer la première tâche du jour',
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
@@ -245,7 +267,7 @@ export const fr: Record<TranslationKey, string> = {
   'recurring.tasks.sectionTitle': 'Tâches quotidiennes',
   'recurring.focus.title': 'Garde ton focus.',
   'recurring.banner.successLine':
-    'Bravo ! Ta série reste intacte jusqu’au reset.',
+    'Great! Your streak is safe. It will increase at the next reset.',
   'recurring.banner.warningLine':
     'Termine toutes les tâches avant le reset quotidien pour garder ta série.',
   'recurring.celebration.title': 'Champion ! Tout est fait !',
@@ -466,7 +488,7 @@ export const fr: Record<TranslationKey, string> = {
   'profile.deleteAccount.errorServer':
     "Une erreur serveur s'est produite. Votre compte n'a pas été supprimé.",
   'profile.deleteAccount.reauthRequired':
-    'Saisissez votre code à 6 chiffres. Un code récent de la connexion suffit — utilisez Envoyer le code seulement si vous en avez besoin d’un nouveau.',
+    'Saisis le code à 6 chiffres que nous t’avons envoyé pour te connecter. Si tu en as besoin d’un nouveau, sélectionne « Envoyer le code »',
   'profile.deleteAccount.reauthSendCode': 'Envoyer le code',
   'profile.deleteAccount.reauthSendingCode': 'Envoi du code…',
   'profile.deleteAccount.reauthCodeSent':

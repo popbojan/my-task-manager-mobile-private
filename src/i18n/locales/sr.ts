@@ -16,10 +16,10 @@ export const sr: Record<TranslationKey, string> = {
   'header.brand': 'My Task Manager',
   'header.logout': 'Odjava',
   'header.accountMenu.open': 'Podešavanja',
-  'login.accountDeletedTitle': 'Vaš nalog je trajno obrisan.',
+  'login.accountDeletedTitle': 'Tvoj nalog je trajno obrisan.',
   'login.accountDeletedNewAccountNote':
-    'Ako se ponovo prijavite istom e-mail adresom, biće kreiran novi nalog.',
-  'login.title': 'Dobrodošli nazad',
+    'Ako se ponovo prijaviš sa istom e-mail adresom, biće kreiran novi nalog.',
+  'login.title': 'Dobrodošao nazad',
   'login.titleOtp': 'Proveri svoj e-mail',
   'login.subtitle': 'Prijavite se i ostanite fokusirani.',
   'login.brand.tagline': 'MASTER YOURSELF',
@@ -50,13 +50,13 @@ export const sr: Record<TranslationKey, string> = {
   'login.help.trigger': 'Prikaži uputstvo za prijavu',
   'login.help.title': 'Kako funkcioniše prijava',
   'login.help.step1':
-    'Unesite e-mail adresu i pritisnite „Pošalji kod“ da biste dobili jednokratni kod za prijavu.',
-  'login.help.step2': 'Proverite e-poštu i unesite kod na sledećem ekranu.',
+    'Unesi e-mail adresu i pritisni „Pošalji kod“ da bih dobio jednokratni kod za prijavu.',
+  'login.help.step2': 'Proveri e-poštu i unesi kod na sledećem ekranu.',
   'login.help.step3':
-    'Pomoću tog koda se prijavljujete i odmah možete koristiti aplikaciju.',
+    'Pomoću tog koda se prijavljuješ i odmah možeš koristiti aplikaciju.',
   'login.help.note':
-    'Svaki put kada koristite istu e-mail adresu, vaši sačuvani zadaci su vam dostupni. Lozinka nije potrebna.',
-  'home.welcome': 'Prijavljeni ste.',
+    'Svaki put kada koristite istu e-mail adresu, tvoji sačuvani zadaci su ti dostupni. Lozinka nije potrebna.',
+  'home.welcome': 'Prijavljen si.',
   'home.placeholder': 'Više ekrana uskoro.',
   'nav.today': 'Danas',
   'nav.history': 'Moj put',
@@ -105,7 +105,7 @@ export const sr: Record<TranslationKey, string> = {
   'history.repair.action': 'Popravi dan',
   'history.repair.confirmTitle': 'Popraviti juče?',
   'history.repair.confirmBody':
-    'Koristi ovo samo ako si stvarno završio sve zadatke, a zaboravio da ih označiš kao urađene u aplikaciji. Inače tvoj niz neće biti realan — veštački ga produžavaš.',
+    'Koristi ovu opciju samo ako si zaista završio sve zadatke, ali si zaboravio da ih označiš kao završene u aplikaciji. U suprotnom veštački produžavaš svoj niz i on više ne odražava tvoj stvarni napredak.',
   'history.repair.error': 'Dan nije mogao biti popravljen.',
   'history.repair.notRepairable':
     'Samo jučerašnji propušteni dan može da se popravi (finalizovan, sa zadacima).',
@@ -141,10 +141,10 @@ export const sr: Record<TranslationKey, string> = {
   'onboarding.progress': 'Korak {{current}} od {{total}}',
   'onboarding.slide1.title': 'Tvoji dnevni zadaci',
   'onboarding.slide1.body':
-    'Počni malo i konkretno: tapni + i napravi prvi dnevni zadatak — na primer „Čitaj 5 minuta“.',
+    'Počni malo i konkretno: Pritisni + i napravi prvi dnevni zadatak. Na primer „Čitaj 5 minuta“.',
   'onboarding.slide2.title': 'Kako završavaš zadatke',
   'onboarding.slide2.body':
-    'Tapni status zadatka i korak po korak dođi do Završeno.',
+    'Pritisni na status zadatka i korak po korak dođi do Završeno.',
   'onboarding.slide3.title': 'Kako tvoj niz raste',
   'onboarding.slide3.body':
     'Kada završiš sve dnevne zadatke, tvoj niz raste za jedan dan.',
@@ -153,7 +153,7 @@ export const sr: Record<TranslationKey, string> = {
     'U Moj put vidiš kalendar sa dnevnim rezultatima. Čak i posle pauze, prošli uspesi ostaju vidljivi.',
   'onboarding.slide5.title': 'Zabeleži šta te pokreće',
   'onboarding.slide5.body':
-    'Tapni dan i napiši belešku: Šta je pomoglo? Šta je bilo teško? Šta ćeš sutra uraditi drugačije?',
+    'Otvori dan i napiši belešku: Šta je pomoglo? Šta je bilo teško? Šta ćeš sutra uraditi drugačije?',
   'onboarding.slide6.title': 'Imaš izbor',
   'onboarding.slide6.body':
     'Za dnevne zadatke, nizove i Moj put potreban je Premium.\n\nZadatke sa prioritetima i fiksnim rokovima možeš besplatno koristiti i bez pretplate.',
@@ -164,7 +164,7 @@ export const sr: Record<TranslationKey, string> = {
   'onboarding.slide6.freeLabel': 'Besplatno',
   'onboarding.slide6.freeHeadline': 'Organizuj svakodnevicu',
   'onboarding.slide6.freeBody':
-    'Zadaci sa prioritetima i fiksnim rokovima — bez pretplate.',
+    'Zadaci sa prioritetima i fiksnim rokovima. Bez pretplate.',
   'onboarding.demo.taskTitle': 'Čitaj 5 minuta',
   'onboarding.demo.boardTaskOneTitle': 'Predati poreske dokumente',
   'onboarding.demo.boardTaskTwoTitle': 'Zakazati termin kod zubara',
@@ -173,15 +173,15 @@ export const sr: Record<TranslationKey, string> = {
   'onboarding.demo.monthTitle': 'Oktobar 2026.',
   'onboarding.demo.dayTitle': 'Ponedeljak, 12. oktobar 2026.',
   'onboarding.demo.noteText':
-    'Danas je kratka rutina čitanja pomogla. Sutra krećem odmah posle doručka — bez telefona.',
+    'Danas je kratka rutina čitanja pomogla. Sutra krećem odmah posle doručka. Bez telefona.',
   'onboarding.empty.overline': 'Prvi korak',
   'onboarding.empty.tasks.title': 'Još nema zadataka',
   'onboarding.empty.tasks.body':
-    'Dodaj projekte sa rokom i prioritetom — tabla za sve što nije dnevna navika.',
+    'Dodaj projekte sa rokom i prioritetom. Tabla za sve što nije dnevna navika.',
   'onboarding.empty.tasks.cta': 'Napravi prvi zadatak',
   'onboarding.empty.recurring.title': 'Još nema dnevnih zadataka',
   'onboarding.empty.recurring.body':
-    'Šta želiš da radiš svaki dan? Kreni malo — jedna do tri navike su dovoljne.',
+    'Šta želiš da radiš svaki dan? Kreni polako. Jedna do tri navike su dovoljne.',
   'onboarding.empty.recurring.cta': 'Napravi prvi dnevni zadatak',
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
@@ -211,10 +211,10 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.deleteConfirm':
     'Da li stvarno želiš da obrišeš zadatak „{{title}}“? Ova radnja se ne može poništiti.',
   'recurring.deleteBlockedDone':
-    'Završeni zadaci (status „{{column}}“) se ne mogu obrisati. Prvo postavi zadatak na Otvoreno ili U toku.',
+    'Završeni zadaci (status „{{column}}“) se ne mogu obrisati. Prvo vrati zadatak na Otvoreno ili U toku.',
   'recurring.deleteError': 'Zadatak nije obrisan.',
   'recurring.deleteErrorDoneColumn':
-    'Završeni zadaci (status „{{column}}“) se ne mogu obrisati. Prvo postavi zadatak na Otvoreno ili U toku.',
+    'Završeni zadaci (status „{{column}}“) se ne mogu obrisati. Prvo vrati zadatak na Otvoreno ili U toku.',
   'recurring.streak.count': 'Niz {{count}}',
   'recurring.status.todo': 'Otvoreno',
   'recurring.status.inProgress': 'U toku',
@@ -241,7 +241,8 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.today.doneLabel': 'završeno',
   'recurring.tasks.sectionTitle': 'Dnevni zadaci',
   'recurring.focus.title': 'Zadrži fokus.',
-  'recurring.banner.successLine': 'Odlično! Niz ostaje netaknut do reseta.',
+  'recurring.banner.successLine':
+    'Odlično! Tvoj niz je sačuvan. Produžiće se pri sledećem resetovanju.',
   'recurring.banner.warningLine':
     'Završi sve zadatke pre dnevnog reseta da zadržiš niz i nivo.',
   'recurring.celebration.title': 'Pokidao si!',
@@ -274,21 +275,21 @@ export const sr: Record<TranslationKey, string> = {
   'tasks.deleteConfirm':
     'Da li stvarno želiš da obrišeš zadatak „{{title}}“? Ova radnja se ne može poništiti.',
   'tasks.deleteError': 'Zadatak nije obrisan.',
-  'tasks.status.todo': 'Otvoreno',
+  'tasks.status.todo': 'Otvoren',
   'tasks.status.inProgress': 'U toku',
-  'tasks.status.review': 'Pregled',
-  'tasks.status.done': 'Završeno',
-  'tasks.filter.all': 'Sve',
-  'tasks.filter.importantUrgent': 'Važno i hitno',
-  'tasks.filter.important': 'Važno',
-  'tasks.filter.urgent': 'Hitno',
-  'tasks.filter.other': 'Ostalo',
+  'tasks.status.review': 'U pregledu',
+  'tasks.status.done': 'Završen',
+  'tasks.filter.all': 'Svi',
+  'tasks.filter.importantUrgent': 'Važni i hitni',
+  'tasks.filter.important': 'Važni',
+  'tasks.filter.urgent': 'Hitni',
+  'tasks.filter.other': 'Ostali',
   'tasks.deadline.overdue': 'KASNI',
   'tasks.deadline.thisWeek': 'OVA NEDELJA',
   'tasks.priority.none': 'Ostalo',
-  'tasks.priority.important': 'Važno',
-  'tasks.priority.urgent': 'Hitno',
-  'tasks.priority.importantUrgent': 'Važno i hitno',
+  'tasks.priority.important': 'Važan',
+  'tasks.priority.urgent': 'Hitan',
+  'tasks.priority.importantUrgent': 'Važan i hitan',
   'tasks.form.createTitle': 'Novi zadatak',
   'tasks.form.editTitle': 'Izmeni zadatak',
   'tasks.form.titleLabel': 'Naslov',
@@ -307,7 +308,7 @@ export const sr: Record<TranslationKey, string> = {
   'tasks.form.save': 'Sačuvaj',
   'tasks.form.error': 'Čuvanje nije uspelo.',
   'progress.sectionTitle': 'NAPREDAK',
-  'progress.last7Days': 'POSLEDNJIH 7 DANA',
+  'progress.last7Days': 'TVOJA NEDELJA',
   'progress.remainingToday': 'Još {{count}} zadataka danas',
   'progress.remainingTodayOne': 'Još 1 zadatak danas',
   'progress.allDoneToday': 'Sve završeno danas!',
@@ -334,7 +335,7 @@ export const sr: Record<TranslationKey, string> = {
     'Tvoji podaci, nizovi i uspesi se trajno čuvaju.',
   'premium.feature.access.title': 'Pristup web i mobilnoj aplikaciji',
   'premium.feature.access.description':
-    'Koristi Today svuda — na računaru i na telefonu.',
+    'Koristi Danas svuda. Na računaru i na telefonu.',
   'premium.guaranteeMonthly':
     'Mesečna pretplata: otkaži bilo kada. Bez skrivenih troškova.',
   'premium.guaranteeLifetime': 'Lifetime: jednom plati, trajno koristi.',
@@ -380,7 +381,7 @@ export const sr: Record<TranslationKey, string> = {
   'subscription.settings.manageErrorOpenFailed':
     'Upravljanje pretplatom nije moglo da se otvori. Pokušaj ponovo.',
   'subscription.settings.manageErrorTestStore':
-    'Test Store kupovine postoje samo u RevenueCat sandboxu — nema prave Google Play stranice. Za pravo upravljanje koristi Play Store ili release build.',
+    'Test Store kupovina postoji samo u RevenueCat sandboxu. Nema prave Google Play stranice. Za pravo upravljanje koristi Play Store ili release build.',
   'subscription.mobile.provider.stripe':
     'Premium je aktivan preko web pretplate (Stripe).',
   'subscription.mobile.provider.apple':
@@ -393,30 +394,31 @@ export const sr: Record<TranslationKey, string> = {
     'Premium je već aktivan za ovaj nalog. Dodatna kupovina nije potrebna.',
   'subscription.mobile.purchaseMonthly': 'Mesečno – {{price}}',
   'subscription.mobile.purchaseLifetime': 'Doživotno – {{price}}',
-  'subscription.mobile.restore': 'Vrati kupovinu',
+  'subscription.mobile.restore': 'Povrati kupovinu',
   'subscription.mobile.offeringsLoading': 'Učitavanje ponuda iz prodavnice…',
   'subscription.mobile.offeringsUnavailableGooglePlay':
-    'Trenutno nije moguće uzeti pretplatu preko Google Play-a. Nabavi Premium preko web aplikacije (Stripe). Jednom kupljena pretplata važi i u web- i u mobilnoj aplikaciji, dok god koristiš isti e-mail za prijavu.',
+    'Trenutno nije moguće kupiti pretplatu preko Google Play-a. Nabavi Premium preko web aplikacije (Stripe). Jednom kupljena pretplata važi kako u web-u tako i u mobilnoj aplikaciji, dok god koristiš isti e-mail za prijavu.',
   'subscription.mobile.offeringsUnavailableAppStore':
-    'Trenutno nije moguće uzeti pretplatu preko App Store-a. Nabavi Premium preko web aplikacije (Stripe). Jednom kupljena pretplata važi i u web- i u mobilnoj aplikaciji, dok god koristiš isti e-mail za prijavu.',
+    'Trenutno nije moguće kupiti pretplatu preko App Store-a. Nabavi Premium preko web aplikacije (Stripe). Jednom kupljena pretplata važi kako u web-u tako i u mobilnoj aplikaciji, dok god koristiš isti e-mail za prijavu.',
   'subscription.mobile.webSubscriptionLinkCta':
     'Nabavi Premium na web aplikaciji',
   'subscription.mobile.webSubscriptionLinkA11y':
     'Otvori web aplikaciju za Premium: {{url}}',
   'subscription.mobile.revenueCatUnavailable':
-    'Kupovine u aplikaciji još nisu podešene na ovom uređaju. Aplikacija ostaje upotrebljiva.',
+    'Kupovina u aplikaciji još nije podešena na ovom uređaju. Aplikacija ostaje upotrebljiva.',
   'subscription.mobile.panelUnavailable':
-    'Odeljak za pretplatu trenutno nije mogao da se učita. Osvežite ili pokušajte kasnije.',
+    'Stranica za pretplatu trenutno nije mogla da se učita. Osveži ili pokušaj kasnije.',
   'subscription.mobile.purchaseError':
     'Kupovina nije završena. Pokušaj ponovo.',
-  'subscription.mobile.restoreError': 'Kupovine nisu vraćene. Pokušaj ponovo.',
+  'subscription.mobile.restoreError':
+    'Kupovina nije povraćena. Pokušaj ponovo.',
   'subscription.mobile.restoreNothing':
-    'Nije pronađena nijedna kupovina za vraćanje.',
+    'Nije pronađena nijedna kupovina za provraćaj.',
   'subscription.mobile.purchaseInFlight': 'Kupovina je već u toku.',
   'subscription.mobile.identityMismatch':
-    'Nalog se još priprema za kupovine. Sačekaj, prijavi se ponovo i pokušaj opet.',
+    'Nalog se još priprema za kupovinu. Sačekaj, prijavi se ponovo i pokušaj opet.',
   'subscription.mobile.processing.title':
-    'Kupovina uspešna – aktivacija se obrađuje',
+    'Kupovina uspešna. Aktivacija se obrađuje',
   'subscription.mobile.processing.message':
     'Kupovina je uspešna. Premium će biti aktivan čim server potvrdi kupovinu.',
   'subscription.mobile.processing.hint':
@@ -430,42 +432,42 @@ export const sr: Record<TranslationKey, string> = {
   'profile.deleteAccount.menuItem': 'Obriši nalog',
   'profile.deleteAccount.title': 'Obriši nalog',
   'profile.deleteAccount.confirmQuestion':
-    'Da li ste sigurni da želite da obrišete nalog?',
+    'Da li si siguran da želiš da obrišeš nalog?',
   'profile.deleteAccount.newAccountNote':
-    'Ako se ponovo prijavite istom e-mail adresom, biće kreiran novi nalog.',
+    'Ako se ponovo prijaviš sa istom e-mail adresom, biće kreiran novi nalog.',
   'profile.deleteAccount.dataLoss':
     'Brisanjem naloga trajno se uklanjaju svi zadaci i povezani podaci poput napretka i istorije, bez mogućnosti vraćanja.',
   'profile.deleteAccount.personalData':
     'Biće obrisani i svi lični podaci poput e-mail adrese, korisničkog imena, podešavanja i slično.',
   'profile.deleteAccount.subscriptionHintPrefix':
-    'Ako zaista želite da obrišete nalog, ',
+    'Ako zaista želiš da obrišeš nalog, ',
   'profile.deleteAccount.subscriptionHintBold':
-    'prvo otkažite pretplatu ako je imate.',
+    'prvo otkaži pretplatu ako je imaš.',
   'profile.deleteAccount.subscriptionHintSuffix':
-    ' Inače brisanje neće uspeti jer se pretplate vode u spoljnim sistemima kao što su Google Play, Stripe ili Apple.',
-  'profile.deleteAccount.continueToVerify': 'Nastavi na potvrdu',
+    ' U suprotnom, brisanje naloga neće biti moguće jer se pretplatama upravlja preko drugih platformi, kao što su Google Play, Stripe ili Apple.',
+  'profile.deleteAccount.continueToVerify': 'Nastavi',
   'profile.deleteAccount.backToInfo': 'Nazad',
   'profile.deleteAccount.errorGeneric':
-    'Brisanje naloga nije uspelo. Pokušajte ponovo.',
+    'Brisanje naloga nije uspelo. Pokušaj ponovo.',
   'profile.deleteAccount.errorBlockedBySubscription':
     'Aktivna pretplata mora prvo biti otkazana.',
   'profile.deleteAccount.errorReauthenticationRequired':
     'Iz bezbednosnih razloga potrebna je ponovna potvrda jednokratnim kodom.',
   'profile.deleteAccount.errorSubscriptionVerificationUnavailable':
-    'Status pretplate nije mogao biti proveren. Nijedan podatak nije obrisan. Pokušajte ponovo kasnije.',
+    'Status pretplate nije mogao biti proveren. Nijedan podatak nije obrisan. Pokušaj ponovo kasnije.',
   'profile.deleteAccount.errorUnauthorized':
-    'Niste prijavljeni ili vaša sesija više nije važeća.',
+    'Nisi prijavljen ili tvoja sesija više nije važeća.',
   'profile.deleteAccount.errorServer':
     'Došlo je do greške na serveru. Vaš nalog nije obrisan.',
   'profile.deleteAccount.reauthRequired':
-    'Unesite 6-cifreni jednokratni kod. Svež kod sa prijave je dovoljan — Pošalji kod samo ako vam treba novi.',
+    'Unesi šestocifreni kod koji smo ti poslali za prijavu. Ako ti treba novi, izaberi „Pošalji kod“.',
   'profile.deleteAccount.reauthSendCode': 'Pošalji kod',
   'profile.deleteAccount.reauthSendingCode': 'Šaljem kod…',
   'profile.deleteAccount.reauthCodeSent': 'Poslali smo kod na {{email}}.',
   'profile.deleteAccount.reauthConfirmButton': 'Potvrdi i obriši nalog',
   'profile.accountMenu.title': 'Nalog',
   'profile.accountMenu.subscription': 'Pretplata i naplata',
-  'profile.accountMenu.subscriptionHint': 'Premium status, kupovina i vraćanje',
+  'profile.accountMenu.subscriptionHint': 'Premium status, kupovina i povraćaj',
   'profile.helpMenu.title': 'Pomoć',
   'profile.helpMenu.viewIntroduction': 'Kako funkcioniše',
   'profile.helpMenu.viewIntroductionHint':

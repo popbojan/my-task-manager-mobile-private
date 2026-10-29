@@ -80,6 +80,28 @@ export const en: Record<TranslationKey, string> = {
   'history.weekday.fri': 'Fri',
   'history.weekday.sat': 'Sat',
   'history.weekday.sun': 'Sun',
+  'history.month.jan': 'January',
+  'history.month.feb': 'February',
+  'history.month.mar': 'March',
+  'history.month.apr': 'April',
+  'history.month.may': 'May',
+  'history.month.jun': 'June',
+  'history.month.jul': 'July',
+  'history.month.aug': 'August',
+  'history.month.sep': 'September',
+  'history.month.oct': 'October',
+  'history.month.nov': 'November',
+  'history.month.dec': 'December',
+  'history.weekdayLong.mon': 'Monday',
+  'history.weekdayLong.tue': 'Tuesday',
+  'history.weekdayLong.wed': 'Wednesday',
+  'history.weekdayLong.thu': 'Thursday',
+  'history.weekdayLong.fri': 'Friday',
+  'history.weekdayLong.sat': 'Saturday',
+  'history.weekdayLong.sun': 'Sunday',
+  'history.monthYearTitle': '{{month}} {{year}}',
+  'history.dayDetailDate': '{{weekday}}, {{month}} {{day}}, {{year}}',
+  'history.dateLong': '{{month}} {{day}}, {{year}}',
   'history.openDay': 'Open day {{day}}',
   'history.hasNote': 'Has a note',
   'history.levelShort': 'Lv {{level}}',
@@ -105,7 +127,7 @@ export const en: Record<TranslationKey, string> = {
   'history.repair.action': 'Repair the day',
   'history.repair.confirmTitle': 'Repair yesterday?',
   'history.repair.confirmBody':
-    "Only use this if you completed all tasks in real life but forgot to mark them done in the app. Otherwise your streak won't be realistic—you're extending it artificially.",
+    'Only use this option if you completed all your tasks but forgot to mark them as done in the app. Otherwise, you’re artificially extending your streak, and it no longer reflects your actual progress.',
   'history.repair.error': 'Could not repair this day.',
   'history.repair.notRepairable':
     "Only yesterday's missed day can be repaired (finalized, with tasks).",
@@ -141,7 +163,7 @@ export const en: Record<TranslationKey, string> = {
   'onboarding.progress': 'Step {{current}} of {{total}}',
   'onboarding.slide1.title': 'Your daily tasks',
   'onboarding.slide1.body':
-    'Start small and concrete: tap + and create your first daily task — for example “Read for 5 minutes”.',
+    'Start small and concrete: tap + and create your first daily task. For example “Read for 5 minutes”.',
   'onboarding.slide2.title': 'How you complete tasks',
   'onboarding.slide2.body':
     'Tap a task’s status and move step by step until it is Done.',
@@ -164,7 +186,7 @@ export const en: Record<TranslationKey, string> = {
   'onboarding.slide6.freeLabel': 'FREE',
   'onboarding.slide6.freeHeadline': 'Organize your everyday life',
   'onboarding.slide6.freeBody':
-    'Tasks with priorities and fixed due dates — without a subscription.',
+    'Tasks with priorities and fixed due dates. Without a subscription.',
   'onboarding.demo.taskTitle': 'Read for 5 minutes',
   'onboarding.demo.boardTaskOneTitle': 'Submit tax documents',
   'onboarding.demo.boardTaskTwoTitle': 'Book dentist appointment',
@@ -173,15 +195,15 @@ export const en: Record<TranslationKey, string> = {
   'onboarding.demo.monthTitle': 'October 2026',
   'onboarding.demo.dayTitle': 'Monday, 12 October 2026',
   'onboarding.demo.noteText':
-    'Today the short reading routine helped. Tomorrow I will start right after breakfast — without my phone.',
+    'Today the short reading routine helped. Tomorrow I will start right after breakfast. Without my phone.',
   'onboarding.empty.overline': 'First step',
   'onboarding.empty.tasks.title': 'No tasks yet',
   'onboarding.empty.tasks.body':
-    'Add projects with deadlines and priorities — your board for everything that is not a daily habit.',
+    'Add projects with deadlines and priorities. Your board for everything that is not a daily habit.',
   'onboarding.empty.tasks.cta': 'Create first task',
   'onboarding.empty.recurring.title': 'No daily tasks yet',
   'onboarding.empty.recurring.body':
-    'What do you want to accomplish every day? Start small — one to three habits is enough.',
+    'What do you want to accomplish every day? Start small. One to three habits is enough.',
   'onboarding.empty.recurring.cta': 'Create first daily task',
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
@@ -242,7 +264,7 @@ export const en: Record<TranslationKey, string> = {
   'recurring.tasks.sectionTitle': 'Daily tasks',
   'recurring.focus.title': 'Keep your focus.',
   'recurring.banner.successLine':
-    'Great! Your streak stays intact until reset.',
+    'Great! Your streak is safe. It will increase at the next reset.',
   'recurring.banner.warningLine':
     'Complete all tasks before the daily reset to keep your streak & level.',
   'recurring.celebration.title': 'Knockout! All done!',
@@ -455,7 +477,7 @@ export const en: Record<TranslationKey, string> = {
   'profile.deleteAccount.errorServer':
     'A server error occurred. Your account was not deleted.',
   'profile.deleteAccount.reauthRequired':
-    'Enter your 6-digit one-time code. A fresh code from sign-in is fine—use Send code only if you need a new one.',
+    'Enter the 6-digit code we sent you to sign in. If you need a new one, select “Send code.”',
   'profile.deleteAccount.reauthSendCode': 'Send code',
   'profile.deleteAccount.reauthSendingCode': 'Sending code…',
   'profile.deleteAccount.reauthCodeSent': 'We sent a code to {{email}}.',

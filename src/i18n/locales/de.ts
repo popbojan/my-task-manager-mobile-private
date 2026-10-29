@@ -79,6 +79,28 @@ export const de = {
   'history.weekday.fri': 'Fr',
   'history.weekday.sat': 'Sa',
   'history.weekday.sun': 'So',
+  'history.month.jan': 'Januar',
+  'history.month.feb': 'Februar',
+  'history.month.mar': 'März',
+  'history.month.apr': 'April',
+  'history.month.may': 'Mai',
+  'history.month.jun': 'Juni',
+  'history.month.jul': 'Juli',
+  'history.month.aug': 'August',
+  'history.month.sep': 'September',
+  'history.month.oct': 'Oktober',
+  'history.month.nov': 'November',
+  'history.month.dec': 'Dezember',
+  'history.weekdayLong.mon': 'Montag',
+  'history.weekdayLong.tue': 'Dienstag',
+  'history.weekdayLong.wed': 'Mittwoch',
+  'history.weekdayLong.thu': 'Donnerstag',
+  'history.weekdayLong.fri': 'Freitag',
+  'history.weekdayLong.sat': 'Samstag',
+  'history.weekdayLong.sun': 'Sonntag',
+  'history.monthYearTitle': '{{month}} {{year}}',
+  'history.dayDetailDate': '{{weekday}}, {{day}}. {{month}} {{year}}',
+  'history.dateLong': '{{day}}. {{month}} {{year}}',
   'history.openDay': 'Tag {{day}} öffnen',
   'history.hasNote': 'Notiz vorhanden',
   'history.levelShort': 'Lv {{level}}',
@@ -139,7 +161,7 @@ export const de = {
   'onboarding.progress': 'Schritt {{current}} von {{total}}',
   'onboarding.slide1.title': 'Deine täglichen Aufgaben',
   'onboarding.slide1.body':
-    'Klein und konkret beginnen: Tippe auf + und lege deine erste tägliche Aufgabe an — zum Beispiel „5 Minuten lesen“.',
+    'Klein und konkret beginnen: Tippe auf + und lege deine erste tägliche Aufgabe an. Zum Beispiel „5 Minuten lesen“.',
   'onboarding.slide2.title': 'So erledigst du deine Aufgaben',
   'onboarding.slide2.body':
     'Tippe auf den Status einer Aufgabe und wechsle Schritt für Schritt bis „Erledigt“.',
@@ -162,7 +184,7 @@ export const de = {
   'onboarding.slide6.freeLabel': 'KOSTENLOS',
   'onboarding.slide6.freeHeadline': 'Deinen Alltag organisieren',
   'onboarding.slide6.freeBody':
-    'Aufgaben mit Prioritäten und festen Fälligkeitsterminen — ohne Abonnement.',
+    'Aufgaben mit Prioritäten und festen Fälligkeitsterminen. Ohne Abonnement.',
   'onboarding.demo.taskTitle': '5 Minuten lesen',
   'onboarding.demo.boardTaskOneTitle': 'Steuerunterlagen einreichen',
   'onboarding.demo.boardTaskTwoTitle': 'Zahnarzttermin buchen',
@@ -171,15 +193,15 @@ export const de = {
   'onboarding.demo.monthTitle': 'Oktober 2026',
   'onboarding.demo.dayTitle': 'Montag, 12. Oktober 2026',
   'onboarding.demo.noteText':
-    'Heute hat die kurze Leseroutine geholfen. Morgen starte ich direkt nach dem Frühstück — ohne Handy.',
+    'Heute hat die kurze Leseroutine geholfen. Morgen starte ich direkt nach dem Frühstück. Ohne Handy.',
   'onboarding.empty.overline': 'Erster Schritt',
   'onboarding.empty.tasks.title': 'Noch keine Aufgaben',
   'onboarding.empty.tasks.body':
-    'Lege Projekte mit Deadline und Priorität an — dein Board für alles, was nicht täglich wiederkehrt.',
+    'Lege Projekte mit Deadline und Priorität an. Dein Board für alles, was nicht täglich wiederkehrt.',
   'onboarding.empty.tasks.cta': 'Erste Aufgabe anlegen',
   'onboarding.empty.recurring.title': 'Noch keine täglichen Aufgaben',
   'onboarding.empty.recurring.body':
-    'Was willst du jeden Tag schaffen? Starte klein — ein bis drei Gewohnheiten reichen.',
+    'Was willst du jeden Tag schaffen? Starte klein. Ein bis drei Gewohnheiten reichen.',
   'onboarding.empty.recurring.cta': 'Erste Tagesaufgabe anlegen',
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
@@ -241,7 +263,7 @@ export const de = {
   'recurring.tasks.sectionTitle': 'Tägliche Aufgaben',
   'recurring.focus.title': 'Bleib fokussiert',
   'recurring.banner.successLine':
-    'Stark! Dein Streak bleibt intakt bis zum Reset.',
+    'Stark! Dein Streak ist gesichert. Er verlängert sich beim nächsten Reset.',
   'recurring.banner.warningLine':
     'Erledige alle Aufgaben vor Mitternacht, um deinen Streak zu behalten.',
   'recurring.celebration.title': 'Knockout! Alles erledigt!',
@@ -461,7 +483,7 @@ export const de = {
   'profile.deleteAccount.errorServer':
     'Ein Serverfehler ist aufgetreten. Ihr Konto wurde nicht gelöscht.',
   'profile.deleteAccount.reauthRequired':
-    'Geben Sie Ihren 6-stelligen Einmalcode ein. Ein frischer Code von der Anmeldung reicht – „Code senden“ nur, wenn Sie einen neuen brauchen.',
+    'Gib den sechsstelligen Code ein, den wir dir zur Anmeldung geschickt haben. Wenn du einen neuen brauchst, wähle „Code senden“.',
   'profile.deleteAccount.reauthSendCode': 'Code senden',
   'profile.deleteAccount.reauthSendingCode': 'Sende Code…',
   'profile.deleteAccount.reauthCodeSent':

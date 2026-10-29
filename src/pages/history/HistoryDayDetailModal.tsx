@@ -25,7 +25,7 @@ import { applyHistoryDayToCache } from '@/history/updateHistoryDayCache';
 import { applyHistoryNoteToCache } from '@/history/updateHistoryNoteCache';
 import { refetchRecurringBoardData } from '@/recurring/refetchRecurringBoardData';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import type { AppLanguage } from '@/i18n/types';
+import { formatHistoryDayDetailTitle } from '@/i18n/calendarLabels';
 import type { TranslationKey } from '@/i18n/locales/de';
 import { CheckIcon, CrossIcon, FireIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import PremiumProgressRing from '@/pages/recurring-tasks/premium/PremiumProgressRing';
@@ -37,7 +37,6 @@ import {
   formatHistoryStreakDisplay,
   formatHistoryTaskRatioDisplay,
   monthKeyFromCalendarDate,
-  parseCalendarDate,
   resolveHistoryDayCellTone,
   resolveHistoryDayProgressPercent,
   historyMonthsToRefreshAfterRepair,
@@ -52,13 +51,6 @@ import { getApiErrorMessage, parseApiErrorBody } from '@/utils/apiError';
 import HistoryRepairConfirmModal from '@/pages/history/HistoryRepairConfirmModal';
 
 const NOTE_MAX_LENGTH = 2000;
-
-const LOCALE_MAP: Record<AppLanguage, string> = {
-  de: 'de-DE',
-  en: 'en-GB',
-  fr: 'fr-FR',
-  sr: 'sr-RS',
-};
 
 const STATUS_LABEL_KEYS: Record<HistoryDayStatus, TranslationKey> = {
   [HistoryDayStatus.Success]: 'history.status.success',
@@ -129,15 +121,6 @@ function HistoryDetailStatusBadge({ entry }: { entry?: HistoryDay }) {
   return null;
 }
 
-function formatDayTitle(date: string, language: AppLanguage): string {
-  return new Intl.DateTimeFormat(LOCALE_MAP[language], {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(parseCalendarDate(date));
-}
-
 export default function HistoryDayDetailModal({
   date,
   dayOfMonth,
@@ -147,7 +130,7 @@ export default function HistoryDayDetailModal({
   visibleMonth,
   onClose,
 }: HistoryDayDetailModalProps) {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
@@ -523,7 +506,7 @@ export default function HistoryDayDetailModal({
             <View style={styles.panelHeader}>
               <View style={styles.panelHeaderCopy}>
                 <Text style={styles.eyebrow}>{t('history.title')}</Text>
-                <Text style={styles.title}>{formatDayTitle(date, language)}</Text>
+                <Text style={styles.title}>{formatHistoryDayDetailTitle(date, t)}</Text>
               </View>
               <Pressable
                 style={styles.closeButton}

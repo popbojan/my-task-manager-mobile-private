@@ -17,7 +17,7 @@ import AppBrandHeader from '@/components/AppBrandHeader';
 import { historyMonthQueryKey } from '@/history/historyQueryKeys';
 import { useRefetchHistoryOnTabFocus } from '@/history/useRefetchHistoryOnTabFocus';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import type { AppLanguage } from '@/i18n/types';
+import { formatHistoryMonthYear } from '@/i18n/calendarLabels';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 import HistoryDayCell from '@/pages/history/HistoryDayCell';
 import HistoryMonthPickerModal from '@/pages/history/HistoryMonthPickerModal';
@@ -52,13 +52,6 @@ type HistoryScreenProps = {
   onOpenDayDetail?: (payload: HistoryDayDetailPayload) => void;
 };
 
-const LOCALE_MAP: Record<AppLanguage, string> = {
-  de: 'de-DE',
-  en: 'en-GB',
-  fr: 'fr-FR',
-  sr: 'sr-RS',
-};
-
 const WEEKDAY_KEYS = [
   'history.weekday.mon',
   'history.weekday.tue',
@@ -69,14 +62,6 @@ const WEEKDAY_KEYS = [
   'history.weekday.sun',
 ] as const;
 
-function formatMonthTitle(monthKey: string, language: AppLanguage): string {
-  const { year, monthIndex } = parseMonthKey(monthKey);
-  return new Intl.DateTimeFormat(LOCALE_MAP[language], {
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(year, monthIndex, 1));
-}
-
 export default function HistoryScreen({
   isActive = true,
   onOpenSubscription,
@@ -84,7 +69,7 @@ export default function HistoryScreen({
 }: HistoryScreenProps) {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { accessToken } = useAuth();
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
@@ -124,6 +109,11 @@ export default function HistoryScreen({
   const daysByDate = useMemo(
     () => indexHistoryDaysByDate(historyQuery.data?.days ?? []),
     [historyQuery.data?.days],
+  );
+
+  const visibleMonthParts = useMemo(
+    () => parseMonthKey(visibleMonth),
+    [visibleMonth],
   );
 
   const gridCells = useMemo(
@@ -226,7 +216,11 @@ export default function HistoryScreen({
               }}
             >
               <Text style={styles.monthTitle}>
-                {formatMonthTitle(visibleMonth, language)}
+                {formatHistoryMonthYear(
+                  visibleMonthParts.monthIndex,
+                  visibleMonthParts.year,
+                  t,
+                )}
               </Text>
             </Pressable>
 

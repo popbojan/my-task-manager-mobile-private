@@ -369,7 +369,11 @@ export default function LoginScreen() {
       </ImageBackground>
 
       <LoginHelpModal visible={helpOpen} onClose={() => setHelpOpen(false)} />
-      <LegalWebViewModal page={legalPage} onClose={() => setLegalPage(null)} />
+      <LegalWebViewModal
+        page={legalPage}
+        closeLabelKey="privacy.backLoggedOut"
+        onClose={() => setLegalPage(null)}
+      />
     </View>
   );
 }

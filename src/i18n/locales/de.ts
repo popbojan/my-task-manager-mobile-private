@@ -500,6 +500,8 @@ export const de = {
   'profile.legalMenu.title': 'Rechtliches',
   'profile.legalMenu.privacy': 'Datenschutz',
   'profile.legalMenu.impressum': 'Impressum / Kontakt',
+  'privacy.backLoggedIn': 'Zurück zur App',
+  'privacy.backLoggedOut': 'Zurück zum Login',
 } as const;
 
 export type TranslationKey = keyof typeof de;

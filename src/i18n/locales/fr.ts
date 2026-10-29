@@ -173,13 +173,13 @@ export const fr: Record<TranslationKey, string> = {
     'Quand tu termines toutes les tâches quotidiennes, ta série grandit d’un jour.',
   'onboarding.slide4.title': 'Ton parcours reste visible',
   'onboarding.slide4.body':
-    'Dans Mon parcours, tu vois ton calendrier avec les résultats du jour. Même après une pause, tes succès passés restent visibles.',
+    'Dans « Mon parcours », tu vois ton calendrier avec les résultats du jour. Même après une pause, tes succès passés restent visibles.',
   'onboarding.slide5.title': 'Note ce qui te motive',
   'onboarding.slide5.body':
     'Appuie sur un jour et écris une note : Qu’est-ce qui a aidé ? Qu’est-ce qui était difficile ? Que feras-tu différemment demain ?',
   'onboarding.slide6.title': 'Tu as le choix',
   'onboarding.slide6.body':
-    'Les tâches quotidiennes, les séries et Mon parcours nécessitent Premium.\n\nLes tâches avec priorités et échéances fixes restent gratuites sans abonnement.',
+    'Les tâches quotidiennes, les séries et « Mon parcours » nécessitent Premium.\n\nLes tâches avec priorités et échéances fixes restent gratuites sans abonnement.',
   'onboarding.slide6.premiumLabel': 'PREMIUM',
   'onboarding.slide6.premiumHeadline': 'Construire ta routine quotidienne',
   'onboarding.slide6.premiumBody':
@@ -506,4 +506,6 @@ export const fr: Record<TranslationKey, string> = {
   'profile.legalMenu.title': 'Mentions légales',
   'profile.legalMenu.privacy': 'Confidentialité',
   'profile.legalMenu.impressum': 'Mentions légales / Contact',
+  'privacy.backLoggedIn': "Retour à l'app",
+  'privacy.backLoggedOut': 'Retour à la connexion',
 };

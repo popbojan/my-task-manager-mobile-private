@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 import type { WebViewNavigation } from 'react-native-webview/lib/WebViewTypes';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import type { TranslationKey } from '@/i18n/locales';
 import {
   buildLegalWebViewCloseLabelUpdateScript,
   buildLegalWebViewHeaderPatchScript,
@@ -24,15 +25,22 @@ import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 type LegalWebViewModalProps = {
   page: LegalPage | null;
   onClose: () => void;
+  /** Web legal pages use back-style labels (see privacy.backLogged* in web app). */
+  closeLabelKey?: TranslationKey;
 };
 
-export default function LegalWebViewModal({ page, onClose }: LegalWebViewModalProps) {
+export default function LegalWebViewModal({
+  page,
+  onClose,
+  closeLabelKey = 'privacy.backLoggedIn',
+}: LegalWebViewModalProps) {
   const { language, setLanguage, t } = useLanguage();
   const webViewRef = useRef<WebView>(null);
   const [canGoBack, setCanGoBack] = useState(false);
   const [webSourceUri, setWebSourceUri] = useState<string | null>(null);
   const visible = page !== null;
-  const headerPatchScript = buildLegalWebViewHeaderPatchScript(t('common.close'));
+  const closeLabel = t(closeLabelKey);
+  const headerPatchScript = buildLegalWebViewHeaderPatchScript(closeLabel);
 
   useEffect(() => {
     if (visible && page) {
@@ -44,6 +52,15 @@ export default function LegalWebViewModal({ page, onClose }: LegalWebViewModalPr
       setWebSourceUri(null);
     }
   }, [visible, page]);
+
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+    webViewRef.current?.injectJavaScript(
+      buildLegalWebViewCloseLabelUpdateScript(closeLabel),
+    );
+  }, [closeLabel, visible]);
 
   useEffect(() => {
     if (!visible || Platform.OS !== 'android') {
@@ -86,7 +103,7 @@ export default function LegalWebViewModal({ page, onClose }: LegalWebViewModalPr
 
     webViewRef.current?.injectJavaScript(
       buildLegalWebViewCloseLabelUpdateScript(
-        getCloseLabelForLanguage(message.language),
+        getCloseLabelForLanguage(message.language, closeLabelKey),
       ),
     );
   }

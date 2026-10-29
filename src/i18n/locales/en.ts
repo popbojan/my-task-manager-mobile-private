@@ -172,13 +172,13 @@ export const en: Record<TranslationKey, string> = {
     'When you complete all daily tasks, your streak grows by one day.',
   'onboarding.slide4.title': 'Your journey stays visible',
   'onboarding.slide4.body':
-    'In My Journey you see your calendar with daily results. Even after a break, your past successes stay visible.',
+    'In “My Journey” you see your calendar with daily results. Even after a break, your past successes stay visible.',
   'onboarding.slide5.title': 'Capture what moves you',
   'onboarding.slide5.body':
     'Tap a day and write a note: What helped? What was difficult? What will you do differently tomorrow?',
   'onboarding.slide6.title': 'You have a choice',
   'onboarding.slide6.body':
-    'Daily tasks, streaks, and My Journey require Premium.\n\nTasks with priorities and fixed due dates are free to use without a subscription.',
+    'Daily tasks, streaks, and “My Journey” require Premium.\n\nTasks with priorities and fixed due dates are free to use without a subscription.',
   'onboarding.slide6.premiumLabel': 'PREMIUM',
   'onboarding.slide6.premiumHeadline': 'Build your daily routine',
   'onboarding.slide6.premiumBody':
@@ -493,4 +493,6 @@ export const en: Record<TranslationKey, string> = {
   'profile.legalMenu.title': 'Legal',
   'profile.legalMenu.privacy': 'Privacy policy',
   'profile.legalMenu.impressum': 'Legal notice / Contact',
+  'privacy.backLoggedIn': 'Back to app',
+  'privacy.backLoggedOut': 'Back to login',
 };

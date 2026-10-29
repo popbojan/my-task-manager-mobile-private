@@ -104,7 +104,7 @@ export const de = {
   'history.repair.action': 'Tag reparieren',
   'history.repair.confirmTitle': 'Gestern reparieren?',
   'history.repair.confirmBody':
-    'Nutze das nur, wenn du alle Aufgaben wirklich erledigt hast und vergessen hast, sie in der App als erledigt zu markieren. Sonst ist dein Streak nicht realistisch – du verlängerst sie künstlich.',
+    'Nutze diese Funktion nur, wenn du wirklich alle Aufgaben erledigt, aber vergessen hast, sie in der App abzuhaken. Andernfalls verlängerst du deine Streak künstlich und sie spiegelt deinen tatsächlichen Fortschritt nicht mehr wider.',
   'history.repair.error': 'Der Tag konnte nicht repariert werden.',
   'history.repair.notRepairable':
     'Nur der gestern verpasste Tag kann repariert werden (finalisiert, mit Aufgaben).',

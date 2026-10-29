@@ -24,6 +24,8 @@ import {
   clearAccountDeletedNotice,
   hasAccountDeletedNotice,
 } from '@/pages/login/accountDeletedNotice';
+import LegalWebViewModal from '@/legal/LegalWebViewModal';
+import type { LegalPage } from '@/legal/openLegalPage';
 import LoginHelpModal from '@/pages/login/LoginHelpModal';
 import MasteryLevelStrip from '@/pages/login/MasteryLevelStrip';
 import { loginTheme } from '@/pages/login/loginTheme';
@@ -54,6 +56,7 @@ export default function LoginScreen() {
   const [levels, setLevels] = useState<MasteryLevel[]>([]);
   const [levelsLoading, setLevelsLoading] = useState(true);
   const [showAccountDeletedNotice, setShowAccountDeletedNotice] = useState(false);
+  const [legalPage, setLegalPage] = useState<LegalPage | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -340,6 +343,25 @@ export default function LoginScreen() {
                 <Text style={styles.securityFooter}>
                   🛡 {t('login.security')}
                 </Text>
+                <View style={styles.legalFooter}>
+                  <Pressable
+                    accessibilityRole="link"
+                    hitSlop={8}
+                    onPress={() => setLegalPage('privacy')}
+                  >
+                    <Text style={styles.legalLink}>{t('profile.legalMenu.privacy')}</Text>
+                  </Pressable>
+                  <Text style={styles.legalSeparator} accessibilityElementsHidden>
+                    ·
+                  </Text>
+                  <Pressable
+                    accessibilityRole="link"
+                    hitSlop={8}
+                    onPress={() => setLegalPage('impressum')}
+                  >
+                    <Text style={styles.legalLink}>{t('profile.legalMenu.impressum')}</Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
           </KeyboardAvoidingView>
@@ -347,6 +369,7 @@ export default function LoginScreen() {
       </ImageBackground>
 
       <LoginHelpModal visible={helpOpen} onClose={() => setHelpOpen(false)} />
+      <LegalWebViewModal page={legalPage} onClose={() => setLegalPage(null)} />
     </View>
   );
 }
@@ -566,5 +589,23 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.45)',
     fontSize: 11,
     lineHeight: 16,
+  },
+  legalFooter: {
+    marginTop: 6,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  legalLink: {
+    color: 'rgba(255, 255, 255, 0.62)',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+  },
+  legalSeparator: {
+    color: 'rgba(255, 255, 255, 0.35)',
+    fontSize: 12,
   },
 });

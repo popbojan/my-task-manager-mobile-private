@@ -21,7 +21,7 @@ export const sr: Record<TranslationKey, string> = {
     'Ako se ponovo prijaviš sa istom e-mail adresom, biće kreiran novi nalog.',
   'login.title': 'Dobrodošao nazad',
   'login.titleOtp': 'Proveri svoj e-mail',
-  'login.subtitle': 'Prijavite se i ostanite fokusirani.',
+  'login.subtitle': 'Prijavi se i ostani fokusiran.',
   'login.brand.tagline': 'MASTER YOURSELF',
   'login.hero.title': 'Disciplina je jača od motivacije.',
   'login.hero.subtitle': 'Napreduj svaki dan.',

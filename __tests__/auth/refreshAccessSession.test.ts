@@ -23,6 +23,8 @@ import { refreshAccessSession } from '@/auth/refreshAccessSession';
 
 const refreshAccessToken = authApi.refreshAccessToken as jest.Mock;
 const getAccessToken = jest.requireMock('@/api/authClient').getAccessToken as jest.Mock;
+const refreshAppData = jest.requireMock('@/refresh/refreshAppData')
+  .refreshAppData as jest.Mock;
 
 describe('refreshAccessSession', () => {
   let queryClient: QueryClient;
@@ -52,6 +54,16 @@ describe('refreshAccessSession', () => {
 
     expect(result).toBeNull();
     expect(setAccessToken).not.toHaveBeenCalled();
+  });
+
+  it('refetches app data after a successful refresh by default', async () => {
+    getAccessToken.mockReturnValue(null);
+    refreshAccessToken.mockResolvedValue({ accessToken: 'new-token' });
+
+    const result = await refreshAccessSession({ queryClient, setAccessToken });
+
+    expect(result).toBe('new-token');
+    expect(refreshAppData).toHaveBeenCalledWith(queryClient, 'new-token');
   });
 
   it('clears the session when refresh returns 401', async () => {

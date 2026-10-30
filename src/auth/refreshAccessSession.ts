@@ -9,7 +9,10 @@ import { invalidateAuthenticatedSessionQueries } from '@/session/invalidateAuthe
 export type RefreshAccessSessionOptions = {
   queryClient: QueryClient;
   setAccessToken: (token: string | null) => void;
-  /** Reload tasks, subscription, etc. after a new access token is issued. */
+  /**
+   * Reload session data (incl. GET /users/me + mobileAppVersion sync) after refresh.
+   * Defaults to true so cold start and foreground refresh both report app version.
+   */
   refetchAppData?: boolean;
 };
 
@@ -33,7 +36,7 @@ function clearAuthenticatedSession(
 export async function refreshAccessSession({
   queryClient,
   setAccessToken,
-  refetchAppData = false,
+  refetchAppData = true,
 }: RefreshAccessSessionOptions): Promise<string | null> {
   const previousToken = getAccessToken();
 

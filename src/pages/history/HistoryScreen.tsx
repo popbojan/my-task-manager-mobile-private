@@ -294,6 +294,7 @@ export default function HistoryScreen({
                         pressed && styles.gridSlotPressed,
                       ]}
                       accessibilityRole="button"
+                      accessibilityState={{ selected: isToday }}
                       accessibilityLabel={t('history.openDay', {
                         day: String(cell.dayOfMonth),
                       })}

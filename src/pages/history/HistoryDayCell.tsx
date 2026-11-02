@@ -109,7 +109,14 @@ export default function HistoryDayCell({
   const isOnboarding = variant === 'onboarding';
 
   return (
-    <View style={[toneStyles(tone, isToday, variant), styles.cellFill, { minHeight: height }]}>
+    <View
+      style={[
+        toneStyles(tone, isToday, variant),
+        styles.cellFill,
+        { minHeight: height },
+        isToday && styles.cellToday,
+      ]}
+    >
       <View style={[styles.topRow, isOnboarding ? styles.topRowOnboarding : null]}>
         <Text
           style={[
@@ -163,6 +170,12 @@ export default function HistoryDayCell({
       ) : (
         <View style={styles.detailsPlaceholder} />
       )}
+      {isToday ? (
+        <View
+          pointerEvents="none"
+          style={[styles.todayBar, isOnboarding && styles.todayBarOnboarding]}
+        />
+      ) : null}
     </View>
   );
 }
@@ -176,6 +189,9 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.06)',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  cellToday: {
+    paddingBottom: 9,
   },
   cellOnboarding: {
     borderRadius: 10,
@@ -209,6 +225,21 @@ const styles = StyleSheet.create({
   todayOutline: {
     borderColor: recurringTheme.accentBright,
     borderWidth: 1.5,
+  },
+  todayBar: {
+    position: 'absolute',
+    left: 6,
+    right: 6,
+    bottom: 3,
+    height: 2,
+    borderRadius: 999,
+    backgroundColor: '#b7f7d8',
+  },
+  todayBarOnboarding: {
+    left: 5,
+    right: 5,
+    bottom: 2,
+    height: 2,
   },
   topRow: {
     width: '100%',

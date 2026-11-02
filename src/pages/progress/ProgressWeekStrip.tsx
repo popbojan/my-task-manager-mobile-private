@@ -1,35 +1,40 @@
 import { StyleSheet, Text, View } from 'react-native';
-import type { AppLanguage } from '@/i18n/types';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { useCurrentUser } from '@/user/useCurrentUser';
+import { getDeviceTimezone } from '@/user/deviceTimezone';
+import { parseCalendarDate } from '@/utils/historyCalendar';
 import PremiumProgressRing from '@/pages/recurring-tasks/premium/PremiumProgressRing';
 import PremiumSurface from '@/pages/recurring-tasks/premium/PremiumSurface';
 import { CheckIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
   buildWeekDayStates,
-  getWeekDaysMondayStart,
+  getProgressStripCalendarDates,
   type WeekDayState,
 } from '@/pages/progress/progressWeekUtils';
+import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 import type { RecurringTaskProgress } from '@/api/generated/models/RecurringTaskProgress';
 
 type ProgressWeekStripProps = {
   progress: RecurringTaskProgress;
   doneTasksToday: number;
   totalTasksToday: number;
+  historyDaysByDate: Map<string, HistoryDay>;
 };
 
-const LOCALE_MAP: Record<AppLanguage, string> = {
-  de: 'de-DE',
-  en: 'en-GB',
-  fr: 'fr-FR',
-  sr: 'sr-RS',
-};
+const WEEKDAY_KEYS = [
+  'history.weekday.sun',
+  'history.weekday.mon',
+  'history.weekday.tue',
+  'history.weekday.wed',
+  'history.weekday.thu',
+  'history.weekday.fri',
+  'history.weekday.sat',
+] as const;
 
-function formatWeekdayLabel(date: Date, language: AppLanguage): string {
-  const label = new Intl.DateTimeFormat(LOCALE_MAP[language], {
-    weekday: 'short',
-  }).format(date);
-  return label.replace(/\./g, '').slice(0, 2).toUpperCase();
+function formatWeekdayLabel(calendarDate: string, t: (key: (typeof WEEKDAY_KEYS)[number]) => string): string {
+  const weekdayIndex = parseCalendarDate(calendarDate).getUTCDay();
+  return t(WEEKDAY_KEYS[weekdayIndex]!);
 }
 
 function WeekDayCircle({ state }: { state: WeekDayState }) {
@@ -69,14 +74,16 @@ export default function ProgressWeekStrip({
   progress,
   doneTasksToday,
   totalTasksToday,
+  historyDaysByDate,
 }: ProgressWeekStripProps) {
-  const { t, language } = useLanguage();
-  const weekDays = getWeekDaysMondayStart();
-  const states = buildWeekDayStates(
-    progress,
-    doneTasksToday,
-    totalTasksToday,
-  );
+  const { t } = useLanguage();
+  const currentUserQuery = useCurrentUser();
+  const timeZone = currentUserQuery.data?.timezone ?? getDeviceTimezone();
+  const weekCalendarDates = getProgressStripCalendarDates(timeZone);
+  const states = buildWeekDayStates(progress, doneTasksToday, totalTasksToday, {
+    timeZone,
+    historyDaysByDate,
+  });
   const openTasks = Math.max(0, totalTasksToday - doneTasksToday);
 
   const footerLabel =
@@ -91,9 +98,9 @@ export default function ProgressWeekStrip({
   return (
     <PremiumSurface accent="green" compact padding={12} radius={14} contentStyle={styles.wrap}>
       <View style={styles.row}>
-        {weekDays.map((day, index) => (
-          <View key={day.toISOString()} style={styles.dayItem}>
-            <Text style={styles.weekday}>{formatWeekdayLabel(day, language)}</Text>
+        {weekCalendarDates.map((calendarDate, index) => (
+          <View key={calendarDate} style={styles.dayItem}>
+            <Text style={styles.weekday}>{formatWeekdayLabel(calendarDate, t)}</Text>
             <WeekDayCircle state={states[index]!} />
           </View>
         ))}

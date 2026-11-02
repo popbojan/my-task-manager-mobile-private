@@ -95,3 +95,7 @@ yarn-error.log
 # Firebase (copy from *.example after Firebase Console setup)
 /android/app/google-services.json
 /ios/MyTaskManagerMobile/GoogleService-Info.plist
+
+# Lokale Screenshots (Ordner bleibt via .gitkeep im Repo)
+screenshots/*
+!screenshots/.gitkeep

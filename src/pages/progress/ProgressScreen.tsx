@@ -10,11 +10,13 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RecurringTaskStatus } from '@/api/generated';
 import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
+import { historyMonthQueryKey } from '@/history/historyQueryKeys';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { getProgressStripCalendarDates } from '@/pages/progress/progressWeekUtils';
 import AppBrandHeader from '@/components/AppBrandHeader';
 import MasteryProfileHero, {
   MasteryStatsGrid,
@@ -39,6 +41,10 @@ import {
 import PremiumStatusBar from '@/pages/subscription/PremiumStatusBar';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
+import { useCurrentUser } from '@/user/useCurrentUser';
+import { getDeviceTimezone } from '@/user/deviceTimezone';
+import { uniqueMonthKeysForCalendarDates } from '@/utils/calendarDateInTimeZone';
+import { indexHistoryDaysByDate } from '@/utils/historyCalendar';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
@@ -55,6 +61,16 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
   const { t } = useLanguage();
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
+  const currentUserQuery = useCurrentUser();
+  const timeZone = currentUserQuery.data?.timezone ?? getDeviceTimezone();
+  const stripCalendarDates = useMemo(
+    () => getProgressStripCalendarDates(timeZone),
+    [timeZone],
+  );
+  const historyMonths = useMemo(
+    () => uniqueMonthKeysForCalendarDates(stripCalendarDates),
+    [stripCalendarDates],
+  );
   const { refreshing, onRefresh } = useAppRefresh();
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const subscriptionQuery = useSubscriptionAccess();
@@ -73,6 +89,24 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
     enabled: !!accessToken,
     retry: shouldRetryApiQuery,
   });
+
+  const historyMonthQueries = useQueries({
+    queries: historyMonths.map(month => ({
+      queryKey: historyMonthQueryKey(accessToken, month),
+      queryFn: () => authApi.getHistory({ month }),
+      enabled: !!accessToken && hasPremiumAccess,
+      retry: shouldRetryApiQuery,
+    })),
+  });
+
+  const historyDaysByDate = useMemo(() => {
+    if (!hasPremiumAccess) {
+      return new Map();
+    }
+
+    const days = historyMonthQueries.flatMap(query => query.data?.days ?? []);
+    return indexHistoryDaysByDate(days);
+  }, [hasPremiumAccess, historyMonthQueries]);
 
   const masteryLevelsQuery = useQuery({
     queryKey: ['mastery-levels'],
@@ -188,6 +222,7 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
               progress={displayProgress}
               doneTasksToday={doneTasksToday}
               totalTasksToday={displayTasks.length}
+              historyDaysByDate={historyDaysByDate}
             />
 
             {levelProgress.nextLevel ? (

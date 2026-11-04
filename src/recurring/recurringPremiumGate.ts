@@ -18,3 +18,20 @@ export function shouldBlockRecurringPremiumInteraction(input: {
 
   return input.isPremiumPreview;
 }
+
+export function shouldShowRecurringPremiumPreview(input: {
+  subscriptionReady: boolean;
+  hasPremiumAccess: boolean;
+  tasksPremiumLocked: boolean;
+  progressPremiumLocked: boolean;
+}): boolean {
+  if (input.hasPremiumAccess) {
+    return false;
+  }
+
+  if (input.subscriptionReady) {
+    return true;
+  }
+
+  return input.tasksPremiumLocked || input.progressPremiumLocked;
+}

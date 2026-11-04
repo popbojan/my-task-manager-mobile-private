@@ -48,9 +48,15 @@ export async function loadCurrentUserWithTimezoneSync(
   );
 
   if (needsTimezoneSync) {
-    void queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
-    void queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
-    void queryClient.invalidateQueries({ queryKey: ['history'] });
+    void queryClient
+      .invalidateQueries({ queryKey: ['recurring-tasks'] })
+      .catch(() => undefined);
+    void queryClient
+      .invalidateQueries({ queryKey: ['recurring-task-progress'] })
+      .catch(() => undefined);
+    void queryClient
+      .invalidateQueries({ queryKey: ['history'] })
+      .catch(() => undefined);
   }
 
   const updatedUser = applyPreferencesToCurrentUser(user, preferences);

@@ -6,6 +6,7 @@ import { refetchRecurringBoardData } from '@/recurring/refetchRecurringBoardData
 export function useRefetchRecurringOnTabFocus(
   isActive: boolean,
   accessToken: string | null,
+  hasPremiumAccess: boolean,
 ): void {
   const queryClient = useQueryClient();
   const wasActiveRef = useRef(isActive);
@@ -14,10 +15,12 @@ export function useRefetchRecurringOnTabFocus(
     const becameActive = isActive && !wasActiveRef.current;
     wasActiveRef.current = isActive;
 
-    if (!becameActive || !accessToken) {
+    if (!becameActive || !accessToken || !hasPremiumAccess) {
       return;
     }
 
-    void refetchRecurringBoardData(queryClient, accessToken);
-  }, [accessToken, isActive, queryClient]);
+    void refetchRecurringBoardData(queryClient, accessToken).catch(
+      () => undefined,
+    );
+  }, [accessToken, hasPremiumAccess, isActive, queryClient]);
 }

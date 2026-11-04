@@ -25,10 +25,12 @@ export function useRefetchHistoryOnTabFocus(
     onReturnedToTab();
 
     const month = defaultVisibleMonthKey();
-    void queryClient.fetchQuery({
-      queryKey: historyMonthQueryKey(accessToken, month),
-      queryFn: () => authApi.getHistory({ month }),
-      staleTime: 0,
-    });
+    void queryClient
+      .fetchQuery({
+        queryKey: historyMonthQueryKey(accessToken, month),
+        queryFn: () => authApi.getHistory({ month }),
+        staleTime: 0,
+      })
+      .catch(() => undefined);
   }, [accessToken, hasPremiumAccess, isActive, onReturnedToTab, queryClient]);
 }

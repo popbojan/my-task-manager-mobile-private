@@ -2,7 +2,10 @@ import type { QueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/authClient';
 import { refetchRecurringBoardData } from '@/recurring/refetchRecurringBoardData';
 import { revenueCatOfferingsQueryKey } from '@/revenuecat/useRevenueCatOfferings';
-import { refreshSubscriptionFromBackend } from '@/subscription/subscriptionQuery';
+import {
+  readCachedSubscription,
+  refreshSubscriptionFromBackend,
+} from '@/subscription/subscriptionQuery';
 import {
   currentUserQueryKey,
   loadCurrentUserWithTimezoneSync,
@@ -30,10 +33,8 @@ export async function refreshAppData(
     }),
   ]);
 
-  // Premium-gated endpoints may return 403 — refresh must never crash the app.
   await Promise.allSettled([
     refreshSubscriptionFromBackend(queryClient),
-    refetchRecurringBoardData(queryClient, accessToken),
     queryClient.fetchQuery({
       queryKey: tasksQueryKey(accessToken),
       queryFn: () => authApi.getTasks(),
@@ -44,7 +45,18 @@ export async function refreshAppData(
       queryFn: () => authApi.getMasteryLevels(),
       staleTime: 0,
     }),
-    queryClient.invalidateQueries({ queryKey: ['history'] }),
     queryClient.invalidateQueries({ queryKey: revenueCatOfferingsQueryKey }),
+  ]);
+
+  const hasPremiumAccess =
+    readCachedSubscription(queryClient)?.hasPremiumAccess === true;
+
+  if (!hasPremiumAccess) {
+    return;
+  }
+
+  await Promise.allSettled([
+    refetchRecurringBoardData(queryClient, accessToken),
+    queryClient.invalidateQueries({ queryKey: ['history'] }),
   ]);
 }

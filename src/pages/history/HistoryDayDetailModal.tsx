@@ -195,7 +195,8 @@ export default function HistoryDayDetailModal({
         if (fresh) {
           setDisplayEntry(fresh);
         }
-      });
+      })
+      .catch(() => undefined);
   }, [accessToken, date, entry?.status, queryClient, todayCalendarDate]);
 
   useEffect(() => {
@@ -253,7 +254,7 @@ export default function HistoryDayDetailModal({
       if (updated) {
         queryClient.setQueryData(queryKey, updated);
       } else {
-        void queryClient.invalidateQueries({ queryKey });
+        void queryClient.invalidateQueries({ queryKey }).catch(() => undefined);
       }
 
       onClose();
@@ -344,7 +345,7 @@ export default function HistoryDayDetailModal({
       if (updated) {
         queryClient.setQueryData(queryKey, updated);
       } else {
-        void queryClient.invalidateQueries({ queryKey });
+        void queryClient.invalidateQueries({ queryKey }).catch(() => undefined);
       }
 
       onClose();

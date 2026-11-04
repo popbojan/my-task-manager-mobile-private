@@ -32,6 +32,7 @@ import SubscriptionBootstrap from '@/subscription/SubscriptionBootstrap';
 import { SubscriptionSessionProvider } from '@/subscription/SubscriptionSessionProvider';
 import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import {
+  invalidateRecurringQueries,
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
 } from '@/recurring/recurringQueryKeys';
@@ -332,9 +333,7 @@ function MainAppShell() {
           taskId={taskForm.taskId}
           onClose={closeTaskForm}
           onSaved={() => {
-            queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
-            queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
-            queryClient.invalidateQueries({ queryKey: ['history'] });
+            invalidateRecurringQueries(queryClient);
           }}
         />
       ) : null}

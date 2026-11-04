@@ -184,6 +184,7 @@ export default function RecurringTasksScreen({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
+      queryClient.invalidateQueries({ queryKey: ['history'] });
       closeDeleteModal();
     },
   });

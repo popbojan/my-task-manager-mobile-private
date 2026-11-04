@@ -21,13 +21,17 @@ export async function refreshAppData(
     return;
   }
 
-  // Premium-gated endpoints may return 403 — refresh must never crash the app.
+  // Timezone sync can move "today". History must be read after that write.
   await Promise.allSettled([
     queryClient.fetchQuery({
       queryKey: currentUserQueryKey(accessToken),
       queryFn: () => loadCurrentUserWithTimezoneSync(queryClient, accessToken),
       staleTime: 0,
     }),
+  ]);
+
+  // Premium-gated endpoints may return 403 — refresh must never crash the app.
+  await Promise.allSettled([
     refreshSubscriptionFromBackend(queryClient),
     refetchRecurringBoardData(queryClient, accessToken),
     queryClient.fetchQuery({

@@ -15,6 +15,8 @@ export const fr: Record<TranslationKey, string> = {
   'language.switch': 'Choisir la langue',
   'header.brand': 'My Task Manager',
   'header.logout': 'Se déconnecter',
+  'header.logout.confirmTitle': 'Veux-tu te déconnecter ?',
+  'header.logout.confirmBody': 'Tes tâches et tes progrès resteront enregistrés.',
   'header.accountMenu.open': 'Paramètres',
   'login.accountDeletedTitle': 'Votre compte a été définitivement supprimé.',
   'login.accountDeletedNewAccountNote':
@@ -508,4 +510,5 @@ export const fr: Record<TranslationKey, string> = {
   'profile.legalMenu.impressum': 'Mentions légales / Contact',
   'privacy.backLoggedIn': "Retour à l'app",
   'privacy.backLoggedOut': 'Retour à la connexion',
+  'legal.webview.loadError': 'La page n’a pas pu être chargée.',
 };

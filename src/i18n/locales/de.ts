@@ -13,6 +13,8 @@ export const de = {
   'language.switch': 'Sprache wählen',
   'header.brand': 'My Task Manager',
   'header.logout': 'Abmelden',
+  'header.logout.confirmTitle': 'Möchtest du dich abmelden?',
+  'header.logout.confirmBody': 'Deine Aufgaben und Fortschritte bleiben gespeichert.',
   'header.accountMenu.open': 'Einstellungen',
   'login.accountDeletedTitle': 'Ihr Konto wurde dauerhaft gelöscht.',
   'login.accountDeletedNewAccountNote':
@@ -502,6 +504,7 @@ export const de = {
   'profile.legalMenu.impressum': 'Impressum / Kontakt',
   'privacy.backLoggedIn': 'Zurück zur App',
   'privacy.backLoggedOut': 'Zurück zum Login',
+  'legal.webview.loadError': 'Die Seite konnte nicht geladen werden.',
 } as const;
 
 export type TranslationKey = keyof typeof de;

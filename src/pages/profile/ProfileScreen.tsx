@@ -16,6 +16,7 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import { clearAccountDeletedNotice } from '@/pages/login/accountDeletedNotice';
 import LanguagePicker from '@/pages/login/LanguagePicker';
 import DeleteAccountModal from '@/pages/profile/DeleteAccountModal';
+import LogoutConfirmModal from '@/pages/profile/LogoutConfirmModal';
 import SubscriptionSettingsScreen from '@/pages/profile/SubscriptionSettingsScreen';
 import { useDeleteAccountFlow } from '@/pages/profile/useDeleteAccountFlow';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
@@ -48,6 +49,8 @@ export default function ProfileScreen({
   const currentUserQuery = useCurrentUser();
   const [showSubscriptionSettings, setShowSubscriptionSettings] = useState(false);
   const [legalPage, setLegalPage] = useState<LegalPage | null>(null);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const deleteAccountFlow = useDeleteAccountFlow({ queryClient, setAccessToken });
 
   useEffect(() => {
@@ -60,8 +63,19 @@ export default function ProfileScreen({
   }, [openSubscription, onSubscriptionOpened]);
 
   async function handleLogout() {
-    await clearAccountDeletedNotice();
-    await clearUserSession({ queryClient, setAccessToken });
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+
+    try {
+      await clearAccountDeletedNotice();
+      await clearUserSession({ queryClient, setAccessToken });
+    } finally {
+      setIsLoggingOut(false);
+      setIsLogoutConfirmOpen(false);
+    }
   }
 
   if (showSubscriptionSettings) {
@@ -180,7 +194,7 @@ export default function ProfileScreen({
           <Pressable
             style={[styles.footerItem, styles.footerItemBordered]}
             accessibilityRole="button"
-            onPress={() => void handleLogout()}
+            onPress={() => setIsLogoutConfirmOpen(true)}
           >
             <Text style={styles.footerLogoutLabel}>{t('header.logout')}</Text>
           </Pressable>
@@ -206,6 +220,17 @@ export default function ProfileScreen({
       </ScrollView>
 
       <LegalWebViewModal page={legalPage} onClose={() => setLegalPage(null)} />
+
+      <LogoutConfirmModal
+        visible={isLogoutConfirmOpen}
+        isPending={isLoggingOut}
+        onClose={() => {
+          if (!isLoggingOut) {
+            setIsLogoutConfirmOpen(false);
+          }
+        }}
+        onConfirm={() => void handleLogout()}
+      />
 
       <DeleteAccountModal
         visible={deleteAccountFlow.isDeleteModalOpen}

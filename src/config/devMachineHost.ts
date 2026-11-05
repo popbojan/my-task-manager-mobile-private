@@ -10,7 +10,7 @@ let activeDevMachineHost = DEFAULT_DEV_MACHINE_HOST;
 
 function isValidDevMachineHost(host: string): boolean {
   const trimmed = host.trim();
-  if (!trimmed) {
+  if (!trimmed || trimmed === 'undefined' || trimmed === 'null') {
     return false;
   }
 

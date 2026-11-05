@@ -15,6 +15,8 @@ export const sr: Record<TranslationKey, string> = {
   'language.switch': 'Izaberi jezik',
   'header.brand': 'My Task Manager',
   'header.logout': 'Odjava',
+  'header.logout.confirmTitle': 'Da li želiš da se odjaviš?',
+  'header.logout.confirmBody': 'Tvoji zadaci i napredak ostaju sačuvani.',
   'header.accountMenu.open': 'Podešavanja',
   'login.accountDeletedTitle': 'Tvoj nalog je trajno obrisan.',
   'login.accountDeletedNewAccountNote':
@@ -499,4 +501,5 @@ export const sr: Record<TranslationKey, string> = {
   'profile.legalMenu.impressum': 'Impresum / Kontakt',
   'privacy.backLoggedIn': 'Nazad u aplikaciju',
   'privacy.backLoggedOut': 'Nazad na prijavu',
+  'legal.webview.loadError': 'Stranica nije mogla da se učita.',
 };

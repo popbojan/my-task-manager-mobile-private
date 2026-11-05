@@ -21,22 +21,44 @@ export default function LogoutConfirmModal({
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.dialog}>
-          <Text style={styles.title}>{t('header.logout.confirmTitle')}</Text>
-          <Text style={styles.body}>{t('header.logout.confirmBody')}</Text>
+          <View style={styles.header}>
+            <View style={styles.headerCopy}>
+              <Text style={styles.eyebrow}>{t('profile.accountMenu.title')}</Text>
+              <Text style={styles.title}>{t('header.logout.confirmTitle')}</Text>
+            </View>
+            <Pressable
+              style={styles.closeButton}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.close')}
+              onPress={onClose}
+              disabled={isPending}
+            >
+              <Text style={styles.closeButtonText}>×</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.body}>
+            <Text style={styles.message}>{t('header.logout.confirmQuestion')}</Text>
+            <Text style={styles.message}>{t('header.logout.confirmBody')}</Text>
+          </View>
 
           <View style={styles.actions}>
-            <Pressable style={styles.cancelButton} onPress={onClose} disabled={isPending}>
-              <Text style={styles.cancelText}>{t('common.cancel')}</Text>
+            <Pressable
+              style={[styles.secondaryButton, isPending && styles.buttonDisabled]}
+              onPress={onClose}
+              disabled={isPending}
+            >
+              <Text style={styles.secondaryButtonText}>{t('common.cancel')}</Text>
             </Pressable>
             <Pressable
-              style={[styles.confirmButton, isPending && styles.confirmButtonDisabled]}
+              style={[styles.confirmButton, isPending && styles.buttonDisabled]}
               onPress={onConfirm}
               disabled={isPending}
             >
               {isPending ? (
-                <ActivityIndicator color="#fff" size="small" />
+                <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.confirmText}>{t('header.logout')}</Text>
+                <Text style={styles.confirmButtonText}>{t('header.logout')}</Text>
               )}
             </Pressable>
           </View>
@@ -56,57 +78,104 @@ const styles = StyleSheet.create({
   },
   dialog: {
     width: '100%',
-    maxWidth: 340,
+    maxWidth: 420,
     backgroundColor: recurringTheme.surfaceElevated,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 8,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
+    overflow: 'hidden',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.18)',
+    borderBottomWidth: 1,
+    borderBottomColor: recurringTheme.cardBorder,
+  },
+  headerCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: 4,
+  },
+  eyebrow: {
+    color: recurringTheme.textMuted,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
   title: {
     color: recurringTheme.textPrimary,
-    fontSize: 17,
+    fontSize: 20,
     fontWeight: '800',
   },
+  closeButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeButtonText: {
+    color: recurringTheme.textMuted,
+    fontSize: 28,
+    lineHeight: 28,
+    fontWeight: '300',
+  },
   body: {
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    gap: 10,
+  },
+  message: {
     color: recurringTheme.textSecondary,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 20,
   },
   actions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
-    marginTop: 2,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderTopColor: recurringTheme.cardBorder,
   },
-  cancelButton: {
-    flex: 1,
+  secondaryButton: {
+    minHeight: 40,
     borderRadius: 10,
-    paddingVertical: 10,
+    paddingHorizontal: 13,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
+    backgroundColor: recurringTheme.surfaceCard,
   },
-  cancelText: {
-    color: recurringTheme.textSecondary,
-    fontSize: 13,
+  secondaryButtonText: {
+    color: recurringTheme.textPrimary,
+    fontSize: 14,
     fontWeight: '700',
   },
   confirmButton: {
-    flex: 1,
+    minHeight: 40,
     borderRadius: 10,
-    paddingVertical: 10,
+    paddingHorizontal: 13,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: recurringTheme.accent,
   },
-  confirmButtonDisabled: {
-    opacity: 0.6,
-  },
-  confirmText: {
+  confirmButtonText: {
     color: '#fff',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
     textAlign: 'center',
+  },
+  buttonDisabled: {
+    opacity: 0.55,
   },
 });

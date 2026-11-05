@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   ImageBackground,
@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  type TextInputInstance,
   View,
 } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
@@ -33,6 +34,7 @@ import { clearSubscriptionSessionQueries } from '@/subscription/clearSubscriptio
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 import type { MasteryLevel } from '@/api/generated/models/MasteryLevel';
 import { logMonitoringEvent, logMonitoringScreen } from '@/monitoring/appMonitoring';
+import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
 
 const loginBgSource = require('@/assets/images/login-bg.jpg');
 
@@ -57,6 +59,7 @@ export default function LoginScreen() {
   const [levelsLoading, setLevelsLoading] = useState(true);
   const [showAccountDeletedNotice, setShowAccountDeletedNotice] = useState(false);
   const [legalPage, setLegalPage] = useState<LegalPage | null>(null);
+  const otpInputRef = useRef<TextInputInstance>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,6 +96,19 @@ export default function LoginScreen() {
   useEffect(() => {
     void logMonitoringScreen('login');
   }, []);
+
+  useEffect(() => {
+    if (step !== 'otp') {
+      return;
+    }
+
+    focusTextInputSoon(otpInputRef);
+    const retry = setTimeout(() => {
+      otpInputRef.current?.focus();
+    }, 100);
+
+    return () => clearTimeout(retry);
+  }, [step]);
 
   const handleSendOtp = useCallback(async () => {
     if (!email.trim() || isSendingOtp) {
@@ -287,12 +303,15 @@ export default function LoginScreen() {
                     <View>
                       <Text style={styles.label}>{t('login.otp')}</Text>
                       <TextInput
+                        ref={otpInputRef}
                         style={styles.inputStandalone}
                         value={otp}
                         onChangeText={setOtp}
                         placeholder={t('login.otpPlaceholder')}
                         placeholderTextColor="rgba(255, 255, 255, 0.42)"
+                        autoFocus
                         keyboardType="number-pad"
+                        inputMode="numeric"
                         autoComplete={
                           Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'
                         }

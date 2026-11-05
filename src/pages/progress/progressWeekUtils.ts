@@ -1,4 +1,14 @@
+import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 import type { RecurringTaskProgress } from '@/api/generated/models/RecurringTaskProgress';
+import {
+  calendarDateInTimeZone,
+  diffCalendarDays,
+  rollingCalendarDatesEndingToday,
+} from '@/utils/calendarDateInTimeZone';
+import {
+  shiftCalendarDate,
+  shouldShowHistorySuccessCrown,
+} from '@/utils/historyCalendar';
 
 export type WeekDayState =
   | { kind: 'future' }
@@ -6,89 +16,103 @@ export type WeekDayState =
   | { kind: 'complete' }
   | { kind: 'today'; done: number; total: number };
 
-function startOfDay(date: Date): Date {
-  const copy = new Date(date);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
+export type BuildWeekDayStatesOptions = {
+  timeZone: string;
+  now?: Date;
+  /** Same source as Mein Weg — repaired/success days show as complete. */
+  historyDaysByDate?: Map<string, HistoryDay>;
+};
 
-function diffDays(later: Date, earlier: Date): number {
-  return Math.round(
-    (startOfDay(later).getTime() - startOfDay(earlier).getTime()) / 86_400_000,
-  );
-}
-
-export function getWeekDaysMondayStart(now = new Date()): Date[] {
-  const start = startOfDay(now);
-  const weekday = start.getDay();
-  const diff = weekday === 0 ? -6 : 1 - weekday;
-  start.setDate(start.getDate() + diff);
-
-  return Array.from({ length: 7 }, (_, index) => {
-    const day = new Date(start);
-    day.setDate(start.getDate() + index);
-    return day;
-  });
-}
-
-function resolveWeekStreakAnchor(
+function resolveWeekStreakAnchorCalendar(
   progress: RecurringTaskProgress,
-  today: Date,
+  todayCalendarDate: string,
   todayComplete: boolean,
-): { anchorDay: Date | null; streakDays: number } {
+  timeZone: string,
+): { anchorCalendarDate: string | null; streakDays: number } {
   const streakDays = progress.currentStreak;
 
   if (streakDays <= 0) {
-    return { anchorDay: null, streakDays: 0 };
+    return { anchorCalendarDate: null, streakDays: 0 };
   }
 
-  const lastSuccess = progress.lastSuccessfulDay
-    ? startOfDay(progress.lastSuccessfulDay)
+  const lastSuccessCalendar = progress.lastSuccessfulDay
+    ? calendarDateInTimeZone(progress.lastSuccessfulDay, timeZone)
     : null;
 
-  if (!lastSuccess) {
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    return { anchorDay: startOfDay(yesterday), streakDays };
+  if (!lastSuccessCalendar) {
+    return {
+      anchorCalendarDate: shiftCalendarDate(todayCalendarDate, -1),
+      streakDays,
+    };
   }
 
-  if (lastSuccess.getTime() === today.getTime() && !todayComplete) {
+  if (lastSuccessCalendar === todayCalendarDate && !todayComplete) {
     const adjustedStreak = Math.max(0, streakDays - 1);
     if (adjustedStreak <= 0) {
-      return { anchorDay: null, streakDays: 0 };
+      return { anchorCalendarDate: null, streakDays: 0 };
     }
 
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    return { anchorDay: startOfDay(yesterday), streakDays: adjustedStreak };
+    return {
+      anchorCalendarDate: shiftCalendarDate(todayCalendarDate, -1),
+      streakDays: adjustedStreak,
+    };
   }
 
-  return { anchorDay: lastSuccess, streakDays };
+  return { anchorCalendarDate: lastSuccessCalendar, streakDays };
+}
+
+function stateFromStreakFallback(
+  dayCalendar: string,
+  todayCalendarDate: string,
+  anchorCalendarDate: string | null,
+  streakDays: number,
+): WeekDayState {
+  if (!anchorCalendarDate || dayCalendar > anchorCalendarDate) {
+    return { kind: 'empty' };
+  }
+
+  const daysFromAnchor = diffCalendarDays(anchorCalendarDate, dayCalendar);
+  if (daysFromAnchor < streakDays) {
+    return { kind: 'complete' };
+  }
+
+  return { kind: 'empty' };
+}
+
+export function getProgressStripCalendarDates(
+  timeZone: string,
+  now = new Date(),
+): string[] {
+  const todayCalendarDate = calendarDateInTimeZone(now, timeZone);
+  return rollingCalendarDatesEndingToday(todayCalendarDate, 7);
 }
 
 export function buildWeekDayStates(
   progress: RecurringTaskProgress,
   doneTasksToday: number,
   totalTasksToday: number,
-  now = new Date(),
+  {
+    timeZone,
+    now = new Date(),
+    historyDaysByDate,
+  }: BuildWeekDayStatesOptions,
 ): WeekDayState[] {
-  const today = startOfDay(now);
+  const todayCalendarDate = calendarDateInTimeZone(now, timeZone);
   const todayComplete =
     totalTasksToday > 0 && doneTasksToday >= totalTasksToday;
-  const { anchorDay, streakDays } = resolveWeekStreakAnchor(
+  const { anchorCalendarDate, streakDays } = resolveWeekStreakAnchorCalendar(
     progress,
-    today,
+    todayCalendarDate,
     todayComplete,
+    timeZone,
   );
 
-  return getWeekDaysMondayStart(now).map(day => {
-    const dayStart = startOfDay(day);
-
-    if (dayStart > today) {
+  return getProgressStripCalendarDates(timeZone, now).map(dayCalendar => {
+    if (dayCalendar > todayCalendarDate) {
       return { kind: 'future' as const };
     }
 
-    if (dayStart.getTime() === today.getTime()) {
+    if (dayCalendar === todayCalendarDate) {
       return {
         kind: 'today' as const,
         done: doneTasksToday,
@@ -96,15 +120,19 @@ export function buildWeekDayStates(
       };
     }
 
-    if (!anchorDay || dayStart > anchorDay) {
+    const historyDay = historyDaysByDate?.get(dayCalendar);
+    if (historyDay) {
+      if (shouldShowHistorySuccessCrown(historyDay)) {
+        return { kind: 'complete' as const };
+      }
       return { kind: 'empty' as const };
     }
 
-    const daysFromAnchor = diffDays(anchorDay, dayStart);
-    if (daysFromAnchor < streakDays) {
-      return { kind: 'complete' as const };
-    }
-
-    return { kind: 'empty' as const };
+    return stateFromStreakFallback(
+      dayCalendar,
+      todayCalendarDate,
+      anchorCalendarDate,
+      streakDays,
+    );
   });
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -10,11 +10,13 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { RecurringTaskStatus } from '@/api/generated';
 import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
+import { historyMonthQueryKey } from '@/history/historyQueryKeys';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { getProgressStripCalendarDates } from '@/pages/progress/progressWeekUtils';
 import AppBrandHeader from '@/components/AppBrandHeader';
 import MasteryProfileHero, {
   MasteryStatsGrid,
@@ -27,8 +29,8 @@ import StreakRecordCard from '@/pages/progress/StreakRecordCard';
 import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
-  invalidateRecurringQueries,
 } from '@/recurring/recurringQueryKeys';
+import { shouldShowRecurringPremiumPreview } from '@/recurring/recurringPremiumGate';
 import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import { isApiPremiumRequiredError, shouldRetryApiQuery } from '@/utils/apiError';
 import { computeLevelProgress } from '@/utils/masteryProgress';
@@ -39,6 +41,10 @@ import {
 import PremiumStatusBar from '@/pages/subscription/PremiumStatusBar';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
+import { useCurrentUser } from '@/user/useCurrentUser';
+import { getDeviceTimezone } from '@/user/deviceTimezone';
+import { uniqueMonthKeysForCalendarDates } from '@/utils/calendarDateInTimeZone';
+import { indexHistoryDaysByDate } from '@/utils/historyCalendar';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
@@ -54,25 +60,54 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
   );
   const { t } = useLanguage();
   const { accessToken } = useAuth();
-  const queryClient = useQueryClient();
+  const currentUserQuery = useCurrentUser();
+  const timeZone = currentUserQuery.data?.timezone ?? getDeviceTimezone();
+  const stripCalendarDates = useMemo(
+    () => getProgressStripCalendarDates(timeZone),
+    [timeZone],
+  );
+  const historyMonths = useMemo(
+    () => uniqueMonthKeysForCalendarDates(stripCalendarDates),
+    [stripCalendarDates],
+  );
   const { refreshing, onRefresh } = useAppRefresh();
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
+  const subscriptionReady =
+    !subscriptionQuery.isLoading && subscriptionQuery.isFetched;
 
   const tasksQuery = useQuery({
     queryKey: recurringTasksQueryKey(accessToken),
     queryFn: () => authApi.getRecurringTasks(),
-    enabled: !!accessToken,
+    enabled: !!accessToken && hasPremiumAccess,
     retry: shouldRetryApiQuery,
   });
 
   const progressQuery = useQuery({
     queryKey: recurringTaskProgressQueryKey(accessToken),
     queryFn: () => authApi.getRecurringTaskProgress(),
-    enabled: !!accessToken,
+    enabled: !!accessToken && hasPremiumAccess,
     retry: shouldRetryApiQuery,
   });
+
+  const historyMonthQueries = useQueries({
+    queries: historyMonths.map(month => ({
+      queryKey: historyMonthQueryKey(accessToken, month),
+      queryFn: () => authApi.getHistory({ month }),
+      enabled: !!accessToken && hasPremiumAccess,
+      retry: shouldRetryApiQuery,
+    })),
+  });
+
+  const historyDaysByDate = useMemo(() => {
+    if (!hasPremiumAccess) {
+      return new Map();
+    }
+
+    const days = historyMonthQueries.flatMap(query => query.data?.days ?? []);
+    return indexHistoryDaysByDate(days);
+  }, [hasPremiumAccess, historyMonthQueries]);
 
   const masteryLevelsQuery = useQuery({
     queryKey: ['mastery-levels'],
@@ -84,24 +119,12 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
     tasksQuery.isError && isApiPremiumRequiredError(tasksQuery.error);
   const progressPremiumLocked =
     progressQuery.isError && isApiPremiumRequiredError(progressQuery.error);
-  const isPremiumPreview = tasksPremiumLocked || progressPremiumLocked;
-
-  useEffect(() => {
-    if (!hasPremiumAccess) {
-      return;
-    }
-
-    if (!tasksQuery.isError && !progressQuery.isError) {
-      return;
-    }
-
-    invalidateRecurringQueries(queryClient);
-  }, [
+  const isPremiumPreview = shouldShowRecurringPremiumPreview({
+    subscriptionReady,
     hasPremiumAccess,
-    progressQuery.isError,
-    queryClient,
-    tasksQuery.isError,
-  ]);
+    tasksPremiumLocked,
+    progressPremiumLocked,
+  });
 
   const displayTasks = tasksQuery.data ?? [];
   const doneTasksToday = displayTasks.filter(
@@ -125,7 +148,10 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
     [displayProgress.currentLevel, displayProgress.currentStreak, masteryLevels],
   );
 
-  const progressIsLoading = progressQuery.isPending && !progressPremiumLocked;
+  const progressIsLoading =
+    !isPremiumPreview &&
+    !progressPremiumLocked &&
+    (progressQuery.isPending || !subscriptionReady);
   const progressFailed =
     progressQuery.isError && !progressPremiumLocked && !progressQuery.data;
   const canRenderContent = progressQuery.isSuccess || isPremiumPreview;
@@ -188,6 +214,7 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
               progress={displayProgress}
               doneTasksToday={doneTasksToday}
               totalTasksToday={displayTasks.length}
+              historyDaysByDate={historyDaysByDate}
             />
 
             {levelProgress.nextLevel ? (

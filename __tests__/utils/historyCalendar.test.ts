@@ -15,6 +15,7 @@ import {
   shouldShowHistoryNoteMark,
   shouldShowHistorySuccessCrown,
   resolveHistoryDayProgressPercent,
+  isRepairableMissedHistoryDay,
 } from '@/utils/historyCalendar';
 import { HistoryDayStatus } from '@/api/generated/models/HistoryDayStatus';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
@@ -49,8 +50,9 @@ describe('historyCalendar', () => {
     expect(addMonths('2026-01', -1)).toBe('2025-12');
   });
 
-  it('formats calendar dates with local date parts', () => {
+  it('formats API calendar dates with UTC date parts', () => {
     expect(formatApiCalendarDate(parseCalendarDate('2026-10-15'))).toBe('2026-10-15');
+    expect(formatApiCalendarDate(new Date('2026-10-23T00:00:00.000Z'))).toBe('2026-10-23');
   });
 
   it('indexes note-only days by the same calendar date key', () => {
@@ -103,6 +105,27 @@ describe('historyCalendar', () => {
     expect(shouldShowHistorySuccessCrown(inProgress)).toBe(false);
   });
 
+  it('allows repair only for finalized missed yesterday', () => {
+    const missedYesterday: HistoryDay = {
+      date: new Date('2026-10-22T00:00:00.000Z'),
+      status: HistoryDayStatus.Missed,
+      completedTasks: 0,
+      totalTasks: 7,
+      note: null,
+      finalizedAt: new Date('2026-10-22T22:05:00Z'),
+      currentStreak: 0,
+      currentLevel: 1,
+      repairedAt: null,
+    };
+
+    expect(
+      isRepairableMissedHistoryDay(missedYesterday, '2026-10-22', '2026-10-23'),
+    ).toBe(true);
+    expect(
+      isRepairableMissedHistoryDay(missedYesterday, '2026-10-21', '2026-10-23'),
+    ).toBe(false);
+  });
+
   it('derives status badge helpers for missed and in-progress days', () => {
     const missed: HistoryDay = {
       date: new Date('2026-10-09T00:00:00.000Z'),
@@ -113,6 +136,7 @@ describe('historyCalendar', () => {
       finalizedAt: new Date('2026-10-09T22:05:00Z'),
       currentStreak: 0,
       currentLevel: 1,
+      repairedAt: null,
     };
     const inProgress: HistoryDay = {
       date: new Date('2026-10-11T00:00:00.000Z'),

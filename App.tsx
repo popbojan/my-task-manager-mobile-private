@@ -32,6 +32,7 @@ import SubscriptionBootstrap from '@/subscription/SubscriptionBootstrap';
 import { SubscriptionSessionProvider } from '@/subscription/SubscriptionSessionProvider';
 import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import {
+  invalidateRecurringQueries,
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
 } from '@/recurring/recurringQueryKeys';
@@ -50,6 +51,7 @@ import { useCurrentUser } from '@/user/useCurrentUser';
 import RecurringTaskNotificationsSync from '@/notifications/RecurringTaskNotificationsSync';
 import AppMonitoringBootstrap from '@/monitoring/AppMonitoringBootstrap';
 import { logMonitoringScreen } from '@/monitoring/appMonitoring';
+import RecurringTaskResetPolling from '@/recurring/RecurringTaskResetPolling';
 
 function MainAppShell() {
   const queryClient = useQueryClient();
@@ -260,6 +262,7 @@ function MainAppShell() {
               ]}
             >
               <RecurringTasksScreen
+                isActive={activeTab === 'today'}
                 onOpenCreateTask={() => openTaskForm(null)}
                 onOpenEditTask={openTaskForm}
                 onOpenSubscription={() => {
@@ -332,9 +335,7 @@ function MainAppShell() {
           taskId={taskForm.taskId}
           onClose={closeTaskForm}
           onSaved={() => {
-            queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
-            queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
-            queryClient.invalidateQueries({ queryKey: ['history'] });
+            invalidateRecurringQueries(queryClient);
           }}
         />
       ) : null}
@@ -345,6 +346,8 @@ function MainAppShell() {
           dayOfMonth={historyDayModal.payload.dayOfMonth}
           entry={historyDayModal.payload.entry}
           isToday={historyDayModal.payload.isToday}
+          todayCalendarDate={historyDayModal.payload.todayCalendarDate}
+          visibleMonth={historyDayModal.payload.visibleMonth}
           onClose={closeHistoryDayDetail}
         />
       ) : null}
@@ -416,6 +419,7 @@ function AppContent() {
           <RevenueCatBootstrap />
           <CurrentUserBootstrap />
           <SubscriptionBootstrap />
+          <RecurringTaskResetPolling />
           <MainAppShell />
         </SubscriptionSessionProvider>
       ) : (

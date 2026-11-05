@@ -15,6 +15,9 @@ export const fr: Record<TranslationKey, string> = {
   'language.switch': 'Choisir la langue',
   'header.brand': 'My Task Manager',
   'header.logout': 'Se déconnecter',
+  'header.logout.confirmTitle': 'Déconnexion',
+  'header.logout.confirmQuestion': 'Veux-tu te déconnecter ?',
+  'header.logout.confirmBody': 'Tes tâches et tes progrès resteront enregistrés.',
   'header.accountMenu.open': 'Paramètres',
   'login.accountDeletedTitle': 'Votre compte a été définitivement supprimé.',
   'login.accountDeletedNewAccountNote':
@@ -51,7 +54,8 @@ export const fr: Record<TranslationKey, string> = {
   'login.help.title': 'Comment se connecter',
   'login.help.step1':
     'Saisis ton adresse e-mail et appuie sur « Envoyer le code » pour recevoir un code à usage unique.',
-  'login.help.step2': 'Consulte ta boîte mail et saisis le code à l’écran suivant.',
+  'login.help.step2':
+    'Consulte ta boîte mail et saisis le code à l’écran suivant.',
   'login.help.step3':
     'Utilise ce code pour te connecter et accéder à l’application immédiatement.',
   'login.help.note':
@@ -80,6 +84,28 @@ export const fr: Record<TranslationKey, string> = {
   'history.weekday.fri': 'Ven',
   'history.weekday.sat': 'Sam',
   'history.weekday.sun': 'Dim',
+  'history.month.jan': 'janvier',
+  'history.month.feb': 'février',
+  'history.month.mar': 'mars',
+  'history.month.apr': 'avril',
+  'history.month.may': 'mai',
+  'history.month.jun': 'juin',
+  'history.month.jul': 'juillet',
+  'history.month.aug': 'août',
+  'history.month.sep': 'septembre',
+  'history.month.oct': 'octobre',
+  'history.month.nov': 'novembre',
+  'history.month.dec': 'décembre',
+  'history.weekdayLong.mon': 'lundi',
+  'history.weekdayLong.tue': 'mardi',
+  'history.weekdayLong.wed': 'mercredi',
+  'history.weekdayLong.thu': 'jeudi',
+  'history.weekdayLong.fri': 'vendredi',
+  'history.weekdayLong.sat': 'samedi',
+  'history.weekdayLong.sun': 'dimanche',
+  'history.monthYearTitle': '{{month}} {{year}}',
+  'history.dayDetailDate': '{{weekday}} {{day}} {{month}} {{year}}',
+  'history.dateLong': '{{day}} {{month}} {{year}}',
   'history.openDay': 'Ouvrir le jour {{day}}',
   'history.hasNote': 'Note présente',
   'history.levelShort': 'Niv. {{level}}',
@@ -102,6 +128,13 @@ export const fr: Record<TranslationKey, string> = {
   'history.note.tooLongError': 'La note ne peut pas dépasser 2000 caractères.',
   'history.note.saveError': 'Impossible d’enregistrer la note.',
   'history.note.deleteError': 'Impossible de supprimer la note.',
+  'history.repair.action': 'Réparer la journée',
+  'history.repair.confirmTitle': 'Réparer hier ?',
+  'history.repair.confirmBody':
+    'Utilise cette option uniquement si tu as terminé toutes tes tâches, mais oublié de les marquer comme terminées dans l’application. Sinon, tu prolonges artificiellement ta série et elle ne reflète plus tes progrès réels.',
+  'history.repair.error': 'Impossible de réparer ce jour.',
+  'history.repair.notRepairable':
+    "Seule la journée manquée d'hier peut être réparée (finalisée, avec des tâches).",
   'personalIntro.badge': 'Ton départ',
   'personalIntro.progress': 'Étape {{current}} sur {{total}}',
   'personalIntro.skip': 'Passer l’introduction personnelle',
@@ -134,7 +167,7 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.progress': 'Étape {{current}} sur {{total}}',
   'onboarding.slide1.title': 'Tes tâches quotidiennes',
   'onboarding.slide1.body':
-    'Commence petit et concrètement : appuie sur + et crée ta première tâche quotidienne — par exemple « Lire 5 minutes ».',
+    'Commence petit et concrètement : appuie sur + et crée ta première tâche quotidienne. Par exemple « Lire 5 minutes ».',
   'onboarding.slide2.title': 'Comment terminer tes tâches',
   'onboarding.slide2.body':
     'Appuie sur le statut d’une tâche et avance étape par étape jusqu’à Terminé.',
@@ -143,13 +176,13 @@ export const fr: Record<TranslationKey, string> = {
     'Quand tu termines toutes les tâches quotidiennes, ta série grandit d’un jour.',
   'onboarding.slide4.title': 'Ton parcours reste visible',
   'onboarding.slide4.body':
-    'Dans Mon parcours, tu vois ton calendrier avec les résultats du jour. Même après une pause, tes succès passés restent visibles.',
+    'Dans « Mon parcours », tu vois ton calendrier avec les résultats du jour. Même après une pause, tes succès passés restent visibles.',
   'onboarding.slide5.title': 'Note ce qui te motive',
   'onboarding.slide5.body':
     'Appuie sur un jour et écris une note : Qu’est-ce qui a aidé ? Qu’est-ce qui était difficile ? Que feras-tu différemment demain ?',
   'onboarding.slide6.title': 'Tu as le choix',
   'onboarding.slide6.body':
-    'Les tâches quotidiennes, les séries et Mon parcours nécessitent Premium.\n\nLes tâches avec priorités et échéances fixes restent gratuites sans abonnement.',
+    'Les tâches quotidiennes, les séries et « Mon parcours » nécessitent Premium.\n\nLes tâches avec priorités et échéances fixes restent gratuites sans abonnement.',
   'onboarding.slide6.premiumLabel': 'PREMIUM',
   'onboarding.slide6.premiumHeadline': 'Construire ta routine quotidienne',
   'onboarding.slide6.premiumBody':
@@ -157,7 +190,7 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.slide6.freeLabel': 'Gratuit',
   'onboarding.slide6.freeHeadline': 'Organiser le quotidien',
   'onboarding.slide6.freeBody':
-    'Tâches avec priorités et échéances fixes — sans abonnement.',
+    'Tâches avec priorités et échéances fixes. Sans abonnement.',
   'onboarding.demo.taskTitle': 'Lire 5 minutes',
   'onboarding.demo.boardTaskOneTitle': 'Envoyer les documents fiscaux',
   'onboarding.demo.boardTaskTwoTitle': 'Prendre rendez-vous chez le dentiste',
@@ -166,21 +199,20 @@ export const fr: Record<TranslationKey, string> = {
   'onboarding.demo.monthTitle': 'Octobre 2026',
   'onboarding.demo.dayTitle': 'Lundi 12 octobre 2026',
   'onboarding.demo.noteText':
-    'Aujourd’hui, la courte routine de lecture a aidé. Demain, je commence juste après le petit-déjeuner — sans téléphone.',
+    'Aujourd’hui, la courte routine de lecture a aidé. Demain, je commence juste après le petit-déjeuner. Sans téléphone.',
   'onboarding.empty.overline': 'Premier pas',
   'onboarding.empty.tasks.title': 'Aucune tâche pour l’instant',
   'onboarding.empty.tasks.body':
-    'Ajoute des projets avec échéance et priorité — ton board pour tout ce qui n’est pas une habitude quotidienne.',
+    'Ajoute des projets avec échéance et priorité. Ton board pour tout ce qui n’est pas une habitude quotidienne.',
   'onboarding.empty.tasks.cta': 'Créer la première tâche',
   'onboarding.empty.recurring.title': 'Aucune tâche quotidienne',
   'onboarding.empty.recurring.body':
-    'Que veux-tu accomplir chaque jour ? Commence petit — une à trois habitudes suffisent.',
+    'Que veux-tu accomplir chaque jour ? Commence petit. Une à trois habitudes suffisent.',
   'onboarding.empty.recurring.cta': 'Créer la première tâche du jour',
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
     'Local — mêmes données que le web sur localhost:5173 (comptes test avec premium).',
-  'dev.api.hintProduction':
-    'Production — données Railway live (comptes prod).',
+  'dev.api.hintProduction': 'Production — données Railway live (comptes prod).',
   'dev.api.switchToProduction': 'Passer en production',
   'dev.api.switchToLocal': 'Passer en local',
   'dev.api.devHostLabel': 'IP Mac (LAN)',
@@ -192,13 +224,15 @@ export const fr: Record<TranslationKey, string> = {
   'recurring.progressError': 'Impossible de charger la progression.',
   'recurring.levelsError': 'Impossible de charger les niveaux.',
   'recurring.premiumRequired': 'Premium requis pour les tâches quotidiennes.',
-  'recurring.preview.subscribeTaskTitle': 'Abonne-toi pour pratiquer la discipline',
+  'recurring.preview.subscribeTaskTitle':
+    'Abonne-toi pour pratiquer la discipline',
   'recurring.preview.subscribeTaskTitlePersonal':
     'Abonne-toi pour pratiquer {{taskName}}',
   'recurring.noTasks': 'Aucune tâche quotidienne pour l’instant.',
   'recurring.addTaskDaily': 'Nouvelle tâche quotidienne',
   'recurring.status.toggle': 'Changer le statut',
-  'recurring.status.toggleHint': 'Appuie sur le nom ou la case pour changer le statut',
+  'recurring.status.toggleHint':
+    'Appuie sur le nom ou la case pour changer le statut',
   'recurring.edit': 'Modifier',
   'recurring.delete': 'Supprimer',
   'recurring.deleteTitle': 'Supprimer la tâche',
@@ -236,7 +270,7 @@ export const fr: Record<TranslationKey, string> = {
   'recurring.tasks.sectionTitle': 'Tâches quotidiennes',
   'recurring.focus.title': 'Garde ton focus.',
   'recurring.banner.successLine':
-    'Bravo ! Ta série reste intacte jusqu’au reset.',
+    'Great! Your streak is safe. It will increase at the next reset.',
   'recurring.banner.warningLine':
     'Termine toutes les tâches avant le reset quotidien pour garder ta série.',
   'recurring.celebration.title': 'Champion ! Tout est fait !',
@@ -326,7 +360,8 @@ export const fr: Record<TranslationKey, string> = {
   'premium.title': 'Libère ton plein potentiel',
   'premium.subtitle':
     'Les tâches quotidiennes, les séries et 24 niveaux t’aident à progresser chaque jour.',
-  'premium.feature.recurring.title': 'Deviens la meilleure version de toi-même.',
+  'premium.feature.recurring.title':
+    'Deviens la meilleure version de toi-même.',
   'premium.feature.recurring.description': 'Maîtrise tes habitudes.',
   'premium.feature.streaks.title': 'Construire ta chaîne',
   'premium.feature.streaks.description':
@@ -342,16 +377,17 @@ export const fr: Record<TranslationKey, string> = {
     'Utilise Today partout — sur ordinateur et sur ton téléphone.',
   'premium.guaranteeMonthly':
     'Abonnement mensuel résiliable à tout moment. Sans frais cachés.',
-  'premium.guaranteeLifetime':
-    'Lifetime : un paiement, accès permanent.',
+  'premium.guaranteeLifetime': 'Lifetime : un paiement, accès permanent.',
   'premium.footer': 'Les tâches normales restent gratuites pour toi.',
   'premium.cta': 'Activer Premium',
   'recurring.premiumUnlockCta': 'Activer Premium',
   'subscription.checkStatus.cta': 'Vérifier le statut',
   'subscription.settings.title': 'Ton abonnement Premium',
-  'subscription.settings.subtitle': 'Gère ton abo et consulte ton statut Premium.',
+  'subscription.settings.subtitle':
+    'Gère ton abo et consulte ton statut Premium.',
   'subscription.settings.loading': 'Chargement du statut d’abonnement…',
-  'subscription.settings.error': 'Impossible de charger le statut d’abonnement.',
+  'subscription.settings.error':
+    'Impossible de charger le statut d’abonnement.',
   'subscription.settings.statusLabel': 'Statut',
   'subscription.settings.status.inactive': 'Aucun abo actif',
   'subscription.settings.status.pending': 'En attente',
@@ -379,16 +415,20 @@ export const fr: Record<TranslationKey, string> = {
   'subscription.settings.subscribeHint':
     'Pas encore Premium ? Commence ton abonnement ici.',
   'subscription.settings.manageCta': 'Gérer l’abonnement',
-  'subscription.settings.manageLoading': 'Ouverture de la gestion d’abonnement…',
+  'subscription.settings.manageLoading':
+    'Ouverture de la gestion d’abonnement…',
   'subscription.settings.manageErrorNoCustomer':
     'Aucun abo web (Stripe) gérable n’est lié à ce compte.',
   'subscription.settings.manageErrorOpenFailed':
     'Impossible d’ouvrir la gestion de l’abonnement. Réessaie.',
   'subscription.settings.manageErrorTestStore':
     'Les achats Test Store n’existent que dans le bac à sable RevenueCat — pas de page Google Play réelle. Utilise un build Play Store ou release pour gérer un vrai abo.',
-  'subscription.mobile.provider.stripe': 'Premium est actif via ton abo web (Stripe).',
-  'subscription.mobile.provider.apple': 'Premium est actif via l’App Store Apple.',
-  'subscription.mobile.provider.googlePlay': 'Premium est actif via Google Play.',
+  'subscription.mobile.provider.stripe':
+    'Premium est actif via ton abo web (Stripe).',
+  'subscription.mobile.provider.apple':
+    'Premium est actif via l’App Store Apple.',
+  'subscription.mobile.provider.googlePlay':
+    'Premium est actif via Google Play.',
   'subscription.mobile.stripeActive':
     'Tu as déjà Premium via ton abo web. Aucun achat in-app supplémentaire n’est nécessaire.',
   'subscription.mobile.alreadyPremium':
@@ -401,7 +441,8 @@ export const fr: Record<TranslationKey, string> = {
     'Pour le moment, l’abonnement via Google Play n’est pas possible. Prends Premium via l’application web (Stripe). Un abonnement acheté une fois est valable sur le web et sur mobile tant que tu te connectes avec la même adresse e-mail.',
   'subscription.mobile.offeringsUnavailableAppStore':
     'Pour le moment, l’abonnement via l’App Store n’est pas possible. Prends Premium via l’application web (Stripe). Un abonnement acheté une fois est valable sur le web et sur mobile tant que tu te connectes avec la même adresse e-mail.',
-  'subscription.mobile.webSubscriptionLinkCta': 'S’abonner via l’application web',
+  'subscription.mobile.webSubscriptionLinkCta':
+    'S’abonner via l’application web',
   'subscription.mobile.webSubscriptionLinkA11y':
     'Ouvrir l’application web pour Premium : {{url}}',
   'subscription.mobile.revenueCatUnavailable':
@@ -412,7 +453,8 @@ export const fr: Record<TranslationKey, string> = {
     'L’achat n’a pas pu être finalisé. Réessaie.',
   'subscription.mobile.restoreError':
     'Impossible de restaurer les achats. Réessaie.',
-  'subscription.mobile.restoreNothing': 'Aucun achat à restaurer n’a été trouvé.',
+  'subscription.mobile.restoreNothing':
+    'Aucun achat à restaurer n’a été trouvé.',
   'subscription.mobile.purchaseInFlight': 'Un achat est déjà en cours.',
   'subscription.mobile.identityMismatch':
     'Ton compte est encore en préparation pour les achats. Attends, reconnecte-toi, puis réessaie.',
@@ -429,15 +471,18 @@ export const fr: Record<TranslationKey, string> = {
   'profile.emailUnavailable': 'E-mail indisponible',
   'profile.deleteAccount.menuItem': 'Supprimer le compte',
   'profile.deleteAccount.title': 'Supprimer le compte',
-  'profile.deleteAccount.confirmQuestion': 'Voulez-vous vraiment supprimer votre compte ?',
+  'profile.deleteAccount.confirmQuestion':
+    'Voulez-vous vraiment supprimer votre compte ?',
   'profile.deleteAccount.newAccountNote':
     'Si vous vous reconnectez avec la même adresse e-mail, un nouveau compte sera créé.',
   'profile.deleteAccount.dataLoss':
     'La suppression de votre compte efface définitivement toutes vos tâches et données associées (progression, historique, etc.), sans possibilité de les récupérer.',
   'profile.deleteAccount.personalData':
     'Vos données personnelles comme l’e-mail, le nom d’utilisateur, les paramètres, etc. seront également supprimées.',
-  'profile.deleteAccount.subscriptionHintPrefix': 'Si vous confirmez la suppression, ',
-  'profile.deleteAccount.subscriptionHintBold': 'résiliez d’abord tout abonnement actif.',
+  'profile.deleteAccount.subscriptionHintPrefix':
+    'Si vous confirmez la suppression, ',
+  'profile.deleteAccount.subscriptionHintBold':
+    'résiliez d’abord tout abonnement actif.',
   'profile.deleteAccount.subscriptionHintSuffix':
     ' Sinon, la suppression échouera, car les abonnements sont gérés par des systèmes externes (Google Play, Stripe, Apple, etc.).',
   'profile.deleteAccount.continueToVerify': 'Continuer vers la confirmation',
@@ -445,24 +490,27 @@ export const fr: Record<TranslationKey, string> = {
   'profile.deleteAccount.errorGeneric':
     'La suppression du compte a échoué. Veuillez réessayer.',
   'profile.deleteAccount.errorBlockedBySubscription':
-    'Un abonnement en cours doit d\'abord être résilié.',
+    "Un abonnement en cours doit d'abord être résilié.",
   'profile.deleteAccount.errorReauthenticationRequired':
     'Pour des raisons de sécurité, confirmez à nouveau avec un code à usage unique.',
   'profile.deleteAccount.errorSubscriptionVerificationUnavailable':
-    'Impossible de vérifier l\'état de l\'abonnement. Aucune donnée n\'a été supprimée. Réessayez plus tard.',
+    "Impossible de vérifier l'état de l'abonnement. Aucune donnée n'a été supprimée. Réessayez plus tard.",
   'profile.deleteAccount.errorUnauthorized':
-    'Vous n\'êtes pas connecté ou votre session n\'est plus valide.',
+    "Vous n'êtes pas connecté ou votre session n'est plus valide.",
   'profile.deleteAccount.errorServer':
-    'Une erreur serveur s\'est produite. Votre compte n\'a pas été supprimé.',
+    "Une erreur serveur s'est produite. Votre compte n'a pas été supprimé.",
   'profile.deleteAccount.reauthRequired':
-    'Saisissez votre code à 6 chiffres. Un code récent de la connexion suffit — utilisez Envoyer le code seulement si vous en avez besoin d’un nouveau.',
+    'Saisis le code à 6 chiffres que nous t’avons envoyé pour te connecter. Si tu en as besoin d’un nouveau, sélectionne « Envoyer le code »',
   'profile.deleteAccount.reauthSendCode': 'Envoyer le code',
   'profile.deleteAccount.reauthSendingCode': 'Envoi du code…',
-  'profile.deleteAccount.reauthCodeSent': 'Nous avons envoyé un code à {{email}}.',
-  'profile.deleteAccount.reauthConfirmButton': 'Confirmer et supprimer le compte',
+  'profile.deleteAccount.reauthCodeSent':
+    'Nous avons envoyé un code à {{email}}.',
+  'profile.deleteAccount.reauthConfirmButton':
+    'Confirmer et supprimer le compte',
   'profile.accountMenu.title': 'Compte',
   'profile.accountMenu.subscription': 'Abonnement & facturation',
-  'profile.accountMenu.subscriptionHint': 'Statut Premium, achat et restauration',
+  'profile.accountMenu.subscriptionHint':
+    'Statut Premium, achat et restauration',
   'profile.helpMenu.title': 'Aide',
   'profile.helpMenu.viewIntroduction': 'Comment ça marche',
   'profile.helpMenu.viewIntroductionHint':
@@ -470,4 +518,7 @@ export const fr: Record<TranslationKey, string> = {
   'profile.legalMenu.title': 'Mentions légales',
   'profile.legalMenu.privacy': 'Confidentialité',
   'profile.legalMenu.impressum': 'Mentions légales / Contact',
+  'privacy.backLoggedIn': "Retour à l'app",
+  'privacy.backLoggedOut': 'Retour à la connexion',
+  'legal.webview.loadError': 'La page n’a pas pu être chargée.',
 };

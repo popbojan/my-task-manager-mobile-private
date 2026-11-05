@@ -13,19 +13,22 @@ export const de = {
   'language.switch': 'Sprache wählen',
   'header.brand': 'My Task Manager',
   'header.logout': 'Abmelden',
+  'header.logout.confirmTitle': 'Abmeldung',
+  'header.logout.confirmQuestion': 'Möchtest du dich abmelden?',
+  'header.logout.confirmBody': 'Deine Aufgaben und Fortschritte bleiben gespeichert.',
   'header.accountMenu.open': 'Einstellungen',
   'login.accountDeletedTitle': 'Ihr Konto wurde dauerhaft gelöscht.',
   'login.accountDeletedNewAccountNote':
     'Melden Sie sich mit derselben E-Mail an, wird ein neues Konto erstellt.',
   'login.title': 'Willkommen zurück',
-  'login.titleOtp': 'Prüfe deine E-Mail',
-  'login.subtitle': 'Melde dich an und bleibe fokussiert.',
+  'login.titleOtp': 'Prüfe deinen Posteingang',
+  'login.subtitle': 'Melde dich an und bleib fokussiert.',
   'login.brand.tagline': 'MASTER YOURSELF',
   'login.hero.title': 'Disziplin schlägt Motivation.',
   'login.hero.subtitle': 'Wachse jeden Tag.',
   'login.otpHint': 'Wir senden dir einen einmaligen Login-Code.',
   'login.security': 'Deine Daten sind sicher und geschützt.',
-  'login.levels.compactTitle': '24 Ebenen. 24 Monate.',
+  'login.levels.compactTitle': '24 Level. 24 Monate.',
   'login.levels.compactSubtitle': 'Eine stärkere Version von dir.',
   'login.levels.swipeHint': 'Wische, um alle Level zu entdecken',
   'login.subtitleOtp': 'Wir haben einen Code an {{email}} geschickt.',
@@ -65,7 +68,7 @@ export const de = {
   'nav.backToToday': 'Zurück zu Heute',
   'history.title': 'Mein Weg',
   'history.premiumRequired':
-    'Die Tageshistorie ist Teil von Premium. Abonniere, um deine Monatsübersicht mit Erfolgen, Ketten und Level zu sehen.',
+    'Die Tageshistorie ist Teil von Premium. Abonniere, um deine Monatsübersicht mit Erfolgen, Streaks und Level zu sehen.',
   'history.loadError': 'Verlauf konnte nicht geladen werden.',
   'history.previousMonth': 'Vorheriger Monat',
   'history.nextMonth': 'Nächster Monat',
@@ -79,11 +82,33 @@ export const de = {
   'history.weekday.fri': 'Fr',
   'history.weekday.sat': 'Sa',
   'history.weekday.sun': 'So',
+  'history.month.jan': 'Januar',
+  'history.month.feb': 'Februar',
+  'history.month.mar': 'März',
+  'history.month.apr': 'April',
+  'history.month.may': 'Mai',
+  'history.month.jun': 'Juni',
+  'history.month.jul': 'Juli',
+  'history.month.aug': 'August',
+  'history.month.sep': 'September',
+  'history.month.oct': 'Oktober',
+  'history.month.nov': 'November',
+  'history.month.dec': 'Dezember',
+  'history.weekdayLong.mon': 'Montag',
+  'history.weekdayLong.tue': 'Dienstag',
+  'history.weekdayLong.wed': 'Mittwoch',
+  'history.weekdayLong.thu': 'Donnerstag',
+  'history.weekdayLong.fri': 'Freitag',
+  'history.weekdayLong.sat': 'Samstag',
+  'history.weekdayLong.sun': 'Sonntag',
+  'history.monthYearTitle': '{{month}} {{year}}',
+  'history.dayDetailDate': '{{weekday}}, {{day}}. {{month}} {{year}}',
+  'history.dateLong': '{{day}}. {{month}} {{year}}',
   'history.openDay': 'Tag {{day}} öffnen',
   'history.hasNote': 'Notiz vorhanden',
   'history.levelShort': 'Lv {{level}}',
   'history.metric.tasks': 'Aufgaben',
-  'history.metric.streak': 'Kette',
+  'history.metric.streak': 'Streak',
   'history.metric.level': 'Level',
   'history.metric.status': 'Status',
   'history.status.success': 'Erfolgreich',
@@ -101,6 +126,13 @@ export const de = {
   'history.note.tooLongError': 'Die Notiz darf höchstens 2000 Zeichen haben.',
   'history.note.saveError': 'Notiz konnte nicht gespeichert werden.',
   'history.note.deleteError': 'Notiz konnte nicht gelöscht werden.',
+  'history.repair.action': 'Tag reparieren',
+  'history.repair.confirmTitle': 'Gestern reparieren?',
+  'history.repair.confirmBody':
+    'Nutze diese Funktion nur, wenn du wirklich alle Aufgaben erledigt, aber vergessen hast, sie in der App abzuhaken. Andernfalls verlängerst du deinen Streak künstlich und er spiegelt deinen tatsächlichen Fortschritt nicht mehr wider.',
+  'history.repair.error': 'Der Tag konnte nicht repariert werden.',
+  'history.repair.notRepairable':
+    'Nur der gestern verpasste Tag kann repariert werden (finalisiert, mit Aufgaben).',
   'personalIntro.badge': 'Dein Start',
   'personalIntro.progress': 'Schritt {{current}} von {{total}}',
   'personalIntro.skip': 'Persönlichen Einstieg überspringen',
@@ -109,16 +141,14 @@ export const de = {
   'personalIntro.page1.title': 'Was möchtest du jeden Tag tun?',
   'personalIntro.page1.body':
     'Beginne mit etwas Kleinem, das du mindestens 5 Minuten am Tag machen kannst.',
-  'personalIntro.page1.hint':
-    'Zum Beispiel: Lesen, Dehnen oder Deutsch üben',
+  'personalIntro.page1.hint': 'Zum Beispiel: Lesen, Dehnen oder Deutsch üben',
   'personalIntro.page2.title': 'Warum ist dir das wichtig?',
   'personalIntro.page2.body':
     'Was möchtest du mit „{{taskName}}“ für dich erreichen? Ein paar Worte reichen.',
-  'personalIntro.page2.hint':
-    'Zum Beispiel: Ich möchte mich stärker fühlen.',
+  'personalIntro.page2.hint': 'Zum Beispiel: Ich möchte mich stärker fühlen.',
   'personalIntro.page3.title': 'Dein Weg beginnt mit „{{taskName}}“.',
   'personalIntro.page3.body':
-    'Nimm dir jeden Tag mindestens 5 Minuten Zeit dafür. Baue deine Kette auf und sieh, wie dein Fortschritt wächst.',
+    'Nimm dir jeden Tag mindestens 5 Minuten Zeit dafür. Baue deinen Streak auf und sieh, wie dein Fortschritt wächst.',
   'personalIntro.page3.whyLabel': 'Dein Warum: {{why}}',
   'personalIntro.page4.title': 'Jeder neue Tag ist eine Chance.',
   'personalIntro.page4.body':
@@ -130,17 +160,17 @@ export const de = {
   'onboarding.skipStep': 'Schritt überspringen',
   'onboarding.skip': 'Onboarding überspringen',
   'onboarding.next': 'Weiter',
-  'onboarding.finish': 'Los geht\'s',
+  'onboarding.finish': "Los geht's",
   'onboarding.progress': 'Schritt {{current}} von {{total}}',
   'onboarding.slide1.title': 'Deine täglichen Aufgaben',
   'onboarding.slide1.body':
-    'Klein und konkret beginnen: Tippe auf + und lege deine erste tägliche Aufgabe an — zum Beispiel „5 Minuten lesen“.',
+    'Klein und konkret beginnen: Tippe auf + und lege deine erste tägliche Aufgabe an. Zum Beispiel „5 Minuten lesen“.',
   'onboarding.slide2.title': 'So erledigst du deine Aufgaben',
   'onboarding.slide2.body':
     'Tippe auf den Status einer Aufgabe und wechsle Schritt für Schritt bis „Erledigt“.',
-  'onboarding.slide3.title': 'So wächst deine Kette',
+  'onboarding.slide3.title': 'So wächst dein Streak',
   'onboarding.slide3.body':
-    'Wenn du alle täglichen Aufgaben erledigst, wächst deine Kette um einen Tag.',
+    'Wenn du alle täglichen Aufgaben erledigst, wächst dein Streak um einen Tag.',
   'onboarding.slide4.title': 'Dein Weg bleibt sichtbar',
   'onboarding.slide4.body':
     'In „Mein Weg“ siehst du deinen Kalender mit Tagesergebnissen. Auch nach einer Unterbrechung bleiben deine bisherigen Erfolge sichtbar.',
@@ -149,15 +179,15 @@ export const de = {
     'Tippe auf einen Tag und schreibe eine Notiz: Was hat geholfen? Was war schwierig? Was möchtest du morgen anders machen?',
   'onboarding.slide6.title': 'Du hast die Wahl',
   'onboarding.slide6.body':
-    'Für tägliche Aufgaben, Ketten und ‚Mein Weg‘ brauchst du Premium.\n\nAufgaben mit Prioritäten und festen Fälligkeitsterminen kannst du auch ohne Abo kostenlos nutzen.',
+    'Für tägliche Aufgaben, Streaks und ‚Mein Weg‘ brauchst du Premium.\n\nAufgaben mit Prioritäten und festen Fälligkeitsterminen kannst du auch ohne Abo kostenlos nutzen.',
   'onboarding.slide6.premiumLabel': 'PREMIUM',
   'onboarding.slide6.premiumHeadline': 'Deine tägliche Routine aufbauen',
   'onboarding.slide6.premiumBody':
-    'Tägliche Aufgaben, Ketten und dein persönlicher Kalender „Mein Weg“.',
+    'Tägliche Aufgaben, Streaks und dein persönlicher Kalender „Mein Weg“.',
   'onboarding.slide6.freeLabel': 'KOSTENLOS',
   'onboarding.slide6.freeHeadline': 'Deinen Alltag organisieren',
   'onboarding.slide6.freeBody':
-    'Aufgaben mit Prioritäten und festen Fälligkeitsterminen — ohne Abonnement.',
+    'Aufgaben mit Prioritäten und festen Fälligkeitsterminen. Ohne Abonnement.',
   'onboarding.demo.taskTitle': '5 Minuten lesen',
   'onboarding.demo.boardTaskOneTitle': 'Steuerunterlagen einreichen',
   'onboarding.demo.boardTaskTwoTitle': 'Zahnarzttermin buchen',
@@ -166,21 +196,20 @@ export const de = {
   'onboarding.demo.monthTitle': 'Oktober 2026',
   'onboarding.demo.dayTitle': 'Montag, 12. Oktober 2026',
   'onboarding.demo.noteText':
-    'Heute hat die kurze Leseroutine geholfen. Morgen starte ich direkt nach dem Frühstück — ohne Handy.',
+    'Heute hat die kurze Leseroutine geholfen. Morgen starte ich direkt nach dem Frühstück. Ohne Handy.',
   'onboarding.empty.overline': 'Erster Schritt',
   'onboarding.empty.tasks.title': 'Noch keine Aufgaben',
   'onboarding.empty.tasks.body':
-    'Lege Projekte mit Deadline und Priorität an — dein Board für alles, was nicht täglich wiederkehrt.',
+    'Lege Projekte mit Deadline und Priorität an. Dein Board für alles, was nicht täglich wiederkehrt.',
   'onboarding.empty.tasks.cta': 'Erste Aufgabe anlegen',
   'onboarding.empty.recurring.title': 'Noch keine täglichen Aufgaben',
   'onboarding.empty.recurring.body':
-    'Was willst du jeden Tag schaffen? Starte klein — ein bis drei Gewohnheiten reichen.',
+    'Was willst du jeden Tag schaffen? Starte klein. Ein bis drei Gewohnheiten reichen.',
   'onboarding.empty.recurring.cta': 'Erste Tagesaufgabe anlegen',
   'dev.api.title': 'Backend (Dev)',
   'dev.api.hintLocal':
     'Lokal — gleiche Daten wie Web auf localhost:5173 (Test-Accounts mit Premium).',
-  'dev.api.hintProduction':
-    'Production — live Railway-Daten (Prod-Accounts).',
+  'dev.api.hintProduction': 'Production — live Railway-Daten (Prod-Accounts).',
   'dev.api.switchToProduction': 'Zu Production wechseln',
   'dev.api.switchToLocal': 'Zu Lokal wechseln',
   'dev.api.devHostLabel': 'Mac-IP (LAN)',
@@ -198,7 +227,8 @@ export const de = {
   'recurring.noTasks': 'Noch keine täglichen Aufgaben.',
   'recurring.addTaskDaily': 'Neue tägliche Aufgabe',
   'recurring.status.toggle': 'Status ändern',
-  'recurring.status.toggleHint': 'Tippe auf den Namen oder die Checkbox, um den Status zu wechseln',
+  'recurring.status.toggleHint':
+    'Tippe auf den Namen oder die Checkbox, um den Status zu wechseln',
   'recurring.edit': 'Bearbeiten',
   'recurring.delete': 'Löschen',
   'recurring.deleteTitle': 'Aufgabe löschen',
@@ -215,16 +245,17 @@ export const de = {
   'recurring.status.done': 'Erledigt',
   'recurring.stats.dailyHint': 'Tägliche Aufgabe',
   'recurring.loadingTask': 'Lade Aufgabe…',
-  'recurring.stats.currentStreak': 'Aktuelle Kette',
-  'recurring.stats.highestStreak': 'Längste Kette',
+  'recurring.stats.currentStreak': 'Aktueller Streak',
+  'recurring.stats.highestStreak': 'Längster Streak',
   'recurring.stats.currentLevel': 'Aktuelles Level',
   'recurring.stats.highestLevel': 'Höchstes Level',
   'recurring.stats.daysValue': '{{days}} Tage',
-  'recurring.stats.levelValue': '{{level}} Level',
+  'recurring.stats.levelValue': 'Level {{level}} ',
   'recurring.profile.title': 'Mastery-Profil',
   'recurring.profile.levelLabel': 'LEVEL {{level}}',
   'recurring.profile.unknownLevel': 'Unbekanntes Level',
-  'recurring.profile.daysToNext': '{{current}} / {{total}} Tage bis Level {{next}}',
+  'recurring.profile.daysToNext':
+    '{{current}} / {{total}} Tage bis Level {{next}}',
   'recurring.profile.maxLevel': 'Maximales Level erreicht',
   'recurring.today.label': 'HEUTE',
   'recurring.today.remaining': 'Noch {{count}} Aufgaben',
@@ -233,13 +264,14 @@ export const de = {
   'recurring.today.resetAt': 'Reset um 00:05 Uhr',
   'recurring.today.doneLabel': 'erledigt',
   'recurring.tasks.sectionTitle': 'Tägliche Aufgaben',
-  'recurring.focus.title': 'Behalte deinen Fokus.',
-  'recurring.banner.successLine': 'Stark! Deine Kette bleibt intakt bis zum Reset.',
+  'recurring.focus.title': 'Bleib fokussiert',
+  'recurring.banner.successLine':
+    'Stark! Dein Streak ist gesichert. Er verlängert sich beim nächsten Reset.',
   'recurring.banner.warningLine':
-    'Erledige alle Aufgaben vor Mitternacht, um deine Streak zu behalten.',
+    'Erledige alle Aufgaben vor Mitternacht, um deinen Streak zu behalten.',
   'recurring.celebration.title': 'Knockout! Alles erledigt!',
   'recurring.celebration.subtitle':
-    'Komm morgen zurück, erledige deine Aufgaben und steigere deine Kettenzahl.',
+    'Komm morgen zurück, erledige deine Aufgaben und verlängere deinen Streak.',
   'recurring.celebration.dismiss': 'Tippen zum Schließen',
   'recurring.form.createTitle': 'Neue Aufgabe',
   'recurring.form.editTitle': 'Aufgabe bearbeiten',
@@ -250,7 +282,8 @@ export const de = {
   'recurring.form.statusLabel': 'Status',
   'recurring.form.titleRequiredHint':
     'Ohne Titel kann die Aufgabe nicht gespeichert werden.',
-  'recurring.form.titleRequired': 'Bitte gib einen Titel ein — ohne Namen kann die Aufgabe nicht gespeichert werden.',
+  'recurring.form.titleRequired':
+    'Bitte gib einen Titel ein — ohne Namen kann die Aufgabe nicht gespeichert werden.',
   'recurring.form.save': 'Speichern',
   'recurring.form.error': 'Speichern fehlgeschlagen.',
   'recurring.form.notificationLabel': 'Tägliche Erinnerung',
@@ -280,9 +313,9 @@ export const de = {
   'tasks.status.review': 'Review',
   'tasks.status.done': 'Fertig',
   'tasks.filter.all': 'Alle',
-  'tasks.filter.importantUrgent': 'Wichtig & dringend',
-  'tasks.filter.important': 'Wichtig',
-  'tasks.filter.urgent': 'Dringend',
+  'tasks.filter.importantUrgent': 'Wichtige & dringende',
+  'tasks.filter.important': 'Wichtige',
+  'tasks.filter.urgent': 'Dringende',
   'tasks.filter.other': 'Andere',
   'tasks.deadline.overdue': 'ÜBERFÄLLIG',
   'tasks.deadline.thisWeek': 'DIESE WOCHE',
@@ -308,7 +341,7 @@ export const de = {
   'tasks.form.save': 'Speichern',
   'tasks.form.error': 'Speichern fehlgeschlagen.',
   'progress.sectionTitle': 'FORTSCHRITT',
-  'progress.last7Days': 'LETZTE 7 TAGE',
+  'progress.last7Days': 'DEINE WOCHE',
   'progress.remainingToday': 'Noch {{count}} Aufgaben heute',
   'progress.remainingTodayOne': 'Noch 1 Aufgabe heute',
   'progress.allDoneToday': 'Alles erledigt heute!',
@@ -317,17 +350,17 @@ export const de = {
   'progress.daysToNextLevel': 'Noch {{count}} erfolgreiche Tage',
   'progress.nextMilestone': 'NÄCHSTER MEILENSTEIN',
   'progress.recordInSight': 'NEUER REKORD IN SICHT',
-  'progress.daysToRecord': 'Noch {{count}} Tage bis zu deiner längsten Kette.',
+  'progress.daysToRecord': 'Noch {{count}} Tage bis zu deinem längsten Streak.',
   'progress.recordAchieved': 'Neuer Rekord! Glückwunsch!',
   'premium.badge': 'Premium',
   'premium.title': 'Schalte dein volles Potenzial frei',
   'premium.subtitle':
-    'Wiederholende Aufgaben, Streaks und 24 Level helfen dir, jeden Tag besser zu werden.',
+    'Wiederkehrende Aufgaben, Streaks und 24 Level helfen dir, jeden Tag besser zu werden.',
   'premium.feature.recurring.title': 'Werde zur besten Version deiner selbst.',
   'premium.feature.recurring.description': 'Meistere deine Gewohnheiten.',
   'premium.feature.streaks.title': 'Streaks aufbauen',
   'premium.feature.streaks.description':
-    'Bleib konsequent, baue deine Kette aus und verliere nie deinen Fortschritt.',
+    'Bleib konsequent, baue deinen Streak aus und verliere nie deinen Fortschritt.',
   'premium.feature.levels.title': 'Erreiche Level 24.',
   'premium.feature.levels.description':
     'Verwandle kleine Gewohnheiten in ein neues Leben.',
@@ -384,9 +417,12 @@ export const de = {
     'Die Abo-Verwaltung konnte nicht geöffnet werden. Bitte versuche es erneut.',
   'subscription.settings.manageErrorTestStore':
     'Test-Store-Käufe laufen nur in RevenueCat Sandbox — es gibt keine echte Google-Play-Abo-Seite. Für echte Verwaltung einen Play-Store- oder Release-Build nutzen.',
-  'subscription.mobile.provider.stripe': 'Premium ist über dein Web-Abo (Stripe) aktiv.',
-  'subscription.mobile.provider.apple': 'Premium ist über Apple App Store aktiv.',
-  'subscription.mobile.provider.googlePlay': 'Premium ist über Google Play aktiv.',
+  'subscription.mobile.provider.stripe':
+    'Premium ist über dein Web-Abo (Stripe) aktiv.',
+  'subscription.mobile.provider.apple':
+    'Premium ist über Apple App Store aktiv.',
+  'subscription.mobile.provider.googlePlay':
+    'Premium ist über Google Play aktiv.',
   'subscription.mobile.stripeActive':
     'Du hast bereits Premium über dein Web-Abo. Ein weiterer Kauf in der App ist nicht nötig.',
   'subscription.mobile.alreadyPremium':
@@ -399,8 +435,10 @@ export const de = {
     'Derzeit ist kein Abo über Google Play möglich. Schließe Premium in der Web-App ab (Stripe). Ein einmal gekauftes Abo gilt in Web- und Mobil-App, solange du dich mit derselben E-Mail anmeldest.',
   'subscription.mobile.offeringsUnavailableAppStore':
     'Derzeit ist kein Abo über den App Store möglich. Schließe Premium in der Web-App ab (Stripe). Ein einmal gekauftes Abo gilt in Web- und Mobil-App, solange du dich mit derselben E-Mail anmeldest.',
-  'subscription.mobile.webSubscriptionLinkCta': 'Premium in der Web-App abschließen',
-  'subscription.mobile.webSubscriptionLinkA11y': 'Web-App für Premium öffnen: {{url}}',
+  'subscription.mobile.webSubscriptionLinkCta':
+    'Premium in der Web-App abschließen',
+  'subscription.mobile.webSubscriptionLinkA11y':
+    'Web-App für Premium öffnen: {{url}}',
   'subscription.mobile.revenueCatUnavailable':
     'In-App-Käufe sind auf diesem Gerät noch nicht konfiguriert. Die App bleibt nutzbar.',
   'subscription.mobile.panelUnavailable':
@@ -409,11 +447,13 @@ export const de = {
     'Der Kauf konnte nicht abgeschlossen werden. Bitte versuche es erneut.',
   'subscription.mobile.restoreError':
     'Käufe konnten nicht wiederhergestellt werden. Bitte versuche es erneut.',
-  'subscription.mobile.restoreNothing': 'Es wurden keine wiederherstellbaren Käufe gefunden.',
+  'subscription.mobile.restoreNothing':
+    'Es wurden keine wiederherstellbaren Käufe gefunden.',
   'subscription.mobile.purchaseInFlight': 'Ein Kauf läuft bereits.',
   'subscription.mobile.identityMismatch':
     'Dein Konto wird noch für Käufe vorbereitet. Bitte kurz warten, neu einloggen und erneut versuchen.',
-  'subscription.mobile.processing.title': 'Kauf erfolgreich – Aktivierung wird verarbeitet',
+  'subscription.mobile.processing.title':
+    'Kauf erfolgreich – Aktivierung wird verarbeitet',
   'subscription.mobile.processing.message':
     'Dein Kauf war erfolgreich. Premium wird aktiv, sobald der Server den Kauf bestätigt hat.',
   'subscription.mobile.processing.hint':
@@ -455,21 +495,26 @@ export const de = {
   'profile.deleteAccount.errorServer':
     'Ein Serverfehler ist aufgetreten. Ihr Konto wurde nicht gelöscht.',
   'profile.deleteAccount.reauthRequired':
-    'Geben Sie Ihren 6-stelligen Einmalcode ein. Ein frischer Code von der Anmeldung reicht – „Code senden“ nur, wenn Sie einen neuen brauchen.',
+    'Gib den sechsstelligen Code ein, den wir dir zur Anmeldung geschickt haben. Wenn du einen neuen brauchst, wähle „Code senden“.',
   'profile.deleteAccount.reauthSendCode': 'Code senden',
   'profile.deleteAccount.reauthSendingCode': 'Sende Code…',
-  'profile.deleteAccount.reauthCodeSent': 'Wir haben einen Code an {{email}} geschickt.',
+  'profile.deleteAccount.reauthCodeSent':
+    'Wir haben einen Code an {{email}} geschickt.',
   'profile.deleteAccount.reauthConfirmButton': 'Bestätigen und Konto löschen',
   'profile.accountMenu.title': 'Konto',
   'profile.accountMenu.subscription': 'Abo & Abrechnung',
-  'profile.accountMenu.subscriptionHint': 'Premium-Status, Kauf und Wiederherstellung',
+  'profile.accountMenu.subscriptionHint':
+    'Premium-Status, Kauf und Wiederherstellung',
   'profile.helpMenu.title': 'Hilfe',
-  'profile.helpMenu.viewIntroduction': 'So funktioniert\'s',
+  'profile.helpMenu.viewIntroduction': "So funktioniert's",
   'profile.helpMenu.viewIntroductionHint':
     'Die App in sechs kurzen Schritten kennenlernen.',
   'profile.legalMenu.title': 'Rechtliches',
   'profile.legalMenu.privacy': 'Datenschutz',
   'profile.legalMenu.impressum': 'Impressum / Kontakt',
+  'privacy.backLoggedIn': 'Zurück zur App',
+  'privacy.backLoggedOut': 'Zurück zum Login',
+  'legal.webview.loadError': 'Die Seite konnte nicht geladen werden.',
 } as const;
 
 export type TranslationKey = keyof typeof de;

@@ -32,9 +32,10 @@ export function formatCalendarDate(year: number, monthIndex: number, day: number
   return `${year}-${month}-${dayPart}`;
 }
 
+/** Calendar date YYYY-MM-DD as UTC midnight (matches OpenAPI `date` JSON parsing). */
 export function parseCalendarDate(date: string): Date {
   const [yearPart, monthPart, dayPart] = date.split('-');
-  return new Date(Number(yearPart), Number(monthPart) - 1, Number(dayPart));
+  return new Date(Date.UTC(Number(yearPart), Number(monthPart) - 1, Number(dayPart)));
 }
 
 export function getMondayBasedWeekday(date: Date): number {
@@ -99,7 +100,57 @@ export function formatApiCalendarDate(value: Date | string): string {
     return value.slice(0, 10);
   }
 
-  return formatCalendarDate(value.getFullYear(), value.getMonth(), value.getDate());
+  return formatCalendarDate(
+    value.getUTCFullYear(),
+    value.getUTCMonth(),
+    value.getUTCDate(),
+  );
+}
+
+/** Calendar date YYYY-MM-DD shifted by whole days (UTC-safe for API calendar dates). */
+export function shiftCalendarDate(calendarDate: string, dayDelta: number): string {
+  const [yearPart, monthPart, dayPart] = calendarDate.split('-');
+  const shifted = new Date(
+    Date.UTC(Number(yearPart), Number(monthPart) - 1, Number(dayPart) + dayDelta),
+  );
+
+  return formatCalendarDate(
+    shifted.getUTCFullYear(),
+    shifted.getUTCMonth(),
+    shifted.getUTCDate(),
+  );
+}
+
+export function resolveYesterdayCalendarDate(todayCalendarDate: string): string {
+  return shiftCalendarDate(todayCalendarDate, -1);
+}
+
+export function isRepairableMissedHistoryDay(
+  entry: HistoryDay | undefined,
+  calendarDate: string,
+  todayCalendarDate: string | null | undefined,
+): boolean {
+  if (!entry || !todayCalendarDate) {
+    return false;
+  }
+
+  if (calendarDate !== resolveYesterdayCalendarDate(todayCalendarDate)) {
+    return false;
+  }
+
+  if (entry.status !== HistoryDayStatus.Missed) {
+    return false;
+  }
+
+  if (entry.finalizedAt === null) {
+    return false;
+  }
+
+  if (entry.totalTasks === null || entry.totalTasks <= 0) {
+    return false;
+  }
+
+  return true;
 }
 
 export function indexHistoryDaysByDate(days: HistoryDay[]): Map<string, HistoryDay> {
@@ -216,6 +267,26 @@ export function shouldShowHistoryNoteMark(day: HistoryDay | undefined): boolean 
 
 export function monthKeyFromCalendarDate(date: string): string {
   return date.slice(0, 7);
+}
+
+export function historyMonthsToRefreshAfterRepair(options: {
+  repairedCalendarDate: string;
+  todayCalendarDate: string | null;
+  visibleMonth: string | null;
+}): string[] {
+  const months = new Set<string>([
+    monthKeyFromCalendarDate(options.repairedCalendarDate),
+  ]);
+
+  if (options.todayCalendarDate) {
+    months.add(monthKeyFromCalendarDate(options.todayCalendarDate));
+  }
+
+  if (options.visibleMonth) {
+    months.add(options.visibleMonth);
+  }
+
+  return [...months];
 }
 
 export function defaultVisibleMonthKey(today = new Date()): string {

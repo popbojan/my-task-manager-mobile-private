@@ -12,6 +12,7 @@ import {
   type SubscriptionStatus,
   type SubscriptionType,
 } from '@/api/generated';
+import { formatLocalizedDateLong } from '@/i18n/calendarLabels';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import type { TranslationKey } from '@/i18n/locales';
 import PremiumSubscribeSection from '@/pages/subscription/PremiumSubscribeSection';
@@ -51,16 +52,9 @@ const TYPE_LABEL_KEYS: Record<SubscriptionType, TranslationKey> = {
   lifetime: 'subscription.settings.plan.lifetime',
 };
 
-function formatDate(date: Date, locale: string): string {
-  return new Intl.DateTimeFormat(locale, {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  }).format(date);
-}
 
 export default function SubscriptionSettingsPanel() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const flow = usePremiumPurchaseFlow();
   const [recheckLoading, setRecheckLoading] = useState(false);
@@ -71,15 +65,6 @@ export default function SubscriptionSettingsPanel() {
   const subscription = flow.subscriptionQuery.data?.subscription ?? null;
   const stripeSyncFailed = readStripeSyncFailed(flow.subscriptionQuery.data);
   const revenueCatSyncFailed = readRevenueCatSyncFailed(flow.subscriptionQuery.data);
-
-  const locale =
-    language === 'sr'
-      ? 'sr-RS'
-      : language === 'de'
-        ? 'de-DE'
-        : language === 'fr'
-          ? 'fr-FR'
-          : 'en-US';
 
   const statusKey = subscription
     ? STATUS_LABEL_KEYS[subscription.status]
@@ -208,11 +193,11 @@ export default function SubscriptionSettingsPanel() {
                 {isPendingCancellation
                   ? expiryDate
                     ? t('subscription.settings.cancellationExpiresWithDate', {
-                        date: formatDate(expiryDate, locale),
+                        date: formatLocalizedDateLong(expiryDate, t),
                       })
                     : t('subscription.settings.cancellationExpires')
                   : nextBillingDate
-                    ? formatDate(nextBillingDate, locale)
+                    ? formatLocalizedDateLong(nextBillingDate, t)
                     : t('subscription.settings.billingDateUnavailable')}
               </Text>
             </View>

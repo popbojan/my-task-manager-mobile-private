@@ -36,7 +36,10 @@ import { premiumType, recurringTheme } from '@/pages/recurring-tasks/recurringTh
 import TodaySummaryCard from '@/pages/recurring-tasks/TodaySummaryCard';
 import PremiumUpsellModal from '@/pages/subscription/PremiumUpsellModal';
 import PremiumStatusBar from '@/pages/subscription/PremiumStatusBar';
-import { shouldBlockRecurringPremiumInteraction } from '@/recurring/recurringPremiumGate';
+import {
+  shouldBlockRecurringPremiumInteraction,
+  shouldShowRecurringPremiumPreview,
+} from '@/recurring/recurringPremiumGate';
 import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import {
   isApiConflictError,
@@ -58,11 +61,11 @@ import {
   recurringTasksQueryKey,
   invalidateRecurringQueries,
 } from '@/recurring/recurringQueryKeys';
+import { useRefetchRecurringOnTabFocus } from '@/recurring/useRefetchRecurringOnTabFocus';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
 import OnboardingEmptyState from '@/onboarding/OnboardingEmptyState';
 import { useCurrentUser } from '@/user/useCurrentUser';
-import { cancelRecurringTaskNotification } from '@/notifications/recurringTaskNotifications';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
 
@@ -71,12 +74,14 @@ function sortTasksForList(tasks: RecurringTask[]): RecurringTask[] {
 }
 
 type RecurringTasksScreenProps = {
+  isActive?: boolean;
   onOpenCreateTask: () => void;
   onOpenEditTask: (taskId: string) => void;
   onOpenSubscription?: () => void;
 };
 
 export default function RecurringTasksScreen({
+  isActive = true,
   onOpenCreateTask,
   onOpenEditTask,
   onOpenSubscription,
@@ -97,6 +102,8 @@ export default function RecurringTasksScreen({
   const subscriptionReady =
     !subscriptionQuery.isLoading && subscriptionQuery.isFetched;
 
+  useRefetchRecurringOnTabFocus(isActive, accessToken, hasPremiumAccess);
+
   const [deleteModal, setDeleteModal] = useState<{
     visible: boolean;
     task: RecurringTask | null;
@@ -111,14 +118,14 @@ export default function RecurringTasksScreen({
   const tasksQuery = useQuery({
     queryKey: recurringTasksQueryKey(accessToken),
     queryFn: () => authApi.getRecurringTasks(),
-    enabled: !!accessToken,
+    enabled: !!accessToken && hasPremiumAccess,
     retry: shouldRetryApiQuery,
   });
 
   const progressQuery = useQuery({
     queryKey: recurringTaskProgressQueryKey(accessToken),
     queryFn: () => authApi.getRecurringTaskProgress(),
-    enabled: !!accessToken,
+    enabled: !!accessToken && hasPremiumAccess,
     retry: shouldRetryApiQuery,
   });
 
@@ -151,11 +158,15 @@ export default function RecurringTasksScreen({
   );
 
   const onRecurringStatusSyncSettled = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
+    void queryClient
+      .invalidateQueries({ queryKey: ['recurring-task-progress'] })
+      .catch(() => undefined);
   }, [queryClient]);
 
   const onRecurringStatusSyncFailed = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
+    await queryClient
+      .invalidateQueries({ queryKey: ['recurring-tasks'] })
+      .catch(() => undefined);
   }, [queryClient]);
 
   const { toggleStatus, taskForDisplay } = useOptimisticTaskStatusSync<
@@ -177,10 +188,8 @@ export default function RecurringTasksScreen({
   const deleteTaskMutation = useMutation({
     mutationFn: (recurringTaskId: string) =>
       authApi.deleteRecurringTask({ recurringTaskId }),
-    onSuccess: (_data, recurringTaskId) => {
-      void cancelRecurringTaskNotification(recurringTaskId);
-      queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
+    onSuccess: () => {
+      invalidateRecurringQueries(queryClient);
       closeDeleteModal();
     },
   });
@@ -189,24 +198,12 @@ export default function RecurringTasksScreen({
     tasksQuery.isError && isApiPremiumRequiredError(tasksQuery.error);
   const progressPremiumLocked =
     progressQuery.isError && isApiPremiumRequiredError(progressQuery.error);
-  const isPremiumPreview = tasksPremiumLocked || progressPremiumLocked;
-
-  useEffect(() => {
-    if (!hasPremiumAccess) {
-      return;
-    }
-
-    if (!tasksQuery.isError && !progressQuery.isError) {
-      return;
-    }
-
-    invalidateRecurringQueries(queryClient);
-  }, [
+  const isPremiumPreview = shouldShowRecurringPremiumPreview({
+    subscriptionReady,
     hasPremiumAccess,
-    progressQuery.isError,
-    queryClient,
-    tasksQuery.isError,
-  ]);
+    tasksPremiumLocked,
+    progressPremiumLocked,
+  });
 
   const displayTasks = useMemo(
     () =>
@@ -239,9 +236,15 @@ export default function RecurringTasksScreen({
     ? DEFAULT_RECURRING_PROGRESS
     : normalizeRecurringProgress(progressQuery.data);
   const masteryLevels = masteryLevelsQuery.data ?? [];
-  const tasksAreLoading = tasksQuery.isLoading && !tasksPremiumLocked;
+  const tasksAreLoading =
+    !isPremiumPreview &&
+    !tasksPremiumLocked &&
+    (tasksQuery.isPending || !subscriptionReady);
   const tasksFailed = tasksQuery.isError && !tasksPremiumLocked;
-  const progressIsLoading = progressQuery.isLoading && !progressPremiumLocked;
+  const progressIsLoading =
+    !isPremiumPreview &&
+    !progressPremiumLocked &&
+    (progressQuery.isPending || !subscriptionReady);
   const progressFailed =
     progressQuery.isError && !progressPremiumLocked && !progressQuery.data;
   const canManageRecurringTasks =

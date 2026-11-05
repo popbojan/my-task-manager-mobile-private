@@ -1,4 +1,7 @@
-import { shouldBlockRecurringPremiumInteraction } from '@/recurring/recurringPremiumGate';
+import {
+  shouldBlockRecurringPremiumInteraction,
+  shouldShowRecurringPremiumPreview,
+} from '@/recurring/recurringPremiumGate';
 
 describe('shouldBlockRecurringPremiumInteraction', () => {
   it('blocks while subscription is not ready', () => {
@@ -37,6 +40,41 @@ describe('shouldBlockRecurringPremiumInteraction', () => {
         hasPremiumAccess: true,
         isPremiumPreview: false,
         subscriptionReady: true,
+      }),
+    ).toBe(false);
+  });
+});
+
+describe('shouldShowRecurringPremiumPreview', () => {
+  it('shows preview once subscription is ready and there is no premium', () => {
+    expect(
+      shouldShowRecurringPremiumPreview({
+        subscriptionReady: true,
+        hasPremiumAccess: false,
+        tasksPremiumLocked: false,
+        progressPremiumLocked: false,
+      }),
+    ).toBe(true);
+  });
+
+  it('does not show preview while subscription is still loading', () => {
+    expect(
+      shouldShowRecurringPremiumPreview({
+        subscriptionReady: false,
+        hasPremiumAccess: false,
+        tasksPremiumLocked: false,
+        progressPremiumLocked: false,
+      }),
+    ).toBe(false);
+  });
+
+  it('does not show preview for premium users even if a 403 is cached', () => {
+    expect(
+      shouldShowRecurringPremiumPreview({
+        subscriptionReady: true,
+        hasPremiumAccess: true,
+        tasksPremiumLocked: true,
+        progressPremiumLocked: true,
       }),
     ).toBe(false);
   });

@@ -1,11 +1,11 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/authClient';
-import {
-  recurringTaskProgressQueryKey,
-  recurringTasksQueryKey,
-} from '@/recurring/recurringQueryKeys';
+import { refetchRecurringBoardData } from '@/recurring/refetchRecurringBoardData';
 import { revenueCatOfferingsQueryKey } from '@/revenuecat/useRevenueCatOfferings';
-import { refreshSubscriptionFromBackend } from '@/subscription/subscriptionQuery';
+import {
+  readCachedSubscription,
+  refreshSubscriptionFromBackend,
+} from '@/subscription/subscriptionQuery';
 import {
   currentUserQueryKey,
   loadCurrentUserWithTimezoneSync,
@@ -24,24 +24,17 @@ export async function refreshAppData(
     return;
   }
 
-  // Premium-gated endpoints may return 403 — refresh must never crash the app.
+  // Timezone sync can move "today". History must be read after that write.
   await Promise.allSettled([
     queryClient.fetchQuery({
       queryKey: currentUserQueryKey(accessToken),
       queryFn: () => loadCurrentUserWithTimezoneSync(queryClient, accessToken),
       staleTime: 0,
     }),
+  ]);
+
+  await Promise.allSettled([
     refreshSubscriptionFromBackend(queryClient),
-    queryClient.fetchQuery({
-      queryKey: recurringTasksQueryKey(accessToken),
-      queryFn: () => authApi.getRecurringTasks(),
-      staleTime: 0,
-    }),
-    queryClient.fetchQuery({
-      queryKey: recurringTaskProgressQueryKey(accessToken),
-      queryFn: () => authApi.getRecurringTaskProgress(),
-      staleTime: 0,
-    }),
     queryClient.fetchQuery({
       queryKey: tasksQueryKey(accessToken),
       queryFn: () => authApi.getTasks(),
@@ -52,7 +45,18 @@ export async function refreshAppData(
       queryFn: () => authApi.getMasteryLevels(),
       staleTime: 0,
     }),
-    queryClient.invalidateQueries({ queryKey: ['history'] }),
     queryClient.invalidateQueries({ queryKey: revenueCatOfferingsQueryKey }),
+  ]);
+
+  const hasPremiumAccess =
+    readCachedSubscription(queryClient)?.hasPremiumAccess === true;
+
+  if (!hasPremiumAccess) {
+    return;
+  }
+
+  await Promise.allSettled([
+    refetchRecurringBoardData(queryClient, accessToken),
+    queryClient.invalidateQueries({ queryKey: ['history'] }),
   ]);
 }

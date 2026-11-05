@@ -1,6 +1,6 @@
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import type { AppLanguage } from '@/i18n/types';
+import { historyMonthName } from '@/i18n/calendarLabels';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
   formatMonthKey,
@@ -14,26 +14,13 @@ type HistoryMonthPickerModalProps = {
   onSelectMonth: (monthKey: string) => void;
 };
 
-const LOCALE_MAP: Record<AppLanguage, string> = {
-  de: 'de-DE',
-  en: 'en-GB',
-  fr: 'fr-FR',
-  sr: 'sr-RS',
-};
-
-function monthLabel(monthIndex: number, year: number, language: AppLanguage): string {
-  return new Intl.DateTimeFormat(LOCALE_MAP[language], {
-    month: 'long',
-  }).format(new Date(year, monthIndex, 1));
-}
-
 export default function HistoryMonthPickerModal({
   visible,
   monthKey,
   onClose,
   onSelectMonth,
 }: HistoryMonthPickerModalProps) {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { year } = parseMonthKey(monthKey);
 
   function setYear(nextYear: number) {
@@ -82,7 +69,7 @@ export default function HistoryMonthPickerModal({
                   <Text
                     style={[styles.monthChipText, selected && styles.monthChipTextSelected]}
                   >
-                    {monthLabel(monthIndex, year, language)}
+                    {historyMonthName(monthIndex, t)}
                   </Text>
                 </Pressable>
               );

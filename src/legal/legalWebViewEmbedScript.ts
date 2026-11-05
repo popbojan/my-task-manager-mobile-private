@@ -1,5 +1,6 @@
-import type { AppLanguage } from '@/i18n/types';
+import type { TranslationKey } from '@/i18n/locales';
 import { translations } from '@/i18n/locales';
+import type { AppLanguage } from '@/i18n/types';
 import { DEFAULT_APP_LANGUAGE } from '@/i18n/types';
 import { LEGAL_EMBED_CLOSE_MESSAGE } from '@/legal/legalWebViewMessages';
 
@@ -8,9 +9,13 @@ export const LEGAL_WEBVIEW_EMBED_FLAG_SCRIPT = `
   true;
 `;
 
-export function getCloseLabelForLanguage(language: AppLanguage): string {
+export function getCloseLabelForLanguage(
+  language: AppLanguage,
+  labelKey: TranslationKey = 'common.close',
+): string {
   return (
-    translations[language]['common.close'] ??
+    translations[language][labelKey] ??
+    translations[DEFAULT_APP_LANGUAGE][labelKey] ??
     translations[DEFAULT_APP_LANGUAGE]['common.close']
   );
 }

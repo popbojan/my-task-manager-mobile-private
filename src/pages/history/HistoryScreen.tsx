@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -10,16 +10,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import AppBrandHeader from '@/components/AppBrandHeader';
-import {
-  historyMonthQueryKey,
-  historyQueryKeyPrefix,
-} from '@/history/historyQueryKeys';
+import { historyMonthQueryKey } from '@/history/historyQueryKeys';
+import { useRefetchHistoryOnTabFocus } from '@/history/useRefetchHistoryOnTabFocus';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import type { AppLanguage } from '@/i18n/types';
+import { formatHistoryMonthYear } from '@/i18n/calendarLabels';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
 import HistoryDayCell from '@/pages/history/HistoryDayCell';
 import HistoryMonthPickerModal from '@/pages/history/HistoryMonthPickerModal';
@@ -44,19 +42,14 @@ export type HistoryDayDetailPayload = {
   dayOfMonth: number;
   isToday: boolean;
   entry?: HistoryDay;
+  todayCalendarDate: string | null;
+  visibleMonth: string;
 };
 
 type HistoryScreenProps = {
   isActive?: boolean;
   onOpenSubscription?: () => void;
   onOpenDayDetail?: (payload: HistoryDayDetailPayload) => void;
-};
-
-const LOCALE_MAP: Record<AppLanguage, string> = {
-  de: 'de-DE',
-  en: 'en-GB',
-  fr: 'fr-FR',
-  sr: 'sr-RS',
 };
 
 const WEEKDAY_KEYS = [
@@ -69,14 +62,6 @@ const WEEKDAY_KEYS = [
   'history.weekday.sun',
 ] as const;
 
-function formatMonthTitle(monthKey: string, language: AppLanguage): string {
-  const { year, monthIndex } = parseMonthKey(monthKey);
-  return new Intl.DateTimeFormat(LOCALE_MAP[language], {
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(year, monthIndex, 1));
-}
-
 export default function HistoryScreen({
   isActive = true,
   onOpenSubscription,
@@ -84,10 +69,8 @@ export default function HistoryScreen({
 }: HistoryScreenProps) {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { accessToken } = useAuth();
-  const queryClient = useQueryClient();
-  const wasActiveRef = useRef(false);
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
   const subscriptionReady =
@@ -108,25 +91,17 @@ export default function HistoryScreen({
     retry: shouldRetryApiQuery,
   });
 
-  useEffect(() => {
-    if (!isActive || wasActiveRef.current) {
-      wasActiveRef.current = isActive;
-      return;
-    }
-
-    wasActiveRef.current = isActive;
-    const currentMonth = defaultVisibleMonthKey();
-    setVisibleMonth(currentMonth);
+  const handleReturnedToHistoryTab = useCallback(() => {
+    setVisibleMonth(defaultVisibleMonthKey());
     setPickerOpen(false);
+  }, []);
 
-    if (!accessToken || !hasPremiumAccess) {
-      return;
-    }
-
-    void queryClient.invalidateQueries({
-      queryKey: historyQueryKeyPrefix(accessToken),
-    });
-  }, [accessToken, hasPremiumAccess, isActive, queryClient]);
+  useRefetchHistoryOnTabFocus(
+    isActive,
+    accessToken,
+    hasPremiumAccess,
+    handleReturnedToHistoryTab,
+  );
 
   const today = historyQuery.data?.today
     ? formatApiCalendarDate(historyQuery.data.today)
@@ -134,6 +109,11 @@ export default function HistoryScreen({
   const daysByDate = useMemo(
     () => indexHistoryDaysByDate(historyQuery.data?.days ?? []),
     [historyQuery.data?.days],
+  );
+
+  const visibleMonthParts = useMemo(
+    () => parseMonthKey(visibleMonth),
+    [visibleMonth],
   );
 
   const gridCells = useMemo(
@@ -193,7 +173,14 @@ export default function HistoryScreen({
       return;
     }
 
-    onOpenDayDetail({ date, dayOfMonth, isToday, entry });
+    onOpenDayDetail({
+      date,
+      dayOfMonth,
+      isToday,
+      entry,
+      todayCalendarDate: today,
+      visibleMonth,
+    });
   }
 
   const isLoading = hasPremiumAccess && historyQuery.isPending && !historyQuery.data;
@@ -229,7 +216,11 @@ export default function HistoryScreen({
               }}
             >
               <Text style={styles.monthTitle}>
-                {formatMonthTitle(visibleMonth, language)}
+                {formatHistoryMonthYear(
+                  visibleMonthParts.monthIndex,
+                  visibleMonthParts.year,
+                  t,
+                )}
               </Text>
             </Pressable>
 
@@ -303,6 +294,7 @@ export default function HistoryScreen({
                         pressed && styles.gridSlotPressed,
                       ]}
                       accessibilityRole="button"
+                      accessibilityState={{ selected: isToday }}
                       accessibilityLabel={t('history.openDay', {
                         day: String(cell.dayOfMonth),
                       })}

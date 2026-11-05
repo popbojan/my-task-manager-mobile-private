@@ -1,7 +1,7 @@
 
 # HistoryDay
 
-Known counts satisfy 0 <= completedTasks <= totalTasks. success requires completedTasks = totalTasks > 0. missed and in_progress require completedTasks < totalTasks. in_progress requires finalizedAt null. no_tasks requires both counts zero. unknown requires both counts null and finalizedAt null. missed requires a non-null finalizedAt. currentStreak is the global recurring-task streak after this calendar day was processed; null for unknown and server_skipped days. currentLevel is the global mastery level derived from that streak after this calendar day was processed; null for unknown and server_skipped days. Finalized success, missed, and no_tasks days store non-null snapshots. in_progress may expose live streak and level until finalization. Finalization follows existing recurring-task day/reset rules, currently reset scheduled at 00:05 local time. Calendar history must not introduce a different streak cutoff. 
+Known counts satisfy 0 <= completedTasks <= totalTasks. success requires completedTasks = totalTasks > 0. missed and in_progress require completedTasks < totalTasks. in_progress requires finalizedAt null. no_tasks requires both counts zero. unknown requires both counts null and finalizedAt null. missed requires a non-null finalizedAt. After POST /history/yesterday/repair, a missed yesterday becomes success with completedTasks set to totalTasks; repairedAt is set to the repair instant. currentStreak is the global recurring-task streak after this calendar day was processed; null for unknown and server_skipped days. currentLevel is the global mastery level derived from that streak after this calendar day was processed; null for unknown and server_skipped days. Finalized success, missed, and no_tasks days store non-null snapshots. in_progress may expose live streak and level until finalization. Finalization follows existing recurring-task day/reset rules, currently reset scheduled at 00:05 local time. Calendar history must not introduce a different streak cutoff. 
 
 ## Properties
 
@@ -15,6 +15,7 @@ Name | Type
 `finalizedAt` | Date
 `currentStreak` | number
 `currentLevel` | number
+`repairedAt` | Date
 
 ## Example
 
@@ -31,6 +32,7 @@ const example = {
   "finalizedAt": 2026-10-10T22:05Z,
   "currentStreak": 12,
   "currentLevel": 2,
+  "repairedAt": 2026-10-23T10:00Z,
 } satisfies HistoryDay
 
 console.log(example)

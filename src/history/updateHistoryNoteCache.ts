@@ -53,6 +53,7 @@ export function applyHistoryNoteToCache(
       finalizedAt: null,
       currentStreak: null,
       currentLevel: null,
+      repairedAt: null,
     });
     days.sort((left, right) => left.date.getTime() - right.date.getTime());
   }

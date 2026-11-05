@@ -1,14 +1,21 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { subscriptionQueryKey } from '@/subscription/subscriptionQueryOptions';
 
+function invalidateQueriesQuietly(
+  queryClient: QueryClient,
+  queryKey: readonly unknown[],
+): void {
+  void queryClient.invalidateQueries({ queryKey }).catch(() => undefined);
+}
+
 /** Mark session queries stale and refetch (keeps last data while loading). */
 export function invalidateAuthenticatedSessionQueries(
   queryClient: QueryClient,
 ): void {
-  void queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
-  void queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
-  void queryClient.invalidateQueries({ queryKey: ['current-user'] });
-  void queryClient.invalidateQueries({ queryKey: ['tasks'] });
-  void queryClient.invalidateQueries({ queryKey: subscriptionQueryKey });
-  void queryClient.invalidateQueries({ queryKey: ['mastery-levels'] });
+  invalidateQueriesQuietly(queryClient, ['recurring-tasks']);
+  invalidateQueriesQuietly(queryClient, ['recurring-task-progress']);
+  invalidateQueriesQuietly(queryClient, ['current-user']);
+  invalidateQueriesQuietly(queryClient, ['tasks']);
+  invalidateQueriesQuietly(queryClient, subscriptionQueryKey);
+  invalidateQueriesQuietly(queryClient, ['mastery-levels']);
 }

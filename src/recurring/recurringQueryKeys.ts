@@ -47,9 +47,16 @@ export function clearRecurringSessionQueriesIfCached(
   clearRecurringSessionQueries(queryClient);
 }
 
+function invalidateQueriesQuietly(
+  queryClient: QueryClient,
+  queryKey: readonly unknown[],
+): void {
+  void queryClient.invalidateQueries({ queryKey }).catch(() => undefined);
+}
+
 /** Refetch premium-gated recurring data after subscription unlocks. */
 export function invalidateRecurringQueries(queryClient: QueryClient): void {
-  void queryClient.invalidateQueries({ queryKey: ['recurring-tasks'] });
-  void queryClient.invalidateQueries({ queryKey: ['recurring-task-progress'] });
-  void queryClient.invalidateQueries({ queryKey: ['history'] });
+  invalidateQueriesQuietly(queryClient, ['recurring-tasks']);
+  invalidateQueriesQuietly(queryClient, ['recurring-task-progress']);
+  invalidateQueriesQuietly(queryClient, ['history']);
 }

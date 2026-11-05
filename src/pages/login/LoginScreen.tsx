@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   ImageBackground,
@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  type TextInputInstance,
   View,
 } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
@@ -24,6 +25,8 @@ import {
   clearAccountDeletedNotice,
   hasAccountDeletedNotice,
 } from '@/pages/login/accountDeletedNotice';
+import LegalWebViewModal from '@/legal/LegalWebViewModal';
+import type { LegalPage } from '@/legal/openLegalPage';
 import LoginHelpModal from '@/pages/login/LoginHelpModal';
 import MasteryLevelStrip from '@/pages/login/MasteryLevelStrip';
 import { loginTheme } from '@/pages/login/loginTheme';
@@ -31,6 +34,7 @@ import { clearSubscriptionSessionQueries } from '@/subscription/clearSubscriptio
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 import type { MasteryLevel } from '@/api/generated/models/MasteryLevel';
 import { logMonitoringEvent, logMonitoringScreen } from '@/monitoring/appMonitoring';
+import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
 
 const loginBgSource = require('@/assets/images/login-bg.jpg');
 
@@ -54,6 +58,8 @@ export default function LoginScreen() {
   const [levels, setLevels] = useState<MasteryLevel[]>([]);
   const [levelsLoading, setLevelsLoading] = useState(true);
   const [showAccountDeletedNotice, setShowAccountDeletedNotice] = useState(false);
+  const [legalPage, setLegalPage] = useState<LegalPage | null>(null);
+  const otpInputRef = useRef<TextInputInstance>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -90,6 +96,19 @@ export default function LoginScreen() {
   useEffect(() => {
     void logMonitoringScreen('login');
   }, []);
+
+  useEffect(() => {
+    if (step !== 'otp') {
+      return;
+    }
+
+    focusTextInputSoon(otpInputRef);
+    const retry = setTimeout(() => {
+      otpInputRef.current?.focus();
+    }, 100);
+
+    return () => clearTimeout(retry);
+  }, [step]);
 
   const handleSendOtp = useCallback(async () => {
     if (!email.trim() || isSendingOtp) {
@@ -284,12 +303,15 @@ export default function LoginScreen() {
                     <View>
                       <Text style={styles.label}>{t('login.otp')}</Text>
                       <TextInput
+                        ref={otpInputRef}
                         style={styles.inputStandalone}
                         value={otp}
                         onChangeText={setOtp}
                         placeholder={t('login.otpPlaceholder')}
                         placeholderTextColor="rgba(255, 255, 255, 0.42)"
+                        autoFocus
                         keyboardType="number-pad"
+                        inputMode="numeric"
                         autoComplete={
                           Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'
                         }
@@ -340,6 +362,25 @@ export default function LoginScreen() {
                 <Text style={styles.securityFooter}>
                   🛡 {t('login.security')}
                 </Text>
+                <View style={styles.legalFooter}>
+                  <Pressable
+                    accessibilityRole="link"
+                    hitSlop={8}
+                    onPress={() => setLegalPage('privacy')}
+                  >
+                    <Text style={styles.legalLink}>{t('profile.legalMenu.privacy')}</Text>
+                  </Pressable>
+                  <Text style={styles.legalSeparator} accessibilityElementsHidden>
+                    ·
+                  </Text>
+                  <Pressable
+                    accessibilityRole="link"
+                    hitSlop={8}
+                    onPress={() => setLegalPage('impressum')}
+                  >
+                    <Text style={styles.legalLink}>{t('profile.legalMenu.impressum')}</Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
           </KeyboardAvoidingView>
@@ -347,6 +388,11 @@ export default function LoginScreen() {
       </ImageBackground>
 
       <LoginHelpModal visible={helpOpen} onClose={() => setHelpOpen(false)} />
+      <LegalWebViewModal
+        page={legalPage}
+        closeLabelKey="privacy.backLoggedOut"
+        onClose={() => setLegalPage(null)}
+      />
     </View>
   );
 }
@@ -566,5 +612,23 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.45)',
     fontSize: 11,
     lineHeight: 16,
+  },
+  legalFooter: {
+    marginTop: 6,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  legalLink: {
+    color: 'rgba(255, 255, 255, 0.62)',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+  },
+  legalSeparator: {
+    color: 'rgba(255, 255, 255, 0.35)',
+    fontSize: 12,
   },
 });

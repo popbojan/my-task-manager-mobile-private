@@ -286,6 +286,8 @@ export const en: Record<TranslationKey, string> = {
     'Please enter a title — a task without a name cannot be saved.',
   'recurring.form.save': 'Save',
   'recurring.form.error': 'Could not save.',
+  'recurring.form.notificationLabel': 'Daily reminder',
+  'recurring.form.notificationTimeA11y': 'Choose reminder time',
   'tasks.sectionTitle': 'TASKS',
   'tasks.loading': 'Loading tasks…',
   'tasks.loadingTask': 'Loading task…',

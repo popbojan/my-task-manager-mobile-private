@@ -286,6 +286,8 @@ export const de = {
     'Bitte gib einen Titel ein — ohne Namen kann die Aufgabe nicht gespeichert werden.',
   'recurring.form.save': 'Speichern',
   'recurring.form.error': 'Speichern fehlgeschlagen.',
+  'recurring.form.notificationLabel': 'Tägliche Erinnerung',
+  'recurring.form.notificationTimeA11y': 'Erinnerungszeit wählen',
   'tasks.sectionTitle': 'AUFGABEN',
   'tasks.loading': 'Lade Aufgaben…',
   'tasks.loadingTask': 'Lade Aufgabe…',

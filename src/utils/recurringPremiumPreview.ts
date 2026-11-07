@@ -59,6 +59,8 @@ export function createPremiumPreviewTasks(
       status: RecurringTaskStatus.Todo,
       streakCount: 0,
       nextResetAt: getNextDailyResetAt(now, timezone),
+      notificationEnabled: false,
+      notificationTime: null,
       createdAt: now,
       updatedAt: now,
     },

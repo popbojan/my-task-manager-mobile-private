@@ -1,4 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
+import type { RecurringTask } from '@/api/generated/models/RecurringTask';
 import { getApiBaseUrl } from '@/config/api';
 
 export function recurringTasksQueryKey(accessToken: string | null) {
@@ -9,8 +10,32 @@ export function recurringTaskProgressQueryKey(accessToken: string | null) {
   return ['recurring-task-progress', getApiBaseUrl(), accessToken] as const;
 }
 
+export function recurringTaskQueryKey(taskId: string) {
+  return ['recurring-task', taskId] as const;
+}
+
+export function writeRecurringTaskToCaches(
+  queryClient: QueryClient,
+  accessToken: string | null,
+  task: RecurringTask,
+): void {
+  queryClient.setQueryData(recurringTaskQueryKey(task.id), task);
+  queryClient.setQueryData<RecurringTask[]>(
+    recurringTasksQueryKey(accessToken),
+    (old = []) => {
+      const exists = old.some(item => item.id === task.id);
+      if (!exists) {
+        return [...old, task];
+      }
+
+      return old.map(item => (item.id === task.id ? task : item));
+    },
+  );
+}
+
 export function clearRecurringSessionQueries(queryClient: QueryClient) {
   queryClient.removeQueries({ queryKey: ['recurring-tasks'] });
+  queryClient.removeQueries({ queryKey: ['recurring-task'] });
   queryClient.removeQueries({ queryKey: ['recurring-task-progress'] });
   queryClient.removeQueries({ queryKey: ['current-user'] });
 }
@@ -57,6 +82,7 @@ function invalidateQueriesQuietly(
 /** Refetch premium-gated recurring data after subscription unlocks. */
 export function invalidateRecurringQueries(queryClient: QueryClient): void {
   invalidateQueriesQuietly(queryClient, ['recurring-tasks']);
+  invalidateQueriesQuietly(queryClient, ['recurring-task']);
   invalidateQueriesQuietly(queryClient, ['recurring-task-progress']);
   invalidateQueriesQuietly(queryClient, ['history']);
 }

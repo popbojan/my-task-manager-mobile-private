@@ -287,6 +287,8 @@ export const sr: Record<TranslationKey, string> = {
     'Unesi naslov — zadatak bez imena ne može biti sačuvan.',
   'recurring.form.save': 'Sačuvaj',
   'recurring.form.error': 'Čuvanje nije uspelo.',
+  'recurring.form.notificationLabel': 'Dnevni podsetnik',
+  'recurring.form.notificationTimeA11y': 'Izaberi vreme podsetnika',
   'tasks.sectionTitle': 'ZADACI',
   'tasks.loading': 'Učitavanje zadataka…',
   'tasks.loadingTask': 'Učitavanje zadatka…',

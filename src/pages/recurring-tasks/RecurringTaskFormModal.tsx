@@ -2,26 +2,36 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   BackHandler,
-  KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   type TextInputInstance,
-  useWindowDimensions,
   View,
+  type LayoutChangeEvent,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import {
-  RecurringTaskStatus,
-  type RecurringTaskStatus as RecurringTaskStatusType,
-} from '@/api/generated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { RecurringTaskStatus, type RecurringTask } from '@/api/generated';
 import { authApi } from '@/api/authClient';
+import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { DAILY_STATUS_COLUMNS } from '@/pages/recurring-tasks/recurringBoardConfig';
-import { recurringTaskToFormState } from '@/pages/recurring-tasks/recurringTaskFormUtils';
+import RecurringTaskNotificationField from '@/pages/recurring-tasks/RecurringTaskNotificationField';
+import { DEFAULT_RECURRING_NOTIFICATION_TIME } from '@/notifications/recurringNotificationTimeUtils';
+import {
+  buildRecurringTaskNotificationFields,
+  recurringTaskToFormState,
+  selectRecurringTaskForForm,
+  type RecurringTaskFormState,
+} from '@/pages/recurring-tasks/recurringTaskFormUtils';
+import {
+  recurringTaskQueryKey,
+  recurringTasksQueryKey,
+  writeRecurringTaskToCaches,
+} from '@/recurring/recurringQueryKeys';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
   isApiPremiumRequiredError,
@@ -35,16 +45,12 @@ type RecurringTaskFormModalProps = {
   onSaved: () => void;
 };
 
-type FormState = {
-  title: string;
-  description: string;
-  status: RecurringTaskStatusType;
-};
-
-const INITIAL_FORM: FormState = {
+const INITIAL_FORM: RecurringTaskFormState = {
   title: '',
   description: '',
   status: RecurringTaskStatus.Todo,
+  notificationEnabled: false,
+  notificationTime: DEFAULT_RECURRING_NOTIFICATION_TIME,
 };
 
 export default function RecurringTaskFormModal({
@@ -53,18 +59,21 @@ export default function RecurringTaskFormModal({
   onSaved,
 }: RecurringTaskFormModalProps) {
   const { t } = useLanguage();
-  const { height: windowHeight } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
   const isEdit = taskId !== null;
-  const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [form, setForm] = useState<RecurringTaskFormState>(INITIAL_FORM);
   const [error, setError] = useState<string | null>(null);
+  const [lockedPanelHeight, setLockedPanelHeight] = useState<number | null>(null);
   const titleInputRef = useRef<TextInputInstance>(null);
 
   const taskQuery = useQuery({
-    queryKey: ['recurring-task', taskId],
+    queryKey: recurringTaskQueryKey(taskId ?? ''),
     queryFn: () => authApi.getRecurringTask({ recurringTaskId: taskId! }),
-    enabled: isEdit,
+    enabled: isEdit && !!taskId,
     retry: shouldRetryApiQuery,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   useEffect(() => {
@@ -83,10 +92,19 @@ export default function RecurringTaskFormModal({
       return;
     }
 
-    if (taskQuery.data) {
-      setForm(recurringTaskToFormState(taskQuery.data));
+    if (!taskId) {
+      return;
     }
-  }, [isEdit, taskQuery.data]);
+
+    const listTask = queryClient
+      .getQueryData<RecurringTask[]>(recurringTasksQueryKey(accessToken))
+      ?.find(task => task.id === taskId);
+    const task = selectRecurringTaskForForm(taskQuery.data, listTask);
+
+    if (task) {
+      setForm(recurringTaskToFormState(task));
+    }
+  }, [accessToken, isEdit, queryClient, taskId, taskQuery.data]);
 
   const isLoadingTask = isEdit && taskQuery.isLoading;
   const canFocusTitle = !isLoadingTask;
@@ -99,6 +117,10 @@ export default function RecurringTaskFormModal({
     focusTextInputSoon(titleInputRef);
   }, [canFocusTitle]);
 
+  useEffect(() => {
+    setLockedPanelHeight(null);
+  }, [taskId]);
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       const trimmedTitle = form.title.trim();
@@ -106,9 +128,11 @@ export default function RecurringTaskFormModal({
         throw new Error('empty');
       }
 
+      const notificationFields = buildRecurringTaskNotificationFields(form);
       const payload = {
         title: trimmedTitle,
         description: form.description.trim() || null,
+        ...notificationFields,
       };
 
       if (isEdit && taskId) {
@@ -134,7 +158,8 @@ export default function RecurringTaskFormModal({
 
       return created;
     },
-    onSuccess: () => {
+    onSuccess: saved => {
+      writeRecurringTaskToCaches(queryClient, accessToken, saved);
       onSaved();
       onClose();
     },
@@ -164,7 +189,21 @@ export default function RecurringTaskFormModal({
     saveMutation.mutate();
   }
 
-  const panelHeight = Math.min(Math.round(windowHeight * 0.52), 420);
+  function handlePanelLayout(event: LayoutChangeEvent) {
+    if (isLoadingTask || lockedPanelHeight !== null) {
+      return;
+    }
+
+    const measuredHeight = Math.ceil(event.nativeEvent.layout.height);
+    if (measuredHeight >= 160) {
+      setLockedPanelHeight(measuredHeight);
+    }
+  }
+
+  const panelSizeStyle =
+    lockedPanelHeight !== null
+      ? { height: lockedPanelHeight, maxHeight: lockedPanelHeight }
+      : null;
 
   return (
     <View style={styles.overlay} accessibilityViewIsModal>
@@ -174,14 +213,9 @@ export default function RecurringTaskFormModal({
         onPress={onClose}
       />
 
-      <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          enabled={Platform.OS === 'ios'}
-          style={styles.keyboardWrap}
-          keyboardVerticalOffset={insets.top}
-        >
+      <View style={styles.modalShell}>
         <SafeAreaView edges={['top']} style={styles.safeTop}>
-          <View style={[styles.panel, { height: panelHeight }]}>
+          <View style={[styles.panel, panelSizeStyle]} onLayout={handlePanelLayout}>
             <View style={styles.panelHeader}>
               <View style={styles.panelHeaderCopy}>
                 <Text style={styles.eyebrow}>{t('recurring.stats.dailyHint')}</Text>
@@ -204,87 +238,105 @@ export default function RecurringTaskFormModal({
                 <Text style={styles.loadingText}>{t('recurring.loadingTask')}</Text>
               </View>
             ) : (
-              <View style={styles.formBody}>
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>
-                    {t('recurring.form.titleLabel')} *{' '}
-                    <Text style={styles.fieldHintInline}>
-                      ({t('recurring.form.titleRequiredHint')})
+              <ScrollView
+                style={lockedPanelHeight !== null ? styles.formScrollLocked : styles.formScroll}
+                contentContainerStyle={styles.formScrollContent}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+                showsVerticalScrollIndicator
+                bounces={false}
+              >
+                  <View style={styles.fieldBlock}>
+                    <Text style={styles.label}>
+                      {t('recurring.form.titleLabel')} *{' '}
+                      <Text style={styles.fieldHintInline}>
+                        ({t('recurring.form.titleRequiredHint')})
+                      </Text>
                     </Text>
-                  </Text>
-                  <TextInput
-                    ref={titleInputRef}
-                    style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
-                    value={form.title}
-                    onChangeText={title => {
-                      setForm(current => ({ ...current, title }));
-                      if (error && title.trim()) {
-                        setError(null);
-                      }
-                    }}
-                    placeholder={t('recurring.form.titlePlaceholder')}
-                    placeholderTextColor={recurringTheme.textMuted}
-                    autoFocus
-                    showSoftInputOnFocus
-                    returnKeyType="next"
-                  />
-                </View>
-
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>{t('recurring.form.descriptionLabel')}</Text>
-                  <TextInput
-                    style={[styles.input, styles.textArea]}
-                    value={form.description}
-                    onChangeText={description =>
-                      setForm(current => ({ ...current, description }))
-                    }
-                    placeholder={t('recurring.form.descriptionPlaceholder')}
-                    placeholderTextColor={recurringTheme.textMuted}
-                    multiline
-                    numberOfLines={4}
-                    textAlignVertical="top"
-                  />
-                </View>
-
-                <View style={styles.fieldBlock}>
-                  <Text style={styles.label}>{t('recurring.form.statusLabel')}</Text>
-                  <View style={styles.statusRow}>
-                    {DAILY_STATUS_COLUMNS.map(({ status, labelKey }) => {
-                      const active = form.status === status;
-
-                      return (
-                        <Pressable
-                          key={status}
-                          style={[styles.statusChip, active && styles.statusChipActive]}
-                          onPress={() => setForm(current => ({ ...current, status }))}
-                        >
-                          <Text
-                            style={[
-                              styles.statusChipText,
-                              active && styles.statusChipTextActive,
-                            ]}
-                            numberOfLines={1}
-                            adjustsFontSizeToFit
-                            minimumFontScale={0.8}
-                          >
-                            {t(labelKey)}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
+                    <TextInput
+                      ref={titleInputRef}
+                      style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
+                      value={form.title}
+                      onChangeText={title => {
+                        setForm(current => ({ ...current, title }));
+                        if (error && title.trim()) {
+                          setError(null);
+                        }
+                      }}
+                      placeholder={t('recurring.form.titlePlaceholder')}
+                      placeholderTextColor={recurringTheme.textMuted}
+                      autoFocus
+                      showSoftInputOnFocus
+                      returnKeyType="next"
+                    />
                   </View>
-                </View>
+
+                  <View style={styles.fieldBlock}>
+                    <Text style={styles.label}>{t('recurring.form.descriptionLabel')}</Text>
+                    <TextInput
+                      style={[styles.input, styles.textArea]}
+                      value={form.description}
+                      onChangeText={description =>
+                        setForm(current => ({ ...current, description }))
+                      }
+                      placeholder={t('recurring.form.descriptionPlaceholder')}
+                      placeholderTextColor={recurringTheme.textMuted}
+                      multiline
+                      numberOfLines={4}
+                      textAlignVertical="top"
+                    />
+                  </View>
+
+                  <RecurringTaskNotificationField
+                    enabled={form.notificationEnabled}
+                    notificationTime={form.notificationTime}
+                    onEnabledChange={notificationEnabled =>
+                      setForm(current => ({ ...current, notificationEnabled }))
+                    }
+                    onNotificationTimeChange={notificationTime =>
+                      setForm(current => ({ ...current, notificationTime }))
+                    }
+                  />
+
+                  <View style={styles.statusFieldRow}>
+                    <Text style={styles.statusLabelInline}>
+                      {t('recurring.form.statusLabel')}
+                    </Text>
+                    <View style={styles.statusRow}>
+                      {DAILY_STATUS_COLUMNS.map(({ status, labelKey }) => {
+                        const active = form.status === status;
+
+                        return (
+                          <Pressable
+                            key={status}
+                            style={[styles.statusChip, active && styles.statusChipActive]}
+                            onPress={() => setForm(current => ({ ...current, status }))}
+                          >
+                            <Text
+                              style={[
+                                styles.statusChipText,
+                                active && styles.statusChipTextActive,
+                              ]}
+                              numberOfLines={1}
+                              adjustsFontSizeToFit
+                              minimumFontScale={0.8}
+                            >
+                              {t(labelKey)}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </View>
 
                 <View style={styles.footer}>
-                  <View style={styles.errorSlot}>
-                    {error ? (
-                      <View style={styles.errorBox}>
-                        <Text style={styles.error} numberOfLines={2}>
-                          {error}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
+                  {error ? (
+                    <View style={styles.errorBox}>
+                      <Text style={styles.error} numberOfLines={2}>
+                        {error}
+                      </Text>
+                    </View>
+                  ) : null}
 
                   <View style={styles.actions}>
                     <Pressable style={styles.cancelButton} onPress={onClose}>
@@ -303,11 +355,11 @@ export default function RecurringTaskFormModal({
                     </Pressable>
                   </View>
                 </View>
-              </View>
+              </ScrollView>
             )}
           </View>
         </SafeAreaView>
-      </KeyboardAvoidingView>
+      </View>
     </View>
   );
 }
@@ -322,16 +374,25 @@ const styles = StyleSheet.create({
   backdropTap: {
     ...StyleSheet.absoluteFill,
   },
-  keyboardWrap: {
+  modalShell: {
     flex: 1,
     justifyContent: 'flex-start',
   },
   safeTop: {
     justifyContent: 'flex-start',
   },
+  formScroll: {
+    flexGrow: 0,
+    flexShrink: 1,
+  },
+  formScrollLocked: {
+    flex: 1,
+    minHeight: 0,
+  },
   panel: {
     marginHorizontal: 12,
     marginTop: 8,
+    flexDirection: 'column',
     backgroundColor: recurringTheme.surfaceElevated,
     borderRadius: 20,
     borderWidth: 1,
@@ -397,12 +458,12 @@ const styles = StyleSheet.create({
     color: recurringTheme.textSecondary,
     fontSize: 13,
   },
-  formBody: {
-    flex: 1,
+  formScrollContent: {
+    flexGrow: 0,
+    gap: 10,
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 12,
-    justifyContent: 'space-between',
   },
   fieldBlock: {
     gap: 4,
@@ -435,13 +496,26 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     lineHeight: 20,
   },
+  statusFieldRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statusLabelInline: {
+    color: recurringTheme.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+    flexShrink: 0,
+  },
   statusRow: {
+    flex: 1,
     flexDirection: 'row',
     gap: 6,
+    minWidth: 0,
   },
   statusChip: {
     flex: 1,
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
     paddingVertical: 8,
     borderRadius: 10,
     borderWidth: 1,
@@ -463,10 +537,8 @@ const styles = StyleSheet.create({
     color: recurringTheme.accentBright,
   },
   footer: {
-    gap: 6,
-  },
-  errorSlot: {
-    minHeight: 0,
+    gap: 8,
+    marginTop: 2,
   },
   errorBox: {
     borderRadius: 10,

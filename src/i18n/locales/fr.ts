@@ -290,6 +290,8 @@ export const fr: Record<TranslationKey, string> = {
     'Saisis un titre — une tâche sans nom ne peut pas être enregistrée.',
   'recurring.form.save': 'Enregistrer',
   'recurring.form.error': 'Enregistrement impossible.',
+  'recurring.form.notificationLabel': 'Rappel quotidien',
+  'recurring.form.notificationTimeA11y': 'Choisir l’heure du rappel',
   'tasks.sectionTitle': 'TÂCHES',
   'tasks.loading': 'Chargement des tâches…',
   'tasks.loadingTask': 'Chargement de la tâche…',

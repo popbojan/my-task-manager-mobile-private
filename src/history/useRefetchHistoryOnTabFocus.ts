@@ -2,35 +2,51 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/authClient';
 import { historyMonthQueryKey } from '@/history/historyQueryKeys';
-import { defaultVisibleMonthKey } from '@/utils/historyCalendar';
 
 /** Refetch Mein Weg when the user returns to the history tab (screen stays mounted). */
 export function useRefetchHistoryOnTabFocus(
   isActive: boolean,
   accessToken: string | null,
   hasPremiumAccess: boolean,
+  calendarDate: string,
   onReturnedToTab: () => void,
 ): void {
   const queryClient = useQueryClient();
   const wasActiveRef = useRef(isActive);
+  const calendarDateRef = useRef(calendarDate);
 
   useEffect(() => {
     const becameActive = isActive && !wasActiveRef.current;
+    const calendarDateChanged = calendarDate !== calendarDateRef.current;
     wasActiveRef.current = isActive;
+    calendarDateRef.current = calendarDate;
 
-    if (!becameActive || !accessToken || !hasPremiumAccess) {
+    if (!accessToken || !hasPremiumAccess) {
       return;
     }
 
-    onReturnedToTab();
+    if (!becameActive && !(isActive && calendarDateChanged)) {
+      return;
+    }
 
-    const month = defaultVisibleMonthKey();
+    if (becameActive) {
+      onReturnedToTab();
+    }
+
+    const month = calendarDate.slice(0, 7);
     void queryClient
       .fetchQuery({
-        queryKey: historyMonthQueryKey(accessToken, month),
+        queryKey: historyMonthQueryKey(accessToken, month, calendarDate),
         queryFn: () => authApi.getHistory({ month }),
         staleTime: 0,
       })
       .catch(() => undefined);
-  }, [accessToken, hasPremiumAccess, isActive, onReturnedToTab, queryClient]);
+  }, [
+    accessToken,
+    calendarDate,
+    hasPremiumAccess,
+    isActive,
+    onReturnedToTab,
+    queryClient,
+  ]);
 }

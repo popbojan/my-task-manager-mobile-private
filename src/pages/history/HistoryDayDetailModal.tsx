@@ -184,7 +184,7 @@ export default function HistoryDayDetailModal({
     const monthKey = monthKeyFromCalendarDate(date);
     void queryClient
       .fetchQuery({
-        queryKey: historyMonthQueryKey(accessToken, monthKey),
+        queryKey: historyMonthQueryKey(accessToken, monthKey, todayCalendarDate),
         queryFn: () => authApi.getHistory({ month: monthKey }),
         staleTime: 0,
       })
@@ -247,7 +247,7 @@ export default function HistoryDayDetailModal({
 
       const savedDate = formatApiCalendarDate(response.date);
       const monthKey = monthKeyFromCalendarDate(savedDate);
-      const queryKey = historyMonthQueryKey(accessToken, monthKey);
+      const queryKey = historyMonthQueryKey(accessToken, monthKey, todayCalendarDate);
       const current = queryClient.getQueryData<HistoryResponse>(queryKey);
       const updated = applyHistoryNoteToCache(current, savedDate, response.note);
 
@@ -283,7 +283,7 @@ export default function HistoryDayDetailModal({
 
       const repairedDate = formatApiCalendarDate(repairedDay.date);
       const monthKey = monthKeyFromCalendarDate(repairedDate);
-      const queryKey = historyMonthQueryKey(accessToken, monthKey);
+      const queryKey = historyMonthQueryKey(accessToken, monthKey, todayCalendarDate);
       const current = queryClient.getQueryData<HistoryResponse>(queryKey);
       const patched = applyHistoryDayToCache(current, repairedDay);
 
@@ -338,7 +338,7 @@ export default function HistoryDayDetailModal({
       }
 
       const monthKey = monthKeyFromCalendarDate(date);
-      const queryKey = historyMonthQueryKey(accessToken, monthKey);
+      const queryKey = historyMonthQueryKey(accessToken, monthKey, todayCalendarDate);
       const current = queryClient.getQueryData<HistoryResponse>(queryKey);
       const updated = applyHistoryNoteToCache(current, date, null);
 

@@ -15,6 +15,8 @@ import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import AppBrandHeader from '@/components/AppBrandHeader';
 import { historyMonthQueryKey } from '@/history/historyQueryKeys';
+import { isHistoryResponseForCalendarDate } from '@/history/historyResponseCalendarDate';
+import { useCurrentCalendarDate } from '@/history/useCurrentCalendarDate';
 import { useRefetchHistoryOnTabFocus } from '@/history/useRefetchHistoryOnTabFocus';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { formatHistoryMonthYear } from '@/i18n/calendarLabels';
@@ -27,6 +29,8 @@ import PremiumUpsellModal from '@/pages/subscription/PremiumUpsellModal';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
 import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
+import { useCurrentUser } from '@/user/useCurrentUser';
+import { getDeviceTimezone } from '@/user/deviceTimezone';
 import { shouldRetryApiQuery } from '@/utils/apiError';
 import {
   addMonths,
@@ -71,6 +75,9 @@ export default function HistoryScreen({
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { accessToken } = useAuth();
+  const currentUserQuery = useCurrentUser();
+  const timeZone = currentUserQuery.data?.timezone ?? getDeviceTimezone();
+  const calendarDate = useCurrentCalendarDate(timeZone);
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
   const subscriptionReady =
@@ -85,30 +92,39 @@ export default function HistoryScreen({
   const historyQueryEnabled = !!accessToken && hasPremiumAccess;
 
   const historyQuery = useQuery({
-    queryKey: historyMonthQueryKey(accessToken, visibleMonth),
+    queryKey: historyMonthQueryKey(accessToken, visibleMonth, calendarDate),
     queryFn: () => authApi.getHistory({ month: visibleMonth }),
     enabled: historyQueryEnabled,
     retry: shouldRetryApiQuery,
   });
 
   const handleReturnedToHistoryTab = useCallback(() => {
-    setVisibleMonth(defaultVisibleMonthKey());
+    setVisibleMonth(calendarDate.slice(0, 7));
     setPickerOpen(false);
-  }, []);
+  }, [calendarDate]);
 
   useRefetchHistoryOnTabFocus(
     isActive,
     accessToken,
     hasPremiumAccess,
+    calendarDate,
     handleReturnedToHistoryTab,
   );
 
-  const today = historyQuery.data?.today
-    ? formatApiCalendarDate(historyQuery.data.today)
-    : null;
+  const historyData = isHistoryResponseForCalendarDate(
+    historyQuery.data,
+    calendarDate,
+  )
+    ? historyQuery.data
+    : undefined;
+  const today = historyData
+    ? formatApiCalendarDate(historyData.today)
+    : hasPremiumAccess
+      ? calendarDate
+      : null;
   const daysByDate = useMemo(
-    () => indexHistoryDaysByDate(historyQuery.data?.days ?? []),
-    [historyQuery.data?.days],
+    () => indexHistoryDaysByDate(historyData?.days ?? []),
+    [historyData?.days],
   );
 
   const visibleMonthParts = useMemo(
@@ -183,9 +199,9 @@ export default function HistoryScreen({
     });
   }
 
-  const isLoading = hasPremiumAccess && historyQuery.isPending && !historyQuery.data;
+  const isLoading = hasPremiumAccess && historyQuery.isPending && !historyData;
   const loadFailed =
-    hasPremiumAccess && historyQuery.isError && !historyQuery.data;
+    hasPremiumAccess && historyQuery.isError && !historyData;
 
   return (
     <View style={styles.root}>

@@ -1,7 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { useCurrentCalendarDate } from '@/history/useCurrentCalendarDate';
 import { useCurrentUser } from '@/user/useCurrentUser';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
+import { rollingCalendarDatesEndingToday } from '@/utils/calendarDateInTimeZone';
 import { parseCalendarDate } from '@/utils/historyCalendar';
 import PremiumProgressRing from '@/pages/recurring-tasks/premium/PremiumProgressRing';
 import PremiumSurface from '@/pages/recurring-tasks/premium/PremiumSurface';
@@ -9,7 +11,6 @@ import { CheckIcon } from '@/pages/recurring-tasks/premium/PremiumIcons';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import {
   buildWeekDayStates,
-  getProgressStripCalendarDates,
   type WeekDayState,
 } from '@/pages/progress/progressWeekUtils';
 import type { HistoryDay } from '@/api/generated/models/HistoryDay';
@@ -79,7 +80,8 @@ export default function ProgressWeekStrip({
   const { t } = useLanguage();
   const currentUserQuery = useCurrentUser();
   const timeZone = currentUserQuery.data?.timezone ?? getDeviceTimezone();
-  const weekCalendarDates = getProgressStripCalendarDates(timeZone);
+  const calendarDate = useCurrentCalendarDate(timeZone);
+  const weekCalendarDates = rollingCalendarDatesEndingToday(calendarDate, 7);
   const states = buildWeekDayStates(progress, doneTasksToday, totalTasksToday, {
     timeZone,
     historyDaysByDate,

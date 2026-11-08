@@ -15,8 +15,9 @@ import { RecurringTaskStatus } from '@/api/generated';
 import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import { historyMonthQueryKey } from '@/history/historyQueryKeys';
+import { isHistoryResponseForCalendarDate } from '@/history/historyResponseCalendarDate';
+import { useCurrentCalendarDate } from '@/history/useCurrentCalendarDate';
 import { useLanguage } from '@/i18n/LanguageProvider';
-import { getProgressStripCalendarDates } from '@/pages/progress/progressWeekUtils';
 import AppBrandHeader from '@/components/AppBrandHeader';
 import MasteryProfileHero, {
   MasteryStatsGrid,
@@ -43,7 +44,10 @@ import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
 import { useCurrentUser } from '@/user/useCurrentUser';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
-import { uniqueMonthKeysForCalendarDates } from '@/utils/calendarDateInTimeZone';
+import {
+  rollingCalendarDatesEndingToday,
+  uniqueMonthKeysForCalendarDates,
+} from '@/utils/calendarDateInTimeZone';
 import { indexHistoryDaysByDate } from '@/utils/historyCalendar';
 
 const heroSource = require('@/assets/images/recurring-hero-boxing.jpg');
@@ -62,9 +66,10 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
   const { accessToken } = useAuth();
   const currentUserQuery = useCurrentUser();
   const timeZone = currentUserQuery.data?.timezone ?? getDeviceTimezone();
+  const calendarDate = useCurrentCalendarDate(timeZone);
   const stripCalendarDates = useMemo(
-    () => getProgressStripCalendarDates(timeZone),
-    [timeZone],
+    () => rollingCalendarDatesEndingToday(calendarDate, 7),
+    [calendarDate],
   );
   const historyMonths = useMemo(
     () => uniqueMonthKeysForCalendarDates(stripCalendarDates),
@@ -93,7 +98,7 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
 
   const historyMonthQueries = useQueries({
     queries: historyMonths.map(month => ({
-      queryKey: historyMonthQueryKey(accessToken, month),
+      queryKey: historyMonthQueryKey(accessToken, month, calendarDate),
       queryFn: () => authApi.getHistory({ month }),
       enabled: !!accessToken && hasPremiumAccess,
       retry: shouldRetryApiQuery,
@@ -105,9 +110,13 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
       return new Map();
     }
 
-    const days = historyMonthQueries.flatMap(query => query.data?.days ?? []);
+    const days = historyMonthQueries.flatMap(query =>
+      isHistoryResponseForCalendarDate(query.data, calendarDate)
+        ? (query.data?.days ?? [])
+        : [],
+    );
     return indexHistoryDaysByDate(days);
-  }, [hasPremiumAccess, historyMonthQueries]);
+  }, [calendarDate, hasPremiumAccess, historyMonthQueries]);
 
   const masteryLevelsQuery = useQuery({
     queryKey: ['mastery-levels'],

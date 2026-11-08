@@ -14,6 +14,7 @@ export function invalidateAuthenticatedSessionQueries(
 ): void {
   invalidateQueriesQuietly(queryClient, ['recurring-tasks']);
   invalidateQueriesQuietly(queryClient, ['recurring-task-progress']);
+  invalidateQueriesQuietly(queryClient, ['history']);
   invalidateQueriesQuietly(queryClient, ['current-user']);
   invalidateQueriesQuietly(queryClient, ['tasks']);
   invalidateQueriesQuietly(queryClient, subscriptionQueryKey);

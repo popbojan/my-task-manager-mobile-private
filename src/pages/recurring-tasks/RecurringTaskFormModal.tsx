@@ -57,8 +57,18 @@ export default function RecurringTaskFormModal({
   const insets = useSafeAreaInsets();
   const isEdit = taskId !== null;
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const formRef = useRef(form);
+  const hydratedTaskIdRef = useRef<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const titleInputRef = useRef<TextInputInstance>(null);
+
+  function patchForm(updater: (current: FormState) => FormState) {
+    setForm(current => {
+      const next = updater(current);
+      formRef.current = next;
+      return next;
+    });
+  }
 
   const taskQuery = useQuery({
     queryKey: ['recurring-task', taskId],
@@ -78,15 +88,24 @@ export default function RecurringTaskFormModal({
 
   useEffect(() => {
     if (!isEdit) {
+      hydratedTaskIdRef.current = null;
+      formRef.current = INITIAL_FORM;
       setForm(INITIAL_FORM);
       setError(null);
       return;
     }
 
-    if (taskQuery.data) {
-      setForm(recurringTaskToFormState(taskQuery.data));
+    if (!taskId || hydratedTaskIdRef.current === taskId) {
+      return;
     }
-  }, [isEdit, taskQuery.data]);
+
+    if (taskQuery.data) {
+      const next = recurringTaskToFormState(taskQuery.data);
+      formRef.current = next;
+      setForm(next);
+      hydratedTaskIdRef.current = taskId;
+    }
+  }, [isEdit, taskId, taskQuery.data]);
 
   const isLoadingTask = isEdit && taskQuery.isLoading;
   const canFocusTitle = !isLoadingTask;
@@ -101,14 +120,15 @@ export default function RecurringTaskFormModal({
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const trimmedTitle = form.title.trim();
+      const current = formRef.current;
+      const trimmedTitle = current.title.trim();
       if (!trimmedTitle) {
         throw new Error('empty');
       }
 
       const payload = {
         title: trimmedTitle,
-        description: form.description.trim() || null,
+        description: current.description.trim() || null,
       };
 
       if (isEdit && taskId) {
@@ -116,7 +136,7 @@ export default function RecurringTaskFormModal({
           recurringTaskId: taskId,
           updateRecurringTaskRequest: {
             ...payload,
-            status: form.status,
+            status: current.status,
           },
         });
       }
@@ -125,10 +145,10 @@ export default function RecurringTaskFormModal({
         createRecurringTaskRequest: payload,
       });
 
-      if (form.status !== RecurringTaskStatus.Todo) {
+      if (current.status !== RecurringTaskStatus.Todo) {
         await authApi.updateRecurringTask({
           recurringTaskId: created.id,
-          updateRecurringTaskRequest: { status: form.status },
+          updateRecurringTaskRequest: { status: current.status },
         });
       }
 
@@ -155,7 +175,9 @@ export default function RecurringTaskFormModal({
   });
 
   function handleSavePress() {
-    if (!form.title.trim()) {
+    titleInputRef.current?.blur();
+
+    if (!formRef.current.title.trim()) {
       setError(t('recurring.form.titleRequired'));
       return;
     }
@@ -217,7 +239,7 @@ export default function RecurringTaskFormModal({
                     style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
                     value={form.title}
                     onChangeText={title => {
-                      setForm(current => ({ ...current, title }));
+                      patchForm(current => ({ ...current, title }));
                       if (error && title.trim()) {
                         setError(null);
                       }
@@ -236,7 +258,7 @@ export default function RecurringTaskFormModal({
                     style={[styles.input, styles.textArea]}
                     value={form.description}
                     onChangeText={description =>
-                      setForm(current => ({ ...current, description }))
+                      patchForm(current => ({ ...current, description }))
                     }
                     placeholder={t('recurring.form.descriptionPlaceholder')}
                     placeholderTextColor={recurringTheme.textMuted}
@@ -256,7 +278,7 @@ export default function RecurringTaskFormModal({
                         <Pressable
                           key={status}
                           style={[styles.statusChip, active && styles.statusChipActive]}
-                          onPress={() => setForm(current => ({ ...current, status }))}
+                          onPress={() => patchForm(current => ({ ...current, status }))}
                         >
                           <Text
                             style={[

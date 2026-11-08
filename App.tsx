@@ -357,6 +357,7 @@ function MainAppShell() {
           onClose={closeBoardTaskForm}
           onSaved={() => {
             queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            queryClient.invalidateQueries({ queryKey: ['task'] });
           }}
         />
       ) : null}

@@ -31,6 +31,7 @@ import {
   syncTaskOrderIds,
   type TaskFilterId,
 } from '@/pages/tasks/taskBoardConfig';
+import { taskQueryKey, tasksQueryKey } from '@/pages/tasks/taskQueryKeys';
 import { shouldRetryApiQuery } from '@/utils/apiError';
 import { useOptimisticTaskStatusSync } from '@/task-status/useOptimisticTaskStatusSync';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
@@ -51,10 +52,6 @@ type TasksScreenProps = {
   onOpenCreateTask: (activeFilter: TaskFilterId) => void;
   onOpenEditTask: (taskId: string) => void;
 };
-
-function tasksQueryKey(accessToken: string | null) {
-  return ['tasks', accessToken] as const;
-}
 
 export default function TasksScreen({
   onOpenCreateTask,
@@ -90,7 +87,7 @@ export default function TasksScreen({
       queryClient.setQueryData<Task[]>(tasksQueryKey(accessToken), (old = []) =>
         patchTaskInCache(old, taskId, { status }),
       );
-      queryClient.setQueryData<Task>(['task', taskId], old =>
+      queryClient.setQueryData<Task>(taskQueryKey(taskId), old =>
         old ? { ...old, status } : old,
       );
     },
@@ -102,7 +99,7 @@ export default function TasksScreen({
       queryClient.setQueryData<Task[]>(tasksQueryKey(accessToken), (old = []) =>
         patchTaskInCache(old, updated.id, updated),
       );
-      queryClient.setQueryData<Task>(['task', updated.id], updated);
+      queryClient.setQueryData<Task>(taskQueryKey(updated.id), updated);
     },
     [accessToken, queryClient],
   );

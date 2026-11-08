@@ -37,6 +37,12 @@ import {
   getDefaultDeadlineInput,
   parseDeadlineInput,
 } from '@/pages/tasks/taskDeadlineUtils';
+import {
+  selectTaskForForm,
+  taskQueryKey,
+  tasksQueryKey,
+  writeTaskToCaches,
+} from '@/pages/tasks/taskQueryKeys';
 import { shouldRetryApiQuery } from '@/utils/apiError';
 import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
 
@@ -88,10 +94,6 @@ function taskToFormState(task: Task): FormState {
   };
 }
 
-function tasksListQueryKey(accessToken: string | null) {
-  return ['tasks', accessToken] as const;
-}
-
 export default function TaskFormModal({
   taskId,
   initialPriority = TaskPriority.ImportantUrgent,
@@ -105,11 +107,21 @@ export default function TaskFormModal({
   const insets = useSafeAreaInsets();
   const isEdit = taskId !== null;
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const formRef = useRef(form);
+  const hydratedTaskIdRef = useRef<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const titleInputRef = useRef<TextInputInstance>(null);
 
+  function patchForm(updater: (current: FormState) => FormState) {
+    setForm(current => {
+      const next = updater(current);
+      formRef.current = next;
+      return next;
+    });
+  }
+
   const taskQuery = useQuery({
-    queryKey: ['task', taskId],
+    queryKey: taskQueryKey(taskId ?? ''),
     queryFn: () => authApi.getTask({ taskId: taskId! }),
     enabled: isEdit && !!taskId,
     retry: shouldRetryApiQuery,
@@ -128,58 +140,55 @@ export default function TaskFormModal({
 
   useEffect(() => {
     if (!isEdit) {
-      setForm(createInitialForm(initialPriority ?? TaskPriority.ImportantUrgent));
+      hydratedTaskIdRef.current = null;
+      const next = createInitialForm(initialPriority ?? TaskPriority.ImportantUrgent);
+      formRef.current = next;
+      setForm(next);
       setError(null);
     }
   }, [initialPriority, isEdit]);
 
   useEffect(() => {
-    if (!isEdit || !taskId) {
+    if (!isEdit || !taskId || hydratedTaskIdRef.current === taskId) {
       return;
     }
 
     const listTask = queryClient
-      .getQueryData<Task[]>(tasksListQueryKey(accessToken))
+      .getQueryData<Task[]>(tasksQueryKey(accessToken))
       ?.find(task => task.id === taskId);
-    const fetchedTask = taskQuery.data;
+    const task = selectTaskForForm(taskQuery.data, listTask);
 
-    if (!listTask && !fetchedTask) {
+    if (!task) {
       return;
     }
 
-    const task = fetchedTask
-      ? listTask
-        ? {
-            ...fetchedTask,
-            status: listTask.status,
-            priority: listTask.priority,
-          }
-        : fetchedTask
-      : listTask!;
-
-    setForm(taskToFormState(task));
+    const next = taskToFormState(task);
+    formRef.current = next;
+    setForm(next);
+    hydratedTaskIdRef.current = taskId;
   }, [accessToken, isEdit, queryClient, taskId, taskQuery.data]);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const trimmedTitle = form.title.trim();
+      const current = formRef.current;
+      const trimmedTitle = current.title.trim();
       if (!trimmedTitle) {
         throw new Error('empty');
       }
 
-      const deadline = form.deadlineInput.trim()
-        ? parseDeadlineInput(form.deadlineInput)
+      const deadline = current.deadlineInput.trim()
+        ? parseDeadlineInput(current.deadlineInput)
         : null;
 
-      if (form.deadlineInput.trim() && !deadline) {
+      if (current.deadlineInput.trim() && !deadline) {
         throw new Error('deadline');
       }
 
       const payload = {
         title: trimmedTitle,
-        description: form.description.trim() || null,
-        status: form.status,
-        priority: form.priority,
+        description: current.description.trim() || null,
+        status: current.status,
+        priority: current.priority,
         deadline,
       };
 
@@ -192,7 +201,8 @@ export default function TaskFormModal({
 
       return authApi.createTask({ createTaskRequest: payload });
     },
-    onSuccess: () => {
+    onSuccess: saved => {
+      writeTaskToCaches(queryClient, accessToken, saved);
       onSaved();
       onClose();
     },
@@ -212,12 +222,15 @@ export default function TaskFormModal({
   });
 
   function handleSavePress() {
-    if (!form.title.trim()) {
+    titleInputRef.current?.blur();
+    const current = formRef.current;
+
+    if (!current.title.trim()) {
       setError(t('tasks.form.titleRequired'));
       return;
     }
 
-    if (form.deadlineInput.trim() && !parseDeadlineInput(form.deadlineInput)) {
+    if (current.deadlineInput.trim() && !parseDeadlineInput(current.deadlineInput)) {
       setError(t('tasks.form.deadlineInvalid'));
       return;
     }
@@ -253,7 +266,7 @@ export default function TaskFormModal({
             style={[styles.input, !form.title.trim() && error ? styles.inputError : null]}
             value={form.title}
             onChangeText={title => {
-              setForm(current => ({ ...current, title }));
+              patchForm(current => ({ ...current, title }));
               if (error && title.trim()) {
                 setError(null);
               }
@@ -271,7 +284,7 @@ export default function TaskFormModal({
             style={[styles.input, styles.textArea]}
             value={form.description}
             onChangeText={description =>
-              setForm(current => ({ ...current, description }))
+              patchForm(current => ({ ...current, description }))
             }
             placeholder={t('tasks.form.descriptionPlaceholder')}
             placeholderTextColor={recurringTheme.textMuted}
@@ -290,7 +303,7 @@ export default function TaskFormModal({
                 <Pressable
                   key={status}
                   style={[styles.compactChip, active && styles.chipActive]}
-                  onPress={() => setForm(current => ({ ...current, status }))}
+                  onPress={() => patchForm(current => ({ ...current, status }))}
                 >
                   <Text
                     style={[styles.compactChipText, active && styles.chipTextActive]}
@@ -316,7 +329,7 @@ export default function TaskFormModal({
                 <Pressable
                   key={priority}
                   style={[styles.compactChip, active && styles.chipActive]}
-                  onPress={() => setForm(current => ({ ...current, priority }))}
+                  onPress={() => patchForm(current => ({ ...current, priority }))}
                 >
                   <Text
                     style={[styles.compactChipText, active && styles.chipTextActive]}
@@ -335,7 +348,7 @@ export default function TaskFormModal({
         <TaskDeadlineField
           value={form.deadlineInput}
           onChange={deadlineInput => {
-            setForm(current => ({ ...current, deadlineInput }));
+            patchForm(current => ({ ...current, deadlineInput }));
             if (error === t('tasks.form.deadlineInvalid') && parseDeadlineInput(deadlineInput)) {
               setError(null);
             }

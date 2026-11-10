@@ -262,7 +262,11 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.today.remaining': 'Još {{count}} zadataka',
   'recurring.today.remainingOne': 'Još 1 zadatak',
   'recurring.today.allDone': 'Sve završeno!',
-  'recurring.today.resetAt': 'Reset u 00:05',
+  'recurring.today.resetAt': 'Reset u ponoć',
+  'recurring.dailyResetRequired.title': 'Počeo je novi dan',
+  'recurring.dailyResetRequired.body':
+    'Zadaci nisu mogli da se izmene jer je u istom trenutku urađen dnevni reset. Izmena nije sačuvana. Učitavamo trenutno stanje. Proveri ga i pokušaj ponovo.',
+  'recurring.dailyResetRequired.action': 'U redu',
   'recurring.today.doneLabel': 'završeno',
   'recurring.tasks.sectionTitle': 'Dnevni zadaci',
   'recurring.focus.title': 'Zadrži fokus.',

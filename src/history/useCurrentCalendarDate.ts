@@ -2,9 +2,17 @@ import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 import { calendarDateInTimeZone } from '@/utils/calendarDateInTimeZone';
 
-const CALENDAR_DATE_POLL_MS = 60_000;
+const CALENDAR_DATE_POLL_MS = 30_000;
 
-export function useCurrentCalendarDate(timeZone: string): string {
+/**
+ * Local calendar YYYY-MM-DD in the user timezone.
+ * `syncWhen` forces an immediate sync (e.g. when a tab becomes active)
+ * so midnight is not missed by the poll interval.
+ */
+export function useCurrentCalendarDate(
+  timeZone: string,
+  syncWhen: boolean = true,
+): string {
   const [calendarDate, setCalendarDate] = useState(() =>
     calendarDateInTimeZone(new Date(), timeZone),
   );
@@ -29,6 +37,15 @@ export function useCurrentCalendarDate(timeZone: string): string {
       clearInterval(intervalId);
     };
   }, [timeZone]);
+
+  useEffect(() => {
+    if (!syncWhen) {
+      return;
+    }
+
+    const next = calendarDateInTimeZone(new Date(), timeZone);
+    setCalendarDate(current => (current === next ? current : next));
+  }, [syncWhen, timeZone]);
 
   return calendarDate;
 }

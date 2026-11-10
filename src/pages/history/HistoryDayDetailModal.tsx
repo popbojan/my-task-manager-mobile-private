@@ -23,6 +23,7 @@ import { historyMonthQueryKey } from '@/history/historyQueryKeys';
 import { refetchHistoryMonths } from '@/history/refetchHistoryMonths';
 import { applyHistoryDayToCache } from '@/history/updateHistoryDayCache';
 import { applyHistoryNoteToCache } from '@/history/updateHistoryNoteCache';
+import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
 import { refetchRecurringBoardData } from '@/recurring/refetchRecurringBoardData';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { formatHistoryDayDetailTitle } from '@/i18n/calendarLabels';
@@ -235,7 +236,7 @@ export default function HistoryDayDetailModal({
       }
 
       return authApi.putHistoryNote({
-        date,
+        date: date as unknown as Date,
         putHistoryNoteRequest: { note: trimmed },
       });
     },
@@ -259,7 +260,7 @@ export default function HistoryDayDetailModal({
 
       onClose();
     },
-    onError: err => {
+    onError: async err => {
       if (err instanceof Error && err.message === 'empty') {
         setError(t('history.note.emptyError'));
         return;
@@ -267,6 +268,16 @@ export default function HistoryDayDetailModal({
 
       if (err instanceof Error && err.message === 'too-long') {
         setError(t('history.note.tooLongError'));
+        return;
+      }
+
+      const handled = await handleDailyResetRequired({
+        error: err,
+        queryClient,
+        t,
+      });
+      if (handled) {
+        onClose();
         return;
       }
 
@@ -316,6 +327,17 @@ export default function HistoryDayDetailModal({
     },
     onError: async err => {
       setRepairConfirmVisible(false);
+
+      const handled = await handleDailyResetRequired({
+        error: err,
+        queryClient,
+        t,
+      });
+      if (handled) {
+        onClose();
+        return;
+      }
+
       const body = await parseApiErrorBody(err);
       if (body?.code === 'HISTORY_DAY_NOT_REPAIRABLE') {
         setError(t('history.repair.notRepairable'));
@@ -329,7 +351,9 @@ export default function HistoryDayDetailModal({
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await authApi.deleteHistoryNote({ date });
+      await authApi.deleteHistoryNote({
+        date: date as unknown as Date,
+      });
     },
     onSuccess: () => {
       if (!accessToken) {
@@ -350,7 +374,17 @@ export default function HistoryDayDetailModal({
 
       onClose();
     },
-    onError: () => {
+    onError: async err => {
+      const handled = await handleDailyResetRequired({
+        error: err,
+        queryClient,
+        t,
+      });
+      if (handled) {
+        onClose();
+        return;
+      }
+
       setError(t('history.note.deleteError'));
     },
   });

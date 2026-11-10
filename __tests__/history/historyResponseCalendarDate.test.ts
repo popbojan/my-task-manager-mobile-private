@@ -50,6 +50,15 @@ describe('isHistoryResponseForCalendarDate', () => {
   it('rejects missing data', () => {
     expect(isHistoryResponseForCalendarDate(undefined, '2026-11-08')).toBe(false);
   });
+
+  it('treats ISO date-only today as the UTC calendar day', () => {
+    expect(
+      isHistoryResponseForCalendarDate(
+        historyResponse(new Date('2026-11-10T00:00:00.000Z')),
+        '2026-11-10',
+      ),
+    ).toBe(true);
+  });
 });
 
 describe('historyMonthQueryKey', () => {

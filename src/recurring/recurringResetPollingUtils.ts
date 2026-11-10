@@ -1,10 +1,11 @@
 import type { RecurringTask } from '@/api/generated';
 import { isPremiumPreviewTask } from '@/utils/recurringPremiumPreview';
 
-export const RESET_POLL_START_MINUTE = 5;
-export const RESET_POLL_END_MINUTE = 10;
+/** Local midnight — GETs perform on-demand reset when due. */
+export const RESET_POLL_START_MINUTE = 0;
+export const RESET_POLL_END_MINUTE = 4;
 /** First local minute after the poll window — used to avoid re-arming until the window ends. */
-export const RESET_POLL_COOLDOWN_MINUTE = 11;
+export const RESET_POLL_COOLDOWN_MINUTE = 5;
 const MS_PER_MINUTE = 60_000;
 
 export type LocalTimeParts = {
@@ -115,9 +116,10 @@ export type ResetPollSchedulePlan =
     };
 
 /**
- * Poll once per minute from 00:05 through 00:10 (user timezone), max six GETs.
+ * Poll once per minute from 00:00 through 00:04 (user timezone).
+ * GETs trigger the pending on-demand reset when due.
  */
-/** Wait until the next 00:05, or until 00:11 if still inside today's poll window. */
+/** Wait until the next 00:00, or until 00:05 if still inside today's poll window. */
 export function msUntilNextResetPollCycle(
   timeZone: string,
   from = new Date(),
@@ -158,7 +160,7 @@ export function buildResetPollSchedule(
   };
 }
 
-/** UTC instant of 00:05 on the given local calendar day in `timeZone`. */
+/** UTC instant of 00:00 on the given local calendar day in `timeZone`. */
 export function localDailyResetInstantMs(
   timeZone: string,
   localDay: Pick<LocalTimeParts, 'year' | 'month' | 'day'>,
@@ -201,7 +203,8 @@ export function maxLastResetAtMs(tasks: RecurringTask[]): number | null {
 }
 
 /**
- * True when the backend already recorded today's 00:05 reset (e.g. first poll after the job).
+ * True when the backend already recorded today's 00:00 reset
+ * (cron or on-demand GET).
  */
 export function hasTodaysResetRecorded(
   tasks: RecurringTask[],
@@ -209,11 +212,6 @@ export function hasTodaysResetRecorded(
   now = new Date(),
 ): boolean {
   const localNow = readLocalTimeParts(now, timeZone);
-
-  if (localNow.hour === 0 && localNow.minute < RESET_POLL_START_MINUTE) {
-    return false;
-  }
-
   const todaysResetMs = localDailyResetInstantMs(timeZone, localNow);
   const lastResetMs = maxLastResetAtMs(tasks);
 

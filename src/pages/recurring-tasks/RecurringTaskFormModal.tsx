@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   RecurringTaskStatus,
   type RecurringTaskStatus as RecurringTaskStatusType,
@@ -23,6 +23,7 @@ import { useLanguage } from '@/i18n/LanguageProvider';
 import { DAILY_STATUS_COLUMNS } from '@/pages/recurring-tasks/recurringBoardConfig';
 import { recurringTaskToFormState } from '@/pages/recurring-tasks/recurringTaskFormUtils';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
 import {
   isApiPremiumRequiredError,
   shouldRetryApiQuery,
@@ -53,6 +54,7 @@ export default function RecurringTaskFormModal({
   onSaved,
 }: RecurringTaskFormModalProps) {
   const { t } = useLanguage();
+  const queryClient = useQueryClient();
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isEdit = taskId !== null;
@@ -158,7 +160,7 @@ export default function RecurringTaskFormModal({
       onSaved();
       onClose();
     },
-    onError: err => {
+    onError: async err => {
       if (err instanceof Error && err.message === 'empty') {
         setError(t('recurring.form.titleRequired'));
         return;
@@ -166,6 +168,16 @@ export default function RecurringTaskFormModal({
 
       if (isApiPremiumRequiredError(err)) {
         setError(t('recurring.premiumRequired'));
+        onClose();
+        return;
+      }
+
+      const handled = await handleDailyResetRequired({
+        error: err,
+        queryClient,
+        t,
+      });
+      if (handled) {
         onClose();
         return;
       }

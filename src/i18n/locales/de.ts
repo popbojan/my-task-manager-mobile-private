@@ -261,7 +261,11 @@ export const de = {
   'recurring.today.remaining': 'Noch {{count}} Aufgaben',
   'recurring.today.remainingOne': 'Noch 1 Aufgabe',
   'recurring.today.allDone': 'Alles erledigt!',
-  'recurring.today.resetAt': 'Reset um 00:05 Uhr',
+  'recurring.today.resetAt': 'Reset um Mitternacht',
+  'recurring.dailyResetRequired.title': 'Neuer Tag hat begonnen',
+  'recurring.dailyResetRequired.body':
+    'Deine Aufgaben konnten gerade nicht geändert werden, weil gleichzeitig der Tages-Reset gelaufen ist. Die Änderung wurde nicht gespeichert. Wir laden den aktuellen Stand. Bitte prüfe ihn und führe die Änderung danach erneut aus.',
+  'recurring.dailyResetRequired.action': 'Verstanden',
   'recurring.today.doneLabel': 'erledigt',
   'recurring.tasks.sectionTitle': 'Tägliche Aufgaben',
   'recurring.focus.title': 'Bleib fokussiert',

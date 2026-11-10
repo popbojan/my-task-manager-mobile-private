@@ -265,7 +265,11 @@ export const fr: Record<TranslationKey, string> = {
   'recurring.today.remaining': 'Encore {{count}} tâches',
   'recurring.today.remainingOne': 'Encore 1 tâche',
   'recurring.today.allDone': 'Tout est fait !',
-  'recurring.today.resetAt': 'Reset à 00:05',
+  'recurring.today.resetAt': 'Reset à minuit',
+  'recurring.dailyResetRequired.title': 'Un nouveau jour a commencé',
+  'recurring.dailyResetRequired.body':
+    'Tes tâches n’ont pas pu être modifiées à l’instant, car le reset quotidien a eu lieu en même temps. La modification n’a pas été enregistrée. Nous chargeons l’état actuel. Vérifie-le, puis réessaie.',
+  'recurring.dailyResetRequired.action': 'Compris',
   'recurring.today.doneLabel': 'fait',
   'recurring.tasks.sectionTitle': 'Tâches quotidiennes',
   'recurring.focus.title': 'Garde ton focus.',

@@ -232,6 +232,7 @@ example().catch(console.error);
 | **400** | Invalid request |  -  |
 | **401** | Unauthorized |  -  |
 | **403** | Forbidden |  -  |
+| **409** | A new local calendar day has begun and the recurring-task daily reset was due but had not yet run (cron delay or failure). Returned by every recurring-task operation that mutates resources (POST /recurring-tasks, PATCH|DELETE /recurring-tasks/{id}), and by history write operations (POST /history/yesterday/repair, PUT|DELETE /history/{date}/note). The backend rejects the mutation without applying the requested change and returns code DAILY_RESET_REQUIRED. Clients must reload via GET /recurring-tasks, GET /recurring-tasks/{id}, GET /recurring-task-progress, and GET /history; those GETs always perform the pending manual reset when due and return the current day state. Then retry against that state.  |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
@@ -444,6 +445,7 @@ example().catch(console.error);
 | **204** | Note removed or already absent. |  -  |
 | **400** | Invalid input. |  -  |
 | **401** | Missing or invalid bearer authentication. |  -  |
+| **409** | A new local calendar day has begun and the recurring-task daily reset was due but had not yet run (cron delay or failure). Returned by every recurring-task operation that mutates resources (POST /recurring-tasks, PATCH|DELETE /recurring-tasks/{id}), and by history write operations (POST /history/yesterday/repair, PUT|DELETE /history/{date}/note). The backend rejects the mutation without applying the requested change and returns code DAILY_RESET_REQUIRED. Clients must reload via GET /recurring-tasks, GET /recurring-tasks/{id}, GET /recurring-task-progress, and GET /history; those GETs always perform the pending manual reset when due and return the current day state. Then retry against that state.  |  -  |
 | **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
@@ -516,6 +518,7 @@ example().catch(console.error);
 | **204** | Recurring task deleted |  -  |
 | **401** | Unauthorized |  -  |
 | **403** | Forbidden |  -  |
+| **409** | A new local calendar day has begun and the recurring-task daily reset was due but had not yet run (cron delay or failure). Returned by every recurring-task operation that mutates resources (POST /recurring-tasks, PATCH|DELETE /recurring-tasks/{id}), and by history write operations (POST /history/yesterday/repair, PUT|DELETE /history/{date}/note). The backend rejects the mutation without applying the requested change and returns code DAILY_RESET_REQUIRED. Clients must reload via GET /recurring-tasks, GET /recurring-tasks/{id}, GET /recurring-task-progress, and GET /history; those GETs always perform the pending manual reset when due and return the current day state. Then retry against that state.  |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
@@ -725,7 +728,7 @@ This endpoint does not need any parameter.
 
 Get monthly daily history for the authenticated user
 
-Returns the authenticated user\&#39;s recurring-task history and notes for the requested month. Ordinary board tasks are excluded. Entries are ordered by date ascending and unique per user and date. Every completed day with recurring tasks must have a recorded result, even if the user did not open the app. If at least one counted task was not completed by the daily cutoff, the day is marked as missed, including days with zero completed tasks. Dates before history tracking began may have no recorded data. Future dates are included when a note exists. Note-only entries have status unknown and null task counts. Current-day results are provisional and may change until finalized. Success is visible immediately when all counted tasks are completed. Finalized results remain unchanged; notes remain editable. Each finalized day stores a snapshot of the global recurring-task currentStreak and currentLevel after that day\&#39;s evaluation. Historical dates retain their original local date after timezone changes. Finalized missed days with counted tasks may be repaired only for the previous calendar day in the user\&#39;s timezone via POST /history/yesterday/repair. No subscription requirement is added by this contract. 
+Returns the authenticated user\&#39;s recurring-task history and notes for the requested month. Ordinary board tasks are excluded. Entries are ordered by date ascending and unique per user and date. Every completed day with recurring tasks must have a recorded result, even if the user did not open the app. If at least one counted task was not completed by the daily cutoff, the day is marked as missed, including days with zero completed tasks. Dates before history tracking began may have no recorded data. Future dates are included when a note exists. Note-only entries have status unknown and null task counts. Current-day results are provisional and may change until finalized. Success is visible immediately when all counted tasks are completed. Finalized results remain unchanged; notes remain editable. Each finalized day stores a snapshot of the global recurring-task currentStreak and currentLevel after that day\&#39;s evaluation. Historical dates retain their original local date after timezone changes. Finalized missed days with counted tasks may be repaired only for the previous calendar day in the user\&#39;s timezone via POST /history/yesterday/repair. If a daily reset is due but has not yet run, the backend always performs a manual reset before returning history for the current local day. No subscription requirement is added by this contract. 
 
 ### Example
 
@@ -859,6 +862,8 @@ No authorization required
 
 Get a single recurring task
 
+Returns one recurring task owned by the authenticated user (e.g. when opening the edit sheet). If a daily reset is due but has not yet run, the backend always performs a manual reset before returning the current day\&#39;s state for this task. 
+
 ### Example
 
 ```ts
@@ -931,7 +936,7 @@ example().catch(console.error);
 
 Get recurring task progress for the authenticated user
 
-Returns the user\&#39;s global recurring-task streak, current mastery level, and highest achievements reached.
+Returns the user\&#39;s global recurring-task streak, current mastery level, and highest achievements reached. If a daily reset is due but has not yet run, the backend always performs a manual reset before returning progress. 
 
 ### Example
 
@@ -996,7 +1001,7 @@ This endpoint does not need any parameter.
 
 Get recurring tasks for the authenticated user
 
-Returns all recurring tasks owned by the authenticated user.
+Returns all recurring tasks owned by the authenticated user. If a daily reset is due but has not yet run, the backend always performs a manual reset before returning the current day\&#39;s state. 
 
 ### Example
 
@@ -1387,6 +1392,7 @@ example().catch(console.error);
 | **200** | Note created or replaced; returns normalized stored text. |  -  |
 | **400** | Invalid input. |  -  |
 | **401** | Missing or invalid bearer authentication. |  -  |
+| **409** | A new local calendar day has begun and the recurring-task daily reset was due but had not yet run (cron delay or failure). Returned by every recurring-task operation that mutates resources (POST /recurring-tasks, PATCH|DELETE /recurring-tasks/{id}), and by history write operations (POST /history/yesterday/repair, PUT|DELETE /history/{date}/note). The backend rejects the mutation without applying the requested change and returns code DAILY_RESET_REQUIRED. Clients must reload via GET /recurring-tasks, GET /recurring-tasks/{id}, GET /recurring-task-progress, and GET /history; those GETs always perform the pending manual reset when due and return the current day state. Then retry against that state.  |  -  |
 | **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
@@ -1511,7 +1517,7 @@ This endpoint does not need any parameter.
 |-------------|-------------|------------------|
 | **200** | Yesterday repaired (or already success); returns the updated history day. Global progress is recomputed server-side; clients load it via GET /recurring-task-progress (e.g. on the Heute screen).  |  -  |
 | **401** | Missing or invalid bearer authentication. |  -  |
-| **409** | Yesterday cannot be repaired; code HISTORY_DAY_NOT_REPAIRABLE (e.g. not missed, not finalized, no counted tasks, no recorded yesterday, or before history tracking).  |  -  |
+| **409** | Conflict. Either yesterday cannot be repaired (code HISTORY_DAY_NOT_REPAIRABLE: e.g. not missed, not finalized, no counted tasks, no recorded yesterday, or before history tracking), or a daily reset was due and this mutation was rejected (code DAILY_RESET_REQUIRED; clients must reload and retry).  |  -  |
 | **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
@@ -1658,6 +1664,7 @@ example().catch(console.error);
 | **401** | Unauthorized |  -  |
 | **403** | Forbidden |  -  |
 | **404** | Recurring task not found |  -  |
+| **409** | A new local calendar day has begun and the recurring-task daily reset was due but had not yet run (cron delay or failure). Returned by every recurring-task operation that mutates resources (POST /recurring-tasks, PATCH|DELETE /recurring-tasks/{id}), and by history write operations (POST /history/yesterday/repair, PUT|DELETE /history/{date}/note). The backend rejects the mutation without applying the requested change and returns code DAILY_RESET_REQUIRED. Clients must reload via GET /recurring-tasks, GET /recurring-tasks/{id}, GET /recurring-task-progress, and GET /history; those GETs always perform the pending manual reset when due and return the current day state. Then retry against that state.  |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 

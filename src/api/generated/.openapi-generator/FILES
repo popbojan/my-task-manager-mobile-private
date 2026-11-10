@@ -6,6 +6,7 @@ docs/CheckoutSession.md
 docs/CreateRecurringTaskRequest.md
 docs/CreateTaskRequest.md
 docs/CustomerPortalSession.md
+docs/DailyResetConflictError.md
 docs/DefaultApi.md
 docs/ErrorResponse.md
 docs/HistoryDay.md
@@ -42,6 +43,7 @@ models/CheckoutSession.ts
 models/CreateRecurringTaskRequest.ts
 models/CreateTaskRequest.ts
 models/CustomerPortalSession.ts
+models/DailyResetConflictError.ts
 models/ErrorResponse.ts
 models/HistoryDay.ts
 models/HistoryDayStatus.ts

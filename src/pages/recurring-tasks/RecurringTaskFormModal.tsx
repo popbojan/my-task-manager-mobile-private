@@ -62,9 +62,23 @@ export default function RecurringTaskFormModal({
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
   const isEdit = taskId !== null;
-  const [form, setForm] = useState<RecurringTaskFormState>(INITIAL_FORM);
-  const formRef = useRef(form);
-  const hydratedTaskIdRef = useRef<string | null>(null);
+
+  const listTask =
+    isEdit && taskId
+      ? queryClient
+          .getQueryData<RecurringTask[]>(recurringTasksQueryKey(accessToken))
+          ?.find(task => task.id === taskId)
+      : undefined;
+
+  const initialForm = listTask
+    ? recurringTaskToFormState(listTask)
+    : INITIAL_FORM;
+
+  const [form, setForm] = useState<RecurringTaskFormState>(initialForm);
+  const formRef = useRef(initialForm);
+  const hydratedTaskIdRef = useRef<string | null>(
+    isEdit && taskId && listTask ? taskId : null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [lockedPanelHeight, setLockedPanelHeight] = useState<number | null>(null);
   const titleInputRef = useRef<TextInputInstance>(null);
@@ -86,8 +100,9 @@ export default function RecurringTaskFormModal({
     queryFn: () => authApi.getRecurringTask({ recurringTaskId: taskId! }),
     enabled: isEdit && !!taskId,
     retry: shouldRetryApiQuery,
-    staleTime: 0,
-    refetchOnMount: 'always',
+    staleTime: 60_000,
+    refetchOnMount: false,
+    initialData: listTask,
   });
 
   useEffect(() => {
@@ -112,9 +127,6 @@ export default function RecurringTaskFormModal({
       return;
     }
 
-    const listTask = queryClient
-      .getQueryData<RecurringTask[]>(recurringTasksQueryKey(accessToken))
-      ?.find(task => task.id === taskId);
     const task = selectRecurringTaskForForm(taskQuery.data, listTask);
 
     if (task) {
@@ -123,9 +135,10 @@ export default function RecurringTaskFormModal({
       setForm(next);
       hydratedTaskIdRef.current = taskId;
     }
-  }, [accessToken, isEdit, queryClient, taskId, taskQuery.data]);
+  }, [isEdit, listTask, taskId, taskQuery.data]);
 
-  const isLoadingTask = isEdit && taskQuery.isLoading;
+  const isLoadingTask =
+    isEdit && !listTask && !taskQuery.data && taskQuery.isLoading;
   const canFocusTitle = !isLoadingTask;
 
   useEffect(() => {

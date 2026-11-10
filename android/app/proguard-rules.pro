@@ -25,6 +25,10 @@
 -dontwarn okhttp3.**
 -dontwarn okio.**
 
+# Local reminders (react-native-notify-kit / Notifee)
+-keep class app.notifee.core.** { *; }
+-keep class io.invertase.notifee.** { *; }
+
 # Firebase / Google Play Services (Crashlytics + Analytics)
 -keepattributes SourceFile,LineNumberTable
 -keep public class com.google.firebase.** { *; }

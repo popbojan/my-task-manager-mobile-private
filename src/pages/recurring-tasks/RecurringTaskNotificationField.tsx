@@ -19,6 +19,8 @@ import {
 } from '@/notifications/recurringNotificationTimeUtils';
 import { openAndroidTimePicker } from '@/pages/recurring-tasks/openAndroidTimePicker';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import { getDeviceTimezone } from '@/user/deviceTimezone';
+import { resolveRecurringResetTimezone } from '@/recurring/recurringResetPollingUtils';
 
 type RecurringTaskNotificationFieldProps = {
   enabled: boolean;
@@ -92,6 +94,7 @@ export default function RecurringTaskNotificationField({
   }
 
   const timeLabel = formatNotificationTimeLabel(displayTime, locale);
+  const reminderTimeZone = resolveRecurringResetTimezone(getDeviceTimezone());
 
   return (
     <View style={styles.wrap}>
@@ -119,6 +122,11 @@ export default function RecurringTaskNotificationField({
           thumbColor={enabled ? recurringTheme.accentBright : '#f4f4f5'}
         />
       </View>
+      <Text style={styles.hint} numberOfLines={2}>
+        {t('recurring.form.notificationClockHint', {
+          timeZone: reminderTimeZone,
+        })}
+      </Text>
 
       {showIosPicker && Platform.OS === 'ios' ? (
         <View style={styles.iosPickerSheet}>
@@ -157,6 +165,12 @@ const styles = StyleSheet.create({
     color: recurringTheme.textSecondary,
     fontSize: 12,
     fontWeight: '700',
+  },
+  hint: {
+    color: recurringTheme.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
+    opacity: 0.85,
   },
   timeChip: {
     borderWidth: 1,

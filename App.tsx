@@ -32,7 +32,6 @@ import SubscriptionBootstrap from '@/subscription/SubscriptionBootstrap';
 import { SubscriptionSessionProvider } from '@/subscription/SubscriptionSessionProvider';
 import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import {
-  invalidateRecurringQueries,
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
 } from '@/recurring/recurringQueryKeys';
@@ -333,7 +332,10 @@ function MainAppShell() {
           taskId={taskForm.taskId}
           onClose={closeTaskForm}
           onSaved={() => {
-            invalidateRecurringQueries(queryClient);
+            // List/detail caches are already updated on save; only refresh progress.
+            void queryClient
+              .invalidateQueries({ queryKey: ['recurring-task-progress'] })
+              .catch(() => undefined);
           }}
         />
       ) : null}

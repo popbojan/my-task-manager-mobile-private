@@ -157,11 +157,30 @@ export default function RecurringTasksScreen({
     [accessToken, queryClient],
   );
 
+  const progressInvalidateTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+
   const onRecurringStatusSyncSettled = useCallback(() => {
-    void queryClient
-      .invalidateQueries({ queryKey: ['recurring-task-progress'] })
-      .catch(() => undefined);
+    if (progressInvalidateTimeoutRef.current) {
+      clearTimeout(progressInvalidateTimeoutRef.current);
+    }
+
+    // Debounce so rapid status taps don't refetch the hero on every toggle.
+    progressInvalidateTimeoutRef.current = setTimeout(() => {
+      void queryClient
+        .invalidateQueries({ queryKey: ['recurring-task-progress'] })
+        .catch(() => undefined);
+    }, 400);
   }, [queryClient]);
+
+  useEffect(() => {
+    return () => {
+      if (progressInvalidateTimeoutRef.current) {
+        clearTimeout(progressInvalidateTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const onRecurringStatusSyncFailed = useCallback(async () => {
     await queryClient

@@ -124,7 +124,7 @@ export const sr: Record<TranslationKey, string> = {
   'history.note.counter': '{{count}} / {{max}}',
   'history.note.delete': 'Obriši belešku',
   'history.note.emptyError': 'Unesi tekst ili obriši belešku.',
-  'history.note.tooLongError': 'Beleška može imati najviše 2000 znakova.',
+  'history.note.tooLongError': 'Beleška može imati najviše 10000 znakova.',
   'history.note.saveError': 'Beleška nije sačuvana.',
   'history.note.deleteError': 'Beleška nije obrisana.',
   'history.repair.action': 'Popravi dan',

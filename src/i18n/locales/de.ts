@@ -123,7 +123,7 @@ export const de = {
   'history.note.counter': '{{count}} / {{max}}',
   'history.note.delete': 'Notiz löschen',
   'history.note.emptyError': 'Bitte gib einen Text ein oder lösche die Notiz.',
-  'history.note.tooLongError': 'Die Notiz darf höchstens 2000 Zeichen haben.',
+  'history.note.tooLongError': 'Die Notiz darf höchstens 10000 Zeichen haben.',
   'history.note.saveError': 'Notiz konnte nicht gespeichert werden.',
   'history.note.deleteError': 'Notiz konnte nicht gelöscht werden.',
   'history.repair.action': 'Tag reparieren',

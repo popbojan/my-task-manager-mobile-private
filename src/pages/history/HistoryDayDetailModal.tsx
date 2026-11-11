@@ -51,7 +51,7 @@ import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
 import { getApiErrorMessage, parseApiErrorBody } from '@/utils/apiError';
 import HistoryRepairConfirmModal from '@/pages/history/HistoryRepairConfirmModal';
 
-const NOTE_MAX_LENGTH = 2000;
+const NOTE_MAX_LENGTH = 10000;
 
 const STATUS_LABEL_KEYS: Record<HistoryDayStatus, TranslationKey> = {
   [HistoryDayStatus.Success]: 'history.status.success',

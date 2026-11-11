@@ -1326,7 +1326,7 @@ No authorization required
 
 Create or replace a daily history note
 
-Stores one note per authenticated user and date. Trim leading and trailing whitespace before storage. Reject blank text and text longer than 2000 Unicode code points before trimming. Preserve internal whitespace and line breaks. Repeating the same request has the same effect. Last committed write wins. Notes are allowed without a recorded daily result and must not create success, missed, or task counts. Task results cannot be modified through this endpoint. 
+Stores one note per authenticated user and date. Trim leading and trailing whitespace before storage. Reject blank text and text longer than 10000 Unicode code points before trimming. Preserve internal whitespace and line breaks. Repeating the same request has the same effect. Last committed write wins. Notes are allowed without a recorded daily result and must not create success, missed, or task counts. Task results cannot be modified through this endpoint. 
 
 ### Example
 

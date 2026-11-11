@@ -124,7 +124,7 @@ export const en: Record<TranslationKey, string> = {
   'history.note.counter': '{{count}} / {{max}}',
   'history.note.delete': 'Delete note',
   'history.note.emptyError': 'Enter some text or delete the note.',
-  'history.note.tooLongError': 'Notes can be at most 2000 characters.',
+  'history.note.tooLongError': 'Notes can be at most 10000 characters.',
   'history.note.saveError': 'Could not save the note.',
   'history.note.deleteError': 'Could not delete the note.',
   'history.repair.action': 'Repair the day',

@@ -16,14 +16,22 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   RecurringTaskStatus,
+  type RecurringTask,
   type RecurringTaskStatus as RecurringTaskStatusType,
 } from '@/api/generated';
 import { authApi } from '@/api/authClient';
+import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { DAILY_STATUS_COLUMNS } from '@/pages/recurring-tasks/recurringBoardConfig';
 import { recurringTaskToFormState } from '@/pages/recurring-tasks/recurringTaskFormUtils';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
+import {
+  recurringTaskQueryKey,
+  recurringTasksQueryKey,
+  selectRecurringTaskForForm,
+  writeRecurringTaskToCaches,
+} from '@/recurring/recurringQueryKeys';
 import {
   isApiPremiumRequiredError,
   shouldRetryApiQuery,
@@ -54,6 +62,7 @@ export default function RecurringTaskFormModal({
   onSaved,
 }: RecurringTaskFormModalProps) {
   const { t } = useLanguage();
+  const { accessToken } = useAuth();
   const queryClient = useQueryClient();
   const { height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -73,10 +82,12 @@ export default function RecurringTaskFormModal({
   }
 
   const taskQuery = useQuery({
-    queryKey: ['recurring-task', taskId],
+    queryKey: recurringTaskQueryKey(taskId ?? ''),
     queryFn: () => authApi.getRecurringTask({ recurringTaskId: taskId! }),
-    enabled: isEdit,
+    enabled: isEdit && !!taskId,
     retry: shouldRetryApiQuery,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   useEffect(() => {
@@ -101,13 +112,20 @@ export default function RecurringTaskFormModal({
       return;
     }
 
-    if (taskQuery.data) {
-      const next = recurringTaskToFormState(taskQuery.data);
-      formRef.current = next;
-      setForm(next);
-      hydratedTaskIdRef.current = taskId;
+    const listTask = queryClient
+      .getQueryData<RecurringTask[]>(recurringTasksQueryKey(accessToken))
+      ?.find(task => task.id === taskId);
+    const task = selectRecurringTaskForForm(taskQuery.data, listTask);
+
+    if (!task) {
+      return;
     }
-  }, [isEdit, taskId, taskQuery.data]);
+
+    const next = recurringTaskToFormState(task);
+    formRef.current = next;
+    setForm(next);
+    hydratedTaskIdRef.current = taskId;
+  }, [accessToken, isEdit, queryClient, taskId, taskQuery.data]);
 
   const isLoadingTask = isEdit && taskQuery.isLoading;
   const canFocusTitle = !isLoadingTask;
@@ -148,7 +166,7 @@ export default function RecurringTaskFormModal({
       });
 
       if (current.status !== RecurringTaskStatus.Todo) {
-        await authApi.updateRecurringTask({
+        return authApi.updateRecurringTask({
           recurringTaskId: created.id,
           updateRecurringTaskRequest: { status: current.status },
         });
@@ -156,7 +174,8 @@ export default function RecurringTaskFormModal({
 
       return created;
     },
-    onSuccess: () => {
+    onSuccess: saved => {
+      writeRecurringTaskToCaches(queryClient, accessToken, saved);
       onSaved();
       onClose();
     },

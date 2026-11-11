@@ -293,7 +293,15 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.form.error': 'Čuvanje nije uspelo.',
   'recurring.form.notificationLabel': 'Dnevni podsetnik',
   'recurring.form.notificationTimeA11y': 'Izaberi vreme podsetnika',
-  'recurring.form.notificationClockHint': 'Po satu telefona ({{timeZone}})',
+  'recurring.form.notificationPermissionBefore':
+    'Dozvoli obaveštenja u ',
+  'recurring.form.notificationPermissionLink': 'sistemskim podešavanjima',
+  'recurring.form.notificationPermissionAfter':
+    ' da bi podsetnici stigli.',
+  'recurring.form.notificationEnabledHint':
+    'Podsetnici su uključeni — svaki dan u {{time}} na telefonu.',
+  'recurring.form.notificationDisabledHint':
+    'Uključi prekidač da dobijaš dnevni podsetnik na telefonu.',
   'recurring.reminder.channelName': 'Dnevni podsetnici',
   'recurring.reminder.singleTitle': 'Vreme je za: {{title}}',
   'recurring.reminder.singleBody': 'Dobar trenutak da kreneš.',

@@ -1,4 +1,5 @@
 import type { TimestampTrigger } from '@notifee/react-native';
+import { Linking } from 'react-native';
 import type { RecurringReminderCopy } from '@/notifications/recurringReminderPlan';
 import { RECURRING_REMINDER_ID_PREFIX } from '@/notifications/recurringReminderPlan';
 import {
@@ -192,4 +193,21 @@ export async function syncRecurringReminderTriggers(
 /** Force next sync even if the plan fingerprint matches (e.g. after permission grant). */
 export function invalidateRecurringReminderSyncFingerprint(): void {
   lastSyncedFingerprint = null;
+}
+
+/** Opens the OS notification settings for this app (fallback: app settings). */
+export async function openRecurringReminderNotificationSettings(): Promise<void> {
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    await Linking.openSettings().catch(() => undefined);
+    return;
+  }
+
+  try {
+    await notifeePkg.default.openNotificationSettings(
+      RECURRING_REMINDER_CHANNEL_ID,
+    );
+  } catch {
+    await Linking.openSettings().catch(() => undefined);
+  }
 }

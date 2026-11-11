@@ -296,7 +296,15 @@ export const fr: Record<TranslationKey, string> = {
   'recurring.form.error': 'Enregistrement impossible.',
   'recurring.form.notificationLabel': 'Rappel quotidien',
   'recurring.form.notificationTimeA11y': 'Choisir l’heure du rappel',
-  'recurring.form.notificationClockHint': 'Horloge du téléphone ({{timeZone}})',
+  'recurring.form.notificationPermissionBefore':
+    'Autorise les notifications dans les ',
+  'recurring.form.notificationPermissionLink': 'réglages système',
+  'recurring.form.notificationPermissionAfter':
+    ' pour recevoir les rappels.',
+  'recurring.form.notificationEnabledHint':
+    'Rappels activés — chaque jour à {{time}} sur ton téléphone.',
+  'recurring.form.notificationDisabledHint':
+    'Active l’interrupteur pour recevoir un rappel quotidien sur ton téléphone.',
   'recurring.reminder.channelName': 'Rappels quotidiens',
   'recurring.reminder.singleTitle': 'C’est l’heure : {{title}}',
   'recurring.reminder.singleBody': 'Un bon moment pour t’y mettre.',

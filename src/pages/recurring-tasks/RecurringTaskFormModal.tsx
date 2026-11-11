@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   type TextInputInstance,
   View,
   type LayoutChangeEvent,
@@ -83,6 +84,9 @@ export default function RecurringTaskFormModal({
   const [error, setError] = useState<string | null>(null);
   const [lockedPanelHeight, setLockedPanelHeight] = useState<number | null>(null);
   const titleInputRef = useRef<TextInputInstance>(null);
+  const { height: windowHeight } = useWindowDimensions();
+  const maxPanelHeight = Math.round(windowHeight * 0.9);
+  const panelHeaderHeightRef = useRef(52);
 
   function patchForm(
     updater: (
@@ -247,21 +251,41 @@ export default function RecurringTaskFormModal({
     saveMutation.mutate();
   }
 
-  function handlePanelLayout(event: LayoutChangeEvent) {
-    if (isLoadingTask || lockedPanelHeight !== null) {
+  function growPanelToFit(neededHeight: number) {
+    const capped = Math.min(Math.ceil(neededHeight), maxPanelHeight);
+    if (capped < 160) {
       return;
     }
 
-    const measuredHeight = Math.ceil(event.nativeEvent.layout.height);
-    if (measuredHeight >= 160) {
-      setLockedPanelHeight(measuredHeight);
+    setLockedPanelHeight(current =>
+      current === null || capped > current ? capped : current,
+    );
+  }
+
+  function handlePanelLayout(event: LayoutChangeEvent) {
+    if (isLoadingTask) {
+      return;
     }
+
+    growPanelToFit(event.nativeEvent.layout.height);
+  }
+
+  function handleHeaderLayout(event: LayoutChangeEvent) {
+    panelHeaderHeightRef.current = Math.ceil(event.nativeEvent.layout.height);
+  }
+
+  function handleFormContentSizeChange(_width: number, contentHeight: number) {
+    if (isLoadingTask) {
+      return;
+    }
+
+    growPanelToFit(contentHeight + panelHeaderHeightRef.current + 4);
   }
 
   const panelSizeStyle =
     lockedPanelHeight !== null
-      ? { height: lockedPanelHeight, maxHeight: lockedPanelHeight }
-      : null;
+      ? { height: lockedPanelHeight, maxHeight: maxPanelHeight }
+      : { maxHeight: maxPanelHeight };
 
   return (
     <View style={styles.overlay} accessibilityViewIsModal>
@@ -274,7 +298,7 @@ export default function RecurringTaskFormModal({
       <View style={styles.modalShell}>
         <SafeAreaView edges={['top']} style={styles.safeTop}>
           <View style={[styles.panel, panelSizeStyle]} onLayout={handlePanelLayout}>
-            <View style={styles.panelHeader}>
+            <View style={styles.panelHeader} onLayout={handleHeaderLayout}>
               <View style={styles.panelHeaderCopy}>
                 <Text style={styles.eyebrow}>{t('recurring.stats.dailyHint')}</Text>
                 <Text style={styles.title}>
@@ -301,8 +325,9 @@ export default function RecurringTaskFormModal({
                 contentContainerStyle={styles.formScrollContent}
                 keyboardShouldPersistTaps="handled"
                 keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
-                showsVerticalScrollIndicator
+                showsVerticalScrollIndicator={false}
                 bounces={false}
+                onContentSizeChange={handleFormContentSizeChange}
               >
                   <View style={styles.fieldBlock}>
                     <Text style={styles.label}>
@@ -467,8 +492,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: 10,
+    paddingBottom: 6,
     borderBottomWidth: 1,
     borderBottomColor: recurringTheme.cardBorder,
   },
@@ -518,13 +543,13 @@ const styles = StyleSheet.create({
   },
   formScrollContent: {
     flexGrow: 0,
-    gap: 10,
+    gap: 8,
     paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 12,
+    paddingTop: 8,
+    paddingBottom: 10,
   },
   fieldBlock: {
-    gap: 4,
+    gap: 3,
   },
   label: {
     color: recurringTheme.textSecondary,
@@ -541,7 +566,7 @@ const styles = StyleSheet.create({
     borderColor: recurringTheme.cardBorder,
     borderRadius: 12,
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 8,
     color: recurringTheme.textPrimary,
     fontSize: 15,
     backgroundColor: recurringTheme.surfaceInset,
@@ -550,8 +575,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(239, 68, 68, 0.45)',
   },
   textArea: {
-    height: 96,
-    paddingTop: 10,
+    height: 72,
+    paddingTop: 8,
     lineHeight: 20,
   },
   statusFieldRow: {
@@ -595,8 +620,8 @@ const styles = StyleSheet.create({
     color: recurringTheme.accentBright,
   },
   footer: {
-    gap: 8,
-    marginTop: 2,
+    gap: 6,
+    marginTop: 0,
   },
   errorBox: {
     borderRadius: 10,

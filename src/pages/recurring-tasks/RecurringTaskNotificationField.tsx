@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
+  AppState,
   Platform,
   Pressable,
   StyleSheet,
   Switch,
   Text,
   View,
+  type AppStateStatus,
 } from 'react-native';
 import DateTimePicker, {
   type DateTimePickerEvent,
@@ -19,13 +21,13 @@ import {
 } from '@/notifications/recurringNotificationTimeUtils';
 import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
 import {
+  hasRecurringReminderPermission,
   invalidateRecurringReminderSyncFingerprint,
+  openRecurringReminderNotificationSettings,
   requestRecurringReminderPermission,
 } from '@/notifications/recurringReminderScheduler';
 import { openAndroidTimePicker } from '@/pages/recurring-tasks/openAndroidTimePicker';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
-import { getDeviceTimezone } from '@/user/deviceTimezone';
-import { resolveRecurringResetTimezone } from '@/recurring/recurringResetPollingUtils';
 
 type RecurringTaskNotificationFieldProps = {
   enabled: boolean;
@@ -49,7 +51,12 @@ export default function RecurringTaskNotificationField({
 }: RecurringTaskNotificationFieldProps) {
   const { language, t } = useLanguage();
   const [showIosPicker, setShowIosPicker] = useState(false);
-  const [pickerDraft, setPickerDraft] = useState(() => resolvePickerDate(notificationTime));
+  const [pickerDraft, setPickerDraft] = useState(() =>
+    resolvePickerDate(notificationTime),
+  );
+  const [permissionGranted, setPermissionGranted] = useState<boolean | null>(
+    null,
+  );
   const displayTime =
     notificationTime ?? DEFAULT_RECURRING_NOTIFICATION_TIME;
   const locale =
@@ -60,6 +67,31 @@ export default function RecurringTaskNotificationField({
         : language === 'sr'
           ? 'sr-RS'
           : 'en-GB';
+
+  const refreshPermission = useCallback(async () => {
+    const granted = await hasRecurringReminderPermission();
+    setPermissionGranted(granted);
+    return granted;
+  }, []);
+
+  useEffect(() => {
+    void refreshPermission();
+  }, [refreshPermission]);
+
+  useEffect(() => {
+    const onAppState = (next: AppStateStatus) => {
+      if (next === 'active') {
+        void refreshPermission().then(granted => {
+          if (granted && enabled) {
+            invalidateRecurringReminderSyncFingerprint();
+            requestRecurringReminderReschedule();
+          }
+        });
+      }
+    };
+    const sub = AppState.addEventListener('change', onAppState);
+    return () => sub.remove();
+  }, [enabled, refreshPermission]);
 
   function openTimePicker() {
     if (!notificationTime) {
@@ -89,6 +121,7 @@ export default function RecurringTaskNotificationField({
     // Permission is separate from save — ask when the user turns reminders on.
     if (nextEnabled) {
       void requestRecurringReminderPermission().then(granted => {
+        setPermissionGranted(granted);
         if (granted) {
           invalidateRecurringReminderSyncFingerprint();
           requestRecurringReminderReschedule();
@@ -109,7 +142,9 @@ export default function RecurringTaskNotificationField({
   }
 
   const timeLabel = formatNotificationTimeLabel(displayTime, locale);
-  const reminderTimeZone = resolveRecurringResetTimezone(getDeviceTimezone());
+  const showPermissionHint = enabled && permissionGranted === false;
+  const showEnabledHint = enabled && permissionGranted === true;
+  const showDisabledHint = !enabled;
 
   return (
     <View style={styles.wrap}>
@@ -137,11 +172,41 @@ export default function RecurringTaskNotificationField({
           thumbColor={enabled ? recurringTheme.accentBright : '#f4f4f5'}
         />
       </View>
-      <Text style={styles.hint} numberOfLines={2}>
-        {t('recurring.form.notificationClockHint', {
-          timeZone: reminderTimeZone,
-        })}
-      </Text>
+
+      {/* Fixed slot so Cancel/Save don't jump when the hint changes. */}
+      <View style={styles.permissionSlot}>
+        {showPermissionHint ? (
+          <View style={[styles.statusBox, styles.permissionBox]}>
+            <Text style={styles.statusText} numberOfLines={2}>
+              {t('recurring.form.notificationPermissionBefore')}
+              <Text
+                style={styles.permissionLink}
+                onPress={() => {
+                  void openRecurringReminderNotificationSettings();
+                }}
+                accessibilityRole="link"
+              >
+                {t('recurring.form.notificationPermissionLink')}
+              </Text>
+              {t('recurring.form.notificationPermissionAfter')}
+            </Text>
+          </View>
+        ) : null}
+        {showEnabledHint ? (
+          <View style={[styles.statusBox, styles.enabledBox]}>
+            <Text style={styles.statusText} numberOfLines={2}>
+              {t('recurring.form.notificationEnabledHint', { time: timeLabel })}
+            </Text>
+          </View>
+        ) : null}
+        {showDisabledHint ? (
+          <View style={[styles.statusBox, styles.disabledBox]}>
+            <Text style={styles.statusTextMuted} numberOfLines={2}>
+              {t('recurring.form.notificationDisabledHint')}
+            </Text>
+          </View>
+        ) : null}
+      </View>
 
       {showIosPicker && Platform.OS === 'ios' ? (
         <View style={styles.iosPickerSheet}>
@@ -167,7 +232,7 @@ export default function RecurringTaskNotificationField({
 
 const styles = StyleSheet.create({
   wrap: {
-    gap: 6,
+    gap: 4,
   },
   row: {
     flexDirection: 'row',
@@ -181,11 +246,46 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
-  hint: {
+  permissionSlot: {
+    height: 52,
+    justifyContent: 'center',
+  },
+  statusBox: {
+    height: 52,
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    justifyContent: 'center',
+  },
+  permissionBox: {
+    borderColor: 'rgba(245, 158, 11, 0.45)',
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+  },
+  enabledBox: {
+    borderColor: recurringTheme.cardBorderAccent,
+    backgroundColor: 'rgba(82, 183, 136, 0.14)',
+  },
+  disabledBox: {
+    borderColor: recurringTheme.cardBorder,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+  },
+  statusText: {
+    color: recurringTheme.textPrimary,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: '600',
+  },
+  statusTextMuted: {
     color: recurringTheme.textSecondary,
     fontSize: 11,
+    lineHeight: 15,
     fontWeight: '600',
-    opacity: 0.85,
+  },
+  permissionLink: {
+    color: recurringTheme.accentBright,
+    fontWeight: '800',
+    textDecorationLine: 'underline',
   },
   timeChip: {
     borderWidth: 1,

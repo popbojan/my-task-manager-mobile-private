@@ -292,7 +292,15 @@ export const de = {
   'recurring.form.error': 'Speichern fehlgeschlagen.',
   'recurring.form.notificationLabel': 'Tägliche Erinnerung',
   'recurring.form.notificationTimeA11y': 'Erinnerungszeit wählen',
-  'recurring.form.notificationClockHint': 'Nach Handy-Uhr ({{timeZone}})',
+  'recurring.form.notificationPermissionBefore':
+    'Bitte erlaube Benachrichtigungen in den ',
+  'recurring.form.notificationPermissionLink': 'Systemeinstellungen',
+  'recurring.form.notificationPermissionAfter':
+    ', damit Erinnerungen ankommen.',
+  'recurring.form.notificationEnabledHint':
+    'Schalter an: Täglich um {{time}} bekommst du eine Erinnerung auf dem Handy.',
+  'recurring.form.notificationDisabledHint':
+    'Schalter an, wenn du täglich eine Erinnerung auf dem Handy bekommen willst.',
   'recurring.reminder.channelName': 'Tägliche Erinnerungen',
   'recurring.reminder.singleTitle': 'Zeit für {{title}}',
   'recurring.reminder.singleBody': 'Ein guter Moment, um loszulegen.',

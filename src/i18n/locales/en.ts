@@ -292,7 +292,15 @@ export const en: Record<TranslationKey, string> = {
   'recurring.form.error': 'Could not save.',
   'recurring.form.notificationLabel': 'Daily reminder',
   'recurring.form.notificationTimeA11y': 'Choose reminder time',
-  'recurring.form.notificationClockHint': 'Phone clock ({{timeZone}})',
+  'recurring.form.notificationPermissionBefore':
+    'Please allow notifications in ',
+  'recurring.form.notificationPermissionLink': 'system settings',
+  'recurring.form.notificationPermissionAfter':
+    ' so reminders can arrive.',
+  'recurring.form.notificationEnabledHint':
+    'Reminders are on — daily at {{time}} on your phone.',
+  'recurring.form.notificationDisabledHint':
+    'Turn the switch on to get a daily reminder on your phone.',
   'recurring.reminder.channelName': 'Daily reminders',
   'recurring.reminder.singleTitle': 'Time for {{title}}',
   'recurring.reminder.singleBody': 'A good moment to get started.',

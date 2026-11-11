@@ -1,5 +1,5 @@
 /**
- * Parked. Do not import react-native-notify-kit here until we have a
- * non-blocking scheduling path (save must stay instant).
+ * Native entry is @notifee/react-native, loaded lazily via notifeeBridge.
+ * Keep this file so older import paths stay harmless.
  */
-export {};
+export { loadNotifeePackage, isNotifeeNativeLinked } from '@/notifications/notifeeBridge';

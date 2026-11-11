@@ -32,6 +32,7 @@ import {
   recurringTasksQueryKey,
   writeRecurringTaskToCaches,
 } from '@/recurring/recurringQueryKeys';
+import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
 import {
@@ -203,6 +204,8 @@ export default function RecurringTaskFormModal({
     },
     onSuccess: saved => {
       writeRecurringTaskToCaches(queryClient, accessToken, saved);
+      // Never await native scheduling here — idle sync picks this up.
+      requestRecurringReminderReschedule();
       onSaved();
       onClose();
     },

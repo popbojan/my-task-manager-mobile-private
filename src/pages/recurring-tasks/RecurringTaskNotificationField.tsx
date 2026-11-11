@@ -17,6 +17,11 @@ import {
   notificationTimeFromDate,
   notificationTimeToDate,
 } from '@/notifications/recurringNotificationTimeUtils';
+import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
+import {
+  invalidateRecurringReminderSyncFingerprint,
+  requestRecurringReminderPermission,
+} from '@/notifications/recurringReminderScheduler';
 import { openAndroidTimePicker } from '@/pages/recurring-tasks/openAndroidTimePicker';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
@@ -80,6 +85,16 @@ export default function RecurringTaskNotificationField({
       onNotificationTimeChange(DEFAULT_RECURRING_NOTIFICATION_TIME);
     }
     onEnabledChange(nextEnabled);
+
+    // Permission is separate from save — ask when the user turns reminders on.
+    if (nextEnabled) {
+      void requestRecurringReminderPermission().then(granted => {
+        if (granted) {
+          invalidateRecurringReminderSyncFingerprint();
+          requestRecurringReminderReschedule();
+        }
+      });
+    }
   }
 
   function handlePickerChange(event: DateTimePickerEvent, date?: Date) {

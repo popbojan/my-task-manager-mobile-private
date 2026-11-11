@@ -57,6 +57,7 @@ import {
 } from '@/utils/recurringPremiumPreview';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
 import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
+import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
 import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
@@ -172,6 +173,7 @@ export default function RecurringTasksScreen({
       void queryClient
         .invalidateQueries({ queryKey: ['recurring-task-progress'] })
         .catch(() => undefined);
+      requestRecurringReminderReschedule();
     }, 400);
   }, [queryClient]);
 
@@ -227,6 +229,7 @@ export default function RecurringTasksScreen({
     },
     onSuccess: () => {
       invalidateRecurringQueries(queryClient);
+      requestRecurringReminderReschedule();
       closeDeleteModal();
     },
     onError: async error => {

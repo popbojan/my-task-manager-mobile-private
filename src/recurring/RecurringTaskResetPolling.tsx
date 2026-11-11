@@ -18,6 +18,7 @@ import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
 } from '@/recurring/recurringQueryKeys';
+import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
 import { isApiPremiumRequiredError } from '@/utils/apiError';
 import { isPremiumPreviewTask } from '@/utils/recurringPremiumPreview';
 import { useCurrentUser } from '@/user/useCurrentUser';
@@ -83,6 +84,7 @@ export default function RecurringTaskResetPolling() {
 
         const tasks = await authApi.getRecurringTasks();
         queryClient.setQueryData(recurringTasksQueryKey(accessToken), tasks);
+        requestRecurringReminderReschedule();
 
         const realTasks = tasks.filter(task => !isPremiumPreviewTask(task.id));
 

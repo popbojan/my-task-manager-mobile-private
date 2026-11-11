@@ -22,6 +22,7 @@ function demoHistoryDay(
     totalTasks: overrides.totalTasks ?? null,
     note: overrides.note ?? null,
     finalizedAt: overrides.finalizedAt ?? demoDate,
+    repairedAt: overrides.repairedAt ?? null,
     currentStreak: overrides.currentStreak ?? null,
     currentLevel: overrides.currentLevel ?? null,
   };

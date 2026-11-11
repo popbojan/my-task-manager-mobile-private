@@ -2,14 +2,20 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/authClient';
 import { historyMonthQueryKey } from '@/history/historyQueryKeys';
+import { calendarDateInTimeZone } from '@/utils/calendarDateInTimeZone';
 
-/** Refetch Mein Weg when the user returns to the history tab (screen stays mounted). */
+/**
+ * Keep Mein Weg aligned with on-demand daily reset:
+ * - Prefetch when the local calendar day rolls (even if the tab is hidden)
+ * - On tab focus: force a fresh GET (same query key the screen observes)
+ */
 export function useRefetchHistoryOnTabFocus(
   isActive: boolean,
   accessToken: string | null,
   hasPremiumAccess: boolean,
   calendarDate: string,
-  onReturnedToTab: () => void,
+  timeZone: string,
+  onReturnedToTab: (freshCalendarDate: string) => void,
 ): void {
   const queryClient = useQueryClient();
   const wasActiveRef = useRef(isActive);
@@ -25,18 +31,27 @@ export function useRefetchHistoryOnTabFocus(
       return;
     }
 
-    if (!becameActive && !(isActive && calendarDateChanged)) {
+    if (!becameActive && !calendarDateChanged) {
       return;
     }
 
+    const freshCalendarDate = becameActive
+      ? calendarDateInTimeZone(new Date(), timeZone)
+      : calendarDate;
+    const month = freshCalendarDate.slice(0, 7);
+    const queryKey = historyMonthQueryKey(
+      accessToken,
+      month,
+      freshCalendarDate,
+    );
+
     if (becameActive) {
-      onReturnedToTab();
+      onReturnedToTab(freshCalendarDate);
     }
 
-    const month = calendarDate.slice(0, 7);
     void queryClient
       .fetchQuery({
-        queryKey: historyMonthQueryKey(accessToken, month, calendarDate),
+        queryKey,
         queryFn: () => authApi.getHistory({ month }),
         staleTime: 0,
       })
@@ -48,5 +63,6 @@ export function useRefetchHistoryOnTabFocus(
     isActive,
     onReturnedToTab,
     queryClient,
+    timeZone,
   ]);
 }

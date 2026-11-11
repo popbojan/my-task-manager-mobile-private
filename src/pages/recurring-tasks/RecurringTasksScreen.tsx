@@ -56,6 +56,7 @@ import {
   isPremiumPreviewTask,
 } from '@/utils/recurringPremiumPreview';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
+import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
 import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
@@ -193,23 +194,58 @@ export default function RecurringTasksScreen({
     RecurringTask
   >({
     getNextStatus: getNextRecurringToggleStatus,
-    updateStatusOnServer: (taskId, status) =>
-      authApi.updateRecurringTask({
-        recurringTaskId: taskId,
-        updateRecurringTaskRequest: { status },
-      }),
+    updateStatusOnServer: async (taskId, status) => {
+      try {
+        return await authApi.updateRecurringTask({
+          recurringTaskId: taskId,
+          updateRecurringTaskRequest: { status },
+        });
+      } catch (error) {
+        await handleDailyResetRequired({
+          error,
+          queryClient,
+          t,
+        });
+        throw error;
+      }
+    },
     applyServerTask: patchTaskFromServer,
     applyOptimisticStatus: patchTaskStatus,
     onSyncSettled: onRecurringStatusSyncSettled,
     onSyncFailed: onRecurringStatusSyncFailed,
   });
 
+  const [deleteErrorKind, setDeleteErrorKind] = useState<
+    'done-column' | 'generic' | null
+  >(null);
+
   const deleteTaskMutation = useMutation({
     mutationFn: (recurringTaskId: string) =>
       authApi.deleteRecurringTask({ recurringTaskId }),
+    onMutate: () => {
+      setDeleteErrorKind(null);
+    },
     onSuccess: () => {
       invalidateRecurringQueries(queryClient);
       closeDeleteModal();
+    },
+    onError: async error => {
+      const handled = await handleDailyResetRequired({
+        error,
+        queryClient,
+        t,
+      });
+      if (handled) {
+        closeDeleteModal();
+        return;
+      }
+
+      if (isApiConflictError(error)) {
+        setDeleteErrorKind('done-column');
+        return;
+      }
+
+      setDeleteErrorKind('generic');
     },
   });
 
@@ -288,18 +324,18 @@ export default function RecurringTasksScreen({
   }, [allDailyTasksComplete, dailyTaskCount]);
 
   const deleteErrorMessage = useMemo(() => {
-    if (!deleteTaskMutation.isError) {
-      return null;
-    }
-
-    if (isApiConflictError(deleteTaskMutation.error)) {
+    if (deleteErrorKind === 'done-column') {
       return t('recurring.deleteErrorDoneColumn', {
         column: t('recurring.status.done'),
       });
     }
 
-    return t('recurring.deleteError');
-  }, [deleteTaskMutation.error, deleteTaskMutation.isError, t]);
+    if (deleteErrorKind === 'generic') {
+      return t('recurring.deleteError');
+    }
+
+    return null;
+  }, [deleteErrorKind, t]);
 
   function openPremiumUpsell() {
     setIsPremiumUpsellOpen(true);
@@ -350,6 +386,7 @@ export default function RecurringTasksScreen({
 
   function closeDeleteModal() {
     setDeleteModal({ visible: false, task: null });
+    setDeleteErrorKind(null);
     deleteTaskMutation.reset();
   }
 

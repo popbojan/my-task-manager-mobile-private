@@ -37,7 +37,7 @@ function getNextDailyResetAt(from = new Date(), timezone: string): Date {
     const hour = parts.find(part => part.type === 'hour')?.value;
     const minute = parts.find(part => part.type === 'minute')?.value;
 
-    if (hour === '00' && minute === '05') {
+    if (hour === '00' && minute === '00') {
       return candidate;
     }
   }

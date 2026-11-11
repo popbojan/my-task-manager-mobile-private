@@ -33,6 +33,7 @@ import {
   writeRecurringTaskToCaches,
 } from '@/recurring/recurringQueryKeys';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
 import {
   isApiPremiumRequiredError,
   shouldRetryApiQuery,
@@ -76,9 +77,8 @@ export default function RecurringTaskFormModal({
 
   const [form, setForm] = useState<RecurringTaskFormState>(initialForm);
   const formRef = useRef(initialForm);
-  const hydratedTaskIdRef = useRef<string | null>(
-    isEdit && taskId && listTask ? taskId : null,
-  );
+  const hydratedTaskIdRef = useRef<string | null>(null);
+  const hydratedUpdatedAtRef = useRef<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lockedPanelHeight, setLockedPanelHeight] = useState<number | null>(null);
   const titleInputRef = useRef<TextInputInstance>(null);
@@ -100,9 +100,8 @@ export default function RecurringTaskFormModal({
     queryFn: () => authApi.getRecurringTask({ recurringTaskId: taskId! }),
     enabled: isEdit && !!taskId,
     retry: shouldRetryApiQuery,
-    staleTime: 60_000,
-    refetchOnMount: false,
-    initialData: listTask,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   useEffect(() => {
@@ -117,24 +116,35 @@ export default function RecurringTaskFormModal({
   useEffect(() => {
     if (!isEdit) {
       hydratedTaskIdRef.current = null;
+      hydratedUpdatedAtRef.current = null;
       formRef.current = INITIAL_FORM;
       setForm(INITIAL_FORM);
       setError(null);
       return;
     }
 
-    if (!taskId || hydratedTaskIdRef.current === taskId) {
+    if (!taskId) {
       return;
     }
 
     const task = selectRecurringTaskForForm(taskQuery.data, listTask);
-
-    if (task) {
-      const next = recurringTaskToFormState(task);
-      formRef.current = next;
-      setForm(next);
-      hydratedTaskIdRef.current = taskId;
+    if (!task) {
+      return;
     }
+
+    const updatedAt = new Date(task.updatedAt).getTime();
+    if (
+      hydratedTaskIdRef.current === taskId &&
+      hydratedUpdatedAtRef.current === updatedAt
+    ) {
+      return;
+    }
+
+    const next = recurringTaskToFormState(task);
+    formRef.current = next;
+    setForm(next);
+    hydratedTaskIdRef.current = taskId;
+    hydratedUpdatedAtRef.current = updatedAt;
   }, [isEdit, listTask, taskId, taskQuery.data]);
 
   const isLoadingTask =
@@ -183,7 +193,7 @@ export default function RecurringTaskFormModal({
       });
 
       if (current.status !== RecurringTaskStatus.Todo) {
-        await authApi.updateRecurringTask({
+        return authApi.updateRecurringTask({
           recurringTaskId: created.id,
           updateRecurringTaskRequest: { status: current.status },
         });
@@ -196,7 +206,7 @@ export default function RecurringTaskFormModal({
       onSaved();
       onClose();
     },
-    onError: err => {
+    onError: async err => {
       if (err instanceof Error && err.message === 'empty') {
         setError(t('recurring.form.titleRequired'));
         return;
@@ -204,6 +214,16 @@ export default function RecurringTaskFormModal({
 
       if (isApiPremiumRequiredError(err)) {
         setError(t('recurring.premiumRequired'));
+        onClose();
+        return;
+      }
+
+      const handled = await handleDailyResetRequired({
+        error: err,
+        queryClient,
+        t,
+      });
+      if (handled) {
         onClose();
         return;
       }

@@ -33,6 +33,24 @@ export function writeRecurringTaskToCaches(
   );
 }
 
+/** Prefer the newer of list-cache vs detail-cache when opening the edit form. */
+export function selectRecurringTaskForForm(
+  fetched: RecurringTask | undefined,
+  listed: RecurringTask | undefined,
+): RecurringTask | undefined {
+  if (!fetched) {
+    return listed;
+  }
+
+  if (!listed) {
+    return fetched;
+  }
+
+  const fetchedAt = new Date(fetched.updatedAt).getTime();
+  const listedAt = new Date(listed.updatedAt).getTime();
+  return listedAt >= fetchedAt ? listed : fetched;
+}
+
 export function clearRecurringSessionQueries(queryClient: QueryClient) {
   queryClient.removeQueries({ queryKey: ['recurring-tasks'] });
   queryClient.removeQueries({ queryKey: ['recurring-task'] });
@@ -82,7 +100,7 @@ function invalidateQueriesQuietly(
 /** Refetch premium-gated recurring data after subscription unlocks. */
 export function invalidateRecurringQueries(queryClient: QueryClient): void {
   invalidateQueriesQuietly(queryClient, ['recurring-tasks']);
-  invalidateQueriesQuietly(queryClient, ['recurring-task']);
   invalidateQueriesQuietly(queryClient, ['recurring-task-progress']);
+  invalidateQueriesQuietly(queryClient, ['recurring-task']);
   invalidateQueriesQuietly(queryClient, ['history']);
 }

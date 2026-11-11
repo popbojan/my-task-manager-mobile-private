@@ -6,6 +6,7 @@ export * from './CheckoutSession';
 export * from './CreateRecurringTaskRequest';
 export * from './CreateTaskRequest';
 export * from './CustomerPortalSession';
+export * from './DailyResetConflictError';
 export * from './ErrorResponse';
 export * from './HistoryDay';
 export * from './HistoryDayStatus';

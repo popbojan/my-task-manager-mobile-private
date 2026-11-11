@@ -32,4 +32,8 @@ export async function refetchRecurringBoardData(
   if (unexpected) {
     throw unexpected.reason;
   }
+
+  // Board GETs may have applied an on-demand daily reset — mark Mein Weg stale
+  // so the next history focus/fetch picks up the new day.
+  void queryClient.invalidateQueries({ queryKey: ['history'] }).catch(() => undefined);
 }

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -77,50 +77,71 @@ export default function HistoryScreen({
   const { accessToken } = useAuth();
   const currentUserQuery = useCurrentUser();
   const timeZone = currentUserQuery.data?.timezone ?? getDeviceTimezone();
-  const calendarDate = useCurrentCalendarDate(timeZone);
+  const calendarDate = useCurrentCalendarDate(timeZone, isActive);
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
   const subscriptionReady =
     !subscriptionQuery.isLoading && subscriptionQuery.isFetched;
 
   const [visibleMonth, setVisibleMonth] = useState(() => defaultVisibleMonthKey());
+  const [focusedCalendarDate, setFocusedCalendarDate] = useState<string | null>(
+    null,
+  );
   const [pickerOpen, setPickerOpen] = useState(false);
   const [isPremiumUpsellOpen, setIsPremiumUpsellOpen] = useState(false);
   const { refreshing, onRefresh } = useAppRefresh();
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
 
+  // Tab-focus sync can be a beat ahead of useCurrentCalendarDate — keep useQuery
+  // on the same key as the forced GET so the UI updates immediately.
+  const queryCalendarDate = focusedCalendarDate ?? calendarDate;
+
+  useEffect(() => {
+    if (focusedCalendarDate !== null && calendarDate === focusedCalendarDate) {
+      setFocusedCalendarDate(null);
+    }
+  }, [calendarDate, focusedCalendarDate]);
+
   const historyQueryEnabled = !!accessToken && hasPremiumAccess;
 
   const historyQuery = useQuery({
-    queryKey: historyMonthQueryKey(accessToken, visibleMonth, calendarDate),
+    queryKey: historyMonthQueryKey(accessToken, visibleMonth, queryCalendarDate),
     queryFn: () => authApi.getHistory({ month: visibleMonth }),
     enabled: historyQueryEnabled,
     retry: shouldRetryApiQuery,
+    staleTime: 0,
   });
 
-  const handleReturnedToHistoryTab = useCallback(() => {
-    setVisibleMonth(calendarDate.slice(0, 7));
+  const handleReturnedToHistoryTab = useCallback((freshCalendarDate: string) => {
+    setFocusedCalendarDate(freshCalendarDate);
+    setVisibleMonth(freshCalendarDate.slice(0, 7));
     setPickerOpen(false);
-  }, [calendarDate]);
+  }, []);
 
   useRefetchHistoryOnTabFocus(
     isActive,
     accessToken,
     hasPremiumAccess,
     calendarDate,
+    timeZone,
     handleReturnedToHistoryTab,
   );
 
+  // Prefer the server's "today" (post-reset). Ignore client-cached payloads whose
+  // today is behind the local calendar day (pre-midnight live row).
   const historyData = isHistoryResponseForCalendarDate(
     historyQuery.data,
-    calendarDate,
+    queryCalendarDate,
   )
     ? historyQuery.data
-    : undefined;
+    : historyQuery.data &&
+        formatApiCalendarDate(historyQuery.data.today) > queryCalendarDate
+      ? historyQuery.data
+      : undefined;
   const today = historyData
     ? formatApiCalendarDate(historyData.today)
     : hasPremiumAccess
-      ? calendarDate
+      ? queryCalendarDate
       : null;
   const daysByDate = useMemo(
     () => indexHistoryDaysByDate(historyData?.days ?? []),

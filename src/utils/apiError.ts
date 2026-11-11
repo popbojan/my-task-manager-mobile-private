@@ -30,6 +30,22 @@ export function isApiConflictError(error: unknown): boolean {
   return error instanceof ResponseError && error.response.status === 409;
 }
 
+export async function getApiErrorCode(error: unknown): Promise<string | null> {
+  const body = await parseApiErrorBody(error);
+  return body?.code ?? null;
+}
+
+export async function isApiDailyResetRequiredError(
+  error: unknown,
+): Promise<boolean> {
+  if (!isApiConflictError(error)) {
+    return false;
+  }
+
+  const body = await parseApiErrorBody(error);
+  return body?.code === 'DAILY_RESET_REQUIRED';
+}
+
 export function shouldRetryApiQuery(failureCount: number, error: unknown) {
   if (isApiPremiumRequiredError(error)) {
     return false;

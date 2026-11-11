@@ -21,8 +21,8 @@ import {
 } from '@/notifications/recurringNotificationTimeUtils';
 import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
 import {
+  getCachedRecurringReminderPermission,
   hasRecurringReminderPermission,
-  invalidateRecurringReminderSyncFingerprint,
   openRecurringReminderNotificationSettings,
   requestRecurringReminderPermission,
 } from '@/notifications/recurringReminderScheduler';
@@ -55,7 +55,7 @@ export default function RecurringTaskNotificationField({
     resolvePickerDate(notificationTime),
   );
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(
-    null,
+    () => getCachedRecurringReminderPermission(),
   );
   const displayTime =
     notificationTime ?? DEFAULT_RECURRING_NOTIFICATION_TIME;
@@ -81,17 +81,13 @@ export default function RecurringTaskNotificationField({
   useEffect(() => {
     const onAppState = (next: AppStateStatus) => {
       if (next === 'active') {
-        void refreshPermission().then(granted => {
-          if (granted && enabled) {
-            invalidateRecurringReminderSyncFingerprint();
-            requestRecurringReminderReschedule();
-          }
-        });
+        // Permission only — do not kick a native trigger sync from the form.
+        void refreshPermission();
       }
     };
     const sub = AppState.addEventListener('change', onAppState);
     return () => sub.remove();
-  }, [enabled, refreshPermission]);
+  }, [refreshPermission]);
 
   function openTimePicker() {
     if (!notificationTime) {
@@ -123,7 +119,6 @@ export default function RecurringTaskNotificationField({
       void requestRecurringReminderPermission().then(granted => {
         setPermissionGranted(granted);
         if (granted) {
-          invalidateRecurringReminderSyncFingerprint();
           requestRecurringReminderReschedule();
         }
       });

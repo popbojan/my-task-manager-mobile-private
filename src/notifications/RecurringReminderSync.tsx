@@ -4,17 +4,27 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { flushRecurringReminderSchedule } from '@/notifications/flushRecurringReminderSchedule';
-import { subscribeRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
-import { invalidateRecurringReminderSyncFingerprint } from '@/notifications/recurringReminderScheduler';
+import {
+  isRecurringReminderSyncSuspended,
+  subscribeRecurringReminderReschedule,
+} from '@/notifications/recurringReminderQueue';
+import {
+  hasRecurringReminderPermission,
+  invalidateRecurringReminderSyncFingerprint,
+} from '@/notifications/recurringReminderScheduler';
 import { useCurrentUser } from '@/user/useCurrentUser';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
 
-/** Keep save/tap path free; schedule after a short quiet period. */
-const DEBOUNCE_MS = 500;
+/**
+ * Notifee AlarmManager sync can freeze the Android UI for many seconds.
+ * Never run it right after save/modal close — only when backgrounded, or after
+ * a long idle while the form is closed.
+ */
+const FOREGROUND_IDLE_SYNC_MS = 12_000;
 
 /**
- * Idle scheduler: rebuilds local Notifee triggers after a quiet period.
- * Save/status paths only call requestRecurringReminderReschedule() — never await sync.
+ * Marks reminder plan dirty on save/status changes; flushes native triggers
+ * only when it is safe for the UI thread.
  */
 export default function RecurringReminderSync() {
   const queryClient = useQueryClient();
@@ -24,88 +34,104 @@ export default function RecurringReminderSync() {
   const timeZone =
     currentUserQuery.data?.timezone?.trim() || getDeviceTimezone();
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const rafRef = useRef<number | null>(null);
+  const dirtyRef = useRef(true);
   const runningRef = useRef(false);
-  const pendingRef = useRef(false);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flushArgsRef = useRef({ queryClient, accessToken, t, timeZone });
   flushArgsRef.current = { queryClient, accessToken, t, timeZone };
 
-  const scheduleSoonRef = useRef<() => void>(() => {});
+  const clearIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+  }, []);
 
   const runFlush = useCallback(async () => {
+    if (isRecurringReminderSyncSuspended()) {
+      return;
+    }
     if (runningRef.current) {
-      pendingRef.current = true;
+      return;
+    }
+    if (!dirtyRef.current) {
       return;
     }
 
     runningRef.current = true;
+    clearIdleTimer();
     try {
       await flushRecurringReminderSchedule(flushArgsRef.current);
+      dirtyRef.current = false;
     } catch {
-      // Native/permission failures must not affect UI.
+      // Keep dirty so a later background/idle pass can retry.
+      dirtyRef.current = true;
     } finally {
       runningRef.current = false;
-      if (pendingRef.current) {
-        pendingRef.current = false;
-        scheduleSoonRef.current();
-      }
     }
-  }, []);
+  }, [clearIdleTimer]);
 
-  const scheduleSoon = useCallback(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
+  const armIdleSync = useCallback(() => {
+    clearIdleTimer();
+    if (isRecurringReminderSyncSuspended()) {
+      return;
     }
-    if (rafRef.current != null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
+    if (!dirtyRef.current) {
+      return;
+    }
+    if (AppState.currentState !== 'active') {
+      return;
     }
 
-    debounceRef.current = setTimeout(() => {
-      debounceRef.current = null;
-      // Yield one frame so modal close / list paint finish first.
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = null;
-        void runFlush();
-      });
-    }, DEBOUNCE_MS);
-  }, [runFlush]);
+    idleTimerRef.current = setTimeout(() => {
+      idleTimerRef.current = null;
+      void runFlush();
+    }, FOREGROUND_IDLE_SYNC_MS);
+  }, [clearIdleTimer, runFlush]);
 
-  scheduleSoonRef.current = scheduleSoon;
-
-  useEffect(() => {
-    scheduleSoon();
-  }, [scheduleSoon, accessToken, timeZone]);
+  const markDirty = useCallback(() => {
+    dirtyRef.current = true;
+    // Never flush immediately — that blocked modal reopen for 6–10s.
+    armIdleSync();
+  }, [armIdleSync]);
 
   useEffect(() => {
     return subscribeRecurringReminderReschedule(() => {
-      scheduleSoon();
+      markDirty();
     });
-  }, [scheduleSoon]);
+  }, [markDirty]);
+
+  useEffect(() => {
+    // Session/timezone change: plan may differ; wait for idle/background.
+    markDirty();
+  }, [markDirty, accessToken, timeZone]);
 
   useEffect(() => {
     const onAppState = (next: AppStateStatus) => {
       if (next === 'active') {
-        // Permission may have changed in system settings while backgrounded.
+        // Soft permission refresh only — no native trigger rewrite on foreground.
+        void hasRecurringReminderPermission().catch(() => undefined);
+        armIdleSync();
+        return;
+      }
+
+      if (next === 'background' || next === 'inactive') {
+        clearIdleTimer();
+        if (isRecurringReminderSyncSuspended()) {
+          return;
+        }
         invalidateRecurringReminderSyncFingerprint();
-        scheduleSoon();
+        dirtyRef.current = true;
+        void runFlush();
       }
     };
     const sub = AppState.addEventListener('change', onAppState);
     return () => sub.remove();
-  }, [scheduleSoon]);
+  }, [armIdleSync, clearIdleTimer, runFlush]);
 
   useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-      if (rafRef.current != null) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
-  }, []);
+    return () => clearIdleTimer();
+  }, [clearIdleTimer]);
 
   return null;
 }

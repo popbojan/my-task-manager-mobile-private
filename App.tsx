@@ -51,6 +51,10 @@ import AppMonitoringBootstrap from '@/monitoring/AppMonitoringBootstrap';
 import { logMonitoringScreen } from '@/monitoring/appMonitoring';
 import RecurringTaskResetPolling from '@/recurring/RecurringTaskResetPolling';
 import RecurringReminderSync from '@/notifications/RecurringReminderSync';
+import {
+  requestRecurringReminderReschedule,
+  setRecurringReminderSyncSuspended,
+} from '@/notifications/recurringReminderQueue';
 
 function MainAppShell() {
   const queryClient = useQueryClient();
@@ -160,6 +164,8 @@ function MainAppShell() {
       return;
     }
 
+    // Suspend before paint so a pending Notifee sync cannot delay the modal.
+    setRecurringReminderSyncSuspended(true);
     setTaskForm(prev => ({
       visible: true,
       taskId,
@@ -169,6 +175,9 @@ function MainAppShell() {
 
   function closeTaskForm() {
     setTaskForm(prev => ({ ...prev, visible: false, taskId: null }));
+    setRecurringReminderSyncSuspended(false);
+    // Re-arm idle sync only — never flush Notifee on the close/reopen path.
+    requestRecurringReminderReschedule();
   }
 
   function openHistoryDayDetail(payload: HistoryDayDetailPayload) {

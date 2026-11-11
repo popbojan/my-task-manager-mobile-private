@@ -2,6 +2,7 @@ import type { TimestampTrigger } from '@notifee/react-native';
 import { Linking } from 'react-native';
 import type { RecurringReminderCopy } from '@/notifications/recurringReminderPlan';
 import { RECURRING_REMINDER_ID_PREFIX } from '@/notifications/recurringReminderPlan';
+import { isRecurringReminderSyncSuspended } from '@/notifications/recurringReminderQueue';
 import {
   loadNotifeePackage,
   warnNotifeeUnavailable,
@@ -11,6 +12,8 @@ export const RECURRING_REMINDER_CHANNEL_ID = 'recurring-reminders';
 
 let lastSyncedFingerprint: string | null = null;
 let syncInFlight: Promise<void> | null = null;
+let cachedPermission: boolean | null = null;
+let permissionInFlight: Promise<boolean> | null = null;
 
 export function reminderPlanFingerprint(
   reminders: RecurringReminderCopy[],
@@ -27,34 +30,57 @@ function isManagedReminderId(id: string): boolean {
   return id.startsWith(RECURRING_REMINDER_ID_PREFIX);
 }
 
+/** Sync read for instant form paint — may be null until first native check. */
+export function getCachedRecurringReminderPermission(): boolean | null {
+  return cachedPermission;
+}
+
+function yieldToUi(): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}
+
 export async function requestRecurringReminderPermission(): Promise<boolean> {
   const notifeePkg = loadNotifeePackage();
   if (!notifeePkg) {
     warnNotifeeUnavailable('requestRecurringReminderPermission');
+    cachedPermission = false;
     return false;
   }
 
   const { default: notifee, AuthorizationStatus } = notifeePkg;
   const settings = await notifee.requestPermission();
-  return (
+  const granted =
     settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
-    settings.authorizationStatus === AuthorizationStatus.PROVISIONAL
-  );
+    settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
+  cachedPermission = granted;
+  return granted;
 }
 
 export async function hasRecurringReminderPermission(): Promise<boolean> {
-  const notifeePkg = loadNotifeePackage();
-  if (!notifeePkg) {
-    warnNotifeeUnavailable('hasRecurringReminderPermission');
-    return false;
+  if (permissionInFlight) {
+    return permissionInFlight;
   }
 
-  const { default: notifee, AuthorizationStatus } = notifeePkg;
-  const settings = await notifee.getNotificationSettings();
-  return (
-    settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
-    settings.authorizationStatus === AuthorizationStatus.PROVISIONAL
-  );
+  permissionInFlight = (async () => {
+    const notifeePkg = loadNotifeePackage();
+    if (!notifeePkg) {
+      warnNotifeeUnavailable('hasRecurringReminderPermission');
+      cachedPermission = false;
+      return false;
+    }
+
+    const { default: notifee, AuthorizationStatus } = notifeePkg;
+    const settings = await notifee.getNotificationSettings();
+    const granted =
+      settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
+      settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
+    cachedPermission = granted;
+    return granted;
+  })().finally(() => {
+    permissionInFlight = null;
+  });
+
+  return permissionInFlight;
 }
 
 async function ensureReminderChannel(channelName: string): Promise<void> {
@@ -80,21 +106,30 @@ export async function cancelRecurringReminderTriggers(): Promise<void> {
   const notifee = notifeePkg.default;
   const triggerIds = await notifee.getTriggerNotificationIds();
   const managedIds = triggerIds.filter(isManagedReminderId);
-  await Promise.all(
-    managedIds.map(id => notifee.cancelTriggerNotification(id)),
-  );
+  for (const id of managedIds) {
+    if (isRecurringReminderSyncSuspended()) {
+      lastSyncedFingerprint = null;
+      return;
+    }
+    await notifee.cancelTriggerNotification(id);
+    await yieldToUi();
+  }
   lastSyncedFingerprint = null;
 }
 
 /**
  * Apply the reminder plan to native triggers.
  * Diffs by id: cancel stale managed triggers, upsert the desired set.
- * Safe to call off the UI path; skips work when fingerprint is unchanged.
+ * Yields between native calls so modal open / taps stay responsive.
  */
 export async function syncRecurringReminderTriggers(
   reminders: RecurringReminderCopy[],
   channelName: string,
 ): Promise<void> {
+  if (isRecurringReminderSyncSuspended()) {
+    return;
+  }
+
   const fingerprint = reminderPlanFingerprint(reminders);
   if (fingerprint === lastSyncedFingerprint) {
     return;
@@ -102,55 +137,78 @@ export async function syncRecurringReminderTriggers(
 
   if (syncInFlight) {
     await syncInFlight;
-    if (fingerprint === lastSyncedFingerprint) {
+    if (
+      fingerprint === lastSyncedFingerprint ||
+      isRecurringReminderSyncSuspended()
+    ) {
       return;
     }
   }
 
   const run = (async () => {
+    if (isRecurringReminderSyncSuspended()) {
+      return;
+    }
+
     const notifeePkg = loadNotifeePackage();
     if (!notifeePkg) {
       warnNotifeeUnavailable('syncRecurringReminderTriggers');
       return;
     }
 
-    const {
-      default: notifee,
-      AndroidNotificationSetting,
-      TriggerType,
-    } = notifeePkg;
+    const { default: notifee, TriggerType } = notifeePkg;
 
     await ensureReminderChannel(channelName);
+    await yieldToUi();
+
+    if (isRecurringReminderSyncSuspended()) {
+      return;
+    }
 
     if (reminders.length === 0) {
       await cancelRecurringReminderTriggers();
-      lastSyncedFingerprint = fingerprint;
+      if (!isRecurringReminderSyncSuspended()) {
+        lastSyncedFingerprint = fingerprint;
+      }
       return;
     }
 
     const permissionGranted = await hasRecurringReminderPermission();
     if (!permissionGranted) {
       await cancelRecurringReminderTriggers();
-      lastSyncedFingerprint = fingerprint;
+      if (!isRecurringReminderSyncSuspended()) {
+        lastSyncedFingerprint = fingerprint;
+      }
       return;
     }
 
-    const settings = await notifee.getNotificationSettings();
-    const alarmEnabled =
-      settings.android?.alarm === undefined ||
-      settings.android.alarm === AndroidNotificationSetting.ENABLED;
+    if (isRecurringReminderSyncSuspended()) {
+      return;
+    }
 
+    // Avoid AlarmManager here — it can freeze the Android UI for many seconds.
+    // WorkManager triggers stay off the critical path while editing.
     const desiredIds = new Set(reminders.map(reminder => reminder.id));
     const existingIds = await notifee.getTriggerNotificationIds();
     const staleIds = existingIds.filter(
       id => isManagedReminderId(id) && !desiredIds.has(id),
     );
 
-    await Promise.all(
-      staleIds.map(id => notifee.cancelTriggerNotification(id)),
-    );
+    for (const id of staleIds) {
+      if (isRecurringReminderSyncSuspended()) {
+        lastSyncedFingerprint = null;
+        return;
+      }
+      await notifee.cancelTriggerNotification(id);
+      await yieldToUi();
+    }
 
     for (const reminder of reminders) {
+      if (isRecurringReminderSyncSuspended()) {
+        lastSyncedFingerprint = null;
+        return;
+      }
+
       if (reminder.timestamp <= Date.now()) {
         continue;
       }
@@ -158,9 +216,6 @@ export async function syncRecurringReminderTriggers(
       const trigger: TimestampTrigger = {
         type: TriggerType.TIMESTAMP,
         timestamp: reminder.timestamp,
-        ...(alarmEnabled
-          ? { alarmManager: { allowWhileIdle: true } }
-          : {}),
       };
 
       await notifee.createTriggerNotification(
@@ -176,9 +231,12 @@ export async function syncRecurringReminderTriggers(
         },
         trigger,
       );
+      await yieldToUi();
     }
 
-    lastSyncedFingerprint = fingerprint;
+    if (!isRecurringReminderSyncSuspended()) {
+      lastSyncedFingerprint = fingerprint;
+    }
   })();
 
   syncInFlight = run.finally(() => {

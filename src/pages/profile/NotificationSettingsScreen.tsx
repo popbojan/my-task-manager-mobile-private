@@ -29,8 +29,12 @@ import {
   notificationTimeToDate,
 } from '@/notifications/recurringNotificationTimeUtils';
 import {
+  ensureRecurringReminderAlarmPermission,
+  getCachedRecurringReminderAlarmPermission,
   getCachedRecurringReminderPermission,
+  hasRecurringReminderAlarmPermission,
   hasRecurringReminderPermission,
+  openRecurringReminderAlarmSettings,
   openRecurringReminderNotificationSettings,
   requestRecurringReminderPermission,
 } from '@/notifications/recurringReminderScheduler';
@@ -73,6 +77,9 @@ export default function NotificationSettingsScreen({
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(
     () => getCachedRecurringReminderPermission(),
   );
+  const [alarmGranted, setAlarmGranted] = useState<boolean | null>(() =>
+    getCachedRecurringReminderAlarmPermission(),
+  );
   const [isSyncing, setIsSyncing] = useState(false);
 
   const locale =
@@ -85,8 +92,12 @@ export default function NotificationSettingsScreen({
           : 'en-GB';
 
   const refreshPermission = useCallback(async () => {
-    const granted = await hasRecurringReminderPermission();
+    const [granted, alarmOk] = await Promise.all([
+      hasRecurringReminderPermission(),
+      hasRecurringReminderAlarmPermission(),
+    ]);
     setPermissionGranted(granted);
+    setAlarmGranted(alarmOk);
     return granted;
   }, []);
 
@@ -136,6 +147,9 @@ export default function NotificationSettingsScreen({
           ? true
           : await requestRecurringReminderPermission();
         setPermissionGranted(granted);
+
+        const alarmOk = await ensureRecurringReminderAlarmPermission();
+        setAlarmGranted(alarmOk);
       } else if (next.enabled) {
         await refreshPermission();
       }
@@ -211,7 +225,16 @@ export default function NotificationSettingsScreen({
   const timeLabel = formatNotificationTimeLabel(displayTime, locale);
   const showPermissionHint =
     canEdit && enabled && permissionGranted === false;
-  const showEnabledHint = canEdit && enabled && permissionGranted === true;
+  const showAlarmHint =
+    canEdit &&
+    enabled &&
+    permissionGranted === true &&
+    alarmGranted === false;
+  const showEnabledHint =
+    canEdit &&
+    enabled &&
+    permissionGranted === true &&
+    alarmGranted !== false;
   const showDisabledHint = canEdit && !enabled;
 
   return (
@@ -285,6 +308,23 @@ export default function NotificationSettingsScreen({
                         {t('profile.notifications.permissionLink')}
                       </Text>
                       {t('profile.notifications.permissionAfter')}
+                    </Text>
+                  </View>
+                ) : null}
+                {showAlarmHint ? (
+                  <View style={[styles.statusBox, styles.permissionBox]}>
+                    <Text style={styles.statusText} numberOfLines={3}>
+                      {t('profile.notifications.alarmBefore')}
+                      <Text
+                        style={styles.permissionLink}
+                        onPress={() => {
+                          void openRecurringReminderAlarmSettings();
+                        }}
+                        accessibilityRole="link"
+                      >
+                        {t('profile.notifications.alarmLink')}
+                      </Text>
+                      {t('profile.notifications.alarmAfter')}
                     </Text>
                   </View>
                 ) : null}

@@ -301,6 +301,11 @@ export const de = {
   'recurring.form.notificationPermissionLink': 'Systemeinstellungen',
   'recurring.form.notificationPermissionAfter':
     ', damit Erinnerungen ankommen.',
+  'recurring.form.notificationAlarmBefore':
+    'Bitte erlaube Alarme & Erinnerungen in den ',
+  'recurring.form.notificationAlarmLink': 'Systemeinstellungen',
+  'recurring.form.notificationAlarmAfter':
+    ', sonst kann die Erinnerung zur Uhrzeit nicht kommen.',
   'recurring.form.notificationEnabledHint':
     'Schalter an: Täglich um {{time}} bekommst du eine Erinnerung auf dem Handy.',
   'recurring.form.notificationDisabledHint':
@@ -532,6 +537,11 @@ export const de = {
   'profile.notifications.permissionLink': 'Systemeinstellungen',
   'profile.notifications.permissionAfter':
     ', damit die Erinnerung ankommen kann.',
+  'profile.notifications.alarmBefore':
+    'Bitte erlaube Alarme & Erinnerungen in den ',
+  'profile.notifications.alarmLink': 'Systemeinstellungen',
+  'profile.notifications.alarmAfter':
+    ', sonst kann die Erinnerung zur Uhrzeit nicht kommen.',
   'profile.notifications.enabledHint':
     'Schalter an: Täglich um {{time}} bekommst du eine Erinnerung auf dem Handy.',
   'profile.notifications.disabledHint':

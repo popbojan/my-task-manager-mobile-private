@@ -301,6 +301,11 @@ export const en: Record<TranslationKey, string> = {
   'recurring.form.notificationPermissionLink': 'system settings',
   'recurring.form.notificationPermissionAfter':
     ' so reminders can arrive.',
+  'recurring.form.notificationAlarmBefore':
+    'Please allow Alarms & reminders in ',
+  'recurring.form.notificationAlarmLink': 'system settings',
+  'recurring.form.notificationAlarmAfter':
+    ', otherwise the reminder may not fire on time.',
   'recurring.form.notificationEnabledHint':
     'Reminders are on — daily at {{time}} on your phone.',
   'recurring.form.notificationDisabledHint':
@@ -525,6 +530,11 @@ export const en: Record<TranslationKey, string> = {
   'profile.notifications.permissionLink': 'system settings',
   'profile.notifications.permissionAfter':
     ' so the reminder can arrive.',
+  'profile.notifications.alarmBefore':
+    'Please allow Alarms & reminders in ',
+  'profile.notifications.alarmLink': 'system settings',
+  'profile.notifications.alarmAfter':
+    ', otherwise the reminder may not fire on time.',
   'profile.notifications.enabledHint':
     'Switch on: you’ll get a daily reminder on your phone at {{time}}.',
   'profile.notifications.disabledHint':

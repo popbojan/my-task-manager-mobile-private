@@ -305,6 +305,11 @@ export const fr: Record<TranslationKey, string> = {
   'recurring.form.notificationPermissionLink': 'réglages système',
   'recurring.form.notificationPermissionAfter':
     ' pour recevoir les rappels.',
+  'recurring.form.notificationAlarmBefore':
+    'Autorise Alarmes et rappels dans les ',
+  'recurring.form.notificationAlarmLink': 'réglages système',
+  'recurring.form.notificationAlarmAfter':
+    ', sinon le rappel peut ne pas arriver à l’heure.',
   'recurring.form.notificationEnabledHint':
     'Rappels activés — chaque jour à {{time}} sur ton téléphone.',
   'recurring.form.notificationDisabledHint':
@@ -538,6 +543,11 @@ export const fr: Record<TranslationKey, string> = {
   'profile.notifications.permissionLink': 'réglages système',
   'profile.notifications.permissionAfter':
     ' pour que le rappel puisse arriver.',
+  'profile.notifications.alarmBefore':
+    'Autorise Alarmes et rappels dans les ',
+  'profile.notifications.alarmLink': 'réglages système',
+  'profile.notifications.alarmAfter':
+    ', sinon le rappel peut ne pas arriver à l’heure.',
   'profile.notifications.enabledHint':
     'Interrupteur activé : chaque jour à {{time}}, tu reçois un rappel sur le téléphone.',
   'profile.notifications.disabledHint':

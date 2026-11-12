@@ -21,6 +21,8 @@ let lastSyncedFingerprint: string | null = null;
 let syncInFlight: Promise<void> | null = null;
 let cachedPermission: boolean | null = null;
 let permissionInFlight: Promise<boolean> | null = null;
+let cachedAlarmPermission: boolean | null = null;
+let alarmPermissionInFlight: Promise<boolean> | null = null;
 
 export function reminderPlanFingerprint(
   reminders: RecurringReminderCopy[],
@@ -40,6 +42,11 @@ function isManagedReminderId(id: string): boolean {
 /** Sync read for instant form paint — may be null until first native check. */
 export function getCachedRecurringReminderPermission(): boolean | null {
   return cachedPermission;
+}
+
+/** Sync read for Android exact-alarm gate — null until first native check. */
+export function getCachedRecurringReminderAlarmPermission(): boolean | null {
+  return cachedAlarmPermission;
 }
 
 function yieldToUi(): Promise<void> {
@@ -88,6 +95,68 @@ export async function hasRecurringReminderPermission(): Promise<boolean> {
   });
 
   return permissionInFlight;
+}
+
+/**
+ * Android 12+: timestamp/AlarmManager triggers need SCHEDULE_EXACT_ALARM.
+ * iOS / unsupported devices report NOT_SUPPORTED → treat as allowed.
+ */
+export async function hasRecurringReminderAlarmPermission(): Promise<boolean> {
+  if (alarmPermissionInFlight) {
+    return alarmPermissionInFlight;
+  }
+
+  alarmPermissionInFlight = (async () => {
+    const notifeePkg = loadNotifeePackage();
+    if (!notifeePkg) {
+      warnNotifeeUnavailable('hasRecurringReminderAlarmPermission');
+      cachedAlarmPermission = false;
+      return false;
+    }
+
+    const { default: notifee, AndroidNotificationSetting } = notifeePkg;
+    const settings = await notifee.getNotificationSettings();
+    const alarm = settings.android?.alarm;
+    const granted =
+      alarm == null ||
+      alarm === AndroidNotificationSetting.ENABLED ||
+      alarm === AndroidNotificationSetting.NOT_SUPPORTED;
+    cachedAlarmPermission = granted;
+    return granted;
+  })().finally(() => {
+    alarmPermissionInFlight = null;
+  });
+
+  return alarmPermissionInFlight;
+}
+
+/** Opens the system screen for exact alarms / “Alarms & reminders”. */
+export async function openRecurringReminderAlarmSettings(): Promise<void> {
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    await Linking.openSettings().catch(() => undefined);
+    return;
+  }
+
+  try {
+    await notifeePkg.default.openAlarmPermissionSettings();
+  } catch {
+    await Linking.openSettings().catch(() => undefined);
+  }
+}
+
+/**
+ * If exact alarms are disabled, open the system alarm settings once.
+ * Returns whether alarms are allowed afterwards (may still be false if user backs out).
+ */
+export async function ensureRecurringReminderAlarmPermission(): Promise<boolean> {
+  const allowed = await hasRecurringReminderAlarmPermission();
+  if (allowed) {
+    return true;
+  }
+
+  await openRecurringReminderAlarmSettings();
+  return hasRecurringReminderAlarmPermission();
 }
 
 async function ensureReminderChannel(channelName: string): Promise<void> {
@@ -333,3 +402,4 @@ export async function openRecurringReminderNotificationSettings(): Promise<void>
     await Linking.openSettings().catch(() => undefined);
   }
 }
+

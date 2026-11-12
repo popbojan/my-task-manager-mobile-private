@@ -302,6 +302,11 @@ export const sr: Record<TranslationKey, string> = {
   'recurring.form.notificationPermissionLink': 'sistemskim podešavanjima',
   'recurring.form.notificationPermissionAfter':
     ' da bi podsetnici stigli.',
+  'recurring.form.notificationAlarmBefore':
+    'Dozvoli Alarme i podsetnike u ',
+  'recurring.form.notificationAlarmLink': 'sistemskim podešavanjima',
+  'recurring.form.notificationAlarmAfter':
+    ', inače podsetnik možda neće stići na vreme.',
   'recurring.form.notificationEnabledHint':
     'Podsetnici su uključeni — svaki dan u {{time}} na telefonu.',
   'recurring.form.notificationDisabledHint':
@@ -529,6 +534,11 @@ export const sr: Record<TranslationKey, string> = {
   'profile.notifications.permissionLink': 'sistemskim podešavanjima',
   'profile.notifications.permissionAfter':
     ' da bi podsetnik mogao da stigne.',
+  'profile.notifications.alarmBefore':
+    'Dozvoli Alarme i podsetnike u ',
+  'profile.notifications.alarmLink': 'sistemskim podešavanjima',
+  'profile.notifications.alarmAfter':
+    ', inače podsetnik možda neće stići na vreme.',
   'profile.notifications.enabledHint':
     'Prekidač uključen: svaki dan u {{time}} dobijaš podsetnik na telefonu.',
   'profile.notifications.disabledHint':

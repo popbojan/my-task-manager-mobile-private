@@ -21,8 +21,12 @@ import {
 } from '@/notifications/recurringNotificationTimeUtils';
 import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
 import {
+  ensureRecurringReminderAlarmPermission,
+  getCachedRecurringReminderAlarmPermission,
   getCachedRecurringReminderPermission,
+  hasRecurringReminderAlarmPermission,
   hasRecurringReminderPermission,
+  openRecurringReminderAlarmSettings,
   openRecurringReminderNotificationSettings,
   requestRecurringReminderPermission,
 } from '@/notifications/recurringReminderScheduler';
@@ -57,6 +61,9 @@ export default function RecurringTaskNotificationField({
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(
     () => getCachedRecurringReminderPermission(),
   );
+  const [alarmGranted, setAlarmGranted] = useState<boolean | null>(() =>
+    getCachedRecurringReminderAlarmPermission(),
+  );
   const displayTime =
     notificationTime ?? DEFAULT_RECURRING_NOTIFICATION_TIME;
   const locale =
@@ -69,8 +76,12 @@ export default function RecurringTaskNotificationField({
           : 'en-GB';
 
   const refreshPermission = useCallback(async () => {
-    const granted = await hasRecurringReminderPermission();
+    const [granted, alarmOk] = await Promise.all([
+      hasRecurringReminderPermission(),
+      hasRecurringReminderAlarmPermission(),
+    ]);
     setPermissionGranted(granted);
+    setAlarmGranted(alarmOk);
     return granted;
   }, []);
 
@@ -125,7 +136,12 @@ export default function RecurringTaskNotificationField({
           ? true
           : await requestRecurringReminderPermission();
         setPermissionGranted(granted);
-        if (granted) {
+
+        // Android exact alarms are a separate switch from notification permission.
+        const alarmOk = await ensureRecurringReminderAlarmPermission();
+        setAlarmGranted(alarmOk);
+
+        if (granted && alarmOk) {
           requestRecurringReminderReschedule();
         }
       })();
@@ -145,7 +161,10 @@ export default function RecurringTaskNotificationField({
 
   const timeLabel = formatNotificationTimeLabel(displayTime, locale);
   const showPermissionHint = enabled && permissionGranted === false;
-  const showEnabledHint = enabled && permissionGranted === true;
+  const showAlarmHint =
+    enabled && permissionGranted === true && alarmGranted === false;
+  const showEnabledHint =
+    enabled && permissionGranted === true && alarmGranted !== false;
   const showDisabledHint = !enabled;
 
   return (
@@ -191,6 +210,23 @@ export default function RecurringTaskNotificationField({
                 {t('recurring.form.notificationPermissionLink')}
               </Text>
               {t('recurring.form.notificationPermissionAfter')}
+            </Text>
+          </View>
+        ) : null}
+        {showAlarmHint ? (
+          <View style={[styles.statusBox, styles.permissionBox]}>
+            <Text style={styles.statusText} numberOfLines={2}>
+              {t('recurring.form.notificationAlarmBefore')}
+              <Text
+                style={styles.permissionLink}
+                onPress={() => {
+                  void openRecurringReminderAlarmSettings();
+                }}
+                accessibilityRole="link"
+              >
+                {t('recurring.form.notificationAlarmLink')}
+              </Text>
+              {t('recurring.form.notificationAlarmAfter')}
             </Text>
           </View>
         ) : null}

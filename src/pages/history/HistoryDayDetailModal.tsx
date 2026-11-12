@@ -5,7 +5,6 @@ import {
   Keyboard,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -136,13 +135,22 @@ export default function HistoryDayDetailModal({
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
-  const panelHeight = Math.min(Math.round(windowHeight * 0.55), 460);
   const noteInputRef = useRef<TextInputInstance>(null);
   const [displayEntry, setDisplayEntry] = useState(entry);
   const [noteDraft, setNoteDraft] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [repairConfirmVisible, setRepairConfirmVisible] = useState(false);
   const [keyboardInset, setKeyboardInset] = useState(0);
+
+  // Match Heute task-form modal; shrink when keyboard is open so footer stays visible.
+  const maxPanelHeight = Math.min(Math.round(windowHeight * 0.52), 420);
+  const panelHeight =
+    keyboardInset > 0
+      ? Math.max(
+          280,
+          Math.min(maxPanelHeight, windowHeight - keyboardInset - insets.top - 16),
+        )
+      : maxPanelHeight;
 
   const tone = resolveHistoryDayCellTone(displayEntry);
   const statusKey = displayEntry
@@ -402,124 +410,6 @@ export default function HistoryDayDetailModal({
     saveMutation.mutate();
   }
 
-  const formContent = (
-    <>
-      <View style={previewStyles(tone, isToday)}>
-        <View style={styles.previewTopRow}>
-          <Text style={[styles.previewDayNumber, isToday && styles.previewDayNumberToday]}>
-            {dayOfMonth}
-          </Text>
-          <HistoryDetailStatusBadge entry={displayEntry} />
-        </View>
-
-        <View style={styles.metricsList}>
-          <View style={styles.metricRow}>
-            <Text style={styles.metricLabel}>{t('history.metric.tasks')}</Text>
-            <Text style={styles.metricValue}>{formatHistoryTaskRatioDisplay(displayEntry)}</Text>
-          </View>
-          <View style={styles.metricRow}>
-            <Text style={styles.metricLabel}>{t('history.metric.streak')}</Text>
-            <View style={styles.metricValueRow}>
-              <FireIcon size={12} color={recurringTheme.goldBright} />
-              <Text style={styles.metricValue}>{formatHistoryStreakDisplay(displayEntry)}</Text>
-            </View>
-          </View>
-          <View style={styles.metricRow}>
-            <Text style={styles.metricLabel}>{t('history.metric.level')}</Text>
-            <Text style={styles.metricValue}>{formatHistoryLevelDisplay(displayEntry)}</Text>
-          </View>
-          <View style={styles.metricRow}>
-            <Text style={styles.metricLabel}>{t('history.metric.status')}</Text>
-            <Text style={styles.metricValue}>{t(statusKey)}</Text>
-          </View>
-        </View>
-      </View>
-
-      {canRepair ? (
-        <Pressable
-          style={[styles.repairButton, isBusy && styles.repairButtonDisabled]}
-          disabled={isBusy}
-          accessibilityRole="button"
-          onPress={() => {
-            setError(null);
-            Keyboard.dismiss();
-            setRepairConfirmVisible(true);
-          }}
-        >
-          <Text style={styles.repairButtonText}>{t('history.repair.action')}</Text>
-        </Pressable>
-      ) : null}
-
-      <View style={styles.fieldBlock}>
-        <View style={styles.noteLabelRow}>
-          <Text style={styles.label}>{t('history.note.label')}</Text>
-          <Text style={styles.noteCounter}>
-            {t('history.note.counter', {
-              count: String(noteDraft.length),
-              max: String(NOTE_MAX_LENGTH),
-            })}
-          </Text>
-        </View>
-        <TextInput
-          ref={noteInputRef}
-          style={[styles.textArea, styles.textAreaCompact]}
-          value={noteDraft}
-          onChangeText={setNoteDraft}
-          placeholder={t('history.note.placeholder')}
-          placeholderTextColor={recurringTheme.textMuted}
-          multiline
-          numberOfLines={3}
-          maxLength={NOTE_MAX_LENGTH}
-          textAlignVertical="top"
-          editable={!isBusy}
-          autoFocus
-          showSoftInputOnFocus
-        />
-        {canDeleteNote ? (
-          <Pressable
-            style={styles.deleteLink}
-            disabled={isBusy}
-            onPress={() => {
-              setError(null);
-              deleteMutation.mutate();
-            }}
-          >
-            {deleteMutation.isPending ? (
-              <ActivityIndicator color={recurringTheme.fireRedBright} size="small" />
-            ) : (
-              <Text style={styles.deleteLinkText}>{t('history.note.delete')}</Text>
-            )}
-          </Pressable>
-        ) : null}
-      </View>
-
-      {error ? (
-        <View style={styles.errorBox}>
-          <Text style={styles.error} numberOfLines={2}>
-            {error}
-          </Text>
-        </View>
-      ) : null}
-
-      <View style={styles.actions}>
-        <Pressable style={styles.cancelButton} onPress={onClose} disabled={isBusy}>
-          <Text style={styles.cancelText}>{t('common.cancel')}</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.saveButton, (!noteDirty || isBusy) && styles.saveButtonDisabled]}
-          onPress={handleSavePress}
-          disabled={!noteDirty || isBusy}
-        >
-          {saveMutation.isPending ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.saveText}>{t('common.save')}</Text>
-          )}
-        </Pressable>
-      </View>
-    </>
-  );
-
   return (
     <View style={styles.overlay} accessibilityViewIsModal>
       <Pressable
@@ -537,7 +427,7 @@ export default function HistoryDayDetailModal({
 
       <View style={[styles.keyboardWrap, { paddingBottom: keyboardInset }]}>
         <SafeAreaView edges={['top']} style={styles.safeTop}>
-          <View style={[styles.panel, { maxHeight: panelHeight }]}>
+          <View style={[styles.panel, { height: panelHeight }]}>
             <View style={styles.panelHeader}>
               <View style={styles.panelHeaderCopy}>
                 <Text style={styles.eyebrow}>{t('history.title')}</Text>
@@ -552,15 +442,160 @@ export default function HistoryDayDetailModal({
               </Pressable>
             </View>
 
-            <ScrollView
-              style={styles.formScroll}
-              contentContainerStyle={styles.formBody}
-              keyboardShouldPersistTaps="handled"
-              keyboardDismissMode="on-drag"
-              showsVerticalScrollIndicator={false}
-            >
-              {formContent}
-            </ScrollView>
+            <View style={styles.formBody}>
+              <View style={styles.topBlock}>
+                <View style={previewStyles(tone, isToday)}>
+                  <View style={styles.previewTopRow}>
+                    <Text
+                      style={[
+                        styles.previewDayNumber,
+                        isToday && styles.previewDayNumberToday,
+                      ]}
+                    >
+                      {dayOfMonth}
+                    </Text>
+                    <HistoryDetailStatusBadge entry={displayEntry} />
+                  </View>
+
+                  <View style={styles.metricsList}>
+                    <View style={styles.metricRow}>
+                      <Text style={styles.metricLabel}>{t('history.metric.tasks')}</Text>
+                      <Text style={styles.metricValue}>
+                        {formatHistoryTaskRatioDisplay(displayEntry)}
+                      </Text>
+                    </View>
+                    <View style={styles.metricRow}>
+                      <Text style={styles.metricLabel}>{t('history.metric.streak')}</Text>
+                      <View style={styles.metricValueRow}>
+                        <FireIcon size={12} color={recurringTheme.goldBright} />
+                        <Text style={styles.metricValue}>
+                          {formatHistoryStreakDisplay(displayEntry)}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.metricRow}>
+                      <Text style={styles.metricLabel}>{t('history.metric.level')}</Text>
+                      <Text style={styles.metricValue}>
+                        {formatHistoryLevelDisplay(displayEntry)}
+                      </Text>
+                    </View>
+                    <View style={styles.metricRow}>
+                      <Text style={styles.metricLabel}>{t('history.metric.status')}</Text>
+                      <Text style={styles.metricValue}>{t(statusKey)}</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.fieldBlock}>
+                <View style={styles.noteToolbar}>
+                  <View style={styles.noteToolbarMeta}>
+                    <Text style={styles.label}>{t('history.note.label')}</Text>
+                    <Text style={styles.noteCounter}>
+                      {t('history.note.counter', {
+                        count: String(noteDraft.length),
+                        max: String(NOTE_MAX_LENGTH),
+                      })}
+                    </Text>
+                  </View>
+
+                  {canRepair || canDeleteNote ? (
+                    <View style={styles.noteToolbarActions}>
+                      {canRepair ? (
+                        <Pressable
+                          style={[
+                            styles.repairButton,
+                            isBusy && styles.repairButtonDisabled,
+                          ]}
+                          disabled={isBusy}
+                          accessibilityRole="button"
+                          onPress={() => {
+                            setError(null);
+                            Keyboard.dismiss();
+                            setRepairConfirmVisible(true);
+                          }}
+                        >
+                          <Text style={styles.repairButtonText} numberOfLines={1}>
+                            {t('history.repair.action')}
+                          </Text>
+                        </Pressable>
+                      ) : null}
+                      {canDeleteNote ? (
+                        <Pressable
+                          style={styles.deleteLink}
+                          disabled={isBusy}
+                          onPress={() => {
+                            setError(null);
+                            deleteMutation.mutate();
+                          }}
+                        >
+                          {deleteMutation.isPending ? (
+                            <ActivityIndicator
+                              color={recurringTheme.fireRedBright}
+                              size="small"
+                            />
+                          ) : (
+                            <Text style={styles.deleteLinkText} numberOfLines={1}>
+                              {t('history.note.delete')}
+                            </Text>
+                          )}
+                        </Pressable>
+                      ) : null}
+                    </View>
+                  ) : null}
+                </View>
+
+                <TextInput
+                  ref={noteInputRef}
+                  style={styles.textArea}
+                  value={noteDraft}
+                  onChangeText={setNoteDraft}
+                  placeholder={t('history.note.placeholder')}
+                  placeholderTextColor={recurringTheme.textMuted}
+                  multiline
+                  scrollEnabled
+                  maxLength={NOTE_MAX_LENGTH}
+                  textAlignVertical="top"
+                  editable={!isBusy}
+                  autoFocus
+                  showSoftInputOnFocus
+                />
+              </View>
+
+              <View style={styles.footer}>
+                {error ? (
+                  <View style={styles.errorBox}>
+                    <Text style={styles.error} numberOfLines={2}>
+                      {error}
+                    </Text>
+                  </View>
+                ) : null}
+
+                <View style={styles.actions}>
+                  <Pressable
+                    style={styles.cancelButton}
+                    onPress={onClose}
+                    disabled={isBusy}
+                  >
+                    <Text style={styles.cancelText}>{t('common.cancel')}</Text>
+                  </Pressable>
+                  <Pressable
+                    style={[
+                      styles.saveButton,
+                      (!noteDirty || isBusy) && styles.saveButtonDisabled,
+                    ]}
+                    onPress={handleSavePress}
+                    disabled={!noteDirty || isBusy}
+                  >
+                    {saveMutation.isPending ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.saveText}>{t('common.save')}</Text>
+                    )}
+                  </Pressable>
+                </View>
+              </View>
+            </View>
           </View>
         </SafeAreaView>
       </View>
@@ -659,15 +694,21 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     marginTop: -2,
   },
-  formScroll: {
-    flexGrow: 0,
-    flexShrink: 1,
-  },
   formBody: {
+    flex: 1,
+    minHeight: 0,
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 10,
     gap: 6,
+  },
+  topBlock: {
+    gap: 6,
+    flexShrink: 0,
+  },
+  footer: {
+    gap: 6,
+    flexShrink: 0,
   },
   previewCard: {
     borderRadius: 12,
@@ -756,31 +797,33 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     textAlign: 'right',
   },
-  repairButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: recurringTheme.accent,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    alignItems: 'center',
-  },
-  repairButtonDisabled: {
-    opacity: 0.6,
-  },
-  repairButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '800',
-  },
   fieldBlock: {
+    flex: 1,
+    minHeight: 0,
     gap: 6,
     marginTop: 2,
   },
-  noteLabelRow: {
+  noteToolbar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
+    flexShrink: 0,
+    minHeight: 28,
+  },
+  noteToolbarMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 1,
+    minWidth: 0,
+  },
+  noteToolbarActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 8,
+    flexShrink: 0,
   },
   label: {
     color: recurringTheme.textSecondary,
@@ -792,7 +835,25 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
   },
+  repairButton: {
+    backgroundColor: recurringTheme.accent,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignItems: 'center',
+    flexShrink: 1,
+  },
+  repairButtonDisabled: {
+    opacity: 0.6,
+  },
+  repairButtonText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '800',
+  },
   textArea: {
+    flex: 1,
+    minHeight: 72,
     borderWidth: 1,
     borderColor: recurringTheme.cardBorder,
     borderRadius: 12,
@@ -804,16 +865,14 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     backgroundColor: recurringTheme.surfaceInset,
   },
-  textAreaCompact: {
-    height: 72,
-  },
   deleteLink: {
-    alignSelf: 'flex-start',
     paddingVertical: 2,
+    paddingHorizontal: 2,
+    flexShrink: 0,
   },
   deleteLinkText: {
     color: recurringTheme.fireRedBright,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
   errorBox: {

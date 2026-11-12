@@ -25,6 +25,10 @@
         android:name="google_analytics_ssaid_collection_enabled"
         android:value="false"
         tools:replace="android:value" />
+      <!-- Referenced only from JS (Notifee smallIcon); keep for shrinkResources. -->
+      <meta-data
+        android:name="app.mytaskmanager.KEEP_NOTIFICATION_SMALL_ICON"
+        android:resource="@drawable/ic_stat_notify" />
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

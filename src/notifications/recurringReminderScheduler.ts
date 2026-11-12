@@ -117,16 +117,26 @@ export async function cancelRecurringReminderTriggers(): Promise<void> {
   lastSyncedFingerprint = null;
 }
 
+type SyncRecurringReminderOptions = {
+  /** Bypass modal suspend — used while Save loader is visible. */
+  force?: boolean;
+};
+
 /**
  * Apply the reminder plan to native triggers.
  * Diffs by id: cancel stale managed triggers, upsert the desired set.
- * Yields between native calls so modal open / taps stay responsive.
+ * Prefer `force` from the Save path (loader visible); idle/background otherwise.
  */
 export async function syncRecurringReminderTriggers(
   reminders: RecurringReminderCopy[],
   channelName: string,
+  options: SyncRecurringReminderOptions = {},
 ): Promise<void> {
-  if (isRecurringReminderSyncSuspended()) {
+  const force = options.force === true;
+  const shouldAbort = () =>
+    !force && isRecurringReminderSyncSuspended();
+
+  if (shouldAbort()) {
     return;
   }
 
@@ -137,16 +147,13 @@ export async function syncRecurringReminderTriggers(
 
   if (syncInFlight) {
     await syncInFlight;
-    if (
-      fingerprint === lastSyncedFingerprint ||
-      isRecurringReminderSyncSuspended()
-    ) {
+    if (fingerprint === lastSyncedFingerprint || shouldAbort()) {
       return;
     }
   }
 
   const run = (async () => {
-    if (isRecurringReminderSyncSuspended()) {
+    if (shouldAbort()) {
       return;
     }
 
@@ -156,38 +163,36 @@ export async function syncRecurringReminderTriggers(
       return;
     }
 
-    const { default: notifee, TriggerType } = notifeePkg;
+    const { default: notifee, RepeatFrequency, TriggerType } = notifeePkg;
 
     await ensureReminderChannel(channelName);
-    await yieldToUi();
+    if (!force) {
+      await yieldToUi();
+    }
 
-    if (isRecurringReminderSyncSuspended()) {
+    if (shouldAbort()) {
       return;
     }
 
     if (reminders.length === 0) {
       await cancelRecurringReminderTriggers();
-      if (!isRecurringReminderSyncSuspended()) {
-        lastSyncedFingerprint = fingerprint;
-      }
+      lastSyncedFingerprint = fingerprint;
       return;
     }
 
     const permissionGranted = await hasRecurringReminderPermission();
     if (!permissionGranted) {
       await cancelRecurringReminderTriggers();
-      if (!isRecurringReminderSyncSuspended()) {
-        lastSyncedFingerprint = fingerprint;
-      }
+      lastSyncedFingerprint = fingerprint;
       return;
     }
 
-    if (isRecurringReminderSyncSuspended()) {
+    if (shouldAbort()) {
       return;
     }
 
-    // Avoid AlarmManager here — it can freeze the Android UI for many seconds.
-    // WorkManager triggers stay off the critical path while editing.
+    // AlarmManager: reliable with app closed / after reboot. Can be slow —
+    // call with force only under the Save button loader.
     const desiredIds = new Set(reminders.map(reminder => reminder.id));
     const existingIds = await notifee.getTriggerNotificationIds();
     const staleIds = existingIds.filter(
@@ -195,16 +200,18 @@ export async function syncRecurringReminderTriggers(
     );
 
     for (const id of staleIds) {
-      if (isRecurringReminderSyncSuspended()) {
+      if (shouldAbort()) {
         lastSyncedFingerprint = null;
         return;
       }
       await notifee.cancelTriggerNotification(id);
-      await yieldToUi();
+      if (!force) {
+        await yieldToUi();
+      }
     }
 
     for (const reminder of reminders) {
-      if (isRecurringReminderSyncSuspended()) {
+      if (shouldAbort()) {
         lastSyncedFingerprint = null;
         return;
       }
@@ -216,6 +223,10 @@ export async function syncRecurringReminderTriggers(
       const trigger: TimestampTrigger = {
         type: TriggerType.TIMESTAMP,
         timestamp: reminder.timestamp,
+        repeatFrequency: RepeatFrequency.DAILY,
+        alarmManager: {
+          allowWhileIdle: true,
+        },
       };
 
       await notifee.createTriggerNotification(
@@ -231,12 +242,12 @@ export async function syncRecurringReminderTriggers(
         },
         trigger,
       );
-      await yieldToUi();
+      if (!force) {
+        await yieldToUi();
+      }
     }
 
-    if (!isRecurringReminderSyncSuspended()) {
-      lastSyncedFingerprint = fingerprint;
-    }
+    lastSyncedFingerprint = fingerprint;
   })();
 
   syncInFlight = run.finally(() => {

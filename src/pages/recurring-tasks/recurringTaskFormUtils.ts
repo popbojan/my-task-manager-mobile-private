@@ -58,3 +58,53 @@ export function buildRecurringTaskNotificationFields(form: {
     notificationTime: resolveStoredNotificationTime(form.notificationTime),
   };
 }
+
+export type RecurringReminderScheduleSnapshot = {
+  notificationEnabled: boolean;
+  notificationTime: string | null;
+};
+
+export function reminderScheduleSnapshotFromTask(
+  task: Pick<RecurringTask, 'notificationEnabled' | 'notificationTime'>,
+): RecurringReminderScheduleSnapshot {
+  return {
+    notificationEnabled: task.notificationEnabled,
+    notificationTime: task.notificationEnabled
+      ? resolveStoredNotificationTime(task.notificationTime)
+      : task.notificationTime,
+  };
+}
+
+export function reminderScheduleSnapshotFromForm(
+  form: Pick<RecurringTaskFormState, 'notificationEnabled' | 'notificationTime'>,
+): RecurringReminderScheduleSnapshot {
+  return {
+    notificationEnabled: form.notificationEnabled,
+    notificationTime: form.notificationEnabled
+      ? resolveStoredNotificationTime(form.notificationTime)
+      : form.notificationTime,
+  };
+}
+
+/** True when native AlarmManager triggers must be rewritten. */
+export function didRecurringReminderScheduleChange(
+  before: RecurringReminderScheduleSnapshot | null,
+  after: RecurringReminderScheduleSnapshot,
+): boolean {
+  if (!before) {
+    return after.notificationEnabled;
+  }
+
+  if (before.notificationEnabled !== after.notificationEnabled) {
+    return true;
+  }
+
+  if (!after.notificationEnabled) {
+    return false;
+  }
+
+  return (
+    resolveStoredNotificationTime(before.notificationTime) !==
+    resolveStoredNotificationTime(after.notificationTime)
+  );
+}

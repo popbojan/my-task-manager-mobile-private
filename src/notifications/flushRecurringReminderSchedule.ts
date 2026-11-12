@@ -16,13 +16,14 @@ type TranslateFn = (
 
 /**
  * Rebuild local reminder triggers from the recurring-tasks cache.
- * Call only from idle sync — never await this on the save path.
+ * Use `force: true` under the Save loader so the modal only closes when done.
  */
 export async function flushRecurringReminderSchedule(options: {
   queryClient: QueryClient;
   accessToken: string | null;
   t: TranslateFn;
   timeZone?: string;
+  force?: boolean;
 }): Promise<void> {
   const tasks =
     options.queryClient.getQueryData<RecurringTask[]>(
@@ -41,5 +42,6 @@ export async function flushRecurringReminderSchedule(options: {
   await syncRecurringReminderTriggers(
     plan,
     options.t('recurring.reminder.channelName'),
+    { force: options.force === true },
   );
 }

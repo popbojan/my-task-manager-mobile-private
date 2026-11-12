@@ -114,14 +114,21 @@ export default function RecurringTaskNotificationField({
     }
     onEnabledChange(nextEnabled);
 
-    // Permission is separate from save — ask when the user turns reminders on.
+    // Ask the OS only if we don't already know permission is granted.
     if (nextEnabled) {
-      void requestRecurringReminderPermission().then(granted => {
+      void (async () => {
+        const alreadyGranted =
+          permissionGranted === true ||
+          getCachedRecurringReminderPermission() === true ||
+          (await hasRecurringReminderPermission());
+        const granted = alreadyGranted
+          ? true
+          : await requestRecurringReminderPermission();
         setPermissionGranted(granted);
         if (granted) {
           requestRecurringReminderReschedule();
         }
-      });
+      })();
     }
   }
 

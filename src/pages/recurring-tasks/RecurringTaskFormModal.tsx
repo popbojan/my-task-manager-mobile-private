@@ -24,8 +24,12 @@ import RecurringTaskNotificationField from '@/pages/recurring-tasks/RecurringTas
 import { DEFAULT_RECURRING_NOTIFICATION_TIME } from '@/notifications/recurringNotificationTimeUtils';
 import {
   buildRecurringTaskNotificationFields,
+  didRecurringReminderScheduleChange,
   recurringTaskToFormState,
+  reminderScheduleSnapshotFromForm,
+  reminderScheduleSnapshotFromTask,
   selectRecurringTaskForForm,
+  type RecurringReminderScheduleSnapshot,
   type RecurringTaskFormState,
 } from '@/pages/recurring-tasks/recurringTaskFormUtils';
 import {
@@ -33,6 +37,7 @@ import {
   recurringTasksQueryKey,
   writeRecurringTaskToCaches,
 } from '@/recurring/recurringQueryKeys';
+import { flushRecurringReminderSchedule } from '@/notifications/flushRecurringReminderSchedule';
 import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
@@ -41,6 +46,8 @@ import {
   shouldRetryApiQuery,
 } from '@/utils/apiError';
 import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
+import { useCurrentUser } from '@/user/useCurrentUser';
+import { getDeviceTimezone } from '@/user/deviceTimezone';
 
 type RecurringTaskFormModalProps = {
   taskId: string | null;
@@ -64,6 +71,9 @@ export default function RecurringTaskFormModal({
   const { t } = useLanguage();
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
+  const currentUserQuery = useCurrentUser();
+  const timeZone =
+    currentUserQuery.data?.timezone?.trim() || getDeviceTimezone();
   const isEdit = taskId !== null;
 
   const listTask =
@@ -81,6 +91,9 @@ export default function RecurringTaskFormModal({
   const formRef = useRef(initialForm);
   const hydratedTaskIdRef = useRef<string | null>(null);
   const hydratedUpdatedAtRef = useRef<number | null>(null);
+  const scheduleBaselineRef = useRef<RecurringReminderScheduleSnapshot | null>(
+    listTask ? reminderScheduleSnapshotFromTask(listTask) : null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [lockedPanelHeight, setLockedPanelHeight] = useState<number | null>(null);
   const titleInputRef = useRef<TextInputInstance>(null);
@@ -122,6 +135,7 @@ export default function RecurringTaskFormModal({
     if (!isEdit) {
       hydratedTaskIdRef.current = null;
       hydratedUpdatedAtRef.current = null;
+      scheduleBaselineRef.current = null;
       formRef.current = INITIAL_FORM;
       setForm(INITIAL_FORM);
       setError(null);
@@ -148,6 +162,7 @@ export default function RecurringTaskFormModal({
     const next = recurringTaskToFormState(task);
     formRef.current = next;
     setForm(next);
+    scheduleBaselineRef.current = reminderScheduleSnapshotFromTask(task);
     hydratedTaskIdRef.current = taskId;
     hydratedUpdatedAtRef.current = updatedAt;
   }, [isEdit, listTask, taskId, taskQuery.data]);
@@ -183,33 +198,55 @@ export default function RecurringTaskFormModal({
         ...notificationFields,
       };
 
+      let saved: RecurringTask;
       if (isEdit && taskId) {
-        return authApi.updateRecurringTask({
+        saved = await authApi.updateRecurringTask({
           recurringTaskId: taskId,
           updateRecurringTaskRequest: {
             ...payload,
             status: current.status,
           },
         });
-      }
-
-      const created = await authApi.createRecurringTask({
-        createRecurringTaskRequest: payload,
-      });
-
-      if (current.status !== RecurringTaskStatus.Todo) {
-        return authApi.updateRecurringTask({
-          recurringTaskId: created.id,
-          updateRecurringTaskRequest: { status: current.status },
+      } else {
+        const created = await authApi.createRecurringTask({
+          createRecurringTaskRequest: payload,
         });
+
+        saved =
+          current.status !== RecurringTaskStatus.Todo
+            ? await authApi.updateRecurringTask({
+                recurringTaskId: created.id,
+                updateRecurringTaskRequest: { status: current.status },
+              })
+            : created;
       }
 
-      return created;
-    },
-    onSuccess: saved => {
       writeRecurringTaskToCaches(queryClient, accessToken, saved);
-      // Never await native scheduling here — idle sync picks this up.
-      requestRecurringReminderReschedule();
+
+      const scheduleAfter = reminderScheduleSnapshotFromForm(current);
+      const scheduleChanged = didRecurringReminderScheduleChange(
+        scheduleBaselineRef.current,
+        scheduleAfter,
+      );
+
+      if (scheduleChanged) {
+        // Native AlarmManager only when reminder on/off or time changed.
+        await flushRecurringReminderSchedule({
+          queryClient,
+          accessToken,
+          t,
+          timeZone,
+          force: true,
+        });
+        scheduleBaselineRef.current = scheduleAfter;
+      } else {
+        // Title/body copy may still change — refresh triggers later off the UI path.
+        requestRecurringReminderReschedule();
+      }
+
+      return saved;
+    },
+    onSuccess: () => {
       onSaved();
       onClose();
     },

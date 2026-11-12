@@ -122,10 +122,14 @@ export const de = {
   'history.note.placeholder': 'Was ist an diesem Tag passiert?',
   'history.note.counter': '{{count}} / {{max}}',
   'history.note.delete': 'Notiz löschen',
+  'history.note.deleteConfirmTitle': 'Notiz löschen?',
+  'history.note.deleteConfirmBody':
+    'Möchtest du diese Notiz wirklich löschen? Das lässt sich nicht rückgängig machen.',
   'history.note.emptyError': 'Bitte gib einen Text ein oder lösche die Notiz.',
   'history.note.tooLongError': 'Die Notiz darf höchstens 10000 Zeichen haben.',
   'history.note.saveError': 'Notiz konnte nicht gespeichert werden.',
   'history.note.deleteError': 'Notiz konnte nicht gelöscht werden.',
+
   'history.repair.action': 'Tag reparieren',
   'history.repair.confirmTitle': 'Gestern reparieren?',
   'history.repair.confirmBody':

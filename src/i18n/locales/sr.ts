@@ -123,10 +123,14 @@ export const sr: Record<TranslationKey, string> = {
   'history.note.placeholder': 'Šta se desilo ovog dana?',
   'history.note.counter': '{{count}} / {{max}}',
   'history.note.delete': 'Obriši belešku',
+  'history.note.deleteConfirmTitle': 'Obrisati belešku?',
+  'history.note.deleteConfirmBody':
+    'Da li zaista želiš da obrišeš ovu belešku? Ovo se ne može poništiti.',
   'history.note.emptyError': 'Unesi tekst ili obriši belešku.',
   'history.note.tooLongError': 'Beleška može imati najviše 10000 znakova.',
   'history.note.saveError': 'Beleška nije sačuvana.',
   'history.note.deleteError': 'Beleška nije obrisana.',
+
   'history.repair.action': 'Popravi dan',
   'history.repair.confirmTitle': 'Popraviti juče?',
   'history.repair.confirmBody':

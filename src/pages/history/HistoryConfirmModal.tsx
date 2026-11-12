@@ -1,28 +1,35 @@
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import type { TranslationKey } from '@/i18n/locales/de';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 
-type HistoryRepairConfirmModalProps = {
+type HistoryConfirmModalProps = {
   visible: boolean;
   isPending: boolean;
+  titleKey: TranslationKey;
+  bodyKey: TranslationKey;
+  confirmLabelKey: TranslationKey;
   onClose: () => void;
   onConfirm: () => void;
 };
 
-export default function HistoryRepairConfirmModal({
+export default function HistoryConfirmModal({
   visible,
   isPending,
+  titleKey,
+  bodyKey,
+  confirmLabelKey,
   onClose,
   onConfirm,
-}: HistoryRepairConfirmModalProps) {
+}: HistoryConfirmModalProps) {
   const { t } = useLanguage();
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.dialog}>
-          <Text style={styles.title}>{t('history.repair.confirmTitle')}</Text>
-          <Text style={styles.body}>{t('history.repair.confirmBody')}</Text>
+          <Text style={styles.title}>{t(titleKey)}</Text>
+          <Text style={styles.body}>{t(bodyKey)}</Text>
 
           <View style={styles.actions}>
             <Pressable style={styles.cancelButton} onPress={onClose} disabled={isPending}>
@@ -36,7 +43,7 @@ export default function HistoryRepairConfirmModal({
               {isPending ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
-                <Text style={styles.confirmText}>{t('history.repair.action')}</Text>
+                <Text style={styles.confirmText}>{t(confirmLabelKey)}</Text>
               )}
             </Pressable>
           </View>

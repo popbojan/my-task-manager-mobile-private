@@ -48,7 +48,7 @@ import {
 } from '@/utils/historyCalendar';
 import { focusTextInputSoon } from '@/utils/focusTextInputSoon';
 import { getApiErrorMessage, parseApiErrorBody } from '@/utils/apiError';
-import HistoryRepairConfirmModal from '@/pages/history/HistoryRepairConfirmModal';
+import HistoryConfirmModal from '@/pages/history/HistoryConfirmModal';
 
 const NOTE_MAX_LENGTH = 10000;
 
@@ -140,6 +140,7 @@ export default function HistoryDayDetailModal({
   const [noteDraft, setNoteDraft] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [repairConfirmVisible, setRepairConfirmVisible] = useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [keyboardInset, setKeyboardInset] = useState(0);
 
   // Match Heute task-form modal; shrink when keyboard is open so footer stays visible.
@@ -364,6 +365,8 @@ export default function HistoryDayDetailModal({
       });
     },
     onSuccess: () => {
+      setDeleteConfirmVisible(false);
+
       if (!accessToken) {
         onClose();
         return;
@@ -383,6 +386,8 @@ export default function HistoryDayDetailModal({
       onClose();
     },
     onError: async err => {
+      setDeleteConfirmVisible(false);
+
       const handled = await handleDailyResetRequired({
         error: err,
         queryClient,
@@ -526,7 +531,8 @@ export default function HistoryDayDetailModal({
                           disabled={isBusy}
                           onPress={() => {
                             setError(null);
-                            deleteMutation.mutate();
+                            Keyboard.dismiss();
+                            setDeleteConfirmVisible(true);
                           }}
                         >
                           {deleteMutation.isPending ? (
@@ -600,9 +606,12 @@ export default function HistoryDayDetailModal({
         </SafeAreaView>
       </View>
 
-      <HistoryRepairConfirmModal
+      <HistoryConfirmModal
         visible={repairConfirmVisible}
         isPending={repairMutation.isPending}
+        titleKey="history.repair.confirmTitle"
+        bodyKey="history.repair.confirmBody"
+        confirmLabelKey="history.repair.action"
         onClose={() => {
           if (!repairMutation.isPending) {
             setRepairConfirmVisible(false);
@@ -611,6 +620,23 @@ export default function HistoryDayDetailModal({
         onConfirm={() => {
           setError(null);
           repairMutation.mutate();
+        }}
+      />
+
+      <HistoryConfirmModal
+        visible={deleteConfirmVisible}
+        isPending={deleteMutation.isPending}
+        titleKey="history.note.deleteConfirmTitle"
+        bodyKey="history.note.deleteConfirmBody"
+        confirmLabelKey="history.note.delete"
+        onClose={() => {
+          if (!deleteMutation.isPending) {
+            setDeleteConfirmVisible(false);
+          }
+        }}
+        onConfirm={() => {
+          setError(null);
+          deleteMutation.mutate();
         }}
       />
     </View>

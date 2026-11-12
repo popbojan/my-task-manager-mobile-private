@@ -124,10 +124,14 @@ export const fr: Record<TranslationKey, string> = {
   'history.note.placeholder': 'Que s’est-il passé ce jour-là ?',
   'history.note.counter': '{{count}} / {{max}}',
   'history.note.delete': 'Supprimer la note',
+  'history.note.deleteConfirmTitle': 'Supprimer la note ?',
+  'history.note.deleteConfirmBody':
+    'Veux-tu vraiment supprimer cette note ? Cette action est irréversible.',
   'history.note.emptyError': 'Saisis un texte ou supprime la note.',
   'history.note.tooLongError': 'La note ne peut pas dépasser 10000 caractères.',
   'history.note.saveError': 'Impossible d’enregistrer la note.',
   'history.note.deleteError': 'Impossible de supprimer la note.',
+
   'history.repair.action': 'Réparer la journée',
   'history.repair.confirmTitle': 'Réparer hier ?',
   'history.repair.confirmBody':

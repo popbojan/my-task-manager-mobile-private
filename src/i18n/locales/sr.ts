@@ -519,9 +519,9 @@ export const sr: Record<TranslationKey, string> = {
   'profile.accountMenu.subscriptionHint': 'Premium status, kupovina i povraćaj',
   'profile.accountMenu.notifications': 'Obaveštenja',
   'profile.accountMenu.notificationsHint':
-    'Dnevni podsetnik kada još uvek ima otvorenih zadataka',
+    'Dnevni podsetnik da proveriš stranicu Danas',
   'profile.notifications.intro':
-    'Jednom dnevno podsećamo te ako na stranici Danas još uvek ima nekih otvorenih zadataka.',
+    'Jednom dnevno podsećamo te da otvoriš stranicu Danas i proveriš da li si već sve završio.',
   'profile.notifications.reminderLabel': 'Dnevni podsetnik',
   'profile.notifications.timeA11y': 'Izaberi vreme podsetnika',
   'profile.notifications.permissionBefore':
@@ -532,10 +532,11 @@ export const sr: Record<TranslationKey, string> = {
   'profile.notifications.enabledHint':
     'Prekidač uključen: svaki dan u {{time}} dobijaš podsetnik na telefonu.',
   'profile.notifications.disabledHint':
-    'Uključi prekidač za dnevni podsetnik o otvorenim zadacima. Vreme možeš sačuvati uvek.',
-  'profile.notifications.reminderTitle': 'Još otvorenih zadataka?',
+    'Uključi prekidač za dnevni podsetnik na stranicu Danas.',
+  'profile.notifications.reminderTitle': 'Brzo pogledaj Danas?',
   'profile.notifications.reminderBody':
-    'Brzo pogledaj Danas — možda je još nešto otvoreno.',
+    'Otvori stranicu Danas i proveri da li si već sve završio.',
+
 
   'profile.helpMenu.title': 'Pomoć',
   'profile.helpMenu.viewIntroduction': 'Kako funkcioniše',

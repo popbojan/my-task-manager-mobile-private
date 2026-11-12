@@ -117,6 +117,8 @@ function MainAppShell() {
 
   const [activeTab, setActiveTab] = useState<MainTab>('today');
   const pendingOpenTodayFromReminderRef = useRef(false);
+  const hideMainShellRef = useRef(hideMainShell);
+  hideMainShellRef.current = hideMainShell;
 
   useEffect(() => {
     if (hideMainShell) {
@@ -126,23 +128,6 @@ function MainAppShell() {
     void logMonitoringScreen(`tab_${activeTab}`);
   }, [activeTab, hideMainShell]);
 
-  useEffect(() => {
-    return subscribeOpenTodayFromReminder(() => {
-      if (hideMainShell) {
-        pendingOpenTodayFromReminderRef.current = true;
-        return;
-      }
-      setActiveTab('today');
-    });
-  }, [hideMainShell]);
-
-  useEffect(() => {
-    if (hideMainShell || !pendingOpenTodayFromReminderRef.current) {
-      return;
-    }
-    pendingOpenTodayFromReminderRef.current = false;
-    setActiveTab('today');
-  }, [hideMainShell]);
   const [taskForm, setTaskForm] = useState<{
     visible: boolean;
     taskId: string | null;
@@ -160,6 +145,33 @@ function MainAppShell() {
     session: number;
     payload: HistoryDayDetailPayload | null;
   }>({ visible: false, session: 0, payload: null });
+
+  function closeHistoryDayDetail() {
+    setHistoryDayModal(prev => ({ ...prev, visible: false, payload: null }));
+  }
+
+  function openTodayFromReminder() {
+    closeHistoryDayDetail();
+    setActiveTab('today');
+  }
+
+  useEffect(() => {
+    return subscribeOpenTodayFromReminder(() => {
+      if (hideMainShellRef.current) {
+        pendingOpenTodayFromReminderRef.current = true;
+        return;
+      }
+      openTodayFromReminder();
+    });
+  }, []);
+
+  useEffect(() => {
+    if (hideMainShell || !pendingOpenTodayFromReminderRef.current) {
+      return;
+    }
+    pendingOpenTodayFromReminderRef.current = false;
+    openTodayFromReminder();
+  }, [hideMainShell]);
 
   function openTaskForm(taskId: string | null) {
     const tasksError = queryClient.getQueryState(
@@ -202,10 +214,6 @@ function MainAppShell() {
       session: prev.session + 1,
       payload,
     }));
-  }
-
-  function closeHistoryDayDetail() {
-    setHistoryDayModal(prev => ({ ...prev, visible: false, payload: null }));
   }
 
   function openBoardTaskForm(

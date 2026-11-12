@@ -528,9 +528,9 @@ export const fr: Record<TranslationKey, string> = {
     'Statut Premium, achat et restauration',
   'profile.accountMenu.notifications': 'Notifications',
   'profile.accountMenu.notificationsHint':
-    'Rappel quotidien s’il reste encore des tâches ouvertes',
+    'Rappel quotidien pour vérifier la page Aujourd’hui',
   'profile.notifications.intro':
-    'Une fois par jour, on te rappelle s’il reste encore des tâches ouvertes sur la page Aujourd’hui.',
+    'Une fois par jour, on te rappelle d’ouvrir la page Aujourd’hui et de vérifier si tu as déjà tout terminé.',
   'profile.notifications.reminderLabel': 'Rappel du jour',
   'profile.notifications.timeA11y': 'Choisir l’heure du rappel',
   'profile.notifications.permissionBefore':
@@ -541,10 +541,11 @@ export const fr: Record<TranslationKey, string> = {
   'profile.notifications.enabledHint':
     'Interrupteur activé : chaque jour à {{time}}, tu reçois un rappel sur le téléphone.',
   'profile.notifications.disabledHint':
-    'Active l’interrupteur pour un rappel quotidien sur les tâches ouvertes. Tu peux enregistrer l’heure à tout moment.',
-  'profile.notifications.reminderTitle': 'Encore des tâches ouvertes ?',
+    'Active l’interrupteur pour un rappel quotidien vers Aujourd’hui.',
+  'profile.notifications.reminderTitle': 'Un coup d’œil sur Aujourd’hui ?',
   'profile.notifications.reminderBody':
-    'Un coup d’œil sur Aujourd’hui — quelque chose est peut-être encore ouvert.',
+    'Ouvre la page Aujourd’hui et vérifie si tu as déjà tout terminé.',
+
 
   'profile.helpMenu.title': 'Aide',
   'profile.helpMenu.viewIntroduction': 'Comment ça marche',

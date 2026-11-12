@@ -7,7 +7,7 @@ import {
 
 /**
  * Routes notification taps to the Heute tab (foreground + cold start).
- * Background registration lives in index.js (required by Notifee).
+ * Background presses are handled in index.js via onBackgroundEvent.
  */
 export default function RecurringReminderPressBootstrap() {
   useEffect(() => {
@@ -18,18 +18,22 @@ export default function RecurringReminderPressBootstrap() {
 
     const { default: notifee, EventType } = notifeePkg;
 
-    void notifee.getInitialNotification().then(initial => {
-      if (isRecurringReminderNotification(initial?.notification)) {
+    function openTodayIfReminder(notification: {
+      id?: string;
+      data?: Record<string, unknown> | null;
+    } | null | undefined) {
+      if (isRecurringReminderNotification(notification)) {
         requestOpenTodayFromReminder();
       }
+    }
+
+    void notifee.getInitialNotification().then(initial => {
+      openTodayIfReminder(initial?.notification);
     });
 
     return notifee.onForegroundEvent(({ type, detail }) => {
-      if (
-        type === EventType.PRESS &&
-        isRecurringReminderNotification(detail.notification)
-      ) {
-        requestOpenTodayFromReminder();
+      if (type === EventType.PRESS) {
+        openTodayIfReminder(detail.notification);
       }
     });
   }, []);

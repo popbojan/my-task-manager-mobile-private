@@ -4,6 +4,9 @@ type OpenTodayListener = () => void;
 
 const listeners = new Set<OpenTodayListener>();
 
+/** Set when a press arrives before the shell has subscribed (headless/cold). */
+let pendingOpenTodayFromReminder = false;
+
 export const RECURRING_REMINDER_OPEN_TAB = 'today';
 
 export function isRecurringReminderNotification(notification: {
@@ -26,6 +29,11 @@ export function isRecurringReminderNotification(notification: {
 
 /** Ask the main shell to show the Heute tab (notification press). */
 export function requestOpenTodayFromReminder(): void {
+  if (listeners.size === 0) {
+    pendingOpenTodayFromReminder = true;
+    return;
+  }
+
   listeners.forEach(listener => {
     try {
       listener();
@@ -39,6 +47,16 @@ export function subscribeOpenTodayFromReminder(
   listener: OpenTodayListener,
 ): () => void {
   listeners.add(listener);
+
+  if (pendingOpenTodayFromReminder) {
+    pendingOpenTodayFromReminder = false;
+    try {
+      listener();
+    } catch {
+      // Listener failures must not break notification handling.
+    }
+  }
+
   return () => {
     listeners.delete(listener);
   };

@@ -14,8 +14,20 @@ installJavaScriptCrashHandler();
 try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const notifeePkg = require('@notifee/react-native');
-  notifeePkg.default.onBackgroundEvent(async () => {
-    // Cold/background presses are completed via getInitialNotification / foreground events.
+  notifeePkg.default.onBackgroundEvent(async ({ type, detail }) => {
+    if (type !== notifeePkg.EventType.PRESS) {
+      return;
+    }
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const nav = require('./src/notifications/recurringReminderNavigation');
+      if (nav.isRecurringReminderNotification(detail?.notification)) {
+        nav.requestOpenTodayFromReminder();
+      }
+    } catch {
+      // Navigation module unavailable in some test environments.
+    }
   });
 } catch {
   // Native module missing in some test environments.

@@ -21,6 +21,7 @@ import NotificationSettingsScreen from '@/pages/profile/NotificationSettingsScre
 import SubscriptionSettingsScreen from '@/pages/profile/SubscriptionSettingsScreen';
 import { useDeleteAccountFlow } from '@/pages/profile/useDeleteAccountFlow';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
+import { subscribeOpenTodayFromReminder } from '@/notifications/recurringReminderNavigation';
 import { clearUserSession } from '@/session/clearUserSession';
 import { useAppRefresh } from '@/refresh/useAppRefresh';
 import { useRefreshControl } from '@/refresh/useRefreshControl';
@@ -63,6 +64,15 @@ export default function ProfileScreen({
     setShowSubscriptionSettings(true);
     onSubscriptionOpened?.();
   }, [openSubscription, onSubscriptionOpened]);
+
+  // Reminder taps switch to Heute — close nested profile screens so we don't stay stuck.
+  useEffect(() => {
+    return subscribeOpenTodayFromReminder(() => {
+      setShowNotificationSettings(false);
+      setShowSubscriptionSettings(false);
+      setLegalPage(null);
+    });
+  }, []);
 
   async function handleLogout() {
     if (isLoggingOut) {

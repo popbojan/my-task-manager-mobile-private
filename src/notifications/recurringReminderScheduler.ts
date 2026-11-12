@@ -1,7 +1,11 @@
 import type { TimestampTrigger } from '@notifee/react-native';
 import { Linking } from 'react-native';
 import type { RecurringReminderCopy } from '@/notifications/recurringReminderPlan';
-import { RECURRING_REMINDER_ID_PREFIX } from '@/notifications/recurringReminderPlan';
+import {
+  nextDailyReminderTimestampMs,
+  RECURRING_REMINDER_ID_PREFIX,
+} from '@/notifications/recurringReminderPlan';
+import { RECURRING_REMINDER_OPEN_TAB } from '@/notifications/recurringReminderNavigation';
 import { isRecurringReminderSyncSuspended } from '@/notifications/recurringReminderQueue';
 import {
   loadNotifeePackage,
@@ -9,6 +13,9 @@ import {
 } from '@/notifications/notifeeBridge';
 
 export const RECURRING_REMINDER_CHANNEL_ID = 'recurring-reminders';
+
+/** AlarmManager writes can take seconds — keep a lead so we don't skip "now". */
+const MIN_TRIGGER_LEAD_MS = 3_000;
 
 let lastSyncedFingerprint: string | null = null;
 let syncInFlight: Promise<void> | null = null;
@@ -120,7 +127,26 @@ export async function cancelRecurringReminderTriggers(): Promise<void> {
 type SyncRecurringReminderOptions = {
   /** Bypass modal suspend — used while Save loader is visible. */
   force?: boolean;
+  /** IANA timezone used to roll past-due plan timestamps forward. */
+  timeZone: string;
 };
+
+function resolveLiveTriggerTimestamp(
+  reminder: RecurringReminderCopy,
+  timeZone: string,
+  nowMs: number,
+): number | null {
+  if (reminder.timestamp > nowMs + MIN_TRIGGER_LEAD_MS) {
+    return reminder.timestamp;
+  }
+
+  // Save/AlarmManager can outlast the planned minute — schedule the next slot.
+  return nextDailyReminderTimestampMs(
+    reminder.notificationTime,
+    timeZone,
+    new Date(nowMs + MIN_TRIGGER_LEAD_MS),
+  );
+}
 
 /**
  * Apply the reminder plan to native triggers.
@@ -130,9 +156,10 @@ type SyncRecurringReminderOptions = {
 export async function syncRecurringReminderTriggers(
   reminders: RecurringReminderCopy[],
   channelName: string,
-  options: SyncRecurringReminderOptions = {},
+  options: SyncRecurringReminderOptions,
 ): Promise<void> {
   const force = options.force === true;
+  const timeZone = options.timeZone;
   const shouldAbort = () =>
     !force && isRecurringReminderSyncSuspended();
 
@@ -210,19 +237,30 @@ export async function syncRecurringReminderTriggers(
       }
     }
 
+    let scheduledCount = 0;
     for (const reminder of reminders) {
       if (shouldAbort()) {
         lastSyncedFingerprint = null;
         return;
       }
 
-      if (reminder.timestamp <= Date.now()) {
+      const timestamp = resolveLiveTriggerTimestamp(
+        reminder,
+        timeZone,
+        Date.now(),
+      );
+      if (timestamp === null || timestamp <= Date.now()) {
+        if (__DEV__) {
+          console.warn(
+            `[notifications] skipped trigger ${reminder.id} (${reminder.notificationTime}) — no future slot`,
+          );
+        }
         continue;
       }
 
       const trigger: TimestampTrigger = {
         type: TriggerType.TIMESTAMP,
-        timestamp: reminder.timestamp,
+        timestamp,
         repeatFrequency: RepeatFrequency.DAILY,
         alarmManager: {
           allowWhileIdle: true,
@@ -234,17 +272,30 @@ export async function syncRecurringReminderTriggers(
           id: reminder.id,
           title: reminder.title,
           body: reminder.body,
+          data: {
+            openTab: RECURRING_REMINDER_OPEN_TAB,
+          },
           android: {
             channelId: RECURRING_REMINDER_CHANNEL_ID,
-            pressAction: { id: 'default' },
+            pressAction: {
+              id: 'default',
+              launchActivity: 'default',
+            },
             smallIcon: 'ic_stat_notify',
           },
         },
         trigger,
       );
+      scheduledCount += 1;
       if (!force) {
         await yieldToUi();
       }
+    }
+
+    if (reminders.length > 0 && scheduledCount === 0) {
+      // Don't mark synced — otherwise we never retry after a slow save past the minute.
+      lastSyncedFingerprint = null;
+      return;
     }
 
     lastSyncedFingerprint = fingerprint;

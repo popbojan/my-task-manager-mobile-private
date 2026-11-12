@@ -33,15 +33,12 @@ export async function flushRecurringReminderSchedule(options: {
   const translate: RecurringReminderTranslate = (key, params) =>
     options.t(key, params);
 
-  const plan = buildRecurringReminderPlan(
-    tasks,
-    options.timeZone ?? getDeviceTimezone(),
-    translate,
-  );
+  const timeZone = options.timeZone ?? getDeviceTimezone();
+  const plan = buildRecurringReminderPlan(tasks, timeZone, translate);
 
   await syncRecurringReminderTriggers(
     plan,
     options.t('recurring.reminder.channelName'),
-    { force: options.force === true },
+    { force: options.force === true, timeZone },
   );
 }

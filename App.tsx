@@ -50,7 +50,9 @@ import { useCurrentUser } from '@/user/useCurrentUser';
 import AppMonitoringBootstrap from '@/monitoring/AppMonitoringBootstrap';
 import { logMonitoringScreen } from '@/monitoring/appMonitoring';
 import RecurringTaskResetPolling from '@/recurring/RecurringTaskResetPolling';
+import RecurringReminderPressBootstrap from '@/notifications/RecurringReminderPressBootstrap';
 import RecurringReminderSync from '@/notifications/RecurringReminderSync';
+import { subscribeOpenTodayFromReminder } from '@/notifications/recurringReminderNavigation';
 import { setRecurringReminderSyncSuspended } from '@/notifications/recurringReminderQueue';
 
 function MainAppShell() {
@@ -114,6 +116,7 @@ function MainAppShell() {
     (showOnboarding && onboarding.autoVisible && !onboarding.manualOpen);
 
   const [activeTab, setActiveTab] = useState<MainTab>('today');
+  const pendingOpenTodayFromReminderRef = useRef(false);
 
   useEffect(() => {
     if (hideMainShell) {
@@ -122,6 +125,24 @@ function MainAppShell() {
 
     void logMonitoringScreen(`tab_${activeTab}`);
   }, [activeTab, hideMainShell]);
+
+  useEffect(() => {
+    return subscribeOpenTodayFromReminder(() => {
+      if (hideMainShell) {
+        pendingOpenTodayFromReminderRef.current = true;
+        return;
+      }
+      setActiveTab('today');
+    });
+  }, [hideMainShell]);
+
+  useEffect(() => {
+    if (hideMainShell || !pendingOpenTodayFromReminderRef.current) {
+      return;
+    }
+    pendingOpenTodayFromReminderRef.current = false;
+    setActiveTab('today');
+  }, [hideMainShell]);
   const [taskForm, setTaskForm] = useState<{
     visible: boolean;
     taskId: string | null;
@@ -427,6 +448,7 @@ function AppContent() {
           <SubscriptionBootstrap />
           <RecurringTaskResetPolling />
           <RecurringReminderSync />
+          <RecurringReminderPressBootstrap />
           <MainAppShell />
         </SubscriptionSessionProvider>
       ) : (

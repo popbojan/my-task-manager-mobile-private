@@ -17,6 +17,7 @@ import { clearAccountDeletedNotice } from '@/pages/login/accountDeletedNotice';
 import LanguagePicker from '@/pages/login/LanguagePicker';
 import DeleteAccountModal from '@/pages/profile/DeleteAccountModal';
 import LogoutConfirmModal from '@/pages/profile/LogoutConfirmModal';
+import NotificationSettingsScreen from '@/pages/profile/NotificationSettingsScreen';
 import SubscriptionSettingsScreen from '@/pages/profile/SubscriptionSettingsScreen';
 import { useDeleteAccountFlow } from '@/pages/profile/useDeleteAccountFlow';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
@@ -48,6 +49,7 @@ export default function ProfileScreen({
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const currentUserQuery = useCurrentUser();
   const [showSubscriptionSettings, setShowSubscriptionSettings] = useState(false);
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [legalPage, setLegalPage] = useState<LegalPage | null>(null);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -82,6 +84,18 @@ export default function ProfileScreen({
     return (
       <SubscriptionSettingsScreen
         onBack={() => setShowSubscriptionSettings(false)}
+      />
+    );
+  }
+
+  if (showNotificationSettings) {
+    return (
+      <NotificationSettingsScreen
+        onBack={() => setShowNotificationSettings(false)}
+        onOpenSubscription={() => {
+          setShowNotificationSettings(false);
+          setShowSubscriptionSettings(true);
+        }}
       />
     );
   }
@@ -124,6 +138,22 @@ export default function ProfileScreen({
               </Text>
               <Text style={styles.accountMenuItemHint}>
                 {t('profile.accountMenu.subscriptionHint')}
+              </Text>
+            </View>
+            <Text style={styles.accountMenuChevron}>›</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.accountMenuItem}
+            accessibilityRole="button"
+            onPress={() => setShowNotificationSettings(true)}
+          >
+            <View style={styles.accountMenuItemCopy}>
+              <Text style={styles.accountMenuItemLabel}>
+                {t('profile.accountMenu.notifications')}
+              </Text>
+              <Text style={styles.accountMenuItemHint}>
+                {t('profile.accountMenu.notificationsHint')}
               </Text>
             </View>
             <Text style={styles.accountMenuChevron}>›</Text>

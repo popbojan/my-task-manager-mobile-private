@@ -513,6 +513,26 @@ export const en: Record<TranslationKey, string> = {
   'profile.accountMenu.subscription': 'Subscription & billing',
   'profile.accountMenu.subscriptionHint':
     'Premium status, purchase and restore',
+  'profile.accountMenu.notifications': 'Notifications',
+  'profile.accountMenu.notificationsHint':
+    'Daily reminder when there are still open tasks',
+  'profile.notifications.intro':
+    'Once a day we remind you if, on the Today page, there are still some open tasks.',
+  'profile.notifications.reminderLabel': 'Daily reminder',
+  'profile.notifications.timeA11y': 'Choose reminder time',
+  'profile.notifications.permissionBefore':
+    'Please allow notifications in ',
+  'profile.notifications.permissionLink': 'system settings',
+  'profile.notifications.permissionAfter':
+    ' so the reminder can arrive.',
+  'profile.notifications.enabledHint':
+    'Switch on: you’ll get a daily reminder on your phone at {{time}}.',
+  'profile.notifications.disabledHint':
+    'Turn the switch on to get a daily reminder about open tasks. You can save the time anytime.',
+  'profile.notifications.reminderTitle': 'Still have open tasks?',
+  'profile.notifications.reminderBody':
+    'Take a quick look at Today — something may still be open.',
+
   'profile.helpMenu.title': 'Help',
   'profile.helpMenu.viewIntroduction': 'How it works',
   'profile.helpMenu.viewIntroductionHint':

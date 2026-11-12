@@ -526,6 +526,26 @@ export const fr: Record<TranslationKey, string> = {
   'profile.accountMenu.subscription': 'Abonnement & facturation',
   'profile.accountMenu.subscriptionHint':
     'Statut Premium, achat et restauration',
+  'profile.accountMenu.notifications': 'Notifications',
+  'profile.accountMenu.notificationsHint':
+    'Rappel quotidien s’il reste encore des tâches ouvertes',
+  'profile.notifications.intro':
+    'Une fois par jour, on te rappelle s’il reste encore des tâches ouvertes sur la page Aujourd’hui.',
+  'profile.notifications.reminderLabel': 'Rappel du jour',
+  'profile.notifications.timeA11y': 'Choisir l’heure du rappel',
+  'profile.notifications.permissionBefore':
+    'Merci d’autoriser les notifications dans les ',
+  'profile.notifications.permissionLink': 'réglages système',
+  'profile.notifications.permissionAfter':
+    ' pour que le rappel puisse arriver.',
+  'profile.notifications.enabledHint':
+    'Interrupteur activé : chaque jour à {{time}}, tu reçois un rappel sur le téléphone.',
+  'profile.notifications.disabledHint':
+    'Active l’interrupteur pour un rappel quotidien sur les tâches ouvertes. Tu peux enregistrer l’heure à tout moment.',
+  'profile.notifications.reminderTitle': 'Encore des tâches ouvertes ?',
+  'profile.notifications.reminderBody':
+    'Un coup d’œil sur Aujourd’hui — quelque chose est peut-être encore ouvert.',
+
   'profile.helpMenu.title': 'Aide',
   'profile.helpMenu.viewIntroduction': 'Comment ça marche',
   'profile.helpMenu.viewIntroductionHint':

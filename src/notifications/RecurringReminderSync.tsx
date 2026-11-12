@@ -3,12 +3,14 @@ import { AppState, type AppStateStatus } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
+import { flushDailyOpenTasksReminderSchedule } from '@/notifications/flushDailyOpenTasksReminderSchedule';
 import { flushRecurringReminderSchedule } from '@/notifications/flushRecurringReminderSchedule';
 import {
   isRecurringReminderSyncSuspended,
   subscribeRecurringReminderReschedule,
 } from '@/notifications/recurringReminderQueue';
 import { hasRecurringReminderPermission } from '@/notifications/recurringReminderScheduler';
+import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import { useCurrentUser } from '@/user/useCurrentUser';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
 
@@ -22,13 +24,27 @@ export default function RecurringReminderSync() {
   const { accessToken } = useAuth();
   const { t } = useLanguage();
   const currentUserQuery = useCurrentUser();
+  const subscriptionQuery = useSubscriptionAccess();
+  const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
   const timeZone =
     currentUserQuery.data?.timezone?.trim() || getDeviceTimezone();
 
   const dirtyRef = useRef(false);
   const runningRef = useRef(false);
-  const flushArgsRef = useRef({ queryClient, accessToken, t, timeZone });
-  flushArgsRef.current = { queryClient, accessToken, t, timeZone };
+  const flushArgsRef = useRef({
+    queryClient,
+    accessToken,
+    t,
+    timeZone,
+    hasPremiumAccess,
+  });
+  flushArgsRef.current = {
+    queryClient,
+    accessToken,
+    t,
+    timeZone,
+    hasPremiumAccess,
+  };
 
   const runFlush = useCallback(async () => {
     if (isRecurringReminderSyncSuspended()) {
@@ -40,7 +56,13 @@ export default function RecurringReminderSync() {
 
     runningRef.current = true;
     try {
-      await flushRecurringReminderSchedule(flushArgsRef.current);
+      const args = flushArgsRef.current;
+      await flushRecurringReminderSchedule(args);
+      await flushDailyOpenTasksReminderSchedule({
+        t: args.t,
+        timeZone: args.timeZone,
+        hasPremiumAccess: args.hasPremiumAccess,
+      });
       dirtyRef.current = false;
     } catch {
       dirtyRef.current = true;
@@ -57,7 +79,7 @@ export default function RecurringReminderSync() {
 
   useEffect(() => {
     dirtyRef.current = true;
-  }, [accessToken, timeZone]);
+  }, [accessToken, timeZone, hasPremiumAccess]);
 
   useEffect(() => {
     const onAppState = (next: AppStateStatus) => {

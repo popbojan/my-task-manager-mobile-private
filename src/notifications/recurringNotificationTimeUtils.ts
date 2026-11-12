@@ -2,6 +2,9 @@ export const NOTIFICATION_TIME_PATTERN = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
 
 export const DEFAULT_RECURRING_NOTIFICATION_TIME = '09:00';
 
+/** Default evening check-in for the profile “open tasks” reminder. */
+export const DEFAULT_DAILY_OPEN_TASKS_REMINDER_TIME = '20:00';
+
 export function isValidNotificationTime(value: string): boolean {
   return NOTIFICATION_TIME_PATTERN.test(value);
 }

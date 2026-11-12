@@ -520,6 +520,26 @@ export const de = {
   'profile.accountMenu.subscription': 'Abo & Abrechnung',
   'profile.accountMenu.subscriptionHint':
     'Premium-Status, Kauf und Wiederherstellung',
+  'profile.accountMenu.notifications': 'Benachrichtigungen',
+  'profile.accountMenu.notificationsHint':
+    'Tägliche Erinnerung, wenn es noch offene Aufgaben gibt',
+  'profile.notifications.intro':
+    'Einmal am Tag erinnern wir dich, wenn auf der Heute-Seite immer noch einige Aufgaben offen sind.',
+  'profile.notifications.reminderLabel': 'Tages-Erinnerung',
+  'profile.notifications.timeA11y': 'Erinnerungszeit wählen',
+  'profile.notifications.permissionBefore':
+    'Bitte erlaube Benachrichtigungen in den ',
+  'profile.notifications.permissionLink': 'Systemeinstellungen',
+  'profile.notifications.permissionAfter':
+    ', damit die Erinnerung ankommen kann.',
+  'profile.notifications.enabledHint':
+    'Schalter an: Täglich um {{time}} bekommst du eine Erinnerung auf dem Handy.',
+  'profile.notifications.disabledHint':
+    'Schalter an, wenn du täglich an offene Aufgaben erinnert werden willst. Die Uhrzeit kannst du jederzeit speichern.',
+  'profile.notifications.reminderTitle': 'Noch offene Aufgaben?',
+  'profile.notifications.reminderBody':
+    'Kurzer Blick auf Heute — vielleicht ist noch etwas offen.',
+
   'profile.helpMenu.title': 'Hilfe',
   'profile.helpMenu.viewIntroduction': "So funktioniert's",
   'profile.helpMenu.viewIntroductionHint':

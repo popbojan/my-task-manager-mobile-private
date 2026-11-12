@@ -517,6 +517,26 @@ export const sr: Record<TranslationKey, string> = {
   'profile.accountMenu.title': 'Nalog',
   'profile.accountMenu.subscription': 'Pretplata i naplata',
   'profile.accountMenu.subscriptionHint': 'Premium status, kupovina i povraćaj',
+  'profile.accountMenu.notifications': 'Obaveštenja',
+  'profile.accountMenu.notificationsHint':
+    'Dnevni podsetnik kada još uvek ima otvorenih zadataka',
+  'profile.notifications.intro':
+    'Jednom dnevno podsećamo te ako na stranici Danas još uvek ima nekih otvorenih zadataka.',
+  'profile.notifications.reminderLabel': 'Dnevni podsetnik',
+  'profile.notifications.timeA11y': 'Izaberi vreme podsetnika',
+  'profile.notifications.permissionBefore':
+    'Dozvoli obaveštenja u ',
+  'profile.notifications.permissionLink': 'sistemskim podešavanjima',
+  'profile.notifications.permissionAfter':
+    ' da bi podsetnik mogao da stigne.',
+  'profile.notifications.enabledHint':
+    'Prekidač uključen: svaki dan u {{time}} dobijaš podsetnik na telefonu.',
+  'profile.notifications.disabledHint':
+    'Uključi prekidač za dnevni podsetnik o otvorenim zadacima. Vreme možeš sačuvati uvek.',
+  'profile.notifications.reminderTitle': 'Još otvorenih zadataka?',
+  'profile.notifications.reminderBody':
+    'Brzo pogledaj Danas — možda je još nešto otvoreno.',
+
   'profile.helpMenu.title': 'Pomoć',
   'profile.helpMenu.viewIntroduction': 'Kako funkcioniše',
   'profile.helpMenu.viewIntroductionHint':

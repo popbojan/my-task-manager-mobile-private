@@ -264,7 +264,10 @@ export function invalidateRecurringReminderSyncFingerprint(): void {
   lastSyncedFingerprint = null;
 }
 
-/** Opens the OS notification settings for this app (fallback: app settings). */
+/**
+ * Opens app-level notification settings (master toggle), not a single channel page.
+ * Channel settings often have no switch when notifications are disabled for the app.
+ */
 export async function openRecurringReminderNotificationSettings(): Promise<void> {
   const notifeePkg = loadNotifeePackage();
   if (!notifeePkg) {
@@ -273,9 +276,8 @@ export async function openRecurringReminderNotificationSettings(): Promise<void>
   }
 
   try {
-    await notifeePkg.default.openNotificationSettings(
-      RECURRING_REMINDER_CHANNEL_ID,
-    );
+    // No channelId → app notification screen with the main allow/deny switch.
+    await notifeePkg.default.openNotificationSettings();
   } catch {
     await Linking.openSettings().catch(() => undefined);
   }

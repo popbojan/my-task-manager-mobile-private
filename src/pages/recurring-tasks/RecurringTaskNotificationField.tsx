@@ -19,6 +19,7 @@ import {
   notificationTimeFromDate,
   notificationTimeToDate,
 } from '@/notifications/recurringNotificationTimeUtils';
+import NotificationPermissionHint from '@/notifications/NotificationPermissionHint';
 import {
   ensureRecurringReminderAlarmPermission,
   getCachedRecurringReminderAlarmPermission,
@@ -193,38 +194,24 @@ export default function RecurringTaskNotificationField({
       {/* Fixed slot so Cancel/Save don't jump when the hint changes. */}
       <View style={styles.permissionSlot}>
         {showPermissionHint ? (
-          <View style={[styles.statusBox, styles.permissionBox]}>
-            <Text style={styles.statusText} numberOfLines={2}>
-              {t('recurring.form.notificationPermissionBefore')}
-              <Text
-                style={styles.permissionLink}
-                onPress={() => {
-                  void openRecurringReminderNotificationSettings();
-                }}
-                accessibilityRole="link"
-              >
-                {t('recurring.form.notificationPermissionLink')}
-              </Text>
-              {t('recurring.form.notificationPermissionAfter')}
-            </Text>
-          </View>
+          <NotificationPermissionHint
+            before={t('recurring.form.notificationPermissionBefore')}
+            linkLabel={t('recurring.form.notificationPermissionLink')}
+            after={t('recurring.form.notificationPermissionAfter')}
+            onPress={() => {
+              void openRecurringReminderNotificationSettings();
+            }}
+          />
         ) : null}
         {showAlarmHint ? (
-          <View style={[styles.statusBox, styles.permissionBox]}>
-            <Text style={styles.statusText} numberOfLines={2}>
-              {t('recurring.form.notificationAlarmBefore')}
-              <Text
-                style={styles.permissionLink}
-                onPress={() => {
-                  void openRecurringReminderAlarmSettings();
-                }}
-                accessibilityRole="link"
-              >
-                {t('recurring.form.notificationAlarmLink')}
-              </Text>
-              {t('recurring.form.notificationAlarmAfter')}
-            </Text>
-          </View>
+          <NotificationPermissionHint
+            before={t('recurring.form.notificationAlarmBefore')}
+            linkLabel={t('recurring.form.notificationAlarmLink')}
+            after={t('recurring.form.notificationAlarmAfter')}
+            onPress={() => {
+              void openRecurringReminderAlarmSettings();
+            }}
+          />
         ) : null}
         {showEnabledHint ? (
           <View style={[styles.statusBox, styles.enabledBox]}>
@@ -281,20 +268,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   permissionSlot: {
-    height: 52,
+    minHeight: 56,
     justifyContent: 'center',
   },
   statusBox: {
-    height: 52,
+    minHeight: 56,
     borderRadius: 10,
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 8,
     justifyContent: 'center',
-  },
-  permissionBox: {
-    borderColor: 'rgba(245, 158, 11, 0.45)',
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
   },
   enabledBox: {
     borderColor: recurringTheme.cardBorderAccent,
@@ -315,11 +298,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
     fontWeight: '600',
-  },
-  permissionLink: {
-    color: recurringTheme.accentBright,
-    fontWeight: '800',
-    textDecorationLine: 'underline',
   },
   timeChip: {
     borderWidth: 1,

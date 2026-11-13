@@ -129,19 +129,26 @@ export async function hasRecurringReminderAlarmPermission(): Promise<boolean> {
   return alarmPermissionInFlight;
 }
 
+/** Let the press settle — opening settings in the same frame often no-ops on Android. */
+function deferOpenSettings(): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, 80));
+}
+
 /** Opens the system screen for exact alarms / “Alarms & reminders”. */
 export async function openRecurringReminderAlarmSettings(): Promise<void> {
+  await deferOpenSettings();
+
   const notifeePkg = loadNotifeePackage();
-  if (!notifeePkg) {
-    await Linking.openSettings().catch(() => undefined);
-    return;
+  if (notifeePkg) {
+    try {
+      await notifeePkg.default.openAlarmPermissionSettings();
+      return;
+    } catch {
+      // Fall through to app settings.
+    }
   }
 
-  try {
-    await notifeePkg.default.openAlarmPermissionSettings();
-  } catch {
-    await Linking.openSettings().catch(() => undefined);
-  }
+  await Linking.openSettings().catch(() => undefined);
 }
 
 /**
@@ -355,17 +362,19 @@ export function invalidateRecurringReminderSyncFingerprint(): void {
  * Channel settings often have no switch when notifications are disabled for the app.
  */
 export async function openRecurringReminderNotificationSettings(): Promise<void> {
+  await deferOpenSettings();
+
   const notifeePkg = loadNotifeePackage();
-  if (!notifeePkg) {
-    await Linking.openSettings().catch(() => undefined);
-    return;
+  if (notifeePkg) {
+    try {
+      // No channelId → app notification screen with the main allow/deny switch.
+      await notifeePkg.default.openNotificationSettings();
+      return;
+    } catch {
+      // Fall through to app settings.
+    }
   }
 
-  try {
-    // No channelId → app notification screen with the main allow/deny switch.
-    await notifeePkg.default.openNotificationSettings();
-  } catch {
-    await Linking.openSettings().catch(() => undefined);
-  }
+  await Linking.openSettings().catch(() => undefined);
 }
 

@@ -22,6 +22,7 @@ import {
   type DailyOpenTasksReminderPrefs,
 } from '@/notifications/dailyOpenTasksReminderPrefs';
 import { flushDailyOpenTasksReminderSchedule } from '@/notifications/flushDailyOpenTasksReminderSchedule';
+import NotificationPermissionHint from '@/notifications/NotificationPermissionHint';
 import {
   DEFAULT_DAILY_OPEN_TASKS_REMINDER_TIME,
   formatNotificationTimeLabel,
@@ -295,38 +296,24 @@ export default function NotificationSettingsScreen({
 
               <View style={styles.permissionSlot}>
                 {showPermissionHint ? (
-                  <View style={[styles.statusBox, styles.permissionBox]}>
-                    <Text style={styles.statusText} numberOfLines={3}>
-                      {t('profile.notifications.permissionBefore')}
-                      <Text
-                        style={styles.permissionLink}
-                        onPress={() => {
-                          void openRecurringReminderNotificationSettings();
-                        }}
-                        accessibilityRole="link"
-                      >
-                        {t('profile.notifications.permissionLink')}
-                      </Text>
-                      {t('profile.notifications.permissionAfter')}
-                    </Text>
-                  </View>
+                  <NotificationPermissionHint
+                    before={t('profile.notifications.permissionBefore')}
+                    linkLabel={t('profile.notifications.permissionLink')}
+                    after={t('profile.notifications.permissionAfter')}
+                    onPress={() => {
+                      void openRecurringReminderNotificationSettings();
+                    }}
+                  />
                 ) : null}
                 {showAlarmHint ? (
-                  <View style={[styles.statusBox, styles.permissionBox]}>
-                    <Text style={styles.statusText} numberOfLines={3}>
-                      {t('profile.notifications.alarmBefore')}
-                      <Text
-                        style={styles.permissionLink}
-                        onPress={() => {
-                          void openRecurringReminderAlarmSettings();
-                        }}
-                        accessibilityRole="link"
-                      >
-                        {t('profile.notifications.alarmLink')}
-                      </Text>
-                      {t('profile.notifications.alarmAfter')}
-                    </Text>
-                  </View>
+                  <NotificationPermissionHint
+                    before={t('profile.notifications.alarmBefore')}
+                    linkLabel={t('profile.notifications.alarmLink')}
+                    after={t('profile.notifications.alarmAfter')}
+                    onPress={() => {
+                      void openRecurringReminderAlarmSettings();
+                    }}
+                  />
                 ) : null}
                 {showEnabledHint ? (
                   <View style={[styles.statusBox, styles.enabledBox]}>
@@ -464,16 +451,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   statusBox: {
-    minHeight: 64,
+    minHeight: 56,
     borderRadius: 10,
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 8,
     justifyContent: 'center',
-  },
-  permissionBox: {
-    borderColor: 'rgba(245, 158, 11, 0.45)',
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
   },
   enabledBox: {
     borderColor: recurringTheme.cardBorderAccent,
@@ -494,11 +477,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 15,
     fontWeight: '600',
-  },
-  permissionLink: {
-    color: recurringTheme.accentBright,
-    fontWeight: '800',
-    textDecorationLine: 'underline',
   },
   iosPickerSheet: {
     borderRadius: 12,

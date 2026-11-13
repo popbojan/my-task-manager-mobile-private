@@ -57,7 +57,7 @@ import {
 } from '@/utils/recurringPremiumPreview';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
 import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
-import { flushRecurringReminderSchedule } from '@/notifications/flushRecurringReminderSchedule';
+import { cancelOneTaskRecurringReminder } from '@/notifications/recurringReminderScheduler';
 import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
@@ -226,18 +226,12 @@ export default function RecurringTasksScreen({
     onMutate: () => {
       setDeleteErrorKind(null);
     },
-    onSuccess: async () => {
+    onSuccess: async (_data, recurringTaskId) => {
       invalidateRecurringQueries(queryClient);
-      const timeZone =
-        currentUserQuery.data?.timezone?.trim() || getDeviceTimezone();
-      // Task gone → cancel/rebuild alarms only here (no background sync).
-      await flushRecurringReminderSchedule({
-        queryClient,
-        accessToken,
-        t,
-        timeZone,
-        force: true,
-      }).catch(() => undefined);
+      // Cancel only this task's trigger — no full plan rewrite.
+      await cancelOneTaskRecurringReminder(recurringTaskId).catch(
+        () => undefined,
+      );
       closeDeleteModal();
     },
     onError: async error => {

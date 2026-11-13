@@ -20,7 +20,6 @@ import { authApi } from '@/api/authClient';
 import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { DAILY_STATUS_COLUMNS } from '@/pages/recurring-tasks/recurringBoardConfig';
-import RecurringReminderDiscardModal from '@/pages/recurring-tasks/RecurringReminderDiscardModal';
 import RecurringTaskNotificationField from '@/pages/recurring-tasks/RecurringTaskNotificationField';
 import { DEFAULT_RECURRING_NOTIFICATION_TIME } from '@/notifications/recurringNotificationTimeUtils';
 import {
@@ -39,7 +38,7 @@ import {
   recurringTasksQueryKey,
   writeRecurringTaskToCaches,
 } from '@/recurring/recurringQueryKeys';
-import { flushRecurringReminderSchedule } from '@/notifications/flushRecurringReminderSchedule';
+import { syncOneTaskRecurringReminder } from '@/notifications/recurringReminderScheduler';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
 import {
@@ -92,27 +91,17 @@ export default function RecurringTaskFormModal({
   const formRef = useRef(initialForm);
   const hydratedTaskIdRef = useRef<string | null>(null);
   const hydratedUpdatedAtRef = useRef<number | null>(null);
-  /** Reminder state when the edit modal opened (for Cancel → reset). */
-  const openReminderBaselineRef = useRef<RecurringReminderScheduleSnapshot | null>(
-    listTask ? reminderScheduleSnapshotFromTask(listTask) : null,
-  );
-  /** Last reminder successfully written to API + AlarmManager in this session. */
-  const committedReminderRef = useRef<RecurringReminderScheduleSnapshot | null>(
+  const scheduleBaselineRef = useRef<RecurringReminderScheduleSnapshot | null>(
     listTask ? reminderScheduleSnapshotFromTask(listTask) : null,
   );
   const [error, setError] = useState<string | null>(null);
-  const [reminderPersisting, setReminderPersisting] = useState(false);
-  const [reminderDiscardVisible, setReminderDiscardVisible] = useState(false);
-  const [reminderResetPending, setReminderResetPending] = useState(false);
-  /** True when committed reminder differs from what was open at modal start. */
-  const [reminderCommittedDirty, setReminderCommittedDirty] = useState(false);
+  /** Instant Save-button spinner — isPending alone paints too late when AlarmManager blocks. */
+  const [saveUiPending, setSaveUiPending] = useState(false);
   const [lockedPanelHeight, setLockedPanelHeight] = useState<number | null>(null);
   const titleInputRef = useRef<TextInputInstance>(null);
-  const saveMutationPendingRef = useRef(false);
   const { height: windowHeight } = useWindowDimensions();
   const maxPanelHeight = Math.round(windowHeight * 0.9);
   const panelHeaderHeightRef = useRef(52);
-  const reminderPersistGenerationRef = useRef(0);
 
   function patchForm(
     updater: (
@@ -139,13 +128,10 @@ export default function RecurringTaskFormModal({
     if (!isEdit) {
       hydratedTaskIdRef.current = null;
       hydratedUpdatedAtRef.current = null;
-      openReminderBaselineRef.current = null;
-      committedReminderRef.current = null;
+      scheduleBaselineRef.current = null;
       formRef.current = INITIAL_FORM;
       setForm(INITIAL_FORM);
       setError(null);
-      setReminderDiscardVisible(false);
-      setReminderCommittedDirty(false);
       return;
     }
 
@@ -166,25 +152,13 @@ export default function RecurringTaskFormModal({
       return;
     }
 
-    // Don't wipe in-progress title/status edits after an immediate reminder save.
-    if (
-      hydratedTaskIdRef.current === taskId &&
-      reminderPersisting
-    ) {
-      hydratedUpdatedAtRef.current = updatedAt;
-      return;
-    }
-
     const next = recurringTaskToFormState(task);
     formRef.current = next;
     setForm(next);
-    const reminderSnapshot = reminderScheduleSnapshotFromTask(task);
-    openReminderBaselineRef.current = reminderSnapshot;
-    committedReminderRef.current = reminderSnapshot;
-    setReminderCommittedDirty(false);
+    scheduleBaselineRef.current = reminderScheduleSnapshotFromTask(task);
     hydratedTaskIdRef.current = taskId;
     hydratedUpdatedAtRef.current = updatedAt;
-  }, [isEdit, listTask, taskId, taskQuery.data, reminderPersisting]);
+  }, [isEdit, listTask, taskId, taskQuery.data]);
 
   const isLoadingTask =
     isEdit && !listTask && !taskQuery.data && taskQuery.isLoading;
@@ -202,195 +176,34 @@ export default function RecurringTaskFormModal({
     setLockedPanelHeight(null);
   }, [taskId]);
 
-  const flushNativeReminders = useCallback(async () => {
-    await flushRecurringReminderSchedule({
-      queryClient,
-      accessToken,
-      t,
-      timeZone,
-      force: true,
-    });
-  }, [accessToken, queryClient, t, timeZone]);
-
-  /** Let React paint the reminder spinner before AlarmManager blocks the JS bridge. */
-  function yieldForSpinnerPaint(): Promise<void> {
-    return new Promise(resolve => {
-      requestAnimationFrame(() => {
-        setTimeout(resolve, 48);
-      });
-    });
-  }
-
-  const persistReminderNow = useCallback(
-    async (nextReminder: {
-      notificationEnabled: boolean;
-      notificationTime: string | null;
-    }) => {
-      if (!isEdit || !taskId) {
-        return;
-      }
-
-      const generation = ++reminderPersistGenerationRef.current;
-      setReminderPersisting(true);
-      setError(null);
-
-      const notificationFields = buildRecurringTaskNotificationFields({
-        notificationEnabled: nextReminder.notificationEnabled,
-        notificationTime: nextReminder.notificationTime,
-      });
-
-      const existing =
-        queryClient
-          .getQueryData<RecurringTask[]>(recurringTasksQueryKey(accessToken))
-          ?.find(task => task.id === taskId) ??
-        queryClient.getQueryData<RecurringTask>(recurringTaskQueryKey(taskId));
-
-      // Optimistic cache so Android flush sees the new schedule immediately.
-      if (existing) {
-        writeRecurringTaskToCaches(queryClient, accessToken, {
-          ...existing,
-          ...notificationFields,
-        });
-      }
-
-      // Critical: paint spinner before network/native work freezes the bridge.
-      await yieldForSpinnerPaint();
-      if (generation !== reminderPersistGenerationRef.current) {
-        return;
-      }
-
-      try {
-        // Railway under the spinner (fast). AlarmManager afterwards without blocking the modal.
-        const saved = await authApi.updateRecurringTask({
-          recurringTaskId: taskId,
-          updateRecurringTaskRequest: notificationFields,
-        });
-
-        if (generation !== reminderPersistGenerationRef.current) {
-          return;
-        }
-
-        const merged: RecurringTask = {
-          ...saved,
-          ...notificationFields,
-        };
-        writeRecurringTaskToCaches(queryClient, accessToken, merged);
-        hydratedUpdatedAtRef.current = new Date(merged.updatedAt).getTime();
-
-        const committed = reminderScheduleSnapshotFromForm({
-          notificationEnabled: notificationFields.notificationEnabled,
-          notificationTime: notificationFields.notificationTime,
-        });
-        committedReminderRef.current = committed;
-        setReminderCommittedDirty(
-          didRecurringReminderScheduleChange(
-            openReminderBaselineRef.current,
-            committed,
-          ),
-        );
-
-        if (generation === reminderPersistGenerationRef.current) {
-          setReminderPersisting(false);
-        }
-
-        // Native write off the UI path — awaiting AlarmManager was freezing the form.
-        void flushNativeReminders().catch(() => {
-          if (generation === reminderPersistGenerationRef.current) {
-            setError(t('recurring.form.reminderPersistError'));
-          }
-        });
-      } catch (err) {
-        if (generation !== reminderPersistGenerationRef.current) {
-          return;
-        }
-
-        // Roll back optimistic cache if we still have the pre-change task.
-        if (existing) {
-          writeRecurringTaskToCaches(queryClient, accessToken, existing);
-          void flushNativeReminders().catch(() => undefined);
-        }
-
-        if (isApiPremiumRequiredError(err)) {
-          setError(t('recurring.premiumRequired'));
-          return;
-        }
-
-        const handled = await handleDailyResetRequired({
-          error: err,
-          queryClient,
-          t,
-        });
-        if (handled) {
-          return;
-        }
-
-        setError(t('recurring.form.reminderPersistError'));
-      } finally {
-        if (generation === reminderPersistGenerationRef.current) {
-          setReminderPersisting(false);
-        }
-      }
-    },
-    [
-      accessToken,
-      flushNativeReminders,
-      isEdit,
-      queryClient,
-      t,
-      taskId,
-    ],
-  );
-
-  function handleReminderEnabledChange(notificationEnabled: boolean) {
-    const notificationTime = notificationEnabled
-      ? resolveStoredNotificationTime(formRef.current.notificationTime)
-      : formRef.current.notificationTime;
-
-    patchForm(current => ({
-      ...current,
-      notificationEnabled,
-      notificationTime,
-    }));
-
-    void persistReminderNow({ notificationEnabled, notificationTime });
-  }
-
-  function handleReminderTimeChange(notificationTime: string) {
-    patchForm(current => ({
-      ...current,
-      notificationEnabled: true,
-      notificationTime,
-    }));
-    void persistReminderNow({
-      notificationEnabled: true,
-      notificationTime,
-    });
-  }
-
-  function requestClose() {
-    if (reminderResetPending || saveMutationPendingRef.current) {
-      return;
-    }
-
-    if (isEdit && reminderCommittedDirty) {
-      setReminderDiscardVisible(true);
-      return;
-    }
-
-    onClose();
-  }
-
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      requestClose();
+      onClose();
       return true;
     });
 
     return () => subscription.remove();
-  });
+  }, [onClose]);
+
+  const syncNativeOneTask = useCallback(
+    async (task: RecurringTask) => {
+      await syncOneTaskRecurringReminder({
+        task,
+        timeZone,
+        channelName: t('recurring.reminder.channelName'),
+        t: (key, params) => t(key, params),
+      });
+    },
+    [t, timeZone],
+  );
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      // One frame so the Save spinner is visible before Notifee can freeze the bridge.
+      await new Promise<void>(resolve => {
+        requestAnimationFrame(() => setTimeout(resolve, 0));
+      });
+
       const current = formRef.current;
       const trimmedTitle = current.title.trim();
       if (!trimmedTitle) {
@@ -398,6 +211,11 @@ export default function RecurringTaskFormModal({
       }
 
       const notificationFields = buildRecurringTaskNotificationFields(current);
+      const scheduleAfter = reminderScheduleSnapshotFromForm(current);
+      const reminderScheduleChanged = didRecurringReminderScheduleChange(
+        scheduleBaselineRef.current,
+        scheduleAfter,
+      );
       const payload = {
         title: trimmedTitle,
         description: current.description.trim() || null,
@@ -406,14 +224,47 @@ export default function RecurringTaskFormModal({
 
       let saved: RecurringTask;
       if (isEdit && taskId) {
-        // Backend only — AlarmManager already updated on reminder field changes.
-        saved = await authApi.updateRecurringTask({
+        const existing =
+          queryClient
+            .getQueryData<RecurringTask[]>(recurringTasksQueryKey(accessToken))
+            ?.find(task => task.id === taskId) ??
+          queryClient.getQueryData<RecurringTask>(
+            recurringTaskQueryKey(taskId),
+          );
+
+        const optimistic: RecurringTask = {
+          id: taskId,
+          title: trimmedTitle,
+          description: payload.description,
+          status: current.status,
+          streakCount: existing?.streakCount ?? 0,
+          lastCompletedAt: existing?.lastCompletedAt ?? null,
+          lastResetAt: existing?.lastResetAt ?? new Date(),
+          nextResetAt: existing?.nextResetAt ?? new Date(),
+          createdAt: existing?.createdAt ?? new Date(),
+          updatedAt: new Date(),
+          ...notificationFields,
+        };
+
+        const apiPromise = authApi.updateRecurringTask({
           recurringTaskId: taskId,
           updateRecurringTaskRequest: {
             ...payload,
             status: current.status,
           },
         });
+
+        // Android only when switch/time changed — title/status-only stays Railway-only.
+        if (reminderScheduleChanged) {
+          const [updated] = await Promise.all([
+            apiPromise,
+            syncNativeOneTask(optimistic),
+          ]);
+          saved = updated;
+          scheduleBaselineRef.current = scheduleAfter;
+        } else {
+          saved = await apiPromise;
+        }
       } else {
         const created = await authApi.createRecurringTask({
           createRecurringTaskRequest: payload,
@@ -430,22 +281,26 @@ export default function RecurringTaskFormModal({
               })
             : created;
 
-        writeRecurringTaskToCaches(queryClient, accessToken, {
+        const createdMerged: RecurringTask = {
           ...saved,
           ...notificationFields,
-        });
+          title: trimmedTitle,
+          status: current.status,
+        };
+        writeRecurringTaskToCaches(queryClient, accessToken, createdMerged);
 
-        // New task: first chance to register AlarmManager (no id before create).
-        if (notificationFields.notificationEnabled) {
-          await flushNativeReminders();
+        if (reminderScheduleChanged) {
+          await syncNativeOneTask(createdMerged);
+          scheduleBaselineRef.current = scheduleAfter;
         }
 
-        return saved;
+        return createdMerged;
       }
 
       writeRecurringTaskToCaches(queryClient, accessToken, {
         ...saved,
         ...notificationFields,
+        title: trimmedTitle,
       });
       return saved;
     },
@@ -477,9 +332,12 @@ export default function RecurringTaskFormModal({
 
       setError(t('recurring.form.error'));
     },
+    onSettled: () => {
+      setSaveUiPending(false);
+    },
   });
 
-  saveMutationPendingRef.current = saveMutation.isPending;
+  const isSavePending = saveUiPending || saveMutation.isPending;
 
   function handleSavePress() {
     titleInputRef.current?.blur();
@@ -490,37 +348,8 @@ export default function RecurringTaskFormModal({
     }
 
     setError(null);
+    setSaveUiPending(true);
     saveMutation.mutate();
-  }
-
-  async function handleResetReminderAndClose() {
-    const baseline = openReminderBaselineRef.current;
-    if (!isEdit || !taskId || !baseline) {
-      setReminderDiscardVisible(false);
-      onClose();
-      return;
-    }
-
-    setReminderResetPending(true);
-    try {
-      const notificationFields = buildRecurringTaskNotificationFields(baseline);
-      const saved = await authApi.updateRecurringTask({
-        recurringTaskId: taskId,
-        updateRecurringTaskRequest: notificationFields,
-      });
-      writeRecurringTaskToCaches(queryClient, accessToken, {
-        ...saved,
-        ...notificationFields,
-      });
-      await flushNativeReminders();
-      setReminderDiscardVisible(false);
-      onClose();
-    } catch {
-      setError(t('recurring.form.reminderPersistError'));
-      setReminderDiscardVisible(false);
-    } finally {
-      setReminderResetPending(false);
-    }
   }
 
   function growPanelToFit(neededHeight: number) {
@@ -564,20 +393,7 @@ export default function RecurringTaskFormModal({
       <Pressable
         style={styles.backdropTap}
         accessibilityLabel={t('common.close')}
-        onPress={requestClose}
-      />
-
-      <RecurringReminderDiscardModal
-        visible={reminderDiscardVisible}
-        isPending={reminderResetPending}
-        onDismiss={() => setReminderDiscardVisible(false)}
-        onKeepAndClose={() => {
-          setReminderDiscardVisible(false);
-          onClose();
-        }}
-        onResetAndClose={() => {
-          void handleResetReminderAndClose();
-        }}
+        onPress={onClose}
       />
 
       <View style={styles.modalShell}>
@@ -593,7 +409,7 @@ export default function RecurringTaskFormModal({
               <Pressable
                 style={styles.closeButton}
                 accessibilityLabel={t('common.close')}
-                onPress={requestClose}
+                onPress={onClose}
               >
                 <Text style={styles.closeText}>×</Text>
               </Pressable>
@@ -658,10 +474,23 @@ export default function RecurringTaskFormModal({
                   <RecurringTaskNotificationField
                     enabled={form.notificationEnabled}
                     notificationTime={form.notificationTime}
-                    immediatePersist={isEdit}
-                    isPersisting={reminderPersisting}
-                    onEnabledChange={handleReminderEnabledChange}
-                    onNotificationTimeChange={handleReminderTimeChange}
+                    onEnabledChange={notificationEnabled => {
+                      const notificationTime = notificationEnabled
+                        ? resolveStoredNotificationTime(formRef.current.notificationTime)
+                        : formRef.current.notificationTime;
+                      patchForm(current => ({
+                        ...current,
+                        notificationEnabled,
+                        notificationTime,
+                      }));
+                    }}
+                    onNotificationTimeChange={notificationTime =>
+                      patchForm(current => ({
+                        ...current,
+                        notificationEnabled: true,
+                        notificationTime,
+                      }))
+                    }
                   />
 
                   <View style={styles.statusFieldRow}>
@@ -707,17 +536,17 @@ export default function RecurringTaskFormModal({
                   <View style={styles.actions}>
                     <Pressable
                       style={styles.cancelButton}
-                      onPress={requestClose}
-                      disabled={reminderResetPending || saveMutation.isPending}
+                      onPress={onClose}
+                      disabled={isSavePending}
                     >
                       <Text style={styles.cancelText}>{t('common.cancel')}</Text>
                     </Pressable>
                     <Pressable
                       style={styles.saveButton}
                       onPress={handleSavePress}
-                      disabled={saveMutation.isPending || reminderResetPending}
+                      disabled={isSavePending}
                     >
-                      {saveMutation.isPending ? (
+                      {isSavePending ? (
                         <ActivityIndicator color="#fff" />
                       ) : (
                         <Text style={styles.saveText}>{t('recurring.form.save')}</Text>

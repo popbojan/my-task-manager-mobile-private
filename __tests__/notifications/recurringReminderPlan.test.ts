@@ -3,8 +3,9 @@ import type { RecurringTask } from '@/api/generated/models/RecurringTask';
 import {
   buildRecurringReminderPlan,
   nextDailyReminderTimestampMs,
+  reminderCopyForTask,
   reminderCopyForTasks,
-  reminderNotificationId,
+  reminderNotificationIdForTask,
   selectRecurringReminderTasks,
 } from '@/notifications/recurringReminderPlan';
 
@@ -79,8 +80,8 @@ describe('recurringReminderPlan', () => {
     ).toEqual(['ok']);
   });
 
-  it('writes a warm single-task reminder and groups the same clock time', () => {
-    expect(reminderCopyForTasks([task()], t)).toEqual({
+  it('writes a warm single-task reminder copy', () => {
+    expect(reminderCopyForTask(task(), t)).toEqual({
       title: 'Zeit für Deutsch lernen',
       body: 'Ein guter Moment, um loszulegen.',
     });
@@ -99,7 +100,27 @@ describe('recurringReminderPlan', () => {
     });
   });
 
-  it('keeps tomorrow’s reminder when every task at that time is already done', () => {
+  it('schedules one trigger per task (no grouping by clock time)', () => {
+    const from = new Date('2026-11-08T07:30:00.000Z');
+    const plan = buildRecurringReminderPlan(
+      [
+        task({ id: 'a', title: 'Deutsch', notificationTime: '09:00' }),
+        task({ id: 'b', title: 'Sport', notificationTime: '09:00' }),
+      ],
+      'Europe/Berlin',
+      t,
+      from,
+    );
+
+    expect(plan).toHaveLength(2);
+    expect(plan.map(item => item.id).sort()).toEqual([
+      reminderNotificationIdForTask('a'),
+      reminderNotificationIdForTask('b'),
+    ]);
+    expect(plan.every(item => item.taskIds.length === 1)).toBe(true);
+  });
+
+  it('keeps tomorrow’s reminder when the task is already done', () => {
     const from = new Date('2026-11-08T07:30:00.000Z');
     const plan = buildRecurringReminderPlan(
       [
@@ -116,22 +137,16 @@ describe('recurringReminderPlan', () => {
 
     expect(plan).toEqual([
       expect.objectContaining({
-        id: reminderNotificationId('09:00'),
+        id: reminderNotificationIdForTask('done'),
         timestamp: new Date('2026-11-09T08:00:00.000Z').getTime(),
       }),
     ]);
   });
 
-  it('still reminds today when at least one task at that time is open', () => {
+  it('still reminds today when the task is open', () => {
     const from = new Date('2026-11-08T07:30:00.000Z');
     const plan = buildRecurringReminderPlan(
       [
-        task({
-          id: 'done',
-          title: 'Sport',
-          status: RecurringTaskStatus.Done,
-          notificationTime: '09:00',
-        }),
         task({
           id: 'open',
           title: 'Deutsch',
@@ -145,9 +160,10 @@ describe('recurringReminderPlan', () => {
 
     expect(plan).toEqual([
       expect.objectContaining({
+        id: reminderNotificationIdForTask('open'),
         title: 'Zeit für Deutsch',
         timestamp: new Date('2026-11-08T08:00:00.000Z').getTime(),
-        taskIds: ['done', 'open'],
+        taskIds: ['open'],
       }),
     ]);
   });

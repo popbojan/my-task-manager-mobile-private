@@ -41,8 +41,22 @@ export type RecurringReminderTranslate = (
   params?: Record<string, string>,
 ) => string;
 
+/** One AlarmManager trigger per task — same simplicity as the profile daily reminder. */
+export function reminderNotificationIdForTask(taskId: string): string {
+  return `${RECURRING_REMINDER_ID_PREFIX}task-${taskId}`;
+}
+
+/** @deprecated Old time-grouped ids (`recurring-reminder-0900`). Kept for cleanup. */
 export function reminderNotificationId(notificationTime: string): string {
   return `${RECURRING_REMINDER_ID_PREFIX}${notificationTime.replace(':', '')}`;
+}
+
+export function isLegacyTimeGroupedReminderId(id: string): boolean {
+  return (
+    id.startsWith(RECURRING_REMINDER_ID_PREFIX) &&
+    !id.startsWith(`${RECURRING_REMINDER_ID_PREFIX}task-`) &&
+    /^recurring-reminder-\d{3,4}$/.test(id)
+  );
 }
 
 export function localWallClockUtcMs(
@@ -145,20 +159,29 @@ export function isSameLocalCalendarDay(
   return a.year === b.year && a.month === b.month && a.day === b.day;
 }
 
+export function reminderCopyForTask(
+  task: RecurringReminderTask,
+  t: RecurringReminderTranslate,
+): { title: string; body: string } {
+  const title = task.title.trim() || t('recurring.reminder.multiTitle');
+  return {
+    title: t('recurring.reminder.singleTitle', { title }),
+    body: t('recurring.reminder.singleBody'),
+  };
+}
+
+/** @deprecated Prefer reminderCopyForTask — one notification per task. */
 export function reminderCopyForTasks(
   tasks: RecurringReminderTask[],
   t: RecurringReminderTranslate,
 ): { title: string; body: string } {
+  if (tasks.length === 1) {
+    return reminderCopyForTask(tasks[0], t);
+  }
+
   const titles = tasks
     .map(task => task.title.trim())
     .filter(title => title.length > 0);
-
-  if (titles.length === 1) {
-    return {
-      title: t('recurring.reminder.singleTitle', { title: titles[0] }),
-      body: t('recurring.reminder.singleBody'),
-    };
-  }
 
   if (titles.length === 0) {
     return {
@@ -173,63 +196,65 @@ export function reminderCopyForTasks(
   };
 }
 
+export function buildReminderCopyForTask(
+  task: RecurringReminderTask,
+  timeZone: string,
+  t: RecurringReminderTranslate,
+  from = new Date(),
+): RecurringReminderCopy | null {
+  if (
+    isPremiumPreviewTask(task.id) ||
+    !task.notificationEnabled ||
+    !task.notificationTime ||
+    !isValidNotificationTime(task.notificationTime)
+  ) {
+    return null;
+  }
+
+  const notificationTime = task.notificationTime;
+  let timestamp = nextDailyReminderTimestampMs(
+    notificationTime,
+    timeZone,
+    from,
+  );
+  if (timestamp === null) {
+    return null;
+  }
+
+  // Done today → remind tomorrow (same idea as the old grouped plan).
+  if (
+    task.status === RecurringTaskStatus.Done &&
+    isSameLocalCalendarDay(from, new Date(timestamp), timeZone)
+  ) {
+    timestamp = nextDailyReminderTimestampMs(
+      notificationTime,
+      timeZone,
+      new Date(timestamp),
+    );
+    if (timestamp === null) {
+      return null;
+    }
+  }
+
+  const copy = reminderCopyForTask(task, t);
+  return {
+    id: reminderNotificationIdForTask(task.id),
+    notificationTime,
+    timestamp,
+    title: copy.title,
+    body: copy.body,
+    taskIds: [task.id],
+  };
+}
+
+/** One trigger per enabled task — no grouping by clock time. */
 export function buildRecurringReminderPlan(
   tasks: RecurringReminderTask[],
   timeZone: string,
   t: RecurringReminderTranslate,
   from = new Date(),
 ): RecurringReminderCopy[] {
-  const grouped = new Map<string, RecurringReminderTask[]>();
-
-  for (const task of selectRecurringReminderTasks(tasks)) {
-    const time = task.notificationTime as string;
-    const current = grouped.get(time) ?? [];
-    current.push(task);
-    grouped.set(time, current);
-  }
-
-  return [...grouped.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .flatMap(([notificationTime, group]) => {
-      let timestamp = nextDailyReminderTimestampMs(
-        notificationTime,
-        timeZone,
-        from,
-      );
-      if (timestamp === null) {
-        return [];
-      }
-
-      const pending = group.filter(
-        task => task.status !== RecurringTaskStatus.Done,
-      );
-      if (
-        pending.length === 0 &&
-        isSameLocalCalendarDay(from, new Date(timestamp), timeZone)
-      ) {
-        timestamp = nextDailyReminderTimestampMs(
-          notificationTime,
-          timeZone,
-          new Date(timestamp),
-        );
-        if (timestamp === null) {
-          return [];
-        }
-      }
-
-      const copy = reminderCopyForTasks(
-        pending.length > 0 ? pending : group,
-        t,
-      );
-      return [
-        {
-          id: reminderNotificationId(notificationTime),
-          notificationTime,
-          timestamp,
-          title: copy.title,
-          body: copy.body,
-          taskIds: group.map(task => task.id),
-        },
-      ];
-    });
+  return selectRecurringReminderTasks(tasks)
+    .map(task => buildReminderCopyForTask(task, timeZone, t, from))
+    .filter((item): item is RecurringReminderCopy => item !== null);
 }

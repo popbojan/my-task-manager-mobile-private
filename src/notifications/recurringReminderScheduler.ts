@@ -1,10 +1,18 @@
 import type { TimestampTrigger } from '@notifee/react-native';
 import { Linking } from 'react-native';
-import type { RecurringReminderCopy } from '@/notifications/recurringReminderPlan';
+import type {
+  RecurringReminderCopy,
+  RecurringReminderTask,
+  RecurringReminderTranslate,
+} from '@/notifications/recurringReminderPlan';
 import {
+  buildReminderCopyForTask,
+  isLegacyTimeGroupedReminderId,
   nextDailyReminderTimestampMs,
   RECURRING_REMINDER_ID_PREFIX,
+  reminderNotificationIdForTask,
 } from '@/notifications/recurringReminderPlan';
+import { isValidNotificationTime } from '@/notifications/recurringNotificationTimeUtils';
 import { RECURRING_REMINDER_OPEN_TAB } from '@/notifications/recurringReminderNavigation';
 import {
   loadNotifeePackage,
@@ -25,6 +33,7 @@ let permissionInFlight: Promise<boolean> | null = null;
 let cachedAlarmPermission: boolean | null = null;
 let alarmPermissionInFlight: Promise<boolean> | null = null;
 let reminderChannelReady = false;
+let legacyTimeGroupedRemindersCleared = false;
 
 export function reminderPlanFingerprint(
   reminders: RecurringReminderCopy[],
@@ -200,6 +209,141 @@ async function ensureReminderChannel(channelName: string): Promise<void> {
   reminderChannelReady = true;
 }
 
+/** One-shot: drop old time-grouped triggers (`recurring-reminder-0900`). */
+async function cancelLegacyTimeGroupedRemindersOnce(): Promise<void> {
+  if (legacyTimeGroupedRemindersCleared) {
+    return;
+  }
+
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    return;
+  }
+
+  const notifee = notifeePkg.default;
+  const ids = await notifee.getTriggerNotificationIds();
+  for (const id of ids) {
+    if (isLegacyTimeGroupedReminderId(id)) {
+      await notifee.cancelTriggerNotification(id);
+      lastSyncedItemFingerprintById.delete(id);
+    }
+  }
+  legacyTimeGroupedRemindersCleared = true;
+}
+
+export async function cancelOneTaskRecurringReminder(
+  taskId: string,
+): Promise<void> {
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    return;
+  }
+
+  const id = reminderNotificationIdForTask(taskId);
+  await notifeePkg.default.cancelTriggerNotification(id);
+  lastSyncedItemFingerprintById.delete(id);
+  lastSyncedFingerprint = null;
+}
+
+/**
+ * Profile-style: write or cancel exactly one task trigger.
+ * Does not rebuild other tasks' alarms.
+ */
+export async function syncOneTaskRecurringReminder(options: {
+  task: RecurringReminderTask;
+  timeZone: string;
+  channelName: string;
+  t: RecurringReminderTranslate;
+}): Promise<void> {
+  const notifeePkg = loadNotifeePackage();
+  if (!notifeePkg) {
+    warnNotifeeUnavailable('syncOneTaskRecurringReminder');
+    return;
+  }
+
+  const { default: notifee, RepeatFrequency, TriggerType } = notifeePkg;
+  const triggerId = reminderNotificationIdForTask(options.task.id);
+
+  await cancelLegacyTimeGroupedRemindersOnce();
+
+  if (
+    !options.task.notificationEnabled ||
+    !options.task.notificationTime ||
+    !isValidNotificationTime(options.task.notificationTime)
+  ) {
+    await notifee.cancelTriggerNotification(triggerId);
+    lastSyncedItemFingerprintById.delete(triggerId);
+    lastSyncedFingerprint = null;
+    return;
+  }
+
+  // Cached only — never prompt for permission from the Heute modal.
+  const permissionGranted = await hasRecurringReminderPermission();
+  if (!permissionGranted) {
+    await notifee.cancelTriggerNotification(triggerId);
+    lastSyncedItemFingerprintById.delete(triggerId);
+    return;
+  }
+
+  const reminder = buildReminderCopyForTask(
+    options.task,
+    options.timeZone,
+    options.t,
+  );
+  if (!reminder) {
+    await notifee.cancelTriggerNotification(triggerId);
+    lastSyncedItemFingerprintById.delete(triggerId);
+    return;
+  }
+
+  const itemFingerprint = reminderItemFingerprint(reminder);
+  if (lastSyncedItemFingerprintById.get(reminder.id) === itemFingerprint) {
+    return;
+  }
+
+  await ensureReminderChannel(options.channelName);
+
+  const timestamp = resolveLiveTriggerTimestamp(
+    reminder,
+    options.timeZone,
+    Date.now(),
+  );
+  if (timestamp === null || timestamp <= Date.now()) {
+    return;
+  }
+
+  const trigger: TimestampTrigger = {
+    type: TriggerType.TIMESTAMP,
+    timestamp,
+    repeatFrequency: RepeatFrequency.DAILY,
+    alarmManager: {
+      allowWhileIdle: true,
+    },
+  };
+
+  await notifee.createTriggerNotification(
+    {
+      id: reminder.id,
+      title: reminder.title,
+      body: reminder.body,
+      data: {
+        openTab: RECURRING_REMINDER_OPEN_TAB,
+      },
+      android: {
+        channelId: RECURRING_REMINDER_CHANNEL_ID,
+        pressAction: {
+          id: 'default',
+          launchActivity: 'default',
+        },
+        smallIcon: 'ic_stat_notify',
+      },
+    },
+    trigger,
+  );
+  lastSyncedItemFingerprintById.set(reminder.id, itemFingerprint);
+  lastSyncedFingerprint = null;
+}
+
 export async function cancelRecurringReminderTriggers(): Promise<void> {
   const notifeePkg = loadNotifeePackage();
   if (!notifeePkg) {
@@ -284,6 +428,7 @@ export async function syncRecurringReminderTriggers(
     const { default: notifee, RepeatFrequency, TriggerType } = notifeePkg;
 
     await ensureReminderChannel(channelName);
+    await cancelLegacyTimeGroupedRemindersOnce();
 
     if (reminders.length === 0) {
       await cancelRecurringReminderTriggers();

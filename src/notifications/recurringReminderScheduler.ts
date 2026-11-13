@@ -17,11 +17,14 @@ export const RECURRING_REMINDER_CHANNEL_ID = 'recurring-reminders';
 const MIN_TRIGGER_LEAD_MS = 3_000;
 
 let lastSyncedFingerprint: string | null = null;
+/** Per trigger id — skip AlarmManager rewrite when this slot is unchanged. */
+const lastSyncedItemFingerprintById = new Map<string, string>();
 let syncInFlight: Promise<void> | null = null;
 let cachedPermission: boolean | null = null;
 let permissionInFlight: Promise<boolean> | null = null;
 let cachedAlarmPermission: boolean | null = null;
 let alarmPermissionInFlight: Promise<boolean> | null = null;
+let reminderChannelReady = false;
 
 export function reminderPlanFingerprint(
   reminders: RecurringReminderCopy[],
@@ -32,6 +35,11 @@ export function reminderPlanFingerprint(
         `${reminder.id}|${reminder.timestamp}|${reminder.title}|${reminder.body}`,
     )
     .join('\n');
+}
+
+/** Stable slot identity — omit rolling next-fire timestamp so DAILY alarms aren't rewritten. */
+function reminderItemFingerprint(reminder: RecurringReminderCopy): string {
+  return `${reminder.notificationTime}|${reminder.title}|${reminder.body}`;
 }
 
 function isManagedReminderId(id: string): boolean {
@@ -70,6 +78,10 @@ export async function requestRecurringReminderPermission(): Promise<boolean> {
 }
 
 export async function hasRecurringReminderPermission(): Promise<boolean> {
+  if (cachedPermission !== null) {
+    return cachedPermission;
+  }
+
   if (permissionInFlight) {
     return permissionInFlight;
   }
@@ -101,6 +113,10 @@ export async function hasRecurringReminderPermission(): Promise<boolean> {
  * iOS / unsupported devices report NOT_SUPPORTED → treat as allowed.
  */
 export async function hasRecurringReminderAlarmPermission(): Promise<boolean> {
+  if (cachedAlarmPermission !== null) {
+    return cachedAlarmPermission;
+  }
+
   if (alarmPermissionInFlight) {
     return alarmPermissionInFlight;
   }
@@ -166,6 +182,10 @@ export async function ensureRecurringReminderAlarmPermission(): Promise<boolean>
 }
 
 async function ensureReminderChannel(channelName: string): Promise<void> {
+  if (reminderChannelReady) {
+    return;
+  }
+
   const notifeePkg = loadNotifeePackage();
   if (!notifeePkg) {
     return;
@@ -177,6 +197,7 @@ async function ensureReminderChannel(channelName: string): Promise<void> {
     name: channelName,
     importance: AndroidImportance.HIGH,
   });
+  reminderChannelReady = true;
 }
 
 export async function cancelRecurringReminderTriggers(): Promise<void> {
@@ -193,6 +214,7 @@ export async function cancelRecurringReminderTriggers(): Promise<void> {
     await yieldToUi();
   }
   lastSyncedFingerprint = null;
+  lastSyncedItemFingerprintById.clear();
 }
 
 type SyncRecurringReminderOptions = {
@@ -285,10 +307,17 @@ export async function syncRecurringReminderTriggers(
 
     for (const id of staleIds) {
       await notifee.cancelTriggerNotification(id);
+      lastSyncedItemFingerprintById.delete(id);
     }
 
     let scheduledCount = 0;
     for (const reminder of reminders) {
+      const itemFingerprint = reminderItemFingerprint(reminder);
+      if (lastSyncedItemFingerprintById.get(reminder.id) === itemFingerprint) {
+        scheduledCount += 1;
+        continue;
+      }
+
       const timestamp = resolveLiveTriggerTimestamp(
         reminder,
         timeZone,
@@ -331,6 +360,7 @@ export async function syncRecurringReminderTriggers(
         },
         trigger,
       );
+      lastSyncedItemFingerprintById.set(reminder.id, itemFingerprint);
       scheduledCount += 1;
     }
 
@@ -355,6 +385,7 @@ export async function syncRecurringReminderTriggers(
 /** Force next sync even if the plan fingerprint matches (e.g. after permission grant). */
 export function invalidateRecurringReminderSyncFingerprint(): void {
   lastSyncedFingerprint = null;
+  lastSyncedItemFingerprintById.clear();
 }
 
 /**

@@ -314,6 +314,16 @@ export const fr: Record<TranslationKey, string> = {
     'Rappels activés — chaque jour à {{time}} sur ton téléphone.',
   'recurring.form.notificationDisabledHint':
     'Active l’interrupteur pour recevoir un rappel quotidien sur ton téléphone.',
+  'recurring.form.notificationImmediateHint':
+    'Le rappel est enregistré tout de suite. Indépendamment de Enregistrer/Annuler.',
+  'recurring.form.reminderPersistError':
+    'Impossible d’enregistrer le rappel.',
+  'recurring.form.reminderDiscardTitle': 'Rappel déjà enregistré',
+  'recurring.form.reminderDiscardBody':
+    'Tu as modifié le rappel. Il est déjà enregistré sur le téléphone. Garder ce changement ?',
+  'recurring.form.reminderDiscardKeep': 'Fermer quand même',
+  'recurring.form.reminderDiscardReset':
+    'Réinitialiser le rappel et fermer',
   'recurring.reminder.channelName': 'Rappels quotidiens',
   'recurring.reminder.singleTitle': 'C’est l’heure : {{title}}',
   'recurring.reminder.singleBody': 'Un bon moment pour t’y mettre.',

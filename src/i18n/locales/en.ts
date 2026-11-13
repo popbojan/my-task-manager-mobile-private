@@ -310,6 +310,16 @@ export const en: Record<TranslationKey, string> = {
     'Reminders are on — daily at {{time}} on your phone.',
   'recurring.form.notificationDisabledHint':
     'Turn the switch on to get a daily reminder on your phone.',
+  'recurring.form.notificationImmediateHint':
+    'Reminder is saved immediately. Independent of Save/Cancel.',
+  'recurring.form.reminderPersistError':
+    'Could not save the reminder.',
+  'recurring.form.reminderDiscardTitle': 'Reminder already saved',
+  'recurring.form.reminderDiscardBody':
+    'You changed the reminder. It is already saved on your phone. Keep this change?',
+  'recurring.form.reminderDiscardKeep': 'Close anyway',
+  'recurring.form.reminderDiscardReset':
+    'Reset reminder and close',
   'recurring.reminder.channelName': 'Daily reminders',
   'recurring.reminder.singleTitle': 'Time for {{title}}',
   'recurring.reminder.singleBody': 'A good moment to get started.',

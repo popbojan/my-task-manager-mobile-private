@@ -311,6 +311,16 @@ export const sr: Record<TranslationKey, string> = {
     'Podsetnici su uključeni — svaki dan u {{time}} na telefonu.',
   'recurring.form.notificationDisabledHint':
     'Uključi prekidač da dobijaš dnevni podsetnik na telefonu.',
+  'recurring.form.notificationImmediateHint':
+    'Podsetnik se čuva odmah. Nezavisno od Sačuvaj/Otkaži.',
+  'recurring.form.reminderPersistError':
+    'Podsetnik nije sačuvan.',
+  'recurring.form.reminderDiscardTitle': 'Podsetnik je već sačuvan',
+  'recurring.form.reminderDiscardBody':
+    'Promenio/la si podsetnik. Već je sačuvan na telefonu. Zadržati ovu promenu?',
+  'recurring.form.reminderDiscardKeep': 'Ipak zatvori',
+  'recurring.form.reminderDiscardReset':
+    'Vrati podsetnik i zatvori',
   'recurring.reminder.channelName': 'Dnevni podsetnici',
   'recurring.reminder.singleTitle': 'Vreme je za: {{title}}',
   'recurring.reminder.singleBody': 'Dobar trenutak da kreneš.',

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   AppState,
   Platform,
   Pressable,
@@ -21,7 +22,6 @@ import {
 } from '@/notifications/recurringNotificationTimeUtils';
 import NotificationPermissionHint from '@/notifications/NotificationPermissionHint';
 import {
-  ensureRecurringReminderAlarmPermission,
   getCachedRecurringReminderAlarmPermission,
   getCachedRecurringReminderPermission,
   hasRecurringReminderAlarmPermission,
@@ -38,6 +38,9 @@ type RecurringTaskNotificationFieldProps = {
   notificationTime: string | null;
   onEnabledChange: (enabled: boolean) => void;
   onNotificationTimeChange: (notificationTime: string) => void;
+  /** Edit mode: reminder commits immediately (API + AlarmManager). */
+  immediatePersist?: boolean;
+  isPersisting?: boolean;
 };
 
 function resolvePickerDate(notificationTime: string | null): Date {
@@ -52,6 +55,8 @@ export default function RecurringTaskNotificationField({
   notificationTime,
   onEnabledChange,
   onNotificationTimeChange,
+  immediatePersist = false,
+  isPersisting = false,
 }: RecurringTaskNotificationFieldProps) {
   const { language, t } = useLanguage();
   const [showIosPicker, setShowIosPicker] = useState(false);
@@ -101,10 +106,6 @@ export default function RecurringTaskNotificationField({
   }, [refreshPermission]);
 
   function openTimePicker() {
-    if (!notificationTime) {
-      onNotificationTimeChange(DEFAULT_RECURRING_NOTIFICATION_TIME);
-    }
-
     const initial = resolvePickerDate(notificationTime);
     if (Platform.OS === 'android') {
       openAndroidTimePicker(initial, date => {
@@ -120,29 +121,28 @@ export default function RecurringTaskNotificationField({
   }
 
   function handleToggle(nextEnabled: boolean) {
-    if (nextEnabled && !notificationTime) {
-      onNotificationTimeChange(DEFAULT_RECURRING_NOTIFICATION_TIME);
-    }
+    // Update UI + start persist immediately — never wait on permissions/settings first
+    // (that froze the modal for ~10s with no spinner).
     onEnabledChange(nextEnabled);
 
-    // Ask the OS only if we don't already know permission is granted.
-    if (nextEnabled) {
-      void (async () => {
-        const alreadyGranted =
-          permissionGranted === true ||
-          getCachedRecurringReminderPermission() === true ||
-          (await hasRecurringReminderPermission());
-        const granted = alreadyGranted
-          ? true
-          : await requestRecurringReminderPermission();
-        setPermissionGranted(granted);
-
-        // Android exact alarms are a separate switch from notification permission.
-        const alarmOk = await ensureRecurringReminderAlarmPermission();
-        setAlarmGranted(alarmOk);
-        // Native schedule runs only on Speichern — never in the background.
-      })();
+    if (!nextEnabled) {
+      return;
     }
+
+    void (async () => {
+      const alreadyGranted =
+        permissionGranted === true ||
+        getCachedRecurringReminderPermission() === true ||
+        (await hasRecurringReminderPermission());
+      const granted = alreadyGranted
+        ? true
+        : await requestRecurringReminderPermission();
+      setPermissionGranted(granted);
+
+      // Read-only check — do not open Alarme-Einstellungen here (blocks the form).
+      const alarmOk = await hasRecurringReminderAlarmPermission();
+      setAlarmGranted(alarmOk);
+    })();
   }
 
   function handlePickerChange(event: DateTimePickerEvent, date?: Date) {
@@ -170,11 +170,19 @@ export default function RecurringTaskNotificationField({
         <Text style={styles.label} numberOfLines={2}>
           {t('recurring.form.notificationLabel')}
         </Text>
+        {isPersisting ? (
+          <ActivityIndicator
+            color={recurringTheme.accentBright}
+            size="small"
+            style={styles.persistSpinner}
+          />
+        ) : null}
         <Pressable
-          style={styles.timeChip}
+          style={[styles.timeChip, isPersisting && styles.controlDisabled]}
           accessibilityRole="button"
           accessibilityLabel={`${t('recurring.form.notificationTimeA11y')}: ${timeLabel}`}
           onPress={openTimePicker}
+          disabled={isPersisting}
         >
           <Text style={styles.timeChipText} numberOfLines={1}>
             {timeLabel}
@@ -183,6 +191,7 @@ export default function RecurringTaskNotificationField({
         <Switch
           value={enabled}
           onValueChange={handleToggle}
+          disabled={isPersisting}
           trackColor={{
             false: recurringTheme.cardBorder,
             true: recurringTheme.accent,
@@ -190,6 +199,12 @@ export default function RecurringTaskNotificationField({
           thumbColor={enabled ? recurringTheme.accentBright : '#f4f4f5'}
         />
       </View>
+
+      {immediatePersist ? (
+        <Text style={styles.immediateHint} numberOfLines={2}>
+          {t('recurring.form.notificationImmediateHint')}
+        </Text>
+      ) : null}
 
       {/* Fixed slot so Cancel/Save don't jump when the hint changes. */}
       <View style={styles.permissionSlot}>
@@ -266,6 +281,18 @@ const styles = StyleSheet.create({
     color: recurringTheme.textSecondary,
     fontSize: 12,
     fontWeight: '700',
+  },
+  persistSpinner: {
+    marginRight: 2,
+  },
+  controlDisabled: {
+    opacity: 0.55,
+  },
+  immediateHint: {
+    color: recurringTheme.textMuted,
+    fontSize: 11,
+    lineHeight: 15,
+    fontWeight: '600',
   },
   permissionSlot: {
     minHeight: 56,

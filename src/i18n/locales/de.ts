@@ -310,6 +310,16 @@ export const de = {
     'Schalter an: Täglich um {{time}} bekommst du eine Erinnerung auf dem Handy.',
   'recurring.form.notificationDisabledHint':
     'Schalter an, wenn du täglich eine Erinnerung auf dem Handy bekommen willst.',
+  'recurring.form.notificationImmediateHint':
+    'Erinnerung wird sofort gespeichert. Unabhängig von Speichern/Abbrechen.',
+  'recurring.form.reminderPersistError':
+    'Erinnerung konnte nicht gespeichert werden.',
+  'recurring.form.reminderDiscardTitle': 'Erinnerung schon gespeichert',
+  'recurring.form.reminderDiscardBody':
+    'Du hast die Erinnerung geändert. Sie ist bereits auf dem Handy gespeichert. Willst du diese Änderung behalten?',
+  'recurring.form.reminderDiscardKeep': 'Trotzdem schließen',
+  'recurring.form.reminderDiscardReset':
+    'Erinnerung zurücksetzen und schließen',
   'recurring.reminder.channelName': 'Tägliche Erinnerungen',
   'recurring.reminder.singleTitle': 'Zeit für {{title}}',
   'recurring.reminder.singleBody': 'Ein guter Moment, um loszulegen.',

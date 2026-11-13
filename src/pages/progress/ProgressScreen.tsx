@@ -75,7 +75,7 @@ export default function ProgressScreen({ onOpenSubscription }: ProgressScreenPro
     () => uniqueMonthKeysForCalendarDates(stripCalendarDates),
     [stripCalendarDates],
   );
-  const { refreshing, onRefresh } = useAppRefresh();
+  const { refreshing, onRefresh } = useAppRefresh('progress');
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;

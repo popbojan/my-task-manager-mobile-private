@@ -9,7 +9,6 @@ import {
   isRecurringReminderSyncSuspended,
   subscribeRecurringReminderReschedule,
 } from '@/notifications/recurringReminderQueue';
-import { hasRecurringReminderPermission } from '@/notifications/recurringReminderScheduler';
 import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import { useCurrentUser } from '@/user/useCurrentUser';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
@@ -83,12 +82,13 @@ export default function RecurringReminderSync() {
 
   useEffect(() => {
     const onAppState = (next: AppStateStatus) => {
+      // Never flush on resume — AlarmManager sync can freeze the JS bridge.
+      // Only catch dirties when the app actually leaves (background).
       if (next === 'active') {
-        void hasRecurringReminderPermission().catch(() => undefined);
         return;
       }
 
-      if (next === 'background' || next === 'inactive') {
+      if (next === 'background') {
         if (isRecurringReminderSyncSuspended()) {
           return;
         }

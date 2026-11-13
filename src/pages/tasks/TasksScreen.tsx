@@ -65,7 +65,7 @@ export default function TasksScreen({
   const { t } = useLanguage();
   const { accessToken } = useAuth();
   const queryClient = useQueryClient();
-  const { refreshing, onRefresh } = useAppRefresh();
+  const { refreshing, onRefresh } = useAppRefresh('tasks');
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const [activeFilter, setActiveFilter] = useState<TaskFilterId>('all');
   const [deleteModal, setDeleteModal] = useState<{

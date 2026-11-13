@@ -5,13 +5,14 @@ import { refreshAppData } from '@/refresh/refreshAppData';
 import { clearRecurringSessionQueries } from '@/recurring/recurringQueryKeys';
 import { clearSubscriptionSessionQueries } from '@/subscription/clearSubscriptionSession';
 import { invalidateAuthenticatedSessionQueries } from '@/session/invalidateAuthenticatedQueries';
+import { migrateSessionQueriesForAccessToken } from '@/session/migrateSessionQueriesForAccessToken';
 
 export type RefreshAccessSessionOptions = {
   queryClient: QueryClient;
   setAccessToken: (token: string | null) => void;
   /**
-   * Reload session data (incl. GET /users/me + mobileAppVersion sync) after refresh.
-   * Defaults to true so cold start and foreground refresh both report app version.
+   * Full session data reload after token refresh. Off by default — foreground
+   * resume should stay snappy; screens refresh themselves (pull / tab focus).
    */
   refetchAppData?: boolean;
 };
@@ -31,22 +32,33 @@ function clearAuthenticatedSession(
 
 /**
  * Uses the HttpOnly refresh cookie to obtain a fresh access token.
- * Clears stale React Query caches when the session ends or the token rotates.
+ * Clears caches only when the session ends (401).
  */
 export async function refreshAccessSession({
   queryClient,
   setAccessToken,
-  refetchAppData = true,
+  refetchAppData = false,
 }: RefreshAccessSessionOptions): Promise<string | null> {
   const previousToken = getAccessToken();
 
   try {
     const data = await authApi.refreshAccessToken(authRequestInit);
+    if (
+      previousToken &&
+      data.accessToken &&
+      previousToken !== data.accessToken
+    ) {
+      migrateSessionQueriesForAccessToken(
+        queryClient,
+        previousToken,
+        data.accessToken,
+      );
+    }
     setAccessToken(data.accessToken);
-    invalidateAuthenticatedSessionQueries(queryClient);
 
     if (refetchAppData && data.accessToken) {
-      void refreshAppData(queryClient, data.accessToken);
+      invalidateAuthenticatedSessionQueries(queryClient);
+      void refreshAppData(queryClient, data.accessToken, 'all');
     }
 
     return data.accessToken;

@@ -89,7 +89,7 @@ export default function HistoryScreen({
   );
   const [pickerOpen, setPickerOpen] = useState(false);
   const [isPremiumUpsellOpen, setIsPremiumUpsellOpen] = useState(false);
-  const { refreshing, onRefresh } = useAppRefresh();
+  const { refreshing, onRefresh } = useAppRefresh('history');
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
 
   // Tab-focus sync can be a beat ahead of useCurrentCalendarDate — keep useQuery

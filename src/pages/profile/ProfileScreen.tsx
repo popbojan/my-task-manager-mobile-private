@@ -46,7 +46,7 @@ export default function ProfileScreen({
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const { environment } = useApiEnvironment();
-  const { refreshing, onRefresh } = useAppRefresh();
+  const { refreshing, onRefresh } = useAppRefresh('profile');
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const currentUserQuery = useCurrentUser();
   const [showSubscriptionSettings, setShowSubscriptionSettings] = useState(false);

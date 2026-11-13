@@ -5,8 +5,10 @@ import { useAuth } from '@/auth/AuthContext';
 import { refreshAccessSession } from '@/auth/refreshAccessSession';
 import { withTimeout } from '@/utils/withTimeout';
 
-const MIN_FOREGROUND_REFRESH_MS = 15_000;
-const FOREGROUND_REFRESH_TIMEOUT_MS = 25_000;
+/** Avoid hammering refresh on quick app switches. */
+const MIN_FOREGROUND_REFRESH_MS = 30_000;
+/** Token refresh only — keep short so resume stays interactive. */
+const FOREGROUND_REFRESH_TIMEOUT_MS = 8_000;
 
 function readInitialAppState(): AppStateStatus {
   const current = AppState.currentState;
@@ -18,8 +20,9 @@ function readInitialAppState(): AppStateStatus {
 }
 
 /**
- * Re-issues the access token when the app returns to the foreground so expired
- * JWTs do not leave tasks/subscription queries in a failed state.
+ * Re-issues the access token when the app returns to the foreground.
+ * Does not reload the whole app — active screens keep cached data and refresh
+ * via pull-to-refresh / tab focus.
  */
 export function useSessionRefreshOnForeground(enabled: boolean): void {
   const queryClient = useQueryClient();
@@ -57,16 +60,19 @@ export function useSessionRefreshOnForeground(enabled: boolean): void {
       refreshInFlightRef.current = true;
       lastRefreshAtRef.current = now;
 
+      // Token only — never invalidate/refetch here. A new JWT used to remount
+      // empty query keys and flash AppLaunchView for 10–20s; cache is migrated
+      // in refreshAccessSession. Screens stay interactive; pull-to-refresh for data.
       void withTimeout(
         refreshAccessSession({
           queryClient,
           setAccessToken,
-          refetchAppData: true,
+          refetchAppData: false,
         }),
         FOREGROUND_REFRESH_TIMEOUT_MS,
       )
         .catch(() => {
-          void queryClient.cancelQueries();
+          // Don't cancel in-flight UI queries — resume must stay responsive.
         })
         .finally(() => {
           refreshInFlightRef.current = false;

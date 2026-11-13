@@ -56,14 +56,45 @@ describe('refreshAccessSession', () => {
     expect(setAccessToken).not.toHaveBeenCalled();
   });
 
-  it('refetches app data after a successful refresh by default', async () => {
+  it('does not refetch app data after a successful refresh by default', async () => {
     getAccessToken.mockReturnValue(null);
     refreshAccessToken.mockResolvedValue({ accessToken: 'new-token' });
 
     const result = await refreshAccessSession({ queryClient, setAccessToken });
 
     expect(result).toBe('new-token');
-    expect(refreshAppData).toHaveBeenCalledWith(queryClient, 'new-token');
+    expect(refreshAppData).not.toHaveBeenCalled();
+  });
+
+  it('migrates cached queries when the access token string changes', async () => {
+    getAccessToken.mockReturnValue('old-token');
+    refreshAccessToken.mockResolvedValue({ accessToken: 'new-token' });
+    queryClient.setQueryData(['current-user', 'old-token'], { id: 'u1' });
+
+    await refreshAccessSession({ queryClient, setAccessToken });
+
+    expect(queryClient.getQueryData(['current-user', 'new-token'])).toEqual({
+      id: 'u1',
+    });
+    expect(setAccessToken).toHaveBeenCalledWith('new-token');
+  });
+
+  it('refetches app data when refetchAppData is true', async () => {
+    getAccessToken.mockReturnValue(null);
+    refreshAccessToken.mockResolvedValue({ accessToken: 'new-token' });
+
+    const result = await refreshAccessSession({
+      queryClient,
+      setAccessToken,
+      refetchAppData: true,
+    });
+
+    expect(result).toBe('new-token');
+    expect(refreshAppData).toHaveBeenCalledWith(
+      queryClient,
+      'new-token',
+      'all',
+    );
   });
 
   it('clears the session when refresh returns 401', async () => {

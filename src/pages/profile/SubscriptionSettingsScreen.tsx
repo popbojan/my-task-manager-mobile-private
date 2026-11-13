@@ -19,7 +19,7 @@ export default function SubscriptionSettingsScreen({
 }: SubscriptionSettingsScreenProps) {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const { refreshing, onRefresh } = useAppRefresh();
+  const { refreshing, onRefresh } = useAppRefresh('profile');
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
 
   useEffect(() => {

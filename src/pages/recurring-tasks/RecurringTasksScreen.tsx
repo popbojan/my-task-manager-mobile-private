@@ -97,7 +97,7 @@ export default function RecurringTasksScreen({
   const { accessToken } = useAuth();
   const currentUserQuery = useCurrentUser();
   const queryClient = useQueryClient();
-  const { refreshing, onRefresh } = useAppRefresh();
+  const { refreshing, onRefresh } = useAppRefresh('today');
   const refreshControl = useRefreshControl({ refreshing, onRefresh });
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;

@@ -74,9 +74,11 @@ export default function RecurringTaskNotificationField({
           : 'en-GB';
 
   const refreshPermission = useCallback(async () => {
+    // Always re-read OS settings — cache would keep showing "needs permission"
+    // after the user grants it in system settings and returns to the app.
     const [granted, alarmOk] = await Promise.all([
-      hasRecurringReminderPermission(),
-      hasRecurringReminderAlarmPermission(),
+      hasRecurringReminderPermission({ refresh: true }),
+      hasRecurringReminderAlarmPermission({ refresh: true }),
     ]);
     setPermissionGranted(granted);
     setAlarmGranted(alarmOk);

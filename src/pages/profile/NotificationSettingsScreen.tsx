@@ -93,9 +93,10 @@ export default function NotificationSettingsScreen({
           : 'en-GB';
 
   const refreshPermission = useCallback(async () => {
+    // Fresh OS read on mount / AppState active — stale cache hid grants from settings.
     const [granted, alarmOk] = await Promise.all([
-      hasRecurringReminderPermission(),
-      hasRecurringReminderAlarmPermission(),
+      hasRecurringReminderPermission({ refresh: true }),
+      hasRecurringReminderAlarmPermission({ refresh: true }),
     ]);
     setPermissionGranted(granted);
     setAlarmGranted(alarmOk);

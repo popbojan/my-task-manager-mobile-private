@@ -123,8 +123,10 @@ export async function hasRecurringReminderPermission(
  * Android 12+: timestamp/AlarmManager triggers need SCHEDULE_EXACT_ALARM.
  * iOS / unsupported devices report NOT_SUPPORTED → treat as allowed.
  */
-export async function hasRecurringReminderAlarmPermission(): Promise<boolean> {
-  if (cachedAlarmPermission !== null) {
+export async function hasRecurringReminderAlarmPermission(
+  options?: { refresh?: boolean },
+): Promise<boolean> {
+  if (!options?.refresh && cachedAlarmPermission !== null) {
     return cachedAlarmPermission;
   }
 

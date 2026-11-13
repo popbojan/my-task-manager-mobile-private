@@ -57,7 +57,7 @@ import {
 } from '@/utils/recurringPremiumPreview';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
 import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
-import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
+import { flushRecurringReminderSchedule } from '@/notifications/flushRecurringReminderSchedule';
 import {
   recurringTaskProgressQueryKey,
   recurringTasksQueryKey,
@@ -173,7 +173,6 @@ export default function RecurringTasksScreen({
       void queryClient
         .invalidateQueries({ queryKey: ['recurring-task-progress'] })
         .catch(() => undefined);
-      requestRecurringReminderReschedule();
     }, 400);
   }, [queryClient]);
 
@@ -227,9 +226,18 @@ export default function RecurringTasksScreen({
     onMutate: () => {
       setDeleteErrorKind(null);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       invalidateRecurringQueries(queryClient);
-      requestRecurringReminderReschedule();
+      const timeZone =
+        currentUserQuery.data?.timezone?.trim() || getDeviceTimezone();
+      // Task gone → cancel/rebuild alarms only here (no background sync).
+      await flushRecurringReminderSchedule({
+        queryClient,
+        accessToken,
+        t,
+        timeZone,
+        force: true,
+      }).catch(() => undefined);
       closeDeleteModal();
     },
     onError: async error => {

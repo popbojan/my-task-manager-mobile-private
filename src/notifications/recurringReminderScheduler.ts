@@ -6,7 +6,6 @@ import {
   RECURRING_REMINDER_ID_PREFIX,
 } from '@/notifications/recurringReminderPlan';
 import { RECURRING_REMINDER_OPEN_TAB } from '@/notifications/recurringReminderNavigation';
-import { isRecurringReminderSyncSuspended } from '@/notifications/recurringReminderQueue';
 import {
   loadNotifeePackage,
   warnNotifeeUnavailable,
@@ -183,10 +182,6 @@ export async function cancelRecurringReminderTriggers(): Promise<void> {
   const triggerIds = await notifee.getTriggerNotificationIds();
   const managedIds = triggerIds.filter(isManagedReminderId);
   for (const id of managedIds) {
-    if (isRecurringReminderSyncSuspended()) {
-      lastSyncedFingerprint = null;
-      return;
-    }
     await notifee.cancelTriggerNotification(id);
     await yieldToUi();
   }
@@ -194,7 +189,10 @@ export async function cancelRecurringReminderTriggers(): Promise<void> {
 }
 
 type SyncRecurringReminderOptions = {
-  /** Bypass modal suspend — used while Save loader is visible. */
+  /**
+   * When false, skip native work (legacy idle path). Callers that touch
+   * AlarmManager must pass true — there is no background sync anymore.
+   */
   force?: boolean;
   /** IANA timezone used to roll past-due plan timestamps forward. */
   timeZone: string;
@@ -218,9 +216,9 @@ function resolveLiveTriggerTimestamp(
 }
 
 /**
- * Apply the reminder plan to native triggers.
- * Diffs by id: cancel stale managed triggers, upsert the desired set.
- * Prefer `force` from the Save path (loader visible); idle/background otherwise.
+ * Apply the reminder plan to native triggers (AlarmManager).
+ * Only call from explicit user reminder actions (form Save / delete / profile).
+ * Never from AppState background/resume — that freezes the UI for many seconds.
  */
 export async function syncRecurringReminderTriggers(
   reminders: RecurringReminderCopy[],
@@ -229,10 +227,9 @@ export async function syncRecurringReminderTriggers(
 ): Promise<void> {
   const force = options.force === true;
   const timeZone = options.timeZone;
-  const shouldAbort = () =>
-    !force && isRecurringReminderSyncSuspended();
 
-  if (shouldAbort()) {
+  // No idle/background path — callers must opt in with force: true.
+  if (!force) {
     return;
   }
 
@@ -243,16 +240,12 @@ export async function syncRecurringReminderTriggers(
 
   if (syncInFlight) {
     await syncInFlight;
-    if (fingerprint === lastSyncedFingerprint || shouldAbort()) {
+    if (fingerprint === lastSyncedFingerprint) {
       return;
     }
   }
 
   const run = (async () => {
-    if (shouldAbort()) {
-      return;
-    }
-
     const notifeePkg = loadNotifeePackage();
     if (!notifeePkg) {
       warnNotifeeUnavailable('syncRecurringReminderTriggers');
@@ -262,13 +255,6 @@ export async function syncRecurringReminderTriggers(
     const { default: notifee, RepeatFrequency, TriggerType } = notifeePkg;
 
     await ensureReminderChannel(channelName);
-    if (!force) {
-      await yieldToUi();
-    }
-
-    if (shouldAbort()) {
-      return;
-    }
 
     if (reminders.length === 0) {
       await cancelRecurringReminderTriggers();
@@ -283,12 +269,7 @@ export async function syncRecurringReminderTriggers(
       return;
     }
 
-    if (shouldAbort()) {
-      return;
-    }
-
-    // AlarmManager: reliable with app closed / after reboot. Can be slow —
-    // call with force only under the Save button loader.
+    // AlarmManager: reliable with app closed / after reboot; keep under Save/delete loaders.
     const desiredIds = new Set(reminders.map(reminder => reminder.id));
     const existingIds = await notifee.getTriggerNotificationIds();
     const staleIds = existingIds.filter(
@@ -296,23 +277,11 @@ export async function syncRecurringReminderTriggers(
     );
 
     for (const id of staleIds) {
-      if (shouldAbort()) {
-        lastSyncedFingerprint = null;
-        return;
-      }
       await notifee.cancelTriggerNotification(id);
-      if (!force) {
-        await yieldToUi();
-      }
     }
 
     let scheduledCount = 0;
     for (const reminder of reminders) {
-      if (shouldAbort()) {
-        lastSyncedFingerprint = null;
-        return;
-      }
-
       const timestamp = resolveLiveTriggerTimestamp(
         reminder,
         timeZone,
@@ -356,9 +325,6 @@ export async function syncRecurringReminderTriggers(
         trigger,
       );
       scheduledCount += 1;
-      if (!force) {
-        await yieldToUi();
-      }
     }
 
     if (reminders.length > 0 && scheduledCount === 0) {

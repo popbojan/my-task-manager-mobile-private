@@ -16,7 +16,7 @@ type TranslateFn = (
 
 /**
  * Rebuild local reminder triggers from the recurring-tasks cache.
- * Use `force: true` under the Save loader so the modal only closes when done.
+ * Always pass `force: true` — there is no background/idle Notifee sync.
  */
 export async function flushRecurringReminderSchedule(options: {
   queryClient: QueryClient;

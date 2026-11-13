@@ -19,7 +19,6 @@ import {
   notificationTimeFromDate,
   notificationTimeToDate,
 } from '@/notifications/recurringNotificationTimeUtils';
-import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
 import {
   ensureRecurringReminderAlarmPermission,
   getCachedRecurringReminderAlarmPermission,
@@ -140,10 +139,7 @@ export default function RecurringTaskNotificationField({
         // Android exact alarms are a separate switch from notification permission.
         const alarmOk = await ensureRecurringReminderAlarmPermission();
         setAlarmGranted(alarmOk);
-
-        if (granted && alarmOk) {
-          requestRecurringReminderReschedule();
-        }
+        // Native schedule runs only on Speichern — never in the background.
       })();
     }
   }

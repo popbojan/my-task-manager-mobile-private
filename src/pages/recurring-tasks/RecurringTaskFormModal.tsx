@@ -38,7 +38,6 @@ import {
   writeRecurringTaskToCaches,
 } from '@/recurring/recurringQueryKeys';
 import { flushRecurringReminderSchedule } from '@/notifications/flushRecurringReminderSchedule';
-import { requestRecurringReminderReschedule } from '@/notifications/recurringReminderQueue';
 import { recurringTheme } from '@/pages/recurring-tasks/recurringTheme';
 import { handleDailyResetRequired } from '@/recurring/dailyResetRequired';
 import {
@@ -228,9 +227,14 @@ export default function RecurringTaskFormModal({
         scheduleBaselineRef.current,
         scheduleAfter,
       );
+      // Native AlarmManager only on explicit reminder edits (incl. title when on).
+      // Never defer to a background sync — that freezes resume for 10–20s.
+      const needsNativeReminderSync =
+        scheduleChanged ||
+        scheduleAfter.notificationEnabled ||
+        scheduleBaselineRef.current.notificationEnabled;
 
-      if (scheduleChanged) {
-        // Native AlarmManager only when reminder on/off or time changed.
+      if (needsNativeReminderSync) {
         await flushRecurringReminderSchedule({
           queryClient,
           accessToken,
@@ -239,9 +243,6 @@ export default function RecurringTaskFormModal({
           force: true,
         });
         scheduleBaselineRef.current = scheduleAfter;
-      } else {
-        // Title/body copy may still change — refresh triggers later off the UI path.
-        requestRecurringReminderReschedule();
       }
 
       return saved;

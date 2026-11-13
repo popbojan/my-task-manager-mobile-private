@@ -117,6 +117,9 @@ describe('recurringReminderPlan', () => {
       reminderNotificationIdForTask('a'),
       reminderNotificationIdForTask('b'),
     ]);
+    expect(reminderNotificationIdForTask('a-b-c')).toBe(
+      'recurring-reminder-task-abc',
+    );
     expect(plan.every(item => item.taskIds.length === 1)).toBe(true);
   });
 

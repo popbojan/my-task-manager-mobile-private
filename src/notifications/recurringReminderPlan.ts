@@ -41,9 +41,12 @@ export type RecurringReminderTranslate = (
   params?: Record<string, string>,
 ) => string;
 
-/** One AlarmManager trigger per task — same simplicity as the profile daily reminder. */
+/**
+ * One AlarmManager trigger per task — same simplicity as the profile daily reminder.
+ * Strip UUID hyphens: some Android/Notifee paths are flaky with long hyphenated ids.
+ */
 export function reminderNotificationIdForTask(taskId: string): string {
-  return `${RECURRING_REMINDER_ID_PREFIX}task-${taskId}`;
+  return `${RECURRING_REMINDER_ID_PREFIX}task-${taskId.replace(/-/g, '')}`;
 }
 
 /** @deprecated Old time-grouped ids (`recurring-reminder-0900`). Kept for cleanup. */

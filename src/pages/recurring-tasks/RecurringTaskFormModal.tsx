@@ -246,7 +246,8 @@ export default function RecurringTaskFormModal({
           ...notificationFields,
         };
 
-        const apiPromise = authApi.updateRecurringTask({
+        // Railway first. Android only when switch/time changed (and must succeed).
+        saved = await authApi.updateRecurringTask({
           recurringTaskId: taskId,
           updateRecurringTaskRequest: {
             ...payload,
@@ -254,16 +255,14 @@ export default function RecurringTaskFormModal({
           },
         });
 
-        // Android only when switch/time changed — title/status-only stays Railway-only.
         if (reminderScheduleChanged) {
-          const [updated] = await Promise.all([
-            apiPromise,
-            syncNativeOneTask(optimistic),
-          ]);
-          saved = updated;
+          await syncNativeOneTask({
+            ...optimistic,
+            ...saved,
+            ...notificationFields,
+            title: trimmedTitle,
+          });
           scheduleBaselineRef.current = scheduleAfter;
-        } else {
-          saved = await apiPromise;
         }
       } else {
         const created = await authApi.createRecurringTask({
@@ -311,6 +310,14 @@ export default function RecurringTaskFormModal({
     onError: async err => {
       if (err instanceof Error && err.message === 'empty') {
         setError(t('recurring.form.titleRequired'));
+        return;
+      }
+
+      if (
+        err instanceof Error &&
+        err.message.startsWith('reminder-')
+      ) {
+        setError(t('recurring.form.reminderPersistError'));
         return;
       }
 

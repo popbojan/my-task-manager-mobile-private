@@ -86,8 +86,10 @@ export async function requestRecurringReminderPermission(): Promise<boolean> {
   return granted;
 }
 
-export async function hasRecurringReminderPermission(): Promise<boolean> {
-  if (cachedPermission !== null) {
+export async function hasRecurringReminderPermission(
+  options?: { refresh?: boolean },
+): Promise<boolean> {
+  if (!options?.refresh && cachedPermission !== null) {
     return cachedPermission;
   }
 
@@ -248,6 +250,8 @@ export async function cancelOneTaskRecurringReminder(
 /**
  * Profile-style: write or cancel exactly one task trigger.
  * Does not rebuild other tasks' alarms.
+ * Throws when an enabled reminder cannot be scheduled (so Speichern does not
+ * silently mark the schedule as synced).
  */
 export async function syncOneTaskRecurringReminder(options: {
   task: RecurringReminderTask;
@@ -258,7 +262,7 @@ export async function syncOneTaskRecurringReminder(options: {
   const notifeePkg = loadNotifeePackage();
   if (!notifeePkg) {
     warnNotifeeUnavailable('syncOneTaskRecurringReminder');
-    return;
+    throw new Error('reminder-native-unavailable');
   }
 
   const { default: notifee, RepeatFrequency, TriggerType } = notifeePkg;
@@ -277,12 +281,15 @@ export async function syncOneTaskRecurringReminder(options: {
     return;
   }
 
-  // Cached only — never prompt for permission from the Heute modal.
-  const permissionGranted = await hasRecurringReminderPermission();
+  // Fresh read — a stale cached `false` would cancel task alarms while the
+  // already-scheduled profile reminder still fires.
+  const permissionGranted = await hasRecurringReminderPermission({
+    refresh: true,
+  });
   if (!permissionGranted) {
     await notifee.cancelTriggerNotification(triggerId);
     lastSyncedItemFingerprintById.delete(triggerId);
-    return;
+    throw new Error('reminder-permission-denied');
   }
 
   const reminder = buildReminderCopyForTask(
@@ -293,13 +300,13 @@ export async function syncOneTaskRecurringReminder(options: {
   if (!reminder) {
     await notifee.cancelTriggerNotification(triggerId);
     lastSyncedItemFingerprintById.delete(triggerId);
-    return;
+    throw new Error('reminder-plan-empty');
   }
 
   const itemFingerprint = reminderItemFingerprint(reminder);
-  if (lastSyncedItemFingerprintById.get(reminder.id) === itemFingerprint) {
-    return;
-  }
+  // Always rewrite on explicit Speichern schedule change — fingerprint skip
+  // could hide a missing device trigger after a failed earlier attempt.
+  lastSyncedItemFingerprintById.delete(reminder.id);
 
   await ensureReminderChannel(options.channelName);
 
@@ -309,7 +316,7 @@ export async function syncOneTaskRecurringReminder(options: {
     Date.now(),
   );
   if (timestamp === null || timestamp <= Date.now()) {
-    return;
+    throw new Error('reminder-timestamp-invalid');
   }
 
   const trigger: TimestampTrigger = {

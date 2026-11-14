@@ -5,7 +5,9 @@ import {
   nextDailyReminderTimestampMs,
   reminderCopyForTask,
   reminderCopyForTasks,
+  legacyHyphenatedReminderNotificationIdForTask,
   reminderNotificationIdForTask,
+  reminderNotificationIdsForTask,
   selectRecurringReminderTasks,
 } from '@/notifications/recurringReminderPlan';
 
@@ -120,6 +122,13 @@ describe('recurringReminderPlan', () => {
     expect(reminderNotificationIdForTask('a-b-c')).toBe(
       'recurring-reminder-task-abc',
     );
+    expect(legacyHyphenatedReminderNotificationIdForTask('a-b-c')).toBe(
+      'recurring-reminder-task-a-b-c',
+    );
+    expect(reminderNotificationIdsForTask('a-b-c')).toEqual([
+      'recurring-reminder-task-abc',
+      'recurring-reminder-task-a-b-c',
+    ]);
     expect(plan.every(item => item.taskIds.length === 1)).toBe(true);
   });
 

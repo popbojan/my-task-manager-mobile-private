@@ -11,6 +11,7 @@ import {
   nextDailyReminderTimestampMs,
   RECURRING_REMINDER_ID_PREFIX,
   reminderNotificationIdForTask,
+  reminderNotificationIdsForTask,
 } from '@/notifications/recurringReminderPlan';
 import { isValidNotificationTime } from '@/notifications/recurringNotificationTimeUtils';
 import { RECURRING_REMINDER_OPEN_TAB } from '@/notifications/recurringReminderNavigation';
@@ -235,6 +236,19 @@ async function cancelLegacyTimeGroupedRemindersOnce(): Promise<void> {
   legacyTimeGroupedRemindersCleared = true;
 }
 
+async function cancelTaskReminderIds(
+  notifee: {
+    cancelTriggerNotification: (id: string) => Promise<void>;
+  },
+  taskId: string,
+): Promise<void> {
+  for (const id of reminderNotificationIdsForTask(taskId)) {
+    await notifee.cancelTriggerNotification(id);
+    lastSyncedItemFingerprintById.delete(id);
+  }
+  lastSyncedFingerprint = null;
+}
+
 export async function cancelOneTaskRecurringReminder(
   taskId: string,
 ): Promise<void> {
@@ -243,15 +257,12 @@ export async function cancelOneTaskRecurringReminder(
     return;
   }
 
-  const id = reminderNotificationIdForTask(taskId);
-  await notifeePkg.default.cancelTriggerNotification(id);
-  lastSyncedItemFingerprintById.delete(id);
-  lastSyncedFingerprint = null;
+  await cancelTaskReminderIds(notifeePkg.default, taskId);
 }
 
 /**
  * Profile-style: write or cancel exactly one task trigger.
- * Does not rebuild other tasks' alarms.
+ * Mirrors dailyOpenTasksReminderScheduler (channel + AlarmManager + lead).
  * Throws when an enabled reminder cannot be scheduled (so Speichern does not
  * silently mark the schedule as synced).
  */
@@ -277,21 +288,22 @@ export async function syncOneTaskRecurringReminder(options: {
     !options.task.notificationTime ||
     !isValidNotificationTime(options.task.notificationTime)
   ) {
-    await notifee.cancelTriggerNotification(triggerId);
-    lastSyncedItemFingerprintById.delete(triggerId);
-    lastSyncedFingerprint = null;
+    await cancelTaskReminderIds(notifee, options.task.id);
     return;
   }
 
-  // Fresh read — a stale cached `false` would cancel task alarms while the
-  // already-scheduled profile reminder still fires.
-  const permissionGranted = await hasRecurringReminderPermission({
-    refresh: true,
-  });
+  // Fresh OS reads — stale cache would cancel task alarms while profile still fires.
+  const [permissionGranted, alarmGranted] = await Promise.all([
+    hasRecurringReminderPermission({ refresh: true }),
+    hasRecurringReminderAlarmPermission({ refresh: true }),
+  ]);
   if (!permissionGranted) {
-    await notifee.cancelTriggerNotification(triggerId);
-    lastSyncedItemFingerprintById.delete(triggerId);
+    await cancelTaskReminderIds(notifee, options.task.id);
     throw new Error('reminder-permission-denied');
+  }
+  if (!alarmGranted) {
+    await cancelTaskReminderIds(notifee, options.task.id);
+    throw new Error('reminder-alarm-denied');
   }
 
   const reminder = buildReminderCopyForTask(
@@ -300,8 +312,7 @@ export async function syncOneTaskRecurringReminder(options: {
     options.t,
   );
   if (!reminder) {
-    await notifee.cancelTriggerNotification(triggerId);
-    lastSyncedItemFingerprintById.delete(triggerId);
+    await cancelTaskReminderIds(notifee, options.task.id);
     throw new Error('reminder-plan-empty');
   }
 
@@ -310,15 +321,31 @@ export async function syncOneTaskRecurringReminder(options: {
   // could hide a missing device trigger after a failed earlier attempt.
   lastSyncedItemFingerprintById.delete(reminder.id);
 
+  // Same channel write as profile (createChannel is idempotent).
+  reminderChannelReady = false;
   await ensureReminderChannel(options.channelName);
 
-  const timestamp = resolveLiveTriggerTimestamp(
+  // Drop current + hyphenated legacy ids before rewrite.
+  await cancelTaskReminderIds(notifee, options.task.id);
+
+  // Same lead/roll logic as the profile daily reminder.
+  let timestamp = resolveLiveTriggerTimestamp(
     reminder,
     options.timeZone,
     Date.now(),
   );
-  if (timestamp === null || timestamp <= Date.now()) {
+  if (timestamp === null) {
     throw new Error('reminder-timestamp-invalid');
+  }
+  if (timestamp <= Date.now() + MIN_TRIGGER_LEAD_MS) {
+    timestamp = nextDailyReminderTimestampMs(
+      reminder.notificationTime,
+      options.timeZone,
+      new Date(Date.now() + MIN_TRIGGER_LEAD_MS),
+    );
+    if (timestamp === null || timestamp <= Date.now()) {
+      throw new Error('reminder-timestamp-invalid');
+    }
   }
 
   const trigger: TimestampTrigger = {
@@ -332,7 +359,7 @@ export async function syncOneTaskRecurringReminder(options: {
 
   await notifee.createTriggerNotification(
     {
-      id: reminder.id,
+      id: triggerId,
       title: reminder.title,
       body: reminder.body,
       data: {
@@ -349,7 +376,14 @@ export async function syncOneTaskRecurringReminder(options: {
     },
     trigger,
   );
-  lastSyncedItemFingerprintById.set(reminder.id, itemFingerprint);
+
+  // Release builds used to "succeed" while the AlarmManager slot was missing.
+  const registeredIds = await notifee.getTriggerNotificationIds();
+  if (!registeredIds.includes(triggerId)) {
+    throw new Error('reminder-trigger-missing');
+  }
+
+  lastSyncedItemFingerprintById.set(triggerId, itemFingerprint);
   lastSyncedFingerprint = null;
 }
 

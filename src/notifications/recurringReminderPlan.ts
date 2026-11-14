@@ -49,6 +49,20 @@ export function reminderNotificationIdForTask(taskId: string): string {
   return `${RECURRING_REMINDER_ID_PREFIX}task-${taskId.replace(/-/g, '')}`;
 }
 
+/** Pre-strip id format — cancel on rewrite so debug→release upgrades don't leave orphans. */
+export function legacyHyphenatedReminderNotificationIdForTask(
+  taskId: string,
+): string {
+  return `${RECURRING_REMINDER_ID_PREFIX}task-${taskId}`;
+}
+
+/** Current + legacy ids for one task (deduped). */
+export function reminderNotificationIdsForTask(taskId: string): string[] {
+  const current = reminderNotificationIdForTask(taskId);
+  const legacy = legacyHyphenatedReminderNotificationIdForTask(taskId);
+  return current === legacy ? [current] : [current, legacy];
+}
+
 /** @deprecated Old time-grouped ids (`recurring-reminder-0900`). Kept for cleanup. */
 export function reminderNotificationId(notificationTime: string): string {
   return `${RECURRING_REMINDER_ID_PREFIX}${notificationTime.replace(':', '')}`;

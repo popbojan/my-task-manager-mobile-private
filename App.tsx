@@ -360,6 +360,10 @@ function MainAppShell() {
           key={`task-form-${taskForm.session}`}
           taskId={taskForm.taskId}
           onClose={closeTaskForm}
+          onCreated={createdTaskId => {
+            // Keep session — remount would reset the form; only bind the new id.
+            setTaskForm(prev => ({ ...prev, taskId: createdTaskId }));
+          }}
           onSaved={() => {
             // List/detail caches are already updated on save; only refresh progress.
             void queryClient

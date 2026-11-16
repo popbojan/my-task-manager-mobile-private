@@ -53,6 +53,8 @@ type RecurringTaskFormModalProps = {
   taskId: string | null;
   onClose: () => void;
   onSaved: () => void;
+  /** After Railway create succeeds — parent keeps this id so retries are updates. */
+  onCreated?: (taskId: string) => void;
 };
 
 const INITIAL_FORM: RecurringTaskFormState = {
@@ -67,6 +69,7 @@ export default function RecurringTaskFormModal({
   taskId,
   onClose,
   onSaved,
+  onCreated,
 }: RecurringTaskFormModalProps) {
   const { t } = useLanguage();
   const { accessToken } = useAuth();
@@ -74,13 +77,18 @@ export default function RecurringTaskFormModal({
   const currentUserQuery = useCurrentUser();
   const timeZone =
     currentUserQuery.data?.timezone?.trim() || getDeviceTimezone();
-  const isEdit = taskId !== null;
+  // Promote create → edit as soon as Railway returns an id (avoids duplicate creates).
+  const [boundTaskId, setBoundTaskId] = useState<string | null>(taskId);
+  useEffect(() => {
+    setBoundTaskId(taskId);
+  }, [taskId]);
+  const isEdit = boundTaskId !== null;
 
   const listTask =
-    isEdit && taskId
+    isEdit && boundTaskId
       ? queryClient
           .getQueryData<RecurringTask[]>(recurringTasksQueryKey(accessToken))
-          ?.find(task => task.id === taskId)
+          ?.find(task => task.id === boundTaskId)
       : undefined;
 
   const initialForm = listTask
@@ -94,6 +102,8 @@ export default function RecurringTaskFormModal({
   const scheduleBaselineRef = useRef<RecurringReminderScheduleSnapshot | null>(
     listTask ? reminderScheduleSnapshotFromTask(listTask) : null,
   );
+  /** True after Railway create until Android reminder sync succeeds (or none needed). */
+  const nativeSchedulePendingRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   /** Instant Save-button spinner — isPending alone paints too late when AlarmManager blocks. */
   const [saveUiPending, setSaveUiPending] = useState(false);
@@ -116,9 +126,9 @@ export default function RecurringTaskFormModal({
   }
 
   const taskQuery = useQuery({
-    queryKey: recurringTaskQueryKey(taskId ?? ''),
-    queryFn: () => authApi.getRecurringTask({ recurringTaskId: taskId! }),
-    enabled: isEdit && !!taskId,
+    queryKey: recurringTaskQueryKey(boundTaskId ?? ''),
+    queryFn: () => authApi.getRecurringTask({ recurringTaskId: boundTaskId! }),
+    enabled: isEdit && !!boundTaskId,
     retry: shouldRetryApiQuery,
     staleTime: 0,
     refetchOnMount: 'always',
@@ -129,13 +139,14 @@ export default function RecurringTaskFormModal({
       hydratedTaskIdRef.current = null;
       hydratedUpdatedAtRef.current = null;
       scheduleBaselineRef.current = null;
+      nativeSchedulePendingRef.current = false;
       formRef.current = INITIAL_FORM;
       setForm(INITIAL_FORM);
       setError(null);
       return;
     }
 
-    if (!taskId) {
+    if (!boundTaskId) {
       return;
     }
 
@@ -146,7 +157,7 @@ export default function RecurringTaskFormModal({
 
     const updatedAt = new Date(task.updatedAt).getTime();
     if (
-      hydratedTaskIdRef.current === taskId &&
+      hydratedTaskIdRef.current === boundTaskId &&
       hydratedUpdatedAtRef.current === updatedAt
     ) {
       return;
@@ -155,10 +166,14 @@ export default function RecurringTaskFormModal({
     const next = recurringTaskToFormState(task);
     formRef.current = next;
     setForm(next);
-    scheduleBaselineRef.current = reminderScheduleSnapshotFromTask(task);
-    hydratedTaskIdRef.current = taskId;
+    // Don't advance baseline while a post-create Android sync is still pending —
+    // otherwise Speichern-retry would skip native work and never schedule.
+    if (!nativeSchedulePendingRef.current) {
+      scheduleBaselineRef.current = reminderScheduleSnapshotFromTask(task);
+    }
+    hydratedTaskIdRef.current = boundTaskId;
     hydratedUpdatedAtRef.current = updatedAt;
-  }, [isEdit, listTask, taskId, taskQuery.data]);
+  }, [isEdit, listTask, boundTaskId, taskQuery.data]);
 
   const isLoadingTask =
     isEdit && !listTask && !taskQuery.data && taskQuery.isLoading;
@@ -174,7 +189,7 @@ export default function RecurringTaskFormModal({
 
   useEffect(() => {
     setLockedPanelHeight(null);
-  }, [taskId]);
+  }, [boundTaskId]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -223,17 +238,17 @@ export default function RecurringTaskFormModal({
       };
 
       let saved: RecurringTask;
-      if (isEdit && taskId) {
+      if (isEdit && boundTaskId) {
         const existing =
           queryClient
             .getQueryData<RecurringTask[]>(recurringTasksQueryKey(accessToken))
-            ?.find(task => task.id === taskId) ??
+            ?.find(task => task.id === boundTaskId) ??
           queryClient.getQueryData<RecurringTask>(
-            recurringTaskQueryKey(taskId),
+            recurringTaskQueryKey(boundTaskId),
           );
 
         const optimistic: RecurringTask = {
-          id: taskId,
+          id: boundTaskId,
           title: trimmedTitle,
           description: payload.description,
           status: current.status,
@@ -248,7 +263,7 @@ export default function RecurringTaskFormModal({
 
         // Railway first. Android only when switch/time changed (and must succeed).
         saved = await authApi.updateRecurringTask({
-          recurringTaskId: taskId,
+          recurringTaskId: boundTaskId,
           updateRecurringTaskRequest: {
             ...payload,
             status: current.status,
@@ -288,8 +303,20 @@ export default function RecurringTaskFormModal({
         };
         writeRecurringTaskToCaches(queryClient, accessToken, createdMerged);
 
+        // Switch to edit before Android — retries must update, not create again.
+        if (reminderScheduleChanged) {
+          nativeSchedulePendingRef.current = true;
+        }
+        hydratedTaskIdRef.current = createdMerged.id;
+        hydratedUpdatedAtRef.current = new Date(
+          createdMerged.updatedAt,
+        ).getTime();
+        setBoundTaskId(createdMerged.id);
+        onCreated?.(createdMerged.id);
+
         if (reminderScheduleChanged) {
           await syncNativeOneTask(createdMerged);
+          nativeSchedulePendingRef.current = false;
           scheduleBaselineRef.current = scheduleAfter;
         }
 

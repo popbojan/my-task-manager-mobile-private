@@ -555,7 +555,9 @@ export const de = {
   'profile.notifications.enabledHint':
     'Schalter an: Täglich um {{time}} bekommst du eine Erinnerung auf dem Handy.',
   'profile.notifications.disabledHint':
-    'Schalter an, wenn du täglich an die Heute-Seite erinnert werden willst.',
+    'Uhrzeit kannst du trotzdem wählen. Schalter an, wenn die Erinnerung aktiv sein soll.',
+  'profile.notifications.saveError':
+    'Erinnerung konnte nicht gespeichert werden. Bitte erneut versuchen.',
   'profile.notifications.reminderTitle': 'Kurz auf Heute schauen?',
   'profile.notifications.reminderBody':
     'Öffne die Heute-Seite und prüfe, ob du alles schon erledigt hast.',

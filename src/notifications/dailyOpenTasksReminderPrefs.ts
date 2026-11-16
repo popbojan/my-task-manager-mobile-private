@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { User } from '@/api/generated';
 import {
   DEFAULT_DAILY_OPEN_TASKS_REMINDER_TIME,
   isValidNotificationTime,
@@ -51,4 +52,14 @@ export async function saveDailyOpenTasksReminderPrefs(
   const normalized = normalizePrefs(prefs);
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
   return normalized;
+}
+
+/** Map User preferences (Railway) → local/native reminder prefs. */
+export function dailyOpenTasksReminderPrefsFromUser(
+  user: Pick<User, 'notificationEnabled' | 'notificationTime'>,
+): DailyOpenTasksReminderPrefs {
+  return normalizePrefs({
+    enabled: user.notificationEnabled,
+    notificationTime: user.notificationTime,
+  });
 }

@@ -8,6 +8,8 @@ Name | Type
 ------------ | -------------
 `language` | [Language](Language.md)
 `timezone` | string
+`notificationEnabled` | boolean
+`notificationTime` | string
 `personalIntroSeenAt` | Date
 `mobileOnboardingSeenAt` | Date
 `webOnboardingSeenAt` | Date
@@ -23,6 +25,8 @@ import type { UserPreferencesResponse } from ''
 const example = {
   "language": null,
   "timezone": Europe/Berlin,
+  "notificationEnabled": true,
+  "notificationTime": 20:00,
   "personalIntroSeenAt": null,
   "mobileOnboardingSeenAt": null,
   "webOnboardingSeenAt": null,

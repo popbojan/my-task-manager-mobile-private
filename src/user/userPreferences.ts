@@ -29,6 +29,8 @@ export function applyPreferencesToCurrentUser(
     ...user,
     language: preferences.language,
     timezone: preferences.timezone,
+    notificationEnabled: preferences.notificationEnabled,
+    notificationTime: preferences.notificationTime,
     personalIntroSeenAt: preferences.personalIntroSeenAt,
     mobileOnboardingSeenAt: preferences.mobileOnboardingSeenAt,
     webOnboardingSeenAt: preferences.webOnboardingSeenAt,

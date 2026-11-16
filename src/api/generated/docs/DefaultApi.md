@@ -1810,7 +1810,7 @@ example().catch(console.error);
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | User preferences successfully updated |  -  |
-| **400** | Bad Request (e.g. invalid language or timezone) |  -  |
+| **400** | Bad Request (e.g. invalid language, timezone, or notificationTime)  |  -  |
 | **401** | Unauthorized |  -  |
 | **500** | Internal Server Error |  -  |
 

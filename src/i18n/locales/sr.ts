@@ -552,7 +552,9 @@ export const sr: Record<TranslationKey, string> = {
   'profile.notifications.enabledHint':
     'Prekidač uključen: svaki dan u {{time}} dobijaš podsetnik na telefonu.',
   'profile.notifications.disabledHint':
-    'Uključi prekidač za dnevni podsetnik na stranicu Danas.',
+    'Vreme i dalje možeš da izabereš. Uključi prekidač kad želiš podsetnik.',
+  'profile.notifications.saveError':
+    'Podsetnik nije sačuvan. Pokušaj ponovo.',
   'profile.notifications.reminderTitle': 'Brzo pogledaj Danas?',
   'profile.notifications.reminderBody':
     'Otvori stranicu Danas i proveri da li si već sve završio.',

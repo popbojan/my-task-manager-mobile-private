@@ -10,6 +10,8 @@ Name | Type
 `email` | string
 `language` | [Language](Language.md)
 `timezone` | string
+`notificationEnabled` | boolean
+`notificationTime` | string
 `personalIntroSeenAt` | Date
 `mobileOnboardingSeenAt` | Date
 `webOnboardingSeenAt` | Date
@@ -28,6 +30,8 @@ const example = {
   "email": null,
   "language": null,
   "timezone": Europe/Berlin,
+  "notificationEnabled": true,
+  "notificationTime": 20:00,
   "personalIntroSeenAt": 2026-10-19T08:30Z,
   "mobileOnboardingSeenAt": null,
   "webOnboardingSeenAt": 2026-10-19T09:15Z,

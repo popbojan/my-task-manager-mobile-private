@@ -561,7 +561,9 @@ export const fr: Record<TranslationKey, string> = {
   'profile.notifications.enabledHint':
     'Interrupteur activé : chaque jour à {{time}}, tu reçois un rappel sur le téléphone.',
   'profile.notifications.disabledHint':
-    'Active l’interrupteur pour un rappel quotidien vers Aujourd’hui.',
+    'Tu peux quand même choisir l’heure. Active l’interrupteur quand tu veux le rappel.',
+  'profile.notifications.saveError':
+    'Impossible d’enregistrer le rappel. Réessaie.',
   'profile.notifications.reminderTitle': 'Un coup d’œil sur Aujourd’hui ?',
   'profile.notifications.reminderBody':
     'Ouvre la page Aujourd’hui et vérifie si tu as déjà tout terminé.',

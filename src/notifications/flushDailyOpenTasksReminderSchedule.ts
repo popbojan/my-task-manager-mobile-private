@@ -1,5 +1,6 @@
 import {
   loadDailyOpenTasksReminderPrefs,
+  type DailyOpenTasksReminderPrefs,
 } from '@/notifications/dailyOpenTasksReminderPrefs';
 import { syncDailyOpenTasksReminderTrigger } from '@/notifications/dailyOpenTasksReminderScheduler';
 import type { TranslationKey } from '@/i18n/locales/de';
@@ -15,13 +16,15 @@ type FlushDailyOpenTasksReminderOptions = {
   timeZone?: string;
   /** Premium-only feature — non-premium cancels any scheduled trigger. */
   hasPremiumAccess?: boolean;
+  /** When set, skip AsyncStorage read (e.g. parallel save with Railway). */
+  prefs?: DailyOpenTasksReminderPrefs;
 };
 
-/** Apply stored prefs to the native daily open-tasks reminder trigger. */
+/** Apply prefs to the native daily open-tasks reminder trigger. */
 export async function flushDailyOpenTasksReminderSchedule(
   options: FlushDailyOpenTasksReminderOptions,
 ): Promise<void> {
-  const prefs = await loadDailyOpenTasksReminderPrefs();
+  const prefs = options.prefs ?? (await loadDailyOpenTasksReminderPrefs());
   const timeZone = options.timeZone ?? getDeviceTimezone();
   const enabled = options.hasPremiumAccess === true && prefs.enabled;
 

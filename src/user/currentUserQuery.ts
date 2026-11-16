@@ -1,6 +1,10 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { User } from '@/api/generated';
 import { authApi } from '@/api/authClient';
+import {
+  dailyOpenTasksReminderPrefsFromUser,
+  saveDailyOpenTasksReminderPrefs,
+} from '@/notifications/dailyOpenTasksReminderPrefs';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
 import { getMobileAppVersion } from '@/user/mobileAppVersion';
 import { shouldSyncMobileAppVersion } from '@/user/shouldSyncMobileAppVersion';
@@ -26,6 +30,11 @@ export async function loadCurrentUserWithTimezoneSync(
   accessToken: string | null,
 ): Promise<User> {
   const user = await authApi.getCurrentUser();
+  // Keep local cache aligned with Railway so Android flush uses server prefs.
+  await saveDailyOpenTasksReminderPrefs(
+    dailyOpenTasksReminderPrefsFromUser(user),
+  ).catch(() => undefined);
+
   const deviceTimezone = getDeviceTimezone();
   const installedVersion = getMobileAppVersion();
   const needsTimezoneSync = shouldUpdateDeviceTimezone(
@@ -60,6 +69,9 @@ export async function loadCurrentUserWithTimezoneSync(
   }
 
   const updatedUser = applyPreferencesToCurrentUser(user, preferences);
+  await saveDailyOpenTasksReminderPrefs(
+    dailyOpenTasksReminderPrefsFromUser(updatedUser),
+  ).catch(() => undefined);
 
   if (needsVersionSync) {
     return { ...updatedUser, mobileAppVersion: installedVersion };

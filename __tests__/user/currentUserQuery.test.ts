@@ -13,6 +13,14 @@ jest.mock('@/user/mobileAppVersion', () => ({
   getMobileAppVersion: jest.fn(() => '1.2.7'),
 }));
 
+jest.mock('@/notifications/dailyOpenTasksReminderPrefs', () => ({
+  dailyOpenTasksReminderPrefsFromUser: jest.fn(user => ({
+    enabled: user.notificationEnabled,
+    notificationTime: user.notificationTime,
+  })),
+  saveDailyOpenTasksReminderPrefs: jest.fn(async prefs => prefs),
+}));
+
 import { QueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/authClient';
 import { Language, type User } from '@/api/generated';
@@ -26,6 +34,8 @@ const baseUser: User = {
   email: 'user@example.com',
   language: Language.De,
   timezone: 'Pacific/Pago_Pago',
+  notificationEnabled: true,
+  notificationTime: '20:00',
   personalIntroSeenAt: null,
   mobileOnboardingSeenAt: null,
   webOnboardingSeenAt: null,
@@ -48,6 +58,13 @@ describe('loadCurrentUserWithTimezoneSync', () => {
     updateUserPreferences.mockResolvedValue({
       language: Language.De,
       timezone: 'Pacific/Auckland',
+      notificationEnabled: true,
+      notificationTime: '20:00',
+      personalIntroSeenAt: null,
+      mobileOnboardingSeenAt: null,
+      webOnboardingSeenAt: null,
+      personalFocusTaskName: null,
+      personalFocusMotivation: null,
     });
     const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
 

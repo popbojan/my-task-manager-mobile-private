@@ -14,10 +14,12 @@ import {
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
+import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '@/auth/AuthContext';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import {
-  loadDailyOpenTasksReminderPrefs,
+  dailyOpenTasksReminderPrefsFromUser,
   saveDailyOpenTasksReminderPrefs,
   type DailyOpenTasksReminderPrefs,
 } from '@/notifications/dailyOpenTasksReminderPrefs';
@@ -45,6 +47,7 @@ import PremiumStatusBar from '@/pages/subscription/PremiumStatusBar';
 import { useSubscriptionAccess } from '@/subscription/useSubscriptionAccess';
 import { useCurrentUser } from '@/user/useCurrentUser';
 import { getDeviceTimezone } from '@/user/deviceTimezone';
+import { patchUserPreferences } from '@/user/userPreferences';
 
 type NotificationSettingsScreenProps = {
   onBack: () => void;
@@ -63,6 +66,8 @@ export default function NotificationSettingsScreen({
   onOpenSubscription,
 }: NotificationSettingsScreenProps) {
   const { language, t } = useLanguage();
+  const { accessToken } = useAuth();
+  const queryClient = useQueryClient();
   const currentUserQuery = useCurrentUser();
   const subscriptionQuery = useSubscriptionAccess();
   const hasPremiumAccess = subscriptionQuery.data?.hasPremiumAccess ?? false;
@@ -82,6 +87,7 @@ export default function NotificationSettingsScreen({
     getCachedRecurringReminderAlarmPermission(),
   );
   const [isSyncing, setIsSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const locale =
     language === 'de'
@@ -104,17 +110,21 @@ export default function NotificationSettingsScreen({
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      const loaded = await loadDailyOpenTasksReminderPrefs();
-      if (!cancelled) {
-        setPrefs(loaded);
-      }
-      await refreshPermission();
-    })();
-    return () => {
-      cancelled = true;
-    };
+    const user = currentUserQuery.data;
+    if (!user) {
+      return;
+    }
+
+    const fromUser = dailyOpenTasksReminderPrefsFromUser(user);
+    setPrefs(fromUser);
+    void saveDailyOpenTasksReminderPrefs(fromUser).catch(() => undefined);
+  }, [
+    currentUserQuery.data?.notificationEnabled,
+    currentUserQuery.data?.notificationTime,
+  ]);
+
+  useEffect(() => {
+    void refreshPermission();
   }, [refreshPermission]);
 
   useEffect(() => {
@@ -135,11 +145,11 @@ export default function NotificationSettingsScreen({
       return;
     }
 
+    const previous = prefs;
     setPrefs(next);
+    setError(null);
     setIsSyncing(true);
     try {
-      await saveDailyOpenTasksReminderPrefs(next);
-
       if (next.enabled && options?.requestPermission) {
         const alreadyGranted =
           permissionGranted === true ||
@@ -156,11 +166,46 @@ export default function NotificationSettingsScreen({
         await refreshPermission();
       }
 
-      await flushDailyOpenTasksReminderSchedule({
-        t,
-        timeZone,
-        hasPremiumAccess,
-      });
+      // Railway + Android in parallel for speed.
+      const [apiResult, nativeResult] = await Promise.allSettled([
+        patchUserPreferences(queryClient, accessToken, {
+          notificationEnabled: next.enabled,
+          notificationTime: next.notificationTime,
+        }),
+        (async () => {
+          await saveDailyOpenTasksReminderPrefs(next);
+          await flushDailyOpenTasksReminderSchedule({
+            t,
+            timeZone,
+            hasPremiumAccess,
+            prefs: next,
+          });
+        })(),
+      ]);
+
+      if (apiResult.status === 'rejected') {
+        if (previous) {
+          setPrefs(previous);
+          await saveDailyOpenTasksReminderPrefs(previous).catch(() => undefined);
+          await flushDailyOpenTasksReminderSchedule({
+            t,
+            timeZone,
+            hasPremiumAccess,
+            prefs: previous,
+          }).catch(() => undefined);
+        }
+        setError(t('profile.notifications.saveError'));
+        return;
+      }
+
+      if (nativeResult.status === 'rejected') {
+        setError(t('profile.notifications.saveError'));
+      }
+    } catch {
+      if (previous) {
+        setPrefs(previous);
+      }
+      setError(t('profile.notifications.saveError'));
     } finally {
       setIsSyncing(false);
     }
@@ -261,6 +306,8 @@ export default function NotificationSettingsScreen({
         <PremiumStatusBar onOpenSubscription={onOpenSubscription} />
 
         <Text style={styles.intro}>{t('profile.notifications.intro')}</Text>
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         <View style={[styles.card, !canEdit && styles.cardLocked]}>
           {!prefs ? (
@@ -404,6 +451,12 @@ const styles = StyleSheet.create({
     color: recurringTheme.textSecondary,
     fontSize: 14,
     lineHeight: 20,
+  },
+  errorText: {
+    color: '#f87171',
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
   },
   card: {
     borderRadius: 14,

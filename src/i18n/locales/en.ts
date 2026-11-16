@@ -548,7 +548,9 @@ export const en: Record<TranslationKey, string> = {
   'profile.notifications.enabledHint':
     'Switch on: you’ll get a daily reminder on your phone at {{time}}.',
   'profile.notifications.disabledHint':
-    'Turn the switch on to get a daily reminder to check Today.',
+    'You can still pick a time. Turn the switch on when you want the reminder.',
+  'profile.notifications.saveError':
+    'Could not save the reminder. Please try again.',
   'profile.notifications.reminderTitle': 'Quick look at Today?',
   'profile.notifications.reminderBody':
     'Open the Today page and check whether you’ve already finished everything.',

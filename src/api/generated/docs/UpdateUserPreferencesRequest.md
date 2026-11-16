@@ -1,7 +1,7 @@
 
 # UpdateUserPreferencesRequest
 
-Provide at least one of language, timezone, personalIntroSeenAt, mobileOnboardingSeenAt, webOnboardingSeenAt, mobileAppVersion, personalFocusTaskName, personalFocusMotivation, webLastLoginAt, or webLastSeenAt. 
+Provide at least one of language, timezone, notificationEnabled, notificationTime, personalIntroSeenAt, mobileOnboardingSeenAt, webOnboardingSeenAt, mobileAppVersion, personalFocusTaskName, personalFocusMotivation, webLastLoginAt, or webLastSeenAt. 
 
 ## Properties
 
@@ -9,6 +9,8 @@ Name | Type
 ------------ | -------------
 `language` | [Language](Language.md)
 `timezone` | string
+`notificationEnabled` | boolean
+`notificationTime` | string
 `personalIntroSeenAt` | Date
 `mobileOnboardingSeenAt` | Date
 `webOnboardingSeenAt` | Date
@@ -27,6 +29,8 @@ import type { UpdateUserPreferencesRequest } from ''
 const example = {
   "language": null,
   "timezone": Europe/Berlin,
+  "notificationEnabled": null,
+  "notificationTime": 14:45,
   "personalIntroSeenAt": null,
   "mobileOnboardingSeenAt": null,
   "webOnboardingSeenAt": null,

@@ -8,6 +8,7 @@ import type {
 import {
   buildReminderCopyForTask,
   isLegacyTimeGroupedReminderId,
+  legacyHyphenatedReminderNotificationIdForTask,
   nextDailyReminderTimestampMs,
   RECURRING_REMINDER_ID_PREFIX,
   reminderNotificationIdForTask,
@@ -261,8 +262,28 @@ export async function cancelOneTaskRecurringReminder(
 }
 
 /**
+ * Notifee can lag listing a brand-new trigger — retry before failing Speichern.
+ */
+async function waitForTriggerRegistered(
+  notifee: { getTriggerNotificationIds: () => Promise<string[]> },
+  triggerId: string,
+): Promise<boolean> {
+  const delaysMs = [0, 120, 280];
+  for (const delayMs of delaysMs) {
+    if (delayMs > 0) {
+      await new Promise<void>(resolve => setTimeout(resolve, delayMs));
+    }
+    const ids = await notifee.getTriggerNotificationIds();
+    if (ids.includes(triggerId)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Profile-style: write or cancel exactly one task trigger.
- * Mirrors dailyOpenTasksReminderScheduler (channel + AlarmManager + lead).
+ * Same channel / timestamp-lead / AlarmManager pattern as dailyOpenTasksReminder.
  * Throws when an enabled reminder cannot be scheduled (so Speichern does not
  * silently mark the schedule as synced).
  */
@@ -317,26 +338,22 @@ export async function syncOneTaskRecurringReminder(options: {
   }
 
   const itemFingerprint = reminderItemFingerprint(reminder);
-  // Always rewrite on explicit Speichern schedule change — fingerprint skip
-  // could hide a missing device trigger after a failed earlier attempt.
-  lastSyncedItemFingerprintById.delete(reminder.id);
+  lastSyncedItemFingerprintById.delete(triggerId);
 
-  // Same channel write as profile (createChannel is idempotent).
-  reminderChannelReady = false;
+  // Profile: createChannel is idempotent — no forced channel reset.
   await ensureReminderChannel(options.channelName);
 
-  // Drop current + hyphenated legacy ids before rewrite.
-  await cancelTaskReminderIds(notifee, options.task.id);
-
-  // Same lead/roll logic as the profile daily reminder.
-  let timestamp = resolveLiveTriggerTimestamp(
-    reminder,
-    options.timeZone,
-    Date.now(),
+  // Profile overwrites the same id — only drop hyphenated legacy ids.
+  const legacyId = legacyHyphenatedReminderNotificationIdForTask(
+    options.task.id,
   );
-  if (timestamp === null) {
-    throw new Error('reminder-timestamp-invalid');
+  if (legacyId !== triggerId) {
+    await notifee.cancelTriggerNotification(legacyId);
+    lastSyncedItemFingerprintById.delete(legacyId);
   }
+
+  // Same lead/roll as profile daily reminder (plan already handles Done→tomorrow).
+  let timestamp = reminder.timestamp;
   if (timestamp <= Date.now() + MIN_TRIGGER_LEAD_MS) {
     timestamp = nextDailyReminderTimestampMs(
       reminder.notificationTime,
@@ -377,9 +394,8 @@ export async function syncOneTaskRecurringReminder(options: {
     trigger,
   );
 
-  // Release builds used to "succeed" while the AlarmManager slot was missing.
-  const registeredIds = await notifee.getTriggerNotificationIds();
-  if (!registeredIds.includes(triggerId)) {
+  const registered = await waitForTriggerRegistered(notifee, triggerId);
+  if (!registered) {
     throw new Error('reminder-trigger-missing');
   }
 

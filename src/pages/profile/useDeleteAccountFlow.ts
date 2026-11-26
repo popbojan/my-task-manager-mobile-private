@@ -3,7 +3,6 @@ import type { QueryClient } from '@tanstack/react-query';
 import { authApi, authRequestInit } from '@/api/authClient';
 import { ResponseError } from '@/api/generated/runtime';
 import { resolveDeleteAccountErrorMessage } from '@/account/resolveDeleteAccountErrorMessage';
-import { getAuthDeviceHeaders } from '@/device/deviceRequestHeaders';
 import { useApiLanguage, useLanguage } from '@/i18n/LanguageProvider';
 import { markAccountDeletedNotice } from '@/pages/login/accountDeletedNotice';
 import type { DeleteAccountModalStep } from '@/pages/profile/DeleteAccountModal';
@@ -98,10 +97,9 @@ export function useDeleteAccountFlow({
     setDeleteAccountError(null);
 
     try {
-      const deviceHeaders = await getAuthDeviceHeaders();
+      // No device headers: account deletion ignores them and removes all devices.
       await authApi.requestOtp({
         oTPRequest: { email: accountEmail, language: apiLanguage },
-        ...deviceHeaders,
       });
       setDeleteOtpSent(true);
     } catch {
@@ -125,7 +123,6 @@ export function useDeleteAccountFlow({
     setDeleteAccountError(null);
 
     try {
-      const deviceHeaders = await getAuthDeviceHeaders();
       const loginResponse = await authApi.loginWithOtp(
         {
           loginRequest: {
@@ -133,7 +130,6 @@ export function useDeleteAccountFlow({
             otp,
             language: apiLanguage,
           },
-          ...deviceHeaders,
         },
         authRequestInit,
       );

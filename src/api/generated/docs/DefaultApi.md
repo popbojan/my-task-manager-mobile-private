@@ -315,7 +315,7 @@ example().catch(console.error);
 
 Permanently delete the current user\&#39;s account
 
-Deletes the authenticated user\&#39;s account and associated application data. Requires explicit user confirmation in the client and recent OTP authentication. Checks all subscription providers against fresh provider data before deletion. Running subscriptions must first be canceled; subscriptions already set to cancel at period end do not block deletion. Does not cancel store subscriptions, refund purchases, or delete the user\&#39;s Google, Apple, or Stripe account. 
+Deletes the authenticated user\&#39;s account and associated application data, including all UserDevice rows via cascade. Device headers such as X-Device-Id and X-Device-Platform are ignored: a user may have multiple devices, and deletion removes every related record. Requires explicit user confirmation in the client and recent OTP authentication. Checks all subscription providers against fresh provider data before deletion. Running subscriptions must first be canceled; subscriptions already set to cancel at period end do not block deletion. Does not cancel store subscriptions, refund purchases, or delete the user\&#39;s Google, Apple, or Stripe account. 
 
 ### Example
 

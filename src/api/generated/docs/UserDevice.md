@@ -10,6 +10,9 @@ Name | Type
 `deviceId` | string
 `platform` | [DevicePlatform](DevicePlatform.md)
 `appVersion` | string
+`manufacturer` | string
+`model` | string
+`osVersion` | string
 `notificationsEnabled` | boolean
 `notificationTime` | string
 
@@ -23,6 +26,9 @@ const example = {
   "deviceId": 6f1d2c3a-8b4e-4f91-9c0a-1e2d3f4a5b6c,
   "platform": null,
   "appVersion": 1.4.0,
+  "manufacturer": Apple,
+  "model": iPhone 15,
+  "osVersion": 17.4,
   "notificationsEnabled": true,
   "notificationTime": 20:00,
 } satisfies UserDevice

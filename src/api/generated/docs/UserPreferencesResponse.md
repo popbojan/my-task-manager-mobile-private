@@ -15,6 +15,7 @@ Name | Type
 `webOnboardingSeenAt` | Date
 `personalFocusTaskName` | string
 `personalFocusMotivation` | string
+`device` | [UserDevice](UserDevice.md)
 
 ## Example
 
@@ -32,6 +33,7 @@ const example = {
   "webOnboardingSeenAt": null,
   "personalFocusTaskName": null,
   "personalFocusMotivation": null,
+  "device": null,
 } satisfies UserPreferencesResponse
 
 console.log(example)

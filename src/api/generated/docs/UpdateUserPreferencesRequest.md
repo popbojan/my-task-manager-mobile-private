@@ -1,7 +1,7 @@
 
 # UpdateUserPreferencesRequest
 
-Provide at least one of language, timezone, notificationEnabled, notificationTime, personalIntroSeenAt, mobileOnboardingSeenAt, webOnboardingSeenAt, mobileAppVersion, personalFocusTaskName, personalFocusMotivation, webLastLoginAt, or webLastSeenAt. 
+Required non-empty JSON object with at least one supported preference field (anyOf). Unknown properties are rejected. Clients that previously sent webLastLoginAt must stop; login time is set only on successful OTP login. Send language and timezone on app start / foreground return when available. New clients report device version via X-App-Version; body mobileAppVersion remains for older clients and updates only User.mobileAppVersion. 
 
 ## Properties
 
@@ -17,7 +17,6 @@ Name | Type
 `mobileAppVersion` | string
 `personalFocusTaskName` | string
 `personalFocusMotivation` | string
-`webLastLoginAt` | Date
 `webLastSeenAt` | Date
 
 ## Example
@@ -37,7 +36,6 @@ const example = {
   "mobileAppVersion": null,
   "personalFocusTaskName": null,
   "personalFocusMotivation": null,
-  "webLastLoginAt": null,
   "webLastSeenAt": null,
 } satisfies UpdateUserPreferencesRequest
 

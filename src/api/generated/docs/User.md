@@ -18,6 +18,7 @@ Name | Type
 `personalFocusTaskName` | string
 `personalFocusMotivation` | string
 `mobileAppVersion` | string
+`device` | [UserDevice](UserDevice.md)
 
 ## Example
 
@@ -38,6 +39,7 @@ const example = {
   "personalFocusTaskName": 30 Minuten Deutsch lernen,
   "personalFocusMotivation": Ich möchte fließend sprechen können.,
   "mobileAppVersion": 1.2.3,
+  "device": null,
 } satisfies User
 
 console.log(example)

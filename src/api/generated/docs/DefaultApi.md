@@ -19,6 +19,7 @@ All URIs are relative to *http://localhost*
 | [**getRecurringTask**](DefaultApi.md#getrecurringtask) | **GET** /recurring-tasks/{recurringTaskId} | Get a single recurring task |
 | [**getRecurringTaskProgress**](DefaultApi.md#getrecurringtaskprogress) | **GET** /recurring-task-progress | Get recurring task progress for the authenticated user |
 | [**getRecurringTasks**](DefaultApi.md#getrecurringtasks) | **GET** /recurring-tasks | Get recurring tasks for the authenticated user |
+| [**getReminderCommandOutbox**](DefaultApi.md#getremindercommandoutbox) | **GET** /reminder-command-outbox | List open reminder command outbox entries for the current device |
 | [**getTask**](DefaultApi.md#gettask) | **GET** /tasks/{taskId} | Get a single task |
 | [**getTasks**](DefaultApi.md#gettasks) | **GET** /tasks | Get tasks for the authenticated user |
 | [**loginWithOtp**](DefaultApi.md#loginwithotp) | **POST** /auth/login-with-otp | Login using an email and the received OTP |
@@ -596,9 +597,11 @@ example().catch(console.error);
 
 ## getCurrentUser
 
-> User getCurrentUser()
+> User getCurrentUser(xDeviceId, xDevicePlatform)
 
 Get current user
+
+Returns the authenticated user. Optional X-Device-Id and X-Device-Platform look up an already registered device for the response; when either is sent, both are required. Matching device is returned in device; otherwise device is null. This endpoint does not create or update devices. 
 
 ### Example
 
@@ -617,8 +620,15 @@ async function example() {
   });
   const api = new DefaultApi(config);
 
+  const body = {
+    // string | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
+    xDeviceId: 6f1d2c3a-8b4e-4f91-9c0a-1e2d3f4a5b6c,
+    // DevicePlatform | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  (optional)
+    xDevicePlatform: ANDROID,
+  } satisfies GetCurrentUserRequest;
+
   try {
-    const data = await api.getCurrentUser();
+    const data = await api.getCurrentUser(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -631,7 +641,11 @@ example().catch(console.error);
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
+| **xDevicePlatform** | `DevicePlatform` | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  | [Optional] [Defaults to `undefined`] [Enum: WEB, ANDROID, IOS] |
 
 ### Return type
 
@@ -651,6 +665,7 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Current authenticated user |  -  |
+| **400** | Bad Request (e.g. only one of X-Device-Id / X-Device-Platform sent, or invalid X-Device-Platform).  |  -  |
 | **401** | Unauthorized |  -  |
 | **500** | Internal Server Error |  -  |
 
@@ -1060,6 +1075,80 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
+## getReminderCommandOutbox
+
+> Array&lt;ReminderCommandOutboxItem&gt; getReminderCommandOutbox(xDeviceId)
+
+List open reminder command outbox entries for the current device
+
+Returns open reminder-command outbox entries for the authenticated user and the device identified by X-Device-Id. Without entries, returns []. The request does not modify any entries. An unknown or unassigned X-Device-Id for this user also returns 200 with []. 
+
+### Example
+
+```ts
+import {
+  Configuration,
+  DefaultApi,
+} from '';
+import type { GetReminderCommandOutboxRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const config = new Configuration({ 
+    // Configure HTTP bearer authorization: bearerAuth
+    accessToken: "YOUR BEARER TOKEN",
+  });
+  const api = new DefaultApi(config);
+
+  const body = {
+    // string | Client-generated durable device identifier. Required on GET /reminder-command-outbox. Scopes the response to this device; unknown or unassigned values yield an empty list. 
+    xDeviceId: 6f1d2c3a-8b4e-4f91-9c0a-1e2d3f4a5b6c,
+  } satisfies GetReminderCommandOutboxRequest;
+
+  try {
+    const data = await api.getReminderCommandOutbox(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **xDeviceId** | `string` | Client-generated durable device identifier. Required on GET /reminder-command-outbox. Scopes the response to this device; unknown or unassigned values yield an empty list.  | [Defaults to `undefined`] |
+
+### Return type
+
+[**Array&lt;ReminderCommandOutboxItem&gt;**](ReminderCommandOutboxItem.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `application/json`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Open outbox entries for this user and device. Empty array when none exist, or when X-Device-Id is unknown or not assigned to this user.  |  -  |
+| **400** | Bad Request — missing or blank X-Device-Id.  |  -  |
+| **401** | Unauthorized — missing or invalid bearer authentication. |  -  |
+| **500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
 ## getTask
 
 > Task getTask(taskId)
@@ -1196,9 +1285,11 @@ This endpoint does not need any parameter.
 
 ## loginWithOtp
 
-> LoginResponse loginWithOtp(loginRequest)
+> LoginResponse loginWithOtp(loginRequest, xDeviceId, xDevicePlatform, xAppVersion)
 
 Login using an email and the received OTP
+
+Verifies the OTP and issues tokens. Token contents are unchanged. Optional device headers match request-otp: X-Device-Id and X-Device-Platform must both be present when any device header is sent; X-App-Version is optional. On success, user and device updates run in one transaction: the user and the device identified by (userId, deviceId) are marked verified; a missing device is created; other devices are unchanged; lastLoginAt is set. Omitted X-App-Version leaves a stored appVersion unchanged. Invalid OTP performs no registration, update, or verification. Clients without device headers remain supported. 
 
 ### Example
 
@@ -1216,6 +1307,12 @@ async function example() {
   const body = {
     // LoginRequest
     loginRequest: ...,
+    // string | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
+    xDeviceId: 6f1d2c3a-8b4e-4f91-9c0a-1e2d3f4a5b6c,
+    // DevicePlatform | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  (optional)
+    xDevicePlatform: ANDROID,
+    // string | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  (optional)
+    xAppVersion: 1.4.0,
   } satisfies LoginWithOtpRequest;
 
   try {
@@ -1236,6 +1333,9 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **loginRequest** | [LoginRequest](LoginRequest.md) |  | |
+| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
+| **xDevicePlatform** | `DevicePlatform` | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  | [Optional] [Defaults to `undefined`] [Enum: WEB, ANDROID, IOS] |
+| **xAppVersion** | `string` | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  | [Optional] [Defaults to `undefined`] |
 
 ### Return type
 
@@ -1255,6 +1355,7 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | OTP verified and access token generated. A refresh token cookie is set. |  * Set-Cookie - HttpOnly refresh token cookie (refreshToken&#x3D;...; HttpOnly; Secure; SameSite&#x3D;...) <br>  |
+| **400** | Bad Request (e.g. only one of X-Device-Id / X-Device-Platform sent, or invalid X-Device-Platform / X-App-Version).  |  -  |
 | **401** | Invalid or expired OTP |  -  |
 | **500** | Internal Server Error |  -  |
 
@@ -1525,9 +1626,11 @@ This endpoint does not need any parameter.
 
 ## requestOtp
 
-> RequestOtp200Response requestOtp(oTPRequest)
+> RequestOtp200Response requestOtp(oTPRequest, xDeviceId, xDevicePlatform, xAppVersion)
 
 Request a one-time password via email
+
+Sends a one-time password to the given email and creates or updates the user. Optional device headers create or update a UserDevice for that user: X-Device-Id and X-Device-Platform must both be present when any device header is sent; X-App-Version is optional. Omitted X-App-Version leaves a stored appVersion unchanged; a new device without it has appVersion null. New user and device records are created unverified; already verified records are not reset. Clients without device headers remain supported. 
 
 ### Example
 
@@ -1545,6 +1648,12 @@ async function example() {
   const body = {
     // OTPRequest
     oTPRequest: ...,
+    // string | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
+    xDeviceId: 6f1d2c3a-8b4e-4f91-9c0a-1e2d3f4a5b6c,
+    // DevicePlatform | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  (optional)
+    xDevicePlatform: ANDROID,
+    // string | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  (optional)
+    xAppVersion: 1.4.0,
   } satisfies RequestOtpRequest;
 
   try {
@@ -1565,6 +1674,9 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **oTPRequest** | [OTPRequest](OTPRequest.md) |  | |
+| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
+| **xDevicePlatform** | `DevicePlatform` | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  | [Optional] [Defaults to `undefined`] [Enum: WEB, ANDROID, IOS] |
+| **xAppVersion** | `string` | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  | [Optional] [Defaults to `undefined`] |
 
 ### Return type
 
@@ -1584,7 +1696,7 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | OTP successfully sent |  -  |
-| **400** | Bad Request (e.g. invalid email format) |  -  |
+| **400** | Bad Request (e.g. invalid email format; only one of X-Device-Id / X-Device-Platform sent; or invalid X-Device-Platform / X-App-Version).  |  -  |
 | **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
@@ -1747,9 +1859,11 @@ example().catch(console.error);
 
 ## updateUserPreferences
 
-> UserPreferencesResponse updateUserPreferences(updateUserPreferencesRequest)
+> UserPreferencesResponse updateUserPreferences(updateUserPreferencesRequest, xDeviceId, xAppVersion)
 
 Update current user\&#39;s preferences
+
+Updates user preferences for the authenticated user. Requires a non-empty JSON body with at least one supported preference field (missing body, null, and {} are rejected). Does not create devices and does not change platform. Optional X-Device-Id identifies an already registered device (e.g. for device notification settings). Optional X-App-Version updates that device\&#39;s appVersion only when the device already exists; omitted version leaves the stored value unchanged. Body mobileAppVersion updates only User.mobileAppVersion (backwards-compatibility).  Preference values are updated only when they differ from stored values. 
 
 ### Example
 
@@ -1771,6 +1885,10 @@ async function example() {
   const body = {
     // UpdateUserPreferencesRequest
     updateUserPreferencesRequest: ...,
+    // string | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
+    xDeviceId: 6f1d2c3a-8b4e-4f91-9c0a-1e2d3f4a5b6c,
+    // string | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  (optional)
+    xAppVersion: 1.4.0,
   } satisfies UpdateUserPreferencesOperationRequest;
 
   try {
@@ -1791,6 +1909,8 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **updateUserPreferencesRequest** | [UpdateUserPreferencesRequest](UpdateUserPreferencesRequest.md) |  | |
+| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
+| **xAppVersion** | `string` | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  | [Optional] [Defaults to `undefined`] |
 
 ### Return type
 
@@ -1810,7 +1930,7 @@ example().catch(console.error);
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | User preferences successfully updated |  -  |
-| **400** | Bad Request (e.g. invalid language, timezone, or notificationTime)  |  -  |
+| **400** | Bad Request (e.g. missing body, null body, empty object {}, no supported preference field, invalid language, timezone, notificationTime, or X-App-Version).  |  -  |
 | **401** | Unauthorized |  -  |
 | **500** | Internal Server Error |  -  |
 

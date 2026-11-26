@@ -19,6 +19,7 @@ import { useAuth } from '@/auth/AuthContext';
 import { useApiEnvironment } from '@/config/ApiEnvironmentProvider';
 import DevApiPanel from '@/config/DevApiPanel';
 import type { ApiEnvironment } from '@/config/api';
+import { getAuthDeviceHeaders } from '@/device/deviceRequestHeaders';
 import { useApiLanguage, useLanguage } from '@/i18n/LanguageProvider';
 import AppBrandHeader from '@/components/AppBrandHeader';
 import {
@@ -119,8 +120,10 @@ export default function LoginScreen() {
     setIsSendingOtp(true);
 
     try {
+      const deviceHeaders = await getAuthDeviceHeaders();
       await authApi.requestOtp({
         oTPRequest: { email: email.trim(), language: apiLanguage },
+        ...deviceHeaders,
       });
       setStep('otp');
     } catch {
@@ -143,6 +146,7 @@ export default function LoginScreen() {
     setIsLoggingIn(true);
 
     try {
+      const deviceHeaders = await getAuthDeviceHeaders();
       const data = await authApi.loginWithOtp(
         {
           loginRequest: {
@@ -150,6 +154,7 @@ export default function LoginScreen() {
             otp: otp.trim(),
             language: apiLanguage,
           },
+          ...deviceHeaders,
         },
         authRequestInit,
       );

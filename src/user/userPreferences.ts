@@ -6,6 +6,10 @@ import type {
 } from '@/api/generated';
 import { authApi } from '@/api/authClient';
 import {
+  getPreferencesDeviceHeaders,
+  type PreferencesDeviceHeaderOptions,
+} from '@/device/deviceRequestHeaders';
+import {
   buildPersonalIntroPreferencesPatch,
   type PersonalIntroFocusInput,
 } from '@/onboarding/personalIntroPreferences';
@@ -36,6 +40,7 @@ export function applyPreferencesToCurrentUser(
     webOnboardingSeenAt: preferences.webOnboardingSeenAt,
     personalFocusTaskName: preferences.personalFocusTaskName,
     personalFocusMotivation: preferences.personalFocusMotivation,
+    device: preferences.device,
   };
 }
 
@@ -43,9 +48,12 @@ export async function patchUserPreferences(
   queryClient: QueryClient,
   accessToken: string | null,
   patch: Omit<UpdateUserPreferencesRequest, 'mobileAppVersion'>,
+  deviceOptions?: PreferencesDeviceHeaderOptions,
 ): Promise<UserPreferencesResponse> {
+  const deviceHeaders = await getPreferencesDeviceHeaders(deviceOptions);
   const preferences = await authApi.updateUserPreferences({
     updateUserPreferencesRequest: withMobileAppVersion(patch),
+    ...deviceHeaders,
   });
 
   if (accessToken) {

@@ -1863,7 +1863,7 @@ example().catch(console.error);
 
 Update current user\&#39;s preferences
 
-Updates user preferences for the authenticated user. Requires a non-empty JSON body with at least one supported preference field (missing body, null, and {} are rejected). Does not create devices and does not change platform. Optional X-Device-Id identifies an already registered device (e.g. for device notification settings). Optional X-App-Version updates that device\&#39;s appVersion only when the device already exists; omitted version leaves the stored value unchanged. Body mobileAppVersion updates only User.mobileAppVersion (backwards-compatibility).  Preference values are updated only when they differ from stored values. 
+Updates user preferences for the authenticated user. Requires a non-empty JSON body with at least one supported preference field (missing body, null, and {} are rejected). Does not create devices and does not change platform. Optional X-Device-Id identifies an already registered device (e.g. for device notification settings). Optional X-App-Version updates that device\&#39;s appVersion only when the device already exists; omitted version leaves the stored value unchanged. Body mobileAppVersion updates only User.mobileAppVersion. Clients check language, timezone, and app version for changes and call this endpoint only when a change is detected; there is no required sync on every app start or foreground return. Explicit profile changes, including notification settings, are saved immediately. Unchanged values may still be sent. Stored preference values are updated only when they differ from submitted values. 
 
 ### Example
 

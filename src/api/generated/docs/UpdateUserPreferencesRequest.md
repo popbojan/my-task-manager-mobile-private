@@ -1,7 +1,7 @@
 
 # UpdateUserPreferencesRequest
 
-Required non-empty JSON object with at least one supported preference field (anyOf). Unknown properties are rejected. Clients that previously sent webLastLoginAt must stop; login time is set only on successful OTP login. Send language and timezone on app start / foreground return when available. New clients report device version via X-App-Version; body mobileAppVersion remains for older clients and updates only User.mobileAppVersion. 
+Required non-empty JSON object with at least one supported preference field (anyOf). Unknown properties are rejected. Clients that previously sent webLastLoginAt must stop; login time is set only on successful OTP login. Call when language, timezone, or app version changed, or when the user explicitly changes preferences (including notifications). Unchanged values may be included; regular start/foreground sync is not required. New clients report device version via X-App-Version; body mobileAppVersion remains for older clients and updates only User.mobileAppVersion. 
 
 ## Properties
 

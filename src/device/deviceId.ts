@@ -58,3 +58,19 @@ export async function getOrCreateDeviceId(): Promise<string> {
 
   return loadInFlight;
 }
+
+/**
+ * Replace the installation id (e.g. after DEVICE_*_MISMATCH 409).
+ * Persists the new value so subsequent requests use it.
+ */
+export async function rotateDeviceId(): Promise<string> {
+  const next = createDeviceId();
+  cachedDeviceId = next;
+  loadInFlight = null;
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY, next);
+  } catch {
+    // Keep in-memory id for this session if persistence fails.
+  }
+  return next;
+}

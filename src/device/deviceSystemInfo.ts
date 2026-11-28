@@ -48,3 +48,26 @@ export function getDeviceOsVersion(): string {
 
   return String(Platform.Version);
 }
+
+/** OS name from the runtime platform, when known. */
+export function getDeviceOsName(): string | undefined {
+  if (Platform.OS === 'android') {
+    return 'Android';
+  }
+  if (Platform.OS === 'ios') {
+    return 'iOS';
+  }
+  return undefined;
+}
+
+/**
+ * Model for auth device headers. ANDROID/IOS require a non-empty model when
+ * any device header is sent (400 otherwise).
+ */
+export function getRequiredDeviceModel(): string {
+  return (
+    getDeviceModel() ??
+    getDeviceManufacturer() ??
+    (Platform.OS === 'android' ? 'Android' : 'unknown')
+  );
+}

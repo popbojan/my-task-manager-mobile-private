@@ -2,30 +2,33 @@ import { DevicePlatform } from '@/api/generated';
 import { getOrCreateDeviceId } from '@/device/deviceId';
 import {
   getDeviceManufacturer,
-  getDeviceModel,
+  getDeviceOsName,
   getDeviceOsVersion,
+  getRequiredDeviceModel,
 } from '@/device/deviceSystemInfo';
 import { getMobileAppVersion } from '@/user/mobileAppVersion';
 
-/** Auth OTP — full device registration headers. */
+/** Auth OTP — full device registration headers (no browser fields on mobile). */
 export async function getAuthDeviceHeaders(): Promise<{
   xDeviceId: string;
   xDevicePlatform: DevicePlatform;
   xAppVersion: string;
   xDeviceManufacturer?: string;
-  xDeviceModel?: string;
+  xDeviceModel: string;
+  xDeviceOSName?: string;
   xDeviceOSVersion: string;
 }> {
   const xDeviceId = await getOrCreateDeviceId();
   const manufacturer = getDeviceManufacturer();
-  const model = getDeviceModel();
+  const osName = getDeviceOsName();
 
   return {
     xDeviceId,
     xDevicePlatform: DevicePlatform.Android,
     xAppVersion: getMobileAppVersion(),
     ...(manufacturer ? { xDeviceManufacturer: manufacturer } : {}),
-    ...(model ? { xDeviceModel: model } : {}),
+    xDeviceModel: getRequiredDeviceModel(),
+    ...(osName ? { xDeviceOSName: osName } : {}),
     xDeviceOSVersion: getDeviceOsVersion(),
   };
 }

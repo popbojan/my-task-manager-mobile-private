@@ -43,4 +43,23 @@ describe('getOrCreateDeviceId', () => {
     expect(second).toBe(first);
     expect(AsyncStorage.setItem).toHaveBeenCalledWith('@mtm/device-id', first);
   });
+
+  it('rotateDeviceId replaces the stored installation id', async () => {
+    const AsyncStorage = require('@react-native-async-storage/async-storage') as {
+      getItem: jest.Mock;
+      setItem: jest.Mock;
+    };
+    AsyncStorage.getItem.mockResolvedValue('old-id');
+
+    const { getOrCreateDeviceId, rotateDeviceId } = require('@/device/deviceId') as {
+      getOrCreateDeviceId: () => Promise<string>;
+      rotateDeviceId: () => Promise<string>;
+    };
+
+    await expect(getOrCreateDeviceId()).resolves.toBe('old-id');
+    const rotated = await rotateDeviceId();
+    expect(rotated).not.toBe('old-id');
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith('@mtm/device-id', rotated);
+    await expect(getOrCreateDeviceId()).resolves.toBe(rotated);
+  });
 });

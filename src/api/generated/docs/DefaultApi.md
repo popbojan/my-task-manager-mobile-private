@@ -621,9 +621,9 @@ async function example() {
   const api = new DefaultApi(config);
 
   const body = {
-    // string | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
+    // string | Client-generated durable device identifier. On POST /auth/request-otp and POST /auth/login-with-otp, required with X-Device-Platform whenever any device header is sent; for ANDROID or IOS, X-Device-Model is also required. On GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
     xDeviceId: 6f1d2c3a-8b4e-4f91-9c0a-1e2d3f4a5b6c,
-    // DevicePlatform | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  (optional)
+    // DevicePlatform | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. Required with X-Device-Id whenever any device header is sent on the OTP endpoints; for ANDROID or IOS, X-Device-Model is also required. Not used on PATCH /users/me/preferences.  (optional)
     xDevicePlatform: ANDROID,
   } satisfies GetCurrentUserRequest;
 
@@ -644,8 +644,8 @@ example().catch(console.error);
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
-| **xDevicePlatform** | `DevicePlatform` | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  | [Optional] [Defaults to `undefined`] [Enum: WEB, ANDROID, IOS] |
+| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp and POST /auth/login-with-otp, required with X-Device-Platform whenever any device header is sent; for ANDROID or IOS, X-Device-Model is also required. On GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
+| **xDevicePlatform** | `DevicePlatform` | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. Required with X-Device-Id whenever any device header is sent on the OTP endpoints; for ANDROID or IOS, X-Device-Model is also required. Not used on PATCH /users/me/preferences.  | [Optional] [Defaults to `undefined`] [Enum: WEB, ANDROID, IOS] |
 
 ### Return type
 
@@ -1285,11 +1285,11 @@ This endpoint does not need any parameter.
 
 ## loginWithOtp
 
-> LoginResponse loginWithOtp(loginRequest, xDeviceId, xDevicePlatform, xAppVersion, xDeviceManufacturer, xDeviceModel, xDeviceOSVersion)
+> LoginResponse loginWithOtp(loginRequest, xDeviceId, xDevicePlatform, xAppVersion, xDeviceManufacturer, xDeviceModel, xDeviceOSName, xDeviceOSVersion, xDeviceBrowserName, xDeviceBrowserVersion)
 
 Login using an email and the received OTP
 
-Verifies the OTP and issues tokens. Token contents are unchanged. Optional device headers match request-otp: X-Device-Id and X-Device-Platform must both be present when any device header is sent; X-App-Version, X-Device-Manufacturer, X-Device-Model, and X-Device-OS-Version are optional. On success, user and device updates run in one transaction: the user and the device identified by (userId, deviceId) are marked verified; a missing device is created; other devices are unchanged; lastLoginAt is set. Omitted headers leave stored device fields unchanged. Invalid OTP performs no registration, update, or verification. Clients without device headers remain supported. 
+Verifies the OTP and issues tokens. Token contents are unchanged. Device-header rules match request-otp. On success, user and device updates run in one transaction: the user and the device identified by (userId, deviceId) are marked verified; a missing device is created; other devices are unchanged; lastLoginAt is set. Omitted headers leave stored fields unchanged; a previously unknown model may be set. Conflicts: 409 DEVICE_PLATFORM_MISMATCH or DEVICE_MODEL_MISMATCH (same rules as request-otp); no user or device changes; a valid OTP is not consumed. Invalid OTP performs no registration, update, or verification. Clients without device headers remain supported. 
 
 ### Example
 
@@ -1307,18 +1307,24 @@ async function example() {
   const body = {
     // LoginRequest
     loginRequest: ...,
-    // string | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
+    // string | Client-generated durable device identifier. On POST /auth/request-otp and POST /auth/login-with-otp, required with X-Device-Platform whenever any device header is sent; for ANDROID or IOS, X-Device-Model is also required. On GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
     xDeviceId: 6f1d2c3a-8b4e-4f91-9c0a-1e2d3f4a5b6c,
-    // DevicePlatform | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  (optional)
+    // DevicePlatform | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. Required with X-Device-Id whenever any device header is sent on the OTP endpoints; for ANDROID or IOS, X-Device-Model is also required. Not used on PATCH /users/me/preferences.  (optional)
     xDevicePlatform: ANDROID,
     // string | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  (optional)
     xAppVersion: 1.4.0,
-    // string | Optional device manufacturer. Updates UserDevice.manufacturer on POST /auth/request-otp and POST /auth/login-with-otp. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored manufacturer; a newly created device without this header has manufacturer null.  (optional)
+    // string | Optional device manufacturer. Updates UserDevice.manufacturer on POST /auth/request-otp and POST /auth/login-with-otp. Allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored manufacturer; a newly created device without this header has manufacturer null.  (optional)
     xDeviceManufacturer: Apple,
-    // string | Optional device model. Updates UserDevice.model on POST /auth/request-otp and POST /auth/login-with-otp. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored model; a newly created device without this header has model null.  (optional)
+    // string | Device model. Required with X-Device-Id and X-Device-Platform when device headers are sent for ANDROID or IOS on POST /auth/request-otp and POST /auth/login-with-otp. Optional for WEB and allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored model; a newly created device without this header has model null. A previously unknown stored model may be set later.  (optional)
     xDeviceModel: iPhone 15,
-    // string | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  (optional)
+    // string | Optional OS name. Updates UserDevice.osName on POST /auth/request-otp and POST /auth/login-with-otp only. Allowed for WEB, ANDROID and IOS. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored osName; a newly created device without this header has osName null.  (optional)
+    xDeviceOSName: iOS,
+    // string | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  (optional)
     xDeviceOSVersion: 17.4,
+    // string | Optional browser name. Updates UserDevice.browserName on POST /auth/request-otp and POST /auth/login-with-otp. Allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored browserName; a newly created device without this header has browserName null.  (optional)
+    xDeviceBrowserName: Chrome,
+    // string | Optional browser version. Updates UserDevice.browserVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored browserVersion; a newly created device without this header has browserVersion null.  (optional)
+    xDeviceBrowserVersion: 131.0.6778.86,
   } satisfies LoginWithOtpRequest;
 
   try {
@@ -1339,12 +1345,15 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **loginRequest** | [LoginRequest](LoginRequest.md) |  | |
-| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
-| **xDevicePlatform** | `DevicePlatform` | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  | [Optional] [Defaults to `undefined`] [Enum: WEB, ANDROID, IOS] |
+| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp and POST /auth/login-with-otp, required with X-Device-Platform whenever any device header is sent; for ANDROID or IOS, X-Device-Model is also required. On GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
+| **xDevicePlatform** | `DevicePlatform` | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. Required with X-Device-Id whenever any device header is sent on the OTP endpoints; for ANDROID or IOS, X-Device-Model is also required. Not used on PATCH /users/me/preferences.  | [Optional] [Defaults to `undefined`] [Enum: WEB, ANDROID, IOS] |
 | **xAppVersion** | `string` | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  | [Optional] [Defaults to `undefined`] |
-| **xDeviceManufacturer** | `string` | Optional device manufacturer. Updates UserDevice.manufacturer on POST /auth/request-otp and POST /auth/login-with-otp. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored manufacturer; a newly created device without this header has manufacturer null.  | [Optional] [Defaults to `undefined`] |
-| **xDeviceModel** | `string` | Optional device model. Updates UserDevice.model on POST /auth/request-otp and POST /auth/login-with-otp. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored model; a newly created device without this header has model null.  | [Optional] [Defaults to `undefined`] |
-| **xDeviceOSVersion** | `string` | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceManufacturer** | `string` | Optional device manufacturer. Updates UserDevice.manufacturer on POST /auth/request-otp and POST /auth/login-with-otp. Allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored manufacturer; a newly created device without this header has manufacturer null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceModel** | `string` | Device model. Required with X-Device-Id and X-Device-Platform when device headers are sent for ANDROID or IOS on POST /auth/request-otp and POST /auth/login-with-otp. Optional for WEB and allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored model; a newly created device without this header has model null. A previously unknown stored model may be set later.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceOSName** | `string` | Optional OS name. Updates UserDevice.osName on POST /auth/request-otp and POST /auth/login-with-otp only. Allowed for WEB, ANDROID and IOS. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored osName; a newly created device without this header has osName null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceOSVersion** | `string` | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceBrowserName** | `string` | Optional browser name. Updates UserDevice.browserName on POST /auth/request-otp and POST /auth/login-with-otp. Allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored browserName; a newly created device without this header has browserName null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceBrowserVersion** | `string` | Optional browser version. Updates UserDevice.browserVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored browserVersion; a newly created device without this header has browserVersion null.  | [Optional] [Defaults to `undefined`] |
 
 ### Return type
 
@@ -1364,8 +1373,9 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | OTP verified and access token generated. A refresh token cookie is set. |  * Set-Cookie - HttpOnly refresh token cookie (refreshToken&#x3D;...; HttpOnly; Secure; SameSite&#x3D;...) <br>  |
-| **400** | Bad Request (e.g. only one of X-Device-Id / X-Device-Platform sent, or invalid X-Device-Platform / X-App-Version).  |  -  |
+| **400** | Bad Request (e.g. incomplete device headers; ANDROID/IOS without X-Device-Model; or invalid platform / version).  |  -  |
 | **401** | Invalid or expired OTP |  -  |
+| **409** | Device conflict for (userId, deviceId). DEVICE_PLATFORM_MISMATCH when the stored platform differs. DEVICE_MODEL_MISMATCH when both stored and submitted model are present and differ; missing model on either side does not conflict. No user or device changes are applied; on login a valid OTP is not consumed. Clients generate and persist a new installation UUID, then retry the same request once with that new X-Device-Id. Do not retry indefinitely.  |  -  |
 | **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
@@ -1635,11 +1645,11 @@ This endpoint does not need any parameter.
 
 ## requestOtp
 
-> RequestOtp200Response requestOtp(oTPRequest, xDeviceId, xDevicePlatform, xAppVersion, xDeviceManufacturer, xDeviceModel, xDeviceOSVersion)
+> RequestOtp200Response requestOtp(oTPRequest, xDeviceId, xDevicePlatform, xAppVersion, xDeviceManufacturer, xDeviceModel, xDeviceOSName, xDeviceOSVersion, xDeviceBrowserName, xDeviceBrowserVersion)
 
 Request a one-time password via email
 
-Sends a one-time password to the given email and creates or updates the user. Optional device headers create or update a UserDevice for that user: X-Device-Id and X-Device-Platform must both be present when any device header is sent. X-App-Version, X-Device-Manufacturer, X-Device-Model, and X-Device-OS-Version are optional. Omitted headers leave stored device fields unchanged; new devices without optional fields store them as null. New user and device records are created unverified; already verified records are not reset. Clients without device headers remain supported. 
+Sends a one-time password to the given email and creates or updates the user. Calls without device headers remain supported. When any device header is sent, X-Device-Id and X-Device-Platform are required; for ANDROID or IOS, X-Device-Model is also required (400 if missing). For WEB, manufacturer, model, OS name, OS version, browser name, and browser version may all be sent together and remain optional. X-App-Version, X-Device-Manufacturer, X-Device-Model (WEB), X-Device-OS-Name, X-Device-OS-Version, X-Device-Browser-Name, and X-Device-Browser-Version are optional. Omitted headers leave stored fields unchanged; missing optional fields on create are null. A previously unknown model may be set. New user and device records are created unverified; already verified records are not reset. Conflicts: 409 DEVICE_PLATFORM_MISMATCH if (userId, deviceId) exists with a different platform; 409 DEVICE_MODEL_MISMATCH if both stored and submitted model are present and differ. On conflict, no user or device changes are applied. 
 
 ### Example
 
@@ -1657,18 +1667,24 @@ async function example() {
   const body = {
     // OTPRequest
     oTPRequest: ...,
-    // string | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
+    // string | Client-generated durable device identifier. On POST /auth/request-otp and POST /auth/login-with-otp, required with X-Device-Platform whenever any device header is sent; for ANDROID or IOS, X-Device-Model is also required. On GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
     xDeviceId: 6f1d2c3a-8b4e-4f91-9c0a-1e2d3f4a5b6c,
-    // DevicePlatform | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  (optional)
+    // DevicePlatform | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. Required with X-Device-Id whenever any device header is sent on the OTP endpoints; for ANDROID or IOS, X-Device-Model is also required. Not used on PATCH /users/me/preferences.  (optional)
     xDevicePlatform: ANDROID,
     // string | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  (optional)
     xAppVersion: 1.4.0,
-    // string | Optional device manufacturer. Updates UserDevice.manufacturer on POST /auth/request-otp and POST /auth/login-with-otp. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored manufacturer; a newly created device without this header has manufacturer null.  (optional)
+    // string | Optional device manufacturer. Updates UserDevice.manufacturer on POST /auth/request-otp and POST /auth/login-with-otp. Allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored manufacturer; a newly created device without this header has manufacturer null.  (optional)
     xDeviceManufacturer: Apple,
-    // string | Optional device model. Updates UserDevice.model on POST /auth/request-otp and POST /auth/login-with-otp. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored model; a newly created device without this header has model null.  (optional)
+    // string | Device model. Required with X-Device-Id and X-Device-Platform when device headers are sent for ANDROID or IOS on POST /auth/request-otp and POST /auth/login-with-otp. Optional for WEB and allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored model; a newly created device without this header has model null. A previously unknown stored model may be set later.  (optional)
     xDeviceModel: iPhone 15,
-    // string | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  (optional)
+    // string | Optional OS name. Updates UserDevice.osName on POST /auth/request-otp and POST /auth/login-with-otp only. Allowed for WEB, ANDROID and IOS. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored osName; a newly created device without this header has osName null.  (optional)
+    xDeviceOSName: iOS,
+    // string | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  (optional)
     xDeviceOSVersion: 17.4,
+    // string | Optional browser name. Updates UserDevice.browserName on POST /auth/request-otp and POST /auth/login-with-otp. Allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored browserName; a newly created device without this header has browserName null.  (optional)
+    xDeviceBrowserName: Chrome,
+    // string | Optional browser version. Updates UserDevice.browserVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored browserVersion; a newly created device without this header has browserVersion null.  (optional)
+    xDeviceBrowserVersion: 131.0.6778.86,
   } satisfies RequestOtpRequest;
 
   try {
@@ -1689,12 +1705,15 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **oTPRequest** | [OTPRequest](OTPRequest.md) |  | |
-| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
-| **xDevicePlatform** | `DevicePlatform` | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. When any of X-Device-Id or X-Device-Platform is sent, both must be present. Not used on PATCH /users/me/preferences.  | [Optional] [Defaults to `undefined`] [Enum: WEB, ANDROID, IOS] |
+| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp and POST /auth/login-with-otp, required with X-Device-Platform whenever any device header is sent; for ANDROID or IOS, X-Device-Model is also required. On GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
+| **xDevicePlatform** | `DevicePlatform` | Client platform. Used on POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me. Required with X-Device-Id whenever any device header is sent on the OTP endpoints; for ANDROID or IOS, X-Device-Model is also required. Not used on PATCH /users/me/preferences.  | [Optional] [Defaults to `undefined`] [Enum: WEB, ANDROID, IOS] |
 | **xAppVersion** | `string` | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  | [Optional] [Defaults to `undefined`] |
-| **xDeviceManufacturer** | `string` | Optional device manufacturer. Updates UserDevice.manufacturer on POST /auth/request-otp and POST /auth/login-with-otp. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored manufacturer; a newly created device without this header has manufacturer null.  | [Optional] [Defaults to `undefined`] |
-| **xDeviceModel** | `string` | Optional device model. Updates UserDevice.model on POST /auth/request-otp and POST /auth/login-with-otp. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored model; a newly created device without this header has model null.  | [Optional] [Defaults to `undefined`] |
-| **xDeviceOSVersion** | `string` | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceManufacturer** | `string` | Optional device manufacturer. Updates UserDevice.manufacturer on POST /auth/request-otp and POST /auth/login-with-otp. Allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored manufacturer; a newly created device without this header has manufacturer null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceModel** | `string` | Device model. Required with X-Device-Id and X-Device-Platform when device headers are sent for ANDROID or IOS on POST /auth/request-otp and POST /auth/login-with-otp. Optional for WEB and allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored model; a newly created device without this header has model null. A previously unknown stored model may be set later.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceOSName** | `string` | Optional OS name. Updates UserDevice.osName on POST /auth/request-otp and POST /auth/login-with-otp only. Allowed for WEB, ANDROID and IOS. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored osName; a newly created device without this header has osName null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceOSVersion** | `string` | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceBrowserName** | `string` | Optional browser name. Updates UserDevice.browserName on POST /auth/request-otp and POST /auth/login-with-otp. Allowed together with other WEB device metadata. Not used on PATCH /users/me/preferences. Omitted values do not overwrite a stored browserName; a newly created device without this header has browserName null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceBrowserVersion** | `string` | Optional browser version. Updates UserDevice.browserVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored browserVersion; a newly created device without this header has browserVersion null.  | [Optional] [Defaults to `undefined`] |
 
 ### Return type
 
@@ -1714,7 +1733,8 @@ No authorization required
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | OTP successfully sent |  -  |
-| **400** | Bad Request (e.g. invalid email format; only one of X-Device-Id / X-Device-Platform sent; or invalid X-Device-Platform / X-App-Version).  |  -  |
+| **400** | Bad Request (e.g. invalid email format; incomplete device headers; ANDROID/IOS without X-Device-Model; or invalid platform / version).  |  -  |
+| **409** | Device conflict for (userId, deviceId). DEVICE_PLATFORM_MISMATCH when the stored platform differs. DEVICE_MODEL_MISMATCH when both stored and submitted model are present and differ; missing model on either side does not conflict. No user or device changes are applied; on login a valid OTP is not consumed. Clients generate and persist a new installation UUID, then retry the same request once with that new X-Device-Id. Do not retry indefinitely.  |  -  |
 | **500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
@@ -1877,11 +1897,11 @@ example().catch(console.error);
 
 ## updateUserPreferences
 
-> UserPreferencesResponse updateUserPreferences(updateUserPreferencesRequest, xDeviceId, xAppVersion, xDeviceOSVersion)
+> UserPreferencesResponse updateUserPreferences(updateUserPreferencesRequest, xDeviceId, xAppVersion, xDeviceOSVersion, xDeviceBrowserVersion)
 
 Update current user\&#39;s preferences
 
-Updates user preferences for the authenticated user. Requires a non-empty JSON body with at least one supported preference field (missing body, null, and {} are rejected). Does not create devices and does not change platform. Optional X-Device-Id identifies an already registered device. Optional X-App-Version updates that device\&#39;s appVersion; optional X-Device-OS-Version updates osVersion. Omitted headers leave stored values unchanged. Body mobileAppVersion updates only User.mobileAppVersion. Clients call this endpoint when language, timezone, app version, or OS version changed, or on explicit profile changes including notification settings. An OS-version change is sent with X-Device-Id and X-Device-OS-Version plus a required preference body field (e.g. language or timezone). Unchanged values may still be sent. Stored preference values are updated only when they differ from submitted values. 
+Updates user preferences for the authenticated user. Requires a non-empty JSON body with at least one supported preference field (missing body, null, and {} are rejected). Does not create devices and does not change platform. Optional X-Device-Id identifies an already registered device. Of device metadata, only X-App-Version, X-Device-OS-Version, and X-Device-Browser-Version may update that device (appVersion, osVersion, browserVersion). Manufacturer, model, OS name, and browser name are not updated here. Omitted headers leave stored values unchanged. Body mobileAppVersion updates only User.mobileAppVersion. Clients call this endpoint when language, timezone, app version, OS version, or browser version changed, or on explicit profile changes including notification settings. An OS- or browser-version change is sent with X-Device-Id and the corresponding version header plus a required preference body field (e.g. language or timezone). Unchanged values may still be sent. Stored preference values are updated only when they differ from submitted values. 
 
 ### Example
 
@@ -1903,12 +1923,14 @@ async function example() {
   const body = {
     // UpdateUserPreferencesRequest
     updateUserPreferencesRequest: ...,
-    // string | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
+    // string | Client-generated durable device identifier. On POST /auth/request-otp and POST /auth/login-with-otp, required with X-Device-Platform whenever any device header is sent; for ANDROID or IOS, X-Device-Model is also required. On GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  (optional)
     xDeviceId: 6f1d2c3a-8b4e-4f91-9c0a-1e2d3f4a5b6c,
     // string | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  (optional)
     xAppVersion: 1.4.0,
-    // string | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  (optional)
+    // string | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  (optional)
     xDeviceOSVersion: 17.4,
+    // string | Optional browser version. Updates UserDevice.browserVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored browserVersion; a newly created device without this header has browserVersion null.  (optional)
+    xDeviceBrowserVersion: 131.0.6778.86,
   } satisfies UpdateUserPreferencesOperationRequest;
 
   try {
@@ -1929,9 +1951,10 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **updateUserPreferencesRequest** | [UpdateUserPreferencesRequest](UpdateUserPreferencesRequest.md) |  | |
-| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp, POST /auth/login-with-otp, and GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceId** | `string` | Client-generated durable device identifier. On POST /auth/request-otp and POST /auth/login-with-otp, required with X-Device-Platform whenever any device header is sent; for ANDROID or IOS, X-Device-Model is also required. On GET /users/me, when any of X-Device-Id or X-Device-Platform is sent, both must be present. On PATCH /users/me/preferences identifies an already registered device; does not create a device.  | [Optional] [Defaults to `undefined`] |
 | **xAppVersion** | `string` | Optional app or web client version (e.g. semver). Updates only UserDevice.appVersion. Used on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device only). Omitted values do not overwrite a stored appVersion; a newly created device without this header has appVersion null.  | [Optional] [Defaults to `undefined`] |
-| **xDeviceOSVersion** | `string` | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceOSVersion** | `string` | Optional OS version. Updates UserDevice.osVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored osVersion; a newly created device without this header has osVersion null.  | [Optional] [Defaults to `undefined`] |
+| **xDeviceBrowserVersion** | `string` | Optional browser version. Updates UserDevice.browserVersion on POST /auth/request-otp, POST /auth/login-with-otp, and PATCH /users/me/preferences (existing device identified by X-Device-Id). Allowed together with other WEB device metadata on auth. Omitted values do not overwrite a stored browserVersion; a newly created device without this header has browserVersion null.  | [Optional] [Defaults to `undefined`] |
 
 ### Return type
 

@@ -12,7 +12,10 @@ Name | Type
 `appVersion` | string
 `manufacturer` | string
 `model` | string
+`osName` | string
 `osVersion` | string
+`browserName` | string
+`browserVersion` | string
 `notificationsEnabled` | boolean
 `notificationTime` | string
 
@@ -28,7 +31,10 @@ const example = {
   "appVersion": 1.4.0,
   "manufacturer": Apple,
   "model": iPhone 15,
+  "osName": iOS,
   "osVersion": 17.4,
+  "browserName": Chrome,
+  "browserVersion": 131.0.6778.86,
   "notificationsEnabled": true,
   "notificationTime": 20:00,
 } satisfies UserDevice

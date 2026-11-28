@@ -9,7 +9,9 @@ docs/CustomerPortalSession.md
 docs/DailyResetConflictError.md
 docs/DailyReviewReminderCommandOutboxItem.md
 docs/DefaultApi.md
+docs/DeviceModelMismatchError.md
 docs/DevicePlatform.md
+docs/DevicePlatformMismatchError.md
 docs/ErrorResponse.md
 docs/HistoryDay.md
 docs/HistoryDayStatus.md
@@ -28,6 +30,7 @@ docs/RecurringTaskStatus.md
 docs/ReminderCommandOutboxItem.md
 docs/ReminderType.md
 docs/RequestOtp200Response.md
+docs/RequestOtp409Response.md
 docs/Subscription.md
 docs/SubscriptionAccess.md
 docs/SubscriptionProvider.md
@@ -51,7 +54,9 @@ models/CreateTaskRequest.ts
 models/CustomerPortalSession.ts
 models/DailyResetConflictError.ts
 models/DailyReviewReminderCommandOutboxItem.ts
+models/DeviceModelMismatchError.ts
 models/DevicePlatform.ts
+models/DevicePlatformMismatchError.ts
 models/ErrorResponse.ts
 models/HistoryDay.ts
 models/HistoryDayStatus.ts
@@ -70,6 +75,7 @@ models/RecurringTaskStatus.ts
 models/ReminderCommandOutboxItem.ts
 models/ReminderType.ts
 models/RequestOtp200Response.ts
+models/RequestOtp409Response.ts
 models/Subscription.ts
 models/SubscriptionAccess.ts
 models/SubscriptionProvider.ts
